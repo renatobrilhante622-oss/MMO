@@ -23,12 +23,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install dependencies and Force Fresh Build Web
+      - name: Clean Old APKs and Build Fresh Web
         run: |
           if [ -f "MMO/package.json" ]; then
             cd MMO
           fi
-          rm -rf dist android/app/src/main/assets/public
+          # Apaga todos os APKs antigos congelados do repositório!
+          rm -rf dist android/app/src/main/assets/public android/app/build
+          rm -f public/*.apk releases/*.apk *.apk
           npm install --legacy-peer-deps
           npm run build
           if [ ! -d "android" ]; then
@@ -46,16 +48,20 @@ jobs:
             cd android
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew clean assembleDebug
 
-      - name: Find and Prepare APK
+      - name: Prepare Exact Newly Built APK
         run: |
           mkdir -p apk-output
-          find . -name "*-debug.apk" -exec cp {} apk-output/EternalHero-MMO-debug.apk \;
-          ls -la apk-output/
+          if [ -f "MMO/android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            cp MMO/android/app/build/outputs/apk/debug/app-debug.apk apk-output/EternalHero-MMO-vNovo.apk
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk apk-output/EternalHero-MMO-vNovo.apk
+          fi
+          ls -lh apk-output/
 
       - name: Upload APK Ready to Download
         uses: actions/upload-artifact@v4
         with:
-          name: EternalHero-MMO-Atualizado-APK
-          path: apk-output/EternalHero-MMO-debug.apk
+          name: EternalHero-MMO-vNovo-APK
+          path: apk-output/EternalHero-MMO-vNovo.apk
