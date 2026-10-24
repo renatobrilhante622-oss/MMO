@@ -6,7 +6,7 @@ out=Path('docs/mobile-ux-review');out.mkdir(exist_ok=True,parents=True)
 URL=os.environ.get('ETERNA_URL','http://127.0.0.1:5173')
 with sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('ETERNA_CHROME','/tmp/chromium'),args=['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage'])
- for width,height in [(390,844),(844,390),(1366,768)]:
+ for width,height in ([(390,844)] if os.environ.get('ETERNA_UX_TOUCH_ONLY') else [(390,844),(844,390),(1366,768)]):
   context=browser.new_context(viewport={'width':width,'height':height},has_touch=True,is_mobile=width<1000)
   page=context.new_page();page.emulate_media(reduced_motion='reduce');errors=[]
   page.on('pageerror',lambda e:(errors.append(str(e)),print('ERROR',str(e),flush=True)))
@@ -27,7 +27,9 @@ with sync_playwright() as p:
   for selector in ['.paper-boots','.paperdoll-stats','[data-do=upgrade]','.forge-socket-rack']:
    box=page.locator(selector).bounding_box();assert box and box['y']>=42 and box['y']+box['height']<=height+1,(selector,box)
   page.locator('[data-do=forge-open]').click();assert page.locator('.forge-dedicated').is_visible()
+  page.screenshot(path=str(out/f'forge-refine-{width}.png'),timeout=120000,animations='disabled')
   page.locator('[data-do=forge-tab][data-key=sockets]').click();assert page.locator('.forge-socket-rack').is_visible()
+  page.screenshot(path=str(out/f'forge-sockets-{width}.png'),timeout=120000,animations='disabled')
   page.locator('[data-do=forge-back]').click()
   page.locator('[name=rarity-filter]').select_option('mythic');assert page.locator('.rpg-bag-grid .has-item').count()==0
   page.locator('[name=rarity-filter]').select_option('all')
@@ -42,6 +44,11 @@ with sync_playwright() as p:
     page.locator('[data-do=pass-tab][data-key=rewards]').click()
   assert page.locator('.adventure-content').evaluate('(e)=>getComputedStyle(e).overflowY')=='hidden'
   page.locator('[data-do=close]').click()
+  j=page.locator('.move-zone').bounding_box()
+  for selector in ['.combat-controls','.movement-actions','.menu-dock']:
+   c=page.locator(selector).bounding_box()
+   overlap=min(j['x']+j['width'],c['x']+c['width'])>max(j['x'],c['x']) and min(j['y']+j['height'],c['y']+c['height'])>max(j['y'],c['y'])
+   assert not overlap,(selector,j,c)
   page.locator('.map-card').click()
   assert page.locator('.adventure-window.tab-map').is_visible()
   assert page.locator('.map-teleport-slot').count()==10
@@ -59,7 +66,13 @@ with sync_playwright() as p:
    assert page.locator('[data-hud-edit-key='+key+']').count()==1
   element=page.locator('[data-hud-edit-key=joystick]');before=element.bounding_box()
   x=before['x']+before['width']*.5;y=before['y']+before['height']*.5
-  page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+45,y-70,steps=10);page.mouse.up()
+  if width==390:
+   cdp=context.new_cdp_session(page)
+   cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
+   for step in range(1,11):cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x+45*step/10,'y':y-70*step/10}]})
+   cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+  else:
+   page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+45,y-70,steps=10);page.mouse.up()
   after=element.bounding_box();assert after['x']>before['x']+20 and after['y']<before['y']-30,(before,after)
   # The dedicated grip makes even controls underneath the toolbar or another control reachable.
   for key in ['combat','movement','minimap','vitals','shortcuts','autofarm']:

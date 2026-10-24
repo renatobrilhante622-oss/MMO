@@ -1,0 +1,63 @@
+{
+  "tests": 88,
+  "webBuild": "passed",
+  "androidBuild": "passed",
+  "apkSha256": "c75f71bb0fceb0c01b4dcbae39513560dfd10749991da6aa8df601a730251ee7",
+  "apkBytes": 6717886,
+  "apkSignature": "verified",
+  "assetsMatchBuild": true,
+  "browser": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "header": 42,
+      "columns": 3,
+      "teleports": 10,
+      "hud_saved": true,
+      "draggable_controls": 7,
+      "errors": []
+    },
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "header": 42,
+      "columns": 3,
+      "teleports": 10,
+      "hud_saved": true,
+      "draggable_controls": 7,
+      "errors": []
+    },
+    {
+      "viewport": [
+        1366,
+        768
+      ],
+      "header": 42,
+      "columns": 3,
+      "teleports": 10,
+      "hud_saved": true,
+      "draggable_controls": 7,
+      "errors": []
+    }
+  ],
+  "nativeTouchEmulation": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "header": 42,
+      "columns": 3,
+      "teleports": 10,
+      "hud_saved": true,
+      "draggable_controls": 7,
+      "errors": []
+    }
+  ],
+  "forgeLandscapeBounds": "passed",
+  "physicalAndroidDeviceTested": false
+}
