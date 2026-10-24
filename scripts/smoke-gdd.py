@@ -16,22 +16,26 @@ with sync_playwright() as p:
   page.add_init_script('window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};')
   page.goto(url,wait_until='networkidle',timeout=120000)
   page.wait_for_function('!!window.__ETERNA__',timeout=120000)
+  def open_tab(name):
+   button=page.locator('[data-hub='+name+']')
+   if not button.is_visible():page.locator('[data-do=toggle-nav]').click()
+   button.click()
   page.locator('[data-start]').click()
   page.locator('[data-do=class][data-id=necromancer]').click()
   assert page.locator('.adventure-main h1').inner_text()=='Epígrafo'
   page.evaluate('window.__ETERNA__.inventory.addXp(300)')
-  page.locator('[data-hub=talents]').click()
+  open_tab('talents')
   page.locator('[data-do=talent][data-key=power]').click()
   assert page.evaluate('window.__ETERNA__.progress.spent("necromancer")')==1
-  for tab in ['inventory','shop','collection','map','teleports','dungeons','pass','settings']:
-   page.locator('[data-hub='+tab+']').click()
+  for tab in ['inventory','shop','collection','dungeons','pass','settings']:
+   open_tab(tab)
    assert page.locator('.adventure-content').inner_text().strip(),tab
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),tab
   page.locator('[name=language]').select_option('en')
   assert page.locator('.adventure-main h1').inner_text()=='Settings'
-  page.locator('[data-hub=inventory]').click()
+  open_tab('inventory')
   assert page.locator('.adventure-main h1').inner_text()=='Inventory & forge'
-  page.locator('[data-hub=teleports]').click()
+  page.locator('[data-do=close]').click();page.locator('.map-card').click()
   assert page.locator('[data-do=teleport-record]').count()==10
   assert page.locator('[data-do=teleport-record]:not([disabled])').count()==4
   page.locator('[name=bookmark]').fill('Town')
@@ -41,7 +45,7 @@ with sync_playwright() as p:
   page.evaluate('''() => { const e=window.__ETERNA__; e.frame(1000); }''')
   assert page.evaluate('window.__ETERNA__.diagnostics.drawCalls')>0
   page.locator('.journey-button').click()
-  page.locator('[data-hub=arena]').click()
+  open_tab('arena')
   page.locator('[name=nickname]').fill('Smoke '+str(width))
   page.locator('[data-do="online:connect"]').click()
   page.wait_for_selector('.online-status',timeout=15000)

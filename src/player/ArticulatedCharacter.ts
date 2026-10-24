@@ -151,6 +151,7 @@ export class ArticulatedCharacter {
   weapons: WeaponForge;
   private readonly materials = new Set<MeshStandardMaterial>();
   private readonly skin: MeshStandardMaterial;
+  private readonly shadowFace:MeshStandardMaterial;
   private readonly leather: MeshStandardMaterial;
   private readonly steel: MeshStandardMaterial;
   private readonly gold: MeshStandardMaterial;
@@ -174,6 +175,7 @@ export class ArticulatedCharacter {
     this.accent = this.material(definition.color, .45, .42);
     this.accent.emissive.setHex(definition.color);
     this.accent.emissiveIntensity = .25;
+    this.shadowFace=this.material(0x10182b,.08,.77);
     this.skin = this.material(0xbc9678, .02, .83);
     this.leather = this.material(0x24282a, .05, .92);
     this.steel = this.material(0x9eaeb5, .86, .24);
@@ -267,7 +269,7 @@ export class ArticulatedCharacter {
     this.head.name = 'head';this.head.scale.setScalar(.82);
     this.neck.add(this.head);
     const face = this.mesh(this.head, new SphereGeometry(.185, 12, 10), this.skin);
-    face.scale.set(.87, 1.08, .86);
+    face.name='Human face';face.scale.set(.87, 1.08, .86);
     const helmet = this.mesh(this.head, new SphereGeometry(.195, 12, 8, 0, Math.PI * 2, 0, Math.PI * .58), this.armor, 0, .028);
     helmet.name='Metal helmet';helmet.scale.z = .95;
     this.hood=this.mesh(this.head,new SphereGeometry(.224,24,18,Math.PI*.75,Math.PI*1.5,0,Math.PI*.85),this.leather,0,.035,-.01);this.hood.name='Open cloth hood';
@@ -348,7 +350,7 @@ export class ArticulatedCharacter {
   }
 
   private styleSilhouette(definition:ClassDefinition):void {
-    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterRobe.visible=caster;this.hood.visible=caster;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
+    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
     this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;

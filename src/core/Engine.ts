@@ -33,6 +33,7 @@ import { refine } from '../rpg/InventoryForgeSocket';
 import { EPIGRAPHS, cooldownMultiplier, epigraphEffects } from '../rpg/ClassEpigraphSystem';
 import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
 import { COSMETICS } from '../progression/AdventureProgress';
+import { HudEditor } from '../ui/HudEditor';
 import { AdventureHub } from '../ui/AdventureHub';
 import { GameI18n, translateText } from '../ui/I18n';
 import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
@@ -61,6 +62,7 @@ export class Engine {
   readonly hud: MobileHUD;
   readonly progress: AdventureProgress;
   readonly hub: AdventureHub;
+  readonly hudEditor:HudEditor;
   private readonly i18n: GameI18n;
   gpsRoute: MapPoint[] = [];
   private readonly gpsLine = new Line(new BufferGeometry(),new LineBasicMaterial({color:0x7aedd3,transparent:true,opacity:.75,depthTest:true}));
@@ -181,6 +183,7 @@ export class Engine {
     this.composer.addPass(new OutputPass());
     this.hud = new MobileHUD(this.container, {
       onStart: () => this.beginPlay(),
+      onOpenMap:()=>this.hub.open('map'),
       onClassChange: id => this.changeClass(id),
       onOpenProgression: tab => this.hub.open(tab),
       onEquip: id => { if (this.inventory.equip(id)) { this.refreshStats(); this.save(); } },
@@ -200,6 +203,7 @@ export class Engine {
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.textContent='JORNADA / JOURNEY';journey.onclick=()=>this.hub.open('talents');this.container.append(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.textContent='AUTO FARM';this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
+    this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
@@ -245,7 +249,7 @@ export class Engine {
   private beginPlay(): void {
     // Called directly by the start button's user gesture. No autoplay bypass.
     void this.sound.unlock();
-    this.playing = true;
+    this.playing = true;this.hudEditor.initialize();
     if (!this.progress.chosen) this.hub.open('classes');
     this.lastTime = 0;
     this.hud.notify('O vale desperta. Explore a vila, encontre inimigos e procure o portal ao norte.', 'info');
@@ -304,7 +308,7 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !document.hidden;
     this.progress.tick(document.hidden?0:dt);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
@@ -329,7 +333,7 @@ export class Engine {
         this.combat.cooldownMax[input.skill]=this.combat.cooldowns[input.skill];
       }
       this.combat.update(dt);
-      this.base.update(dt);
+
       this.hero.mana = Math.min(this.hero.stats.maxMana, this.hero.mana + dt * 3.5);
       if (this.hero.alive && this.hero.position.distanceTo(this.terrain.spawnPoint) < 24) this.hero.heal(dt * 1.8);
       if (input.interact && this.hero.alive) this.interact();
@@ -340,6 +344,7 @@ export class Engine {
       this.saveClock += dt;
       if (this.saveClock >= 15) { this.save(); this.saveClock = 0; }
     }
+    if(this.playing&&!document.hidden&&!this.hudEditor.active)this.base.update(dt);
     const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
     const bossPhase = boss ? (boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3) : 0;
     if (bossPhase > 0 && this.previousBossPhase > 0 && bossPhase !== this.previousBossPhase) this.sound.bossRoar();
@@ -413,6 +418,7 @@ export class Engine {
     const p=this.progress,inv=this.inventory;
     let ok=false;
     switch(action){
+      case 'edit-hud':this.hub.close();this.hud.resetInput();this.hudEditor.enter();ok=true;break;
       case 'class':
         if (!(data.id in CLASS_DEFINITIONS))break;
         if(p.chosen&&(this.recentCombat>0||this.hero.position.distanceTo(this.terrain.spawnPoint)>28))break;
@@ -461,7 +467,7 @@ export class Engine {
   }
   private updateJourney(dt:number,active:boolean,input:ReturnType<typeof emptyInput>):void {
     const p=this.progress,hero=this.hero;
-    this.autoButton.hidden=!p.vip;this.autoButton.classList.toggle('active',p.autoFarm);
+    this.autoButton.hidden=!p.vip&&!this.hudEditor.active;this.autoButton.classList.toggle('active',p.autoFarm);
     const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
@@ -708,7 +714,7 @@ export class Engine {
     cancelAnimationFrame(this.frameId);
     this.save();
     this.disposers.splice(0).forEach(dispose => dispose());
-    this.hub.dispose();this.i18n.dispose();
+    this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.hud.dispose();
     this.sound.dispose();
     this.companions.dispose?.();

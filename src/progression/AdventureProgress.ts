@@ -1,6 +1,7 @@
+import {Vector3} from 'three';
 import type { ClassId, Rarity } from '../core/GameTypes';
 import { CLASS_IDS } from '../combat/ClassSystem';
-import { RARITIES, type InventoryAndLoot } from '../rpg/InventoryAndLoot';
+import { RARITIES, COMPLETE_ITEM_CATALOG, scaleWorldItem, type InventoryAndLoot } from '../rpg/InventoryAndLoot';
 import { REGIONS, type DungeonDefinition } from '../world/Regions';
 
 export type Attribute = 'power'|'vitality'|'guard'|'spirit'|'precision';
@@ -169,7 +170,11 @@ export class AdventureProgress {
   passClaimable(tier:number):boolean {return tier>=1&&tier<=this.passTier&&(!this.claimed.includes(tier)||(this.premium&&!this.claimedPremium.includes(tier)));}
   claimPass(tier:number):boolean {
     if(!Number.isInteger(tier)||!this.passClaimable(tier))return false;
-    if(!this.claimed.includes(tier)){this.claimed.push(tier);this.inventory.gold+=tier*35;this.inventory.crystals+=tier%5===0?6:1;}
+    if(!this.claimed.includes(tier)){
+      this.claimed.push(tier);this.inventory.gold+=tier*35;this.inventory.crystals+=tier%5===0?6:1;
+      if(tier%10===0)this.gems[tier===10?'ruby':tier===20?'sapphire':'diamond']++;
+      if(tier%15===0){const slot=tier===15?'weapon':'armor',template=COMPLETE_ITEM_CATALOG.filter(i=>i.slot===slot&&i.rarity==='epic'&&i.level<=this.inventory.level).at(-1)!;const id='battlepass-'+this.season+'-'+tier;this.inventory.addLoot({id,position:new Vector3(),gold:0,crystals:0,xp:0,item:{...scaleWorldItem(template,this.inventory.level),id:id+'-item'}});}
+    }
     if(this.premium&&!this.claimedPremium.includes(tier)){this.claimedPremium.push(tier);this.shards+=10;}
     return true;
   }

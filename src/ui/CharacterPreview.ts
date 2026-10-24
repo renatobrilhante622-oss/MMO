@@ -22,7 +22,7 @@ export class CharacterPreview {
     this.renderer.outputColorSpace=SRGBColorSpace;this.renderer.toneMapping=ACESFilmicToneMapping;this.renderer.setPixelRatio(1);this.renderer.setClearColor(0,0);this.renderer.domElement.className='paperdoll-canvas';
     this.renderer.domElement.setAttribute('aria-label','3D character preview');
     this.scene.add(new HemisphereLight(0xc5dbff,0x1d2635,2.4));
-    const key=new DirectionalLight(0xffe8c1,3.7);key.position.set(-3,5,5);const rim=new DirectionalLight(0x7a9dff,3);rim.position.set(3,3,-3);this.scene.add(key,rim);
+    const key=new DirectionalLight(0xe5eaff,3.2);key.position.set(-3,5,5);const rim=new DirectionalLight(0xae7aff,4.5);rim.position.set(3,3,-3);this.scene.add(key,rim);
     const floor=new Mesh(new CircleGeometry(1.6,48),new MeshStandardMaterial({color:0x182431,roughness:.8,metalness:.4,transparent:true,opacity:.45}));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;this.scene.add(floor);
     const c=this.renderer.domElement;c.addEventListener('pointerdown',e=>{this.held=true;this.dragX=e.clientX;c.setPointerCapture(e.pointerId);});c.addEventListener('pointermove',e=>{if(this.held){this.yaw+=(e.clientX-this.dragX)*.013;this.dragX=e.clientX;this.draw(0);}});c.addEventListener('pointerup',()=>this.held=false);c.addEventListener('pointercancel',()=>this.held=false);
   }
@@ -33,8 +33,8 @@ export class CharacterPreview {
       else{this.rig=new ArticulatedCharacter(CLASS_DEFINITIONS[id]);this.scene.add(this.rig.root);}
     }
     if(this.rig){this.rig.accent.color.setHex(cosmetic?.color??color);this.rig.accent.emissive.setHex(cosmetic?.color??color);this.rig.weaponAppearance(cosmetic?.color??color,refine,cosmetic?.rarity??'rare');}
-    host.append(this.renderer.domElement);const width=Math.max(180,host.clientWidth),height=Math.max(290,host.clientHeight);this.renderer.setSize(width,height,false);this.camera.aspect=width/height;
-    const animal=cosmetic?.type==='mount';this.camera.position.set(0,animal?1.9:1.25,animal?6.2:4.4);this.camera.lookAt(0,animal?1.2:1.05,0);this.camera.updateProjectionMatrix();
+    host.append(this.renderer.domElement);const width=Math.max(64,host.clientWidth),height=Math.max(100,host.clientHeight);this.renderer.setSize(width,height,false);this.camera.aspect=width/height;
+    const animal=cosmetic?.type==='mount';const distance=Math.max(animal?6.2:4.4,(animal?2.5:1.05)/(2*Math.tan(16*Math.PI/180)*this.camera.aspect));this.camera.position.set(0,animal?1.9:1.25,distance);this.camera.lookAt(0,animal?1.2:1.05,0);this.camera.updateProjectionMatrix();
     this.draw(0);if(!this.frame)this.frame=requestAnimationFrame(this.animate);
   }
   private draw(dt:number):void {this.time+=dt;if(this.rig){this.rig.root.rotation.y=this.yaw;this.rig.update(dt,this.time,'idle',0,this.yaw,0);}if(this.animal){this.animal.root.rotation.y=this.yaw+.5;this.animal.update(dt,0,this.time);}this.renderer.render(this.scene,this.camera);}

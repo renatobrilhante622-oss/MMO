@@ -13,16 +13,20 @@ with sync_playwright() as p:
   page.on('console',lambda e:(errors.append(e.text),print('CONSOLE ERROR',e.text,flush=True)) if e.type=='error' else None)
   page.add_init_script('window.requestAnimationFrame=()=>0;window.cancelAnimationFrame=()=>{};')
   page.goto(os.environ.get('ETERNA_URL','http://127.0.0.1:5173'),wait_until='networkidle',timeout=120000)
+  def open_tab(name):
+   button=page.locator('[data-hub='+name+']')
+   if not button.is_visible():page.locator('[data-do=toggle-nav]').click()
+   button.click()
   page.locator('[data-start]').click()
   page.locator('[data-do=class][data-id=warlock]').click()
   page.evaluate('''() => {const e=window.__ETERNA__;e.inventory.level=12;e.progress.allocate('warlock','power');e.progress.allocate('warlock','spirit');e.progress.allocate('warlock','precision');e.progress.gems.ruby=3;e.progress.record(0,'Aurora',0,18,false);e.refreshStats();}''')
-  page.locator('[data-hub=talents]').click()
+  open_tab('talents')
   assert page.locator('.talent-node').count()==5
   assert page.locator('.talent-link.lit').count()==3
   assert page.locator('.adventure-content .adventure-card').count()==0
   print('Capturing constellation',width,flush=True)
   page.screenshot(path=str(out/f'constellation-{width}.png'),timeout=120000,animations='disabled')
-  page.locator('[data-hub=inventory]').click()
+  open_tab('inventory')
   assert page.locator('.paper-slot').count()==8
   assert page.locator('.rpg-bag-grid .has-item').count()>=6
   assert page.locator('.adventure-content .adventure-card').count()==0
@@ -37,11 +41,11 @@ with sync_playwright() as p:
    page.locator('[data-do=upgrade]').click()
    assert page.locator('.rpg-forge.hammering').count()==1
    assert page.evaluate('window.__ETERNA__.inventory.items[0].upgrade')==1
-  page.locator('[data-hub=collection]').click()
+  open_tab('collection')
   assert page.locator('.collection-thumbnail .item-illustration').count()==6
   assert page.locator('.adventure-content .adventure-card').count()==0
   page.screenshot(path=str(out/f'collection-{width}.png'),timeout=120000,animations='disabled')
-  page.locator('[data-hub=map]').click()
+  page.locator('[data-do=close]').click();page.locator('.map-card').click()
   assert page.locator('[data-world-map]').evaluate('(c)=>c.width')==1120
   page.locator('[data-do=gps-region][data-id=lake]').click()
   page.evaluate("() => {window.__ETERNA__.setWaypoint({x:0,z:-45});window.__ETERNA__.hub.open('map');}")

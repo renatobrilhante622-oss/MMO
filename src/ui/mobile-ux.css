@@ -1,0 +1,470 @@
+/* One fixed menu viewport: header 42px; scrolling belongs to individual content widgets. */
+.adventure-layer{overflow:hidden}
+.adventure-layer .adventure-window,.adventure-layer .adventure-window:has(.rpg-inventory-layout),.adventure-layer .adventure-window:has(.atlas-frame){width:min(1400px,100vw);height:min(960px,100dvh);max-height:100dvh;max-width:100vw;border-radius:6px;overflow:hidden;flex-direction:row}
+.adventure-layer .adventure-nav{width:160px;box-sizing:border-box;padding:0 5px 6px;max-height:none;flex-shrink:0;display:block;border-right:1px solid #b6a06b2a;overflow-y:auto}
+.adventure-layer .adventure-brand{height:42px;box-sizing:border-box;padding:12px 8px 0;font-size:17px}
+.adventure-layer .adventure-nav>small{display:block;font-size:8px;letter-spacing:1.5px;margin:9px 8px 3px}
+.adventure-layer .adventure-nav button{width:100%;display:flex;align-items:center;gap:8px;min-height:29px;line-height:1.2;font-size:10px;padding:5px 7px;white-space:normal;margin:1px 0}
+.nav-symbol{width:18px;height:18px;display:grid;place-items:center;color:#d8bd83;font-size:15px}
+.adventure-layer .adventure-main{position:relative;min-height:0;overflow:hidden;flex:1;display:flex;flex-direction:column}
+.adventure-layer .adventure-main>.compact-menu-bar{box-sizing:border-box;display:flex;align-items:center;gap:8px;flex:0 0 42px;height:42px;min-height:42px;max-height:42px;padding:0 9px;background:linear-gradient(#1d2b38,#101b28);border-bottom:1px solid #b7a06d3d;overflow:hidden}
+.adventure-layer .compact-menu-bar h1{font:500 16px Georgia,serif;line-height:1.1;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%;flex:1;min-width:0}
+.adventure-layer .compact-menu-bar>button[data-do=close]{width:29px;min-width:29px;height:29px;min-height:29px;padding:0;font-size:22px;line-height:20px;background:#09121b66}
+.compact-wallet{display:flex;justify-content:center;align-items:center;gap:15px;flex:1;color:#e8cd91;font-size:11px;white-space:nowrap}
+.compact-wallet span:nth-child(2){color:#9fcef0}
+.compact-wallet span:nth-child(3){color:#d8b0ff}
+.adventure-layer .compact-nav-toggle{display:none;padding:0;width:25px;min-height:26px;font-size:16px}
+.adventure-layer .adventure-feedback{position:absolute;top:44px;right:8px;max-width:65%;padding:3px 8px;border-radius:5px;background:#0b1929dc;color:#b6e4d4;line-height:1.35;font-size:9px;z-index:12;pointer-events:none;min-height:0}
+.adventure-feedback:empty{display:none}
+.adventure-layer .adventure-content{flex:0 0 calc(100% - 42px);height:calc(100% - 42px);max-height:calc(100% - 42px);min-height:0;box-sizing:border-box;padding:8px;overflow:hidden}
+.adventure-layer .rpg-inventory-layout{height:100%;min-height:0;width:100%;display:grid;grid-template-columns:32fr 38fr 30fr;gap:7px;overflow:hidden}
+.adventure-layer .paperdoll-panel{width:auto;max-width:none;height:100%;min-height:0;position:relative;display:flex;flex-direction:column;box-sizing:border-box}
+.adventure-layer .paperdoll-title{flex:0 0 35px;padding:5px 3px 0;height:35px;box-sizing:border-box}
+.paperdoll-title .rpg-eyebrow,.paperdoll-title .gear-score{display:none}
+.adventure-layer .paperdoll-title h2{font:17px Georgia,serif;margin:2px 0}
+.adventure-layer .paperdoll-stage{height:auto;min-height:0;flex:1}
+.adventure-layer .paperdoll-stage [data-character-preview]{inset:0 15px}
+.adventure-layer .paperdoll-aureole{width:65%;height:auto;aspect-ratio:1;top:30%}
+.adventure-layer .paper-slot{width:44px;max-width:25%;left:auto;right:auto;top:auto;bottom:auto}
+.adventure-layer .paper-slot>span{font-size:8px;margin-bottom:2px;line-height:1.1}
+.adventure-layer .paper-helmet{left:38%;top:0}
+.adventure-layer .paper-armor{left:2px;top:21%}
+.adventure-layer .paper-ring{right:2px;top:21%}
+.adventure-layer .paper-gloves{left:2px;top:43%}
+.adventure-layer .paper-weapon{right:2px;top:43%}
+.adventure-layer .paper-belt{left:2px;top:65%}
+.adventure-layer .paper-amulet{right:2px;top:65%}
+.adventure-layer .paper-boots{left:38%;bottom:0}
+.adventure-layer .paperdoll-stats{flex:0 0 auto;grid-template-columns:repeat(2,1fr);gap:2px;padding:4px 2px}
+.adventure-layer .paperdoll-stats>div{display:flex;justify-content:space-around;align-items:center;padding:3px 0}
+.paperdoll-stats span{font-size:8px}
+.paperdoll-stats b{font-size:12px;margin:0}
+.paperdoll-stats .paper-score{grid-column:1/-1;color:#d8bd7f}
+.adventure-layer .rpg-bag-panel{min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.adventure-layer .bag-heading{flex:0 0 43px;min-height:43px;padding:0 0 4px;align-items:center;margin:0}
+.bag-heading .rpg-eyebrow{font-size:8px;letter-spacing:1px}
+.bag-heading h2{font-size:16px;margin:0}
+.bag-heading h2 small{font-size:9px}
+.adventure-layer .bag-filters{display:flex;flex-direction:row;gap:3px;min-width:0}
+.adventure-layer .bag-filters select{min-height:27px;font-size:9px!important;padding:3px!important;max-width:85px}
+.adventure-layer .rpg-bag-grid{flex:1;min-height:0;max-height:none;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:max-content;align-content:start;overflow-x:hidden;overflow-y:auto;gap:5px;padding:5px}
+.adventure-layer .bag-legend{flex:0 0 auto;display:flex;flex-wrap:wrap;font-size:8px;gap:3px;padding:4px 0}
+.adventure-layer .bag-legend span:last-child{display:none}
+.adventure-layer .rpg-forge{height:100%;box-sizing:border-box;min-width:0;min-height:0;padding:8px;display:flex;flex-direction:column;overflow:hidden}
+.adventure-layer .forge-inspect-heading{flex:0 0 auto;min-height:46px;padding:0 0 5px;gap:6px}
+.adventure-layer .forge-inspect-heading>.item-illustration{width:36px;height:36px}
+.adventure-layer .forge-inspect-heading h3{font:12px/1.25 Georgia,serif;margin:3px 0;overflow-wrap:anywhere}
+.adventure-layer .forge-inspect-heading small{font-size:8px}
+.adventure-layer .forge-inspect-heading p{font-size:8px}
+.adventure-layer .forge-workbench{flex:1 1 100px;height:auto;min-height:45px;max-height:200px;width:100%;margin:0 auto}
+.forge-placed-icon{width:30px;height:30px}
+.adventure-layer .forge-socket-rack{flex:0 0 46px;min-height:0;gap:5px;padding:3px;border-radius:10px}
+.adventure-layer .forge-socket{width:29px;height:29px;min-width:0;max-width:24%;border-width:1px}
+.adventure-layer .forge-socket>span{font-size:18px}
+.adventure-layer .forge-socket svg{width:23px;height:23px}
+.adventure-layer .forge-socket small{top:30px;font-size:7px}
+.adventure-layer .gem-pouch{flex:0 0 42px;gap:5px;padding-top:8px}
+.adventure-layer button.gem-token{width:28px;max-width:25%}
+.adventure-layer .gem-token .item-illustration{height:26px}
+.adventure-layer .gem-token>span{font-size:8px;margin:1px 0}
+.adventure-layer .gem-token i{font-size:7px}
+.adventure-layer .forge-hint{flex:0 0 auto;font-size:8px!important;line-height:1.3!important;margin:5px 0!important}
+.adventure-layer .forge-action-row{flex:0 0 auto;gap:4px;display:grid;grid-template-columns:1fr 1fr}
+.adventure-layer .forge-action-row button{font-size:9px;min-height:29px;padding:4px 3px;min-width:0}
+.adventure-layer .forge-action-row button:first-child{grid-column:1/-1;min-width:0;font-size:10px;min-height:32px}
+.adventure-layer .forge-management{flex:0 0 auto;padding-top:5px;font-size:8px;position:relative}
+.forge-management[open]{position:absolute;bottom:4px;right:4px;max-width:30%;background:#111e2ff5;padding:8px;z-index:20;max-height:160px;overflow:auto}
+.adventure-window.tab-inventory .adventure-feedback{max-width:28%;font-size:8px;top:43px}
+.adventure-window.tab-map{width:100vw!important;height:100dvh!important;border:0;border-radius:0!important}
+.tab-map .adventure-nav,.tab-map .compact-nav-toggle{display:none!important}
+.tab-map .adventure-content{padding:6px}
+.expanded-map-grid{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:8px}
+.map-sheet{min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:stretch}
+.map-sheet .atlas-toolbar{margin:0;min-height:30px;flex:0 0 auto;font-size:10px}
+.map-sheet .atlas-toolbar h2{font-size:17px}
+.map-sheet .atlas-toolbar .rpg-eyebrow{display:none}
+.map-sheet .atlas-frame{flex:0 1 auto;min-height:0;width:min(100%,calc(100dvh - 185px));max-width:none;aspect-ratio:1;margin:3px auto;border-width:3px}
+.map-sheet .atlas-frame canvas{height:100%;width:100%;display:block}
+.map-sheet .atlas-caption{font-size:9px;padding:3px 8px}
+.map-sheet .atlas-legend{flex:0 0 auto;gap:8px;margin:4px 0;font-size:8px}
+.map-sheet .atlas-destinations{display:flex;overflow-x:auto;flex:0 0 auto;gap:4px;padding:3px 0}
+.map-sheet .atlas-destinations button{min-width:115px;flex-shrink:0;padding:4px;font-size:9px;min-height:28px}
+.map-sheet .atlas-monsters{display:none}
+.gps-confirm{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:3px;font-size:9px;color:#abbda8}
+.gps-confirm>button{background:#756039;min-height:30px;font-size:10px}
+.map-pending-pin{position:absolute;transform:translate(-50%,-50%);font-size:27px;color:#fff2b4;filter:drop-shadow(0 0 5px #111);pointer-events:none}
+.map-teleport-bar{min-height:0;display:flex;flex-direction:column;background:#0a1522;border:1px solid #9c875244;border-radius:5px;padding:7px;gap:4px;overflow:hidden}
+.adventure-layer .map-teleport-bar h2{font:15px Georgia,serif;margin:0}
+.map-teleport-bar h2 small{font:9px system-ui;color:#b5a471}
+.adventure-layer .map-teleport-bar>input{min-height:25px;padding:4px 6px;font-size:9px;width:100%}
+.map-teleport-slots{flex:1;min-height:0;display:flex;flex-direction:column;gap:3px}
+.map-teleport-slot{flex:1;min-height:0;max-height:67px;display:flex;align-items:center;gap:4px;border:1px solid #8098b22b;border-radius:4px;padding:3px}
+.map-teleport-slot.locked{opacity:.45}
+.teleport-slot-number{flex:0 0 15px;color:#d5bc7b;font:14px Georgia,serif;text-align:center}
+.map-teleport-slot>div{flex:1;min-width:0;overflow:hidden}
+.map-teleport-slot b{font-size:9px;font-weight:500;display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.map-teleport-slot small{display:block;font-size:7px;color:#7f99b0;line-height:1.25}
+.adventure-layer .map-teleport-slot button{width:23px;min-width:0;height:26px;min-height:0;padding:0;font-size:13px;flex-shrink:0}
+.map-teleport-bar>button{font-size:9px;min-height:26px;padding:3px}
+.teleport-map-rule{font-size:7px;line-height:1.4;color:#8ba0b5}
+.hud-custom-position{pointer-events:auto!important;max-width:none!important}
+.eterna-hud .map-card{pointer-events:auto;cursor:pointer}
+.eterna-hud .combat-controls{display:flex;flex-direction:column;align-items:flex-end;gap:8px;width:250px;bottom:16px;right:18px;pointer-events:none}
+.combat-controls button{pointer-events:auto}
+.eterna-hud>.movement-actions{position:absolute;right:107px;bottom:18px;z-index:31;display:flex;gap:7px;pointer-events:auto}
+.eterna-hud>.movement-actions button{width:48px;height:48px;min-height:0}
+.eterna-hud .move-zone{width:160px;height:160px;left:10px;bottom:42px;top:auto}
+.eterna-hud .move-zone .joystick{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%)}
+.hud-editor-overlay{position:fixed;inset:0;z-index:240;background:repeating-linear-gradient(0deg,transparent 0 23px,#84b6c21f 23px 24px),repeating-linear-gradient(90deg,transparent 0 23px,#84b6c21f 23px 24px);pointer-events:none}
+.hud-editor-toolbar{position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#0b1727f5;border:1px solid #b4a2758c;border-radius:8px;padding:8px;box-shadow:0 5px 30px #0009;pointer-events:auto;max-width:calc(100vw - 16px);box-sizing:border-box;color:#e4dcc9;font:11px system-ui}
+.hud-editor-toolbar label{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.hud-editor-toolbar input{width:90px;accent-color:#e6c77e}
+.hud-editor-toolbar output{width:30px;font-size:10px}
+.hud-editor-toolbar button,.hud-editor-toolbar select{min-height:31px;border:1px solid #7e91a45c;border-radius:4px;background:#1e3044;color:#ece9d6;font:11px system-ui;padding:4px 8px}
+.hud-editor-toolbar [data-hud-save]{background:#28794b;border-color:#75d494;color:white}
+.hud-editor-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid #91c2bd66;border-radius:20px;background:#0d1d2ee8;color:#c0d8d8;font:11px system-ui;max-width:85vw;text-align:center}
+.hud-edit-target{outline:2px dashed #77bfe3!important;outline-offset:3px;z-index:250!important;cursor:move!important;touch-action:none!important;visibility:visible!important}
+.hud-edit-target:before{content:attr(data-hud-edit-label);position:absolute;top:-16px;left:0;padding:2px 4px;background:#0b1e31;color:#b1dcf0;font:9px system-ui;white-space:nowrap;pointer-events:none}
+.hud-edit-selected{outline:2px solid #f5d790!important;box-shadow:0 0 20px #edc16433!important}
+.hud-editor-toolbar{z-index:270}
+.hud-editor-overlay:has(.hud-editor-toolbar){z-index:260}
+.hud-edit-target{z-index:265!important}
+.hud-edit-target .joystick{opacity:1!important}
+.settings-form .edit-hud-launch{display:block;background:linear-gradient(120deg,#244a61,#493b62);border-color:#8bc2d3;color:#e0f5ff;margin:0 0 8px;width:100%}
+.tab-settings .adventure-content{overflow-y:auto}
+.tab-talents .constellation-board{height:calc(100% - 91px);min-height:0}
+.tab-talents .constellation-heading{height:48px;box-sizing:border-box}
+.tab-talents .constellation-emblem{height:35px;width:35px}
+.tab-talents .constellation-heading h2{font-size:20px}
+.tab-talents .constellation-footer{height:28px;font-size:8px}
+.tab-collection .collection-gallery{height:calc(100% - 40px);min-height:0}
+.tab-collection .collection-showcase{min-height:0;display:flex;flex-direction:column;padding:8px}
+.tab-collection .collection-showcase [data-character-preview]{height:auto;min-height:0;flex:1}
+.tab-collection .collection-showcase h2{font-size:18px;margin:5px}
+.tab-collection .collection-tabs{margin:0 0 5px;height:35px}
+.tab-collection .collection-thumbnails{overflow:auto;min-height:0}
+.tab-shop .adventure-content,.tab-market .adventure-content,.tab-clan .adventure-content,.tab-arena .adventure-content,.tab-dungeons .adventure-content{overflow-y:auto}
+.tab-inventory .adventure-content{overflow:hidden!important}
+
+@media(max-width:720px){.adventure-layer .adventure-window{width:100vw!important;height:100dvh!important;border-radius:0!important;max-height:100dvh}
+.adventure-layer .adventure-nav{display:none;position:absolute;left:0;top:42px;bottom:0;width:160px;z-index:80;background:#0b1626f7;border-right:1px solid #b3a36b88;overflow-y:auto}
+.adventure-window.nav-open .adventure-nav{display:block}
+.adventure-layer .compact-nav-toggle{display:block;flex-shrink:0}
+.adventure-layer .compact-menu-bar h1{font-size:12px;max-width:40%;flex:1}
+.adventure-layer .adventure-main>.compact-menu-bar{gap:4px;padding:0 5px}
+.compact-wallet{gap:7px;font-size:9px;flex:0 1 auto}
+.adventure-layer .compact-menu-bar>button[data-do=close]{width:24px;min-width:24px;height:26px;font-size:19px}
+.adventure-layer .adventure-content{padding:4px}
+.adventure-layer .rpg-inventory-layout{gap:3px;grid-template-columns:32fr 38fr 30fr}
+.adventure-layer .paperdoll-title{height:28px;flex-basis:28px}
+.adventure-layer .paperdoll-title h2{font-size:12px}
+.adventure-layer .paperdoll-stage [data-character-preview]{inset:0 4px}
+.adventure-layer .paper-slot{width:29px;max-width:27%}
+.adventure-layer .paper-slot>span{font-size:6px}
+.paper-slot .item-refine{font-size:7px;right:1px}
+.adventure-layer .paper-helmet,.adventure-layer .paper-boots{left:36%}
+.adventure-layer .paperdoll-stats{gap:0}
+.adventure-layer .paperdoll-stats span{font-size:6px}
+.adventure-layer .paperdoll-stats b{font-size:9px}
+.adventure-layer .bag-heading{height:57px;flex-basis:57px;flex-direction:column;align-items:stretch;gap:1px}
+.bag-heading>div:first-child{display:flex;align-items:center;justify-content:space-between}
+.bag-heading .rpg-eyebrow{font-size:7px}
+.bag-heading h2{font-size:12px}
+.bag-heading h2 small{font-size:8px}
+.adventure-layer .bag-filters select{width:50%;max-width:none;font-size:8px!important;padding:2px!important;min-height:24px}
+.adventure-layer .rpg-bag-grid{gap:3px;padding:3px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.adventure-layer .item-level{font-size:7px;left:2px}
+.adventure-layer .item-refine{font-size:8px;right:2px}
+.item-socket-dots{gap:1px;left:11px;bottom:3px}
+.socket-dot{width:4px;height:4px}
+.adventure-layer .bag-legend{font-size:6px}
+.adventure-layer .rpg-forge{padding:4px}
+.adventure-layer .forge-inspect-heading{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:70px;text-align:center}
+.adventure-layer .forge-inspect-heading h3{font-size:9px;margin:1px}
+.adventure-layer .forge-inspect-heading small{font-size:6px}
+.adventure-layer .forge-inspect-heading p{font-size:7px}
+.adventure-layer .forge-inspect-heading>.item-illustration{width:36px;height:36px}
+.adventure-layer .forge-workbench{flex:1 1 70px;max-height:180px;min-height:50px}
+.forge-placed-icon{width:22px;height:22px}
+.adventure-layer .forge-socket-rack{gap:3px;flex-basis:42px;padding:3px 1px}
+.adventure-layer .forge-socket{width:22px;height:22px;max-width:23%}
+.adventure-layer .forge-socket svg{height:18px;width:18px}
+.adventure-layer .forge-socket small{font-size:5px;top:25px}
+.adventure-layer .gem-pouch{gap:2px;padding-top:4px;flex-basis:34px}
+.adventure-layer .gem-token .item-illustration{height:22px}
+.adventure-layer .gem-token>span{font-size:6px}
+.adventure-layer .gem-token i{font-size:5px}
+.adventure-layer .forge-hint{font-size:6px!important}
+.adventure-layer .forge-action-row{display:flex;flex-direction:column;gap:3px}
+.adventure-layer .forge-action-row button,.adventure-layer .forge-action-row button:first-child{font-size:8px;letter-spacing:0;min-height:29px;padding:3px 1px;flex:none;width:100%;min-width:0}
+.adventure-layer .forge-management{font-size:6px}
+.adventure-layer .forge-management[open]{right:3px;max-width:65%;width:200px;font-size:9px}
+.adventure-layer .expanded-map-grid{grid-template-columns:minmax(0,1fr) 122px;gap:4px}
+.map-teleport-bar{padding:4px;gap:3px}
+.adventure-layer .map-teleport-bar h2{font-size:12px}
+.adventure-layer .map-teleport-slot{gap:2px;padding:2px;flex-wrap:wrap;max-height:66px}
+.map-teleport-slot>div{flex:1 0 calc(100% - 23px)}
+.map-teleport-slot b{font-size:8px}
+.map-teleport-slot small{font-size:6px}
+.adventure-layer .map-teleport-slot button{height:22px;flex:1;width:auto;font-size:12px}
+.teleport-slot-number{font-size:12px}
+.map-sheet .atlas-frame{width:100%;max-height:none}
+.map-sheet .atlas-toolbar h2{font-size:12px}
+.map-sheet .atlas-toolbar>span{font-size:8px}
+.map-sheet .atlas-caption{font-size:7px;letter-spacing:.5px}
+.map-sheet .atlas-legend{gap:4px;font-size:6px}
+.map-sheet .atlas-destinations{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
+.map-sheet .atlas-destinations button{min-width:0;font-size:7px;min-height:32px}
+.map-sheet .atlas-destinations small{font-size:6px}
+.gps-confirm{font-size:7px;flex-wrap:wrap;gap:4px}
+.gps-confirm>button{width:100%;font-size:10px}
+.map-sheet .atlas-toolbar button{font-size:8px;min-height:25px}
+.adventure-layer .adventure-feedback{font-size:7px;max-width:50%;top:43px}
+.tab-collection .collection-gallery{grid-template-columns:1fr 1fr;gap:5px}
+.tab-collection .collection-thumbnails{grid-template-columns:repeat(2,1fr);gap:5px}
+.tab-collection .collection-thumbnail span{font-size:9px}
+.tab-collection .collection-showcase h2{font-size:13px}
+.hud-editor-toolbar{flex-wrap:wrap;justify-content:center;gap:5px;width:calc(100vw - 12px);top:5px;font-size:9px;padding:5px}
+.hud-editor-toolbar label{font-size:9px}
+.hud-editor-toolbar input{width:65px}
+.hud-editor-toolbar button,.hud-editor-toolbar select{font-size:9px;min-height:29px;padding:3px 5px}
+.hud-editor-toolbar>select{max-width:130px}
+.hud-editor-hint{font-size:9px}
+.eterna-hud .combat-controls{width:220px;right:10px}
+.eterna-hud>.movement-actions{right:91px;bottom:17px;gap:5px}
+.eterna-hud>.movement-actions button{width:41px;height:41px}
+.eterna-hud .move-zone{width:135px;height:135px;left:5px;bottom:55px}
+}
+
+@media(max-height:480px){.adventure-layer .paperdoll-title{height:23px;flex-basis:23px}
+.adventure-layer .paperdoll-title h2{font-size:12px}
+.adventure-layer .paper-slot{width:32px;max-width:24%}
+.adventure-layer .paper-slot>span{font-size:6px}
+.adventure-layer .paperdoll-stats{grid-template-columns:repeat(3,1fr);padding:2px}
+.adventure-layer .paperdoll-stats>div{padding:1px 0}
+.adventure-layer .paperdoll-stats b{font-size:9px}
+.adventure-layer .paperdoll-stats span{font-size:6px}
+.adventure-layer .paper-score{grid-column:auto}
+.adventure-layer .forge-workbench{max-height:72px;min-height:34px;flex:1}
+.adventure-layer .forge-inspect-heading{min-height:37px}
+.adventure-layer .forge-inspect-heading>.item-illustration{height:30px;width:30px}
+.adventure-layer .forge-socket-rack{flex-basis:36px}
+.adventure-layer .gem-pouch{flex-basis:30px;padding-top:3px}
+.adventure-layer .forge-hint{margin:2px 0!important;font-size:7px!important}
+.adventure-layer .forge-action-row button{min-height:24px}
+.adventure-layer .forge-action-row button:first-child{min-height:27px;font-size:9px}
+.adventure-layer .forge-management{padding-top:1px;font-size:7px}
+.adventure-layer .bag-heading{flex-basis:32px;min-height:32px}
+.adventure-layer .adventure-content{padding:4px}
+.map-sheet .atlas-frame{width:min(100%,calc(100dvh - 152px))}
+.adventure-layer .map-teleport-slot button{height:18px;min-height:0;font-size:10px}
+.map-teleport-slot small{display:none}
+.map-teleport-slot{padding:1px}
+.teleport-map-rule{font-size:6px}
+.adventure-layer .map-teleport-bar h2{font-size:11px}
+.map-teleport-bar>input{height:20px!important;min-height:20px!important}
+.hud-editor-toolbar{top:2px}
+}
+
+/* Illustrated settlement, bestiary, class roster and dual reward lanes. */
+.tab-base .adventure-content,.tab-codex .adventure-content,.tab-classes .adventure-content{overflow:hidden}
+.building-settlement{height:100%;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;align-content:start}
+.building-diorama{position:relative;min-height:230px;background:radial-gradient(ellipse at 50% 25%,#43527244,#0c1929 70%);border:1px solid #899baf32;border-radius:5px;overflow:hidden}
+.building-art{display:block;width:100%;height:150px;max-height:46%;filter:drop-shadow(0 8px 8px #0008)}
+.building-caption{padding:5px 12px 10px}
+.building-caption h2{font:18px Georgia,serif;margin:0 0 8px;color:#ead6af}
+.building-level,.building-production,.beast-research{position:relative;height:13px;background:#08121e;border:1px solid #92805b55;border-radius:3px;overflow:hidden}
+.building-level>i,.building-production>i,.beast-research>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#896532,#d2b57b);box-shadow:0 0 10px #d5b46d55}
+.building-level>span,.building-production>span,.beast-research>span{position:absolute;inset:0;text-align:center;font:9px/11px system-ui;color:#f5e7bf;text-shadow:0 1px 3px #000}
+.building-production{height:12px;margin:6px 0}
+.building-production>i{background:linear-gradient(90deg,#315c7a,#78c3d6);transition:width .12s linear}
+.building-caption p{font-size:10px;line-height:1.4;margin:7px 0}
+.building-caption button{min-height:28px;padding:4px 8px;font-size:10px;width:100%}
+.bestiary-gallery{height:100%;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;align-content:start}
+.bestiary-specimen{background:radial-gradient(ellipse at 50% 20%,#55706d33,#0b1828 70%);border:1px solid #8398a533;border-radius:5px;min-width:0}
+.beast-portrait{width:100%;height:145px;display:block;filter:drop-shadow(0 3px 8px #0007)}
+.bestiary-specimen>div{padding:7px 10px 12px}
+.bestiary-specimen h2{font:17px Georgia,serif;margin:0;color:#dbd4bc}
+.bestiary-specimen p{font-size:10px;line-height:1.5}
+.bestiary-specimen small{font-size:9px;color:#91ada5;display:block;padding-top:8px}
+.beast-research>i{background:linear-gradient(90deg,#375e59,#7ba992)}
+.class-roster{height:100%;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:start}
+.adventure-layer .class-banner{position:relative;background:radial-gradient(ellipse at 50% 15%,color-mix(in srgb,var(--class-tone) 18%,#152135),#0b1525 75%);border:1px solid color-mix(in srgb,var(--class-tone) 30%,#263140);border-radius:5px;min-height:180px;padding:12px 8px;display:flex;flex-direction:column;align-items:center}
+.class-banner-emblem{height:56px;width:56px;color:var(--class-tone);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--class-tone) 30%,transparent))}
+.class-weapon-emblem{width:32px;height:32px;position:absolute;right:10px;top:45px}
+.class-banner h2{font:18px Georgia,serif;color:#e5d7b8;margin:8px 0 4px}
+.class-banner p{font-size:10px;line-height:1.4;margin:4px 0 8px}
+.class-banner>span{font-size:9px;color:var(--class-tone);margin-top:auto}
+.class-banner.active{box-shadow:inset 0 0 30px color-mix(in srgb,var(--class-tone) 10%,transparent);border-color:var(--class-tone)}
+.tab-pass .adventure-content{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
+.vip-splash{display:flex;align-items:center;gap:12px;flex:0 0 110px;min-height:0;padding:8px 14px;box-sizing:border-box;border:1px solid #c4a26888;border-radius:5px;background:radial-gradient(ellipse at 15% 45%,#b78a3859,transparent 60%),linear-gradient(100deg,#2c2440,#3b285a 65%,#1c2038);overflow:hidden}
+.vip-crown{flex:0 0 62px;height:62px;font:48px/62px Georgia,serif;text-align:center;color:#f8d58f;border:1px solid #d4ae6d88;border-radius:50%;box-shadow:0 0 24px #c1954b30,inset 0 0 15px #d6b56e22}
+.vip-splash-copy h2{font:25px Georgia,serif;margin:5px 0;color:#ffe0a3}
+.vip-splash-copy small{font-size:9px;color:#c1b1ca}
+.vip-benefits{display:flex;justify-content:center;gap:20px;flex:1}
+.vip-benefits>div{display:flex;flex-direction:column;align-items:center;gap:5px;max-width:85px}
+.vip-benefits svg{height:48px;width:48px}
+.vip-benefits span{font-size:9px;color:#e7d5ad;text-align:center}
+.vip-splash>button{background:linear-gradient(#c19b51,#7a532c);border-color:#e3c887;color:#fff0c4;min-height:33px;font-size:10px;white-space:nowrap}
+.battlepass-heading{display:flex;align-items:center;gap:15px;flex:0 0 48px}
+.battlepass-heading h2{font:20px Georgia,serif;margin:4px 0;color:#d7d1c1}
+.battlepass-heading .rpg-eyebrow{font-size:8px}
+.battlepass-xp{position:relative;flex:1;height:18px;border:1px solid #a28b6088;border-radius:4px;background:#091522;overflow:hidden}
+.battlepass-xp>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#3e536e,#ad8bce)}
+.battlepass-xp>span{position:absolute;inset:0;text-align:center;font:10px/16px system-ui;color:#f2e7c4;text-shadow:0 1px 3px #000}
+.battlepass-heading>button{font-size:10px;min-height:29px;white-space:nowrap}
+.horizontal-reward-track{flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;border:1px solid #728ca544;background:#081321;scrollbar-color:#ad8a4e #0c1623;border-radius:5px;scroll-snap-type:x proximity}
+.reward-track-row{height:50%;display:grid;grid-template-columns:72px repeat(30,94px);width:max-content;min-height:0}
+.reward-track-label{position:sticky;left:0;z-index:3;background:#162738;border-right:1px solid #95a8b53b;display:grid;place-items:center;font:10px Georgia,serif;letter-spacing:1px;color:#b7c9d4}
+.premium-row .reward-track-label{background:linear-gradient(90deg,#4b3e24,#2b2735);color:#edce85}
+.reward-track-cell{height:100%;box-sizing:border-box;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 6px;border-right:1px solid #75879a25;border-bottom:1px solid #75879a25;gap:3px;scroll-snap-align:start;background:linear-gradient(#152335,#0d1726)}
+.reward-track-cell>small{font:11px Georgia,serif;color:#aab3bd}
+.reward-track-cell>.item-illustration{width:56px;height:auto;max-height:49%;aspect-ratio:1;flex:0 1 auto}
+.reward-track-cell>span{font-size:9px;line-height:1.2;color:#9fabbc;text-align:center;max-width:85px}
+.reward-track-cell>button{padding:3px 6px;min-height:24px;max-height:29px;font-size:9px;width:100%;color:#e4d2a3}
+.reward-track-cell.unlocked>button:not(:disabled){border-color:#e8c97c;background:#786239;box-shadow:0 0 10px #ddbf5e22}
+.reward-track-cell.claimed{background:linear-gradient(#1b302f,#0c1a25)}
+.reward-track-cell.claimed>button{color:#9ee2ba}
+.premium-row .reward-track-cell{background:linear-gradient(#3a2c3955,#221e2b);border-color:#c0a05e33}
+.pass-mission-strip{flex:0 0 68px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pass-mission-strip>div{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px 8px;font-size:10px;color:#a6bac2;background:#101f2e;border:1px solid #6d8c9e33;padding:6px;border-radius:4px}
+.pass-mission-strip progress{width:100%;height:8px;accent-color:#bb9b66}
+.pass-mission-strip small{font-size:8px}
+.pass-mission-strip button{min-height:23px;padding:2px 6px;font-size:8px}
+.online-status{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#233c49aa,#101d2b);padding:8px;border:1px solid #82a49d33;border-radius:4px}
+.online-sigil{display:grid;place-items:center;width:32px;height:32px;border:1px solid #b8a77288;border-radius:50%;font-size:20px;color:#e0c690}
+.clan-raid-banner{display:flex;align-items:center;justify-content:space-around;background:radial-gradient(ellipse at 50% 50%,#71508344,#111c2b);border:1px solid #a48bb555;border-radius:5px;min-height:150px;margin:8px 0;overflow:hidden}
+.clan-raid-banner>.building-art,.clan-raid-banner>.beast-portrait{width:30%;height:145px;max-height:none}
+.clan-raid-banner>div{flex:1;text-align:center}
+.clan-raid-banner h2{font:25px Georgia,serif;color:#e9d8b7}
+.clan-raid-banner span{font-size:9px;letter-spacing:2px;color:#b3a3bf}
+.arena-fighter-plate{position:relative;display:grid;grid-template-columns:48px 1fr;gap:3px 8px;align-items:center;padding:10px;background:linear-gradient(100deg,#22394a,#0d1c2c);border:1px solid #8eb8c24a;border-radius:5px}
+.arena-fighter-plate>svg{grid-row:1/5;width:44px;height:44px;color:#b6b7ee}
+.arena-fighter-plate>small{font-size:9px;color:#c2b080}
+.arena-fighter-plate h3{font-size:13px;margin:0}
+.arena-fighter-plate p{font-size:9px;margin:0}
+.arena-fighter-plate progress{height:8px}
+.paperdoll-panel,.collection-showcase{background:radial-gradient(ellipse at 65% 24%,#62428a35,#0c1526 60%)!important}
+.tab-base .adventure-content{padding:7px}
+
+@media(max-width:720px){.building-settlement{gap:5px}
+.building-diorama{min-height:215px}
+.building-caption{padding:4px 7px 8px}
+.building-caption h2{font-size:13px}
+.building-caption p{font-size:8px}
+.building-art{height:110px}
+.building-caption button{font-size:8px}
+.bestiary-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.beast-portrait{height:115px}
+.bestiary-specimen>div{padding:5px 7px 8px}
+.bestiary-specimen h2{font-size:12px}
+.bestiary-specimen p,.bestiary-specimen small{font-size:8px}
+.class-roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.adventure-layer .class-banner{min-height:180px;padding:8px 5px}
+.class-banner h2{font-size:15px}
+.class-banner p{font-size:8px}
+.class-weapon-emblem{width:27px;height:27px;right:6px}
+.vip-splash{padding:7px;gap:6px;flex-basis:105px;flex-wrap:wrap}
+.vip-crown{flex-basis:36px;height:36px;font:29px/36px Georgia,serif}
+.vip-splash-copy h2{font-size:16px;margin:2px 0}
+.vip-splash-copy .rpg-eyebrow{font-size:7px;letter-spacing:1px}
+.vip-splash-copy small{font-size:7px}
+.vip-benefits{gap:8px;flex:1;min-width:100px}
+.vip-benefits svg{height:27px;width:27px}
+.vip-benefits span{font-size:7px;line-height:1.2}
+.vip-splash>button{min-height:25px;font-size:8px;padding:3px 6px;margin-left:auto}
+.battlepass-heading{flex-basis:57px;flex-wrap:wrap;gap:4px}
+.battlepass-heading h2{font-size:15px;margin:1px 0}
+.battlepass-heading .rpg-eyebrow{font-size:7px}
+.battlepass-xp{flex:1 0 40%;height:15px}
+.battlepass-xp>span{font-size:8px;line-height:13px}
+.battlepass-heading>button{font-size:8px;min-height:24px;padding:3px 6px}
+.reward-track-row{grid-template-columns:52px repeat(30,78px)}
+.reward-track-label{font-size:8px;letter-spacing:.5px}
+.reward-track-cell{padding:5px 4px;gap:2px}
+.reward-track-cell>.item-illustration{width:48px}
+.reward-track-cell>span{font-size:8px}
+.pass-mission-strip{flex-basis:85px;gap:4px}
+.pass-mission-strip>div{font-size:8px;padding:5px;gap:2px 4px}
+.pass-mission-strip>div span{grid-column:1/-1}
+.clan-raid-banner{min-height:95px}
+.clan-raid-banner>.building-art,.clan-raid-banner>.beast-portrait{height:85px}
+.clan-raid-banner h2{font-size:16px}
+.clan-raid-banner span{font-size:6px;letter-spacing:.5px}
+.arena-fighter-plate{grid-template-columns:30px 1fr;padding:6px;gap:3px 5px}
+.arena-fighter-plate>svg{width:28px;height:28px}
+}
+
+@media(max-height:480px){.vip-splash{flex-basis:62px;padding:4px 9px;flex-wrap:nowrap}
+.vip-crown{height:38px;flex-basis:38px;font-size:30px;line-height:38px}
+.vip-splash-copy h2{font-size:17px;margin:2px 0}
+.vip-benefits svg{height:28px;width:28px}
+.vip-benefits span{font-size:7px}
+.vip-splash-copy small{font-size:7px}
+.battlepass-heading{flex-basis:31px}
+.battlepass-heading h2{font-size:16px;margin:0}
+.battlepass-heading .rpg-eyebrow{font-size:6px}
+.battlepass-xp{height:14px}
+.battlepass-xp>span{font-size:8px;line-height:12px}
+.tab-pass .adventure-content{gap:4px}
+.pass-mission-strip{flex-basis:37px;gap:5px}
+.pass-mission-strip>div{grid-template-columns:1fr auto auto;font-size:8px;padding:3px 5px;gap:2px}
+.pass-mission-strip>div span{grid-column:auto}
+.pass-mission-strip progress{display:none}
+.pass-mission-strip button{min-height:21px;font-size:7px}
+.reward-track-row{grid-template-columns:55px repeat(30,78px)}
+.reward-track-cell{padding:2px 4px;gap:1px}
+.reward-track-cell>.item-illustration{width:33px;max-height:42%}
+.reward-track-cell>span{font-size:7px}
+.reward-track-cell>small{font-size:8px}
+.reward-track-cell>button{min-height:18px;font-size:7px;padding:1px 3px}
+.reward-track-label{font-size:8px}
+.building-settlement{grid-template-columns:repeat(4,minmax(0,1fr));overflow:hidden}
+.building-diorama{min-height:0;height:100%;display:flex;flex-direction:column}
+.building-art{height:auto;min-height:0;flex:1;max-height:48%}
+.building-caption{padding:4px 6px 6px;flex:1}
+.building-caption h2{font-size:12px}
+.building-caption p{font-size:8px;line-height:1.35}
+.building-caption button{font-size:8px;min-height:25px}
+.bestiary-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}
+.class-roster{grid-template-columns:repeat(5,minmax(0,1fr))}
+.adventure-layer .class-banner{min-height:220px}
+.class-banner h2{font-size:13px}
+.class-banner p{font-size:8px}
+}
+
+.adventure-layer .rpg-bag-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+.hud-editor-overlay,.hud-editor-overlay:has(.hud-editor-toolbar){z-index:280}
+@media(max-width:720px) and (min-height:481px){.adventure-layer .rpg-bag-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+
+/* Illustrated SVG scenes replace the legacy shield-shaped construction badges. */
+.adventure-layer svg.building-art{width:100%;height:150px;max-height:46%;display:block;clip-path:none;border:0;background:none;flex-shrink:0}
+.reward-track-row{scroll-margin-left:72px}
+@media(max-width:720px){.reward-track-row{scroll-margin-left:52px}
+.adventure-layer .paperdoll-stage [data-character-preview]{inset:0}
+}
+@media(max-height:480px){.adventure-layer svg.building-art{height:auto;min-height:0;flex:1;max-height:48%}
+}
+
+
+.eterna-hud:has(.hud-edit-target){isolation:auto}
+.hud-edit-selected{z-index:275!important}
+.online-lobby-banner{display:flex;align-items:center;justify-content:space-around;gap:12px;min-height:130px;margin-bottom:12px;border:1px solid #b19a6155;background:radial-gradient(ellipse at 50% 90%,#72579266,#101e2f 80%);border-radius:6px;overflow:hidden}
+.online-lobby-banner>svg{width:20%;max-width:160px;height:120px}
+.online-lobby-banner>div{text-align:center;flex:1}
+.online-lobby-banner h2{font:24px Georgia,serif;color:#edd9ac}
+.online-lobby-banner>div>span{font-size:10px;color:#b4bdd0}
+.guild-roster-plate{position:relative;padding:14px;border:1px solid #b19b5b44;background:linear-gradient(120deg,#202e3d,#101e2a);border-radius:5px}
+.guild-roster-plate>svg{width:46px;height:46px;float:left;margin:0 12px 8px 0}
+.guild-roster-plate h3{color:#dfcea3}
+.hud-editor-toolbar [data-hud-drag]{border-color:#72bcdf;cursor:grab}
+@media(max-width:720px),(max-height:480px){.online-lobby-banner{min-height:95px;gap:5px}
+.online-lobby-banner>svg{height:80px}
+.online-lobby-banner h2{font-size:17px}
+.online-lobby-banner>div>span{font-size:8px}
+}
+
+
+.horizontal-reward-track{scroll-padding-left:72px}@media(max-width:720px){.horizontal-reward-track{scroll-padding-left:52px}}@media(max-height:480px){.horizontal-reward-track{scroll-padding-left:55px}}

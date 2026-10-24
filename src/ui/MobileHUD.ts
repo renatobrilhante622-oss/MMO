@@ -23,6 +23,7 @@ export interface HUDModel {
 
 export interface HUDCallbacks {
   onOpenProgression?(tab:'talents'|'inventory'|'settings'|'base'|'codex'):void;
+  onOpenMap?():void;
   onClassChange(id: ClassId): void;
   onEquip(id: string): void;
   onUpgradeItem(id: string): void;
@@ -112,6 +113,12 @@ export class MobileHUD {
       <div class="damage-layer" data-ref="damageLayer" aria-hidden="true"></div><div class="toast-stack" data-ref="toasts" role="status" aria-live="polite"></div>
       <div class="modal-backdrop" data-ref="modal" hidden><section class="game-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="overline" data-ref="modalSubtitle">SEU AVENTUREIRO</span><h1 id="modal-title" data-ref="modalTitle"></h1></div><button class="close-button" data-close aria-label="Fechar janela">×</button></header><div class="modal-body" data-ref="modalBody"></div></section></div>
       <section class="start-screen" data-ref="startScreen"><div class="start-topline"><span class="brand-mark">E<span>✦</span></span><span>UM NOVO MUNDO PARA EXPLORAR</span></div><div class="start-content"><div class="start-eyebrow"><span></span> A SAGA DOS NOVE <span></span></div><h1>ETERNA</h1><div class="start-subtitle">N I N E F O L D</div><p>Uma terra ancestral. Nove caminhos.<br>Uma lenda que só você pode escrever.</p><button class="start-button" data-start>INICIAR JORNADA <span>→</span></button><a class="apk-download" href="/EternalHero-MMO-debug.apk" download>↓ Baixar APK Android</a><div class="start-details"><span>9 CLASSES</span><i></i><span>MUNDO ABERTO</span><i></i><span>PROGRESSO LOCAL</span></div></div><div class="start-bottom"><div class="quality-choice"><label for="start-quality">QUALIDADE</label><select id="start-quality" data-quality><option value="high">Alta · efeitos completos</option><option value="low">Leve · recomendado para celular</option></select></div><p><span class="desktop-copy">WASD para explorar · Arraste para olhar · J para atacar</span><span class="touch-copy">Joystick para explorar · Arraste à direita para olhar</span><br>Jogo individual • Sem conta • Salvamento neste dispositivo<br><span class="touch-copy">No celular, gire a tela para ampliar sua visão.</span></p><button data-panel="help">CONTROLES ${icon('help')}</button></div></section>`;
+    const movement=this.root.querySelector<HTMLElement>('.movement-actions')!;
+    const attack=movement.querySelector<HTMLElement>('.attack-button')!;
+    this.root.querySelector('.combat-controls')!.append(attack);this.root.append(movement);
+    const minimap=this.root.querySelector<HTMLElement>('.map-card')!;minimap.setAttribute('role','button');minimap.tabIndex=0;minimap.setAttribute('aria-label','Abrir mapa mundi / Open world map');
+    minimap.addEventListener('click',()=>{this.clearInput();this.callbacks.onOpenMap?.();});
+    minimap.addEventListener('keydown',event=>{if(event.code==='Enter'||event.code==='Space'){event.preventDefault();event.stopPropagation();this.clearInput();this.callbacks.onOpenMap?.();}});
     container.append(this.root);
     this.root.querySelectorAll<HTMLElement>('[data-ref]').forEach(node => this.el[node.dataset.ref!] = node);
     this.root.querySelectorAll<HTMLSelectElement>('[data-quality]').forEach(select => select.value = this.quality);
@@ -232,14 +239,16 @@ export class MobileHUD {
       this.movePointer = event.pointerId;
       this.joystickOrigin = { x: event.clientX, y: event.clientY };
       const rect = zone.getBoundingClientRect();
-      stick.style.left = `${event.clientX - rect.left}px`;
-      stick.style.top = `${event.clientY - rect.top}px`;
+      const uiScale=rect.width/Math.max(1,zone.offsetWidth);
+      stick.style.left = `${(event.clientX - rect.left)/uiScale}px`;
+      stick.style.top = `${(event.clientY - rect.top)/uiScale}px`;
       stick.classList.add('active');
     }, opts);
     zone.addEventListener('pointermove', event => {
       if (event.pointerId !== this.movePointer) return;
-      const dx = event.clientX - this.joystickOrigin.x;
-      const dy = event.clientY - this.joystickOrigin.y;
+      const uiScale=zone.getBoundingClientRect().width/Math.max(1,zone.offsetWidth);
+      const dx = (event.clientX - this.joystickOrigin.x)/uiScale;
+      const dy = (event.clientY - this.joystickOrigin.y)/uiScale;
       const length = Math.hypot(dx, dy);
       const radius = 44;
       const scale = length > radius ? radius / length : 1;
@@ -286,6 +295,7 @@ export class MobileHUD {
     zone.addEventListener('lostpointercapture', release, opts);
   }
 
+  resetInput():void {this.clearInput();}
   private clearInput(): void {
     this.keys.clear();
     this.input = emptyInput();

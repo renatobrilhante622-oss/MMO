@@ -55,6 +55,12 @@ export class BaseBuilding {
     this.pendingCrystals -= crystals;
   }
 
+  production(id:string):{fraction:number;seconds:number;resource:'gold'|'crystals'|'passive'} {
+    const level=this.buildings.find(b=>b.id===id)?.level??1;
+    if(id==='mine')return {fraction:this.pendingGold,seconds:(1-this.pendingGold)/(.8*level),resource:'gold'};
+    if(id==='alchemy')return {fraction:this.pendingCrystals,seconds:(1-this.pendingCrystals)*40/level,resource:'crystals'};
+    return {fraction:1,seconds:0,resource:'passive'};
+  }
   getBuffs(): StatBonuses {
     const level = (id: string): number => this.buildings.find(building => building.id === id)!.level;
     return { attack: level('forge') * 3, defense: level('stable') * 2, maxHp: level('alchemy') * 14 + level('stable') * 6 };
