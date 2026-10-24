@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Eterna Ninefold</string>
+    <string name="title_activity_main">Eterna Ninefold</string>
+    <string name="package_name">com.renatobrilhante.eterna</string>
+    <string name="custom_url_scheme">com.renatobrilhante.eterna</string>
+</resources>
