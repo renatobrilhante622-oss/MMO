@@ -1,10 +1,9 @@
 import {
-  BoxGeometry, BufferGeometry, CapsuleGeometry, ConeGeometry, DoubleSide,
-  Group, MathUtils, Mesh, MeshStandardMaterial, PlaneGeometry, SphereGeometry,
+  BufferGeometry, CapsuleGeometry, ConeGeometry, DoubleSide,
+  Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, PlaneGeometry, SphereGeometry, Vector2,
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { WeaponForge } from './WeaponForge';
 
 interface Limb {
@@ -163,6 +162,8 @@ export class ArticulatedCharacter {
   private attackSkill: number | undefined;
   private combo = 1;
   private lastHeading = 0;
+  private hood!:Mesh;
+  private casterRobe!:Mesh<LatheGeometry,MeshStandardMaterial>;
   private turning = 0;
   private readonly pose: Pose = this.neutral();
 
@@ -196,6 +197,11 @@ export class ArticulatedCharacter {
     this.cape.mesh.position.set(0, -.15, -.255);
     this.torso.add(this.cape.mesh);
     this.weapons = new WeaponForge(definition);
+    const profile=[new Vector2(.36,-.73),new Vector2(.34,-.63),new Vector2(.3,-.45),new Vector2(.245,-.12),new Vector2(.22,.08),new Vector2(.26,.25),new Vector2(.29,.38),new Vector2(.23,.52),new Vector2(.13,.61)];
+    const cloth=this.material(0x332d4a,.05,.94);
+    const robeGeometry=new LatheGeometry(profile,36);
+    const rp=robeGeometry.getAttribute('position');for(let i=0;i<rp.count;i++){const x=rp.getX(i),z=rp.getZ(i),y=rp.getY(i),angle=Math.atan2(z,x),fold=Math.sin(angle*12)*.015*(1-Math.max(0,y));rp.setXYZ(i,x+Math.cos(angle)*fold,y,z+Math.sin(angle)*fold);}robeGeometry.computeVertexNormals();
+    this.casterRobe=new Mesh(robeGeometry,cloth);this.casterRobe.name='Tailored caster robe';this.casterRobe.castShadow=this.casterRobe.receiveShadow=true;this.pelvis.add(this.casterRobe);this.styleSilhouette(definition);
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
   }
@@ -216,7 +222,7 @@ export class ArticulatedCharacter {
   }
 
   private box(parent: Group, width: number, height: number, depth: number, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
-    return this.mesh(parent, new RoundedBoxGeometry(width, height, depth, 2, Math.min(width,height,depth)*.18), material, x, y, z);
+    const mesh=this.mesh(parent,new SphereGeometry(1,14,10),material,x,y,z);mesh.scale.set(width*.58,height*.58,depth*.58);return mesh;
   }
 
   private buildTorso(): void {
@@ -258,12 +264,13 @@ export class ArticulatedCharacter {
     this.torso.add(this.neck);
     this.mesh(this.neck, new CapsuleGeometry(.075, .1, 3, 8), this.skin, 0, .03);
     this.head.position.y = .17;
-    this.head.name = 'head';
+    this.head.name = 'head';this.head.scale.setScalar(.82);
     this.neck.add(this.head);
     const face = this.mesh(this.head, new SphereGeometry(.185, 12, 10), this.skin);
     face.scale.set(.87, 1.08, .86);
     const helmet = this.mesh(this.head, new SphereGeometry(.195, 12, 8, 0, Math.PI * 2, 0, Math.PI * .58), this.armor, 0, .028);
-    helmet.scale.z = .95;
+    helmet.name='Metal helmet';helmet.scale.z = .95;
+    this.hood=this.mesh(this.head,new SphereGeometry(.224,24,18,Math.PI*.75,Math.PI*1.5,0,Math.PI*.85),this.leather,0,.035,-.01);this.hood.name='Open cloth hood';
     this.box(this.head, .325, .032, .055, this.gold, 0, .025, .155);
     this.box(this.head, .022, .16, .03, this.gold, 0, -.04, .177);
     const nose = this.mesh(this.head, new ConeGeometry(.033, .085, 4), this.skin, 0, -.035, .163);
@@ -275,7 +282,11 @@ export class ArticulatedCharacter {
       cheek.rotation.z = -side * .15;
       this.mesh(this.head, new SphereGeometry(.037, 6, 4), this.gold, side * .165, .028, 0);
     }
-    const crest = this.mesh(this.head, new ConeGeometry(.075, .28, 5), this.accent, 0, .22, -.015);
+    if(['warlock','necromancer','elementalist'].includes(this.definition.id)){
+      helmet.material=this.leather;helmet.scale.set(1.14,1.3,1.1);
+      for(const side of [-1,1])this.mesh(this.head,new CapsuleGeometry(.065,.21,5,10),this.leather,side*.16,-.07,.05).rotation.z=-side*.13;
+    }
+    const crest = this.mesh(this.head, new ConeGeometry(.075, .28, 8), this.accent, 0, .22, -.015);
     crest.scale.z = .5;
     this.box(this.head, .09, .014, .015, this.leather, 0, -.112, .14);
   }
@@ -287,15 +298,15 @@ export class ArticulatedCharacter {
     upper.name = side < 0 ? 'left-shoulder' : 'right-shoulder';
     lower.name = side < 0 ? 'left-elbow' : 'right-elbow';
     end.name = side < 0 ? 'left-wrist' : 'right-wrist';
-    upper.position.set(side * .36, .2, 0);
+    upper.position.set(side * .30, .2, 0);
     lower.position.y = -.29;
     end.position.y = -.27;
     this.torso.add(upper);
     upper.add(lower);
     lower.add(end);
-    const shoulder = this.mesh(upper, new SphereGeometry(.155, 10, 7, 0, Math.PI * 2, 0, Math.PI * .7), this.armor, side * .025, -.02);
+    const shoulder = this.mesh(upper, new SphereGeometry(.125, 16, 10, 0, Math.PI * 2, 0, Math.PI * .7), this.armor, side * .025, -.02);
     shoulder.scale.set(1.1, .8, 1.1);
-    const edge = this.mesh(upper, new TorusGeometry(.142, .012, 5, 12), this.gold, side * .025, .005);
+    const edge = this.mesh(upper, new TorusGeometry(.117, .012, 5, 12), this.gold, side * .025, .005);
     edge.rotation.x = Math.PI / 2;
     this.mesh(upper, new CapsuleGeometry(.067, .15, 4, 8), this.leather, 0, -.16);
     this.box(upper, .14, .18, .16, this.armor, 0, -.15, .015);
@@ -336,6 +347,12 @@ export class ArticulatedCharacter {
     return { upper, lower, end };
   }
 
+  private styleSilhouette(definition:ClassDefinition):void {
+    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterRobe.visible=caster;this.hood.visible=caster;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
+    this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
+    this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
+    for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
+  }
   weaponAppearance(color:number,refine:number,rarity:string):void {this.weapons.appearance(color,refine,rarity);}
 
   setClass(definition: ClassDefinition): void {
@@ -348,6 +365,7 @@ export class ArticulatedCharacter {
     this.weapons = new WeaponForge(definition);
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
+    this.styleSilhouette(definition);
     this.attackClock = 0;
   }
 

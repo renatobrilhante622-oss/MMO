@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { TERRAIN_GLSL, WATER_VERTEX_GLSL, WATER_FRAGMENT_GLSL, PORTAL_VERTEX_GLSL, PORTAL_FRAGMENT_GLSL } from './WorldShaders';
+import { createGroundTextures, type PBRTextureSet } from './ProceduralTextures';
 import { WorldLife } from './WorldLife';
 
 export interface WorldCollider {
@@ -31,6 +32,8 @@ export class OpenWorldGenerator {
   private readonly life: WorldLife;
   private generated = false;
   private elapsed = 0;
+  private ground?:{grass:PBRTextureSet;dirt:PBRTextureSet;cobble:PBRTextureSet};
+  private wind={value:0};
   private water?: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private portal?: THREE.Group;
   private portalLight?: THREE.PointLight;
@@ -100,6 +103,7 @@ export class OpenWorldGenerator {
     if (this.generated) return;
     this.generated = true;
     this.scene.add(this.root);
+    if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble')};
     this.createTerrain();
     this.createWater();
     this.createVillage();
@@ -138,9 +142,11 @@ export class OpenWorldGenerator {
 
   private terrainMaterial(): THREE.MeshStandardMaterial {
     const material = this.material({ color: 0xffffff, roughness: .96 });
+    if(this.ground){material.normalMap=this.ground.grass.normalMap;material.normalMap.repeat.set(80,80);material.normalScale.set(.3,.3);material.roughnessMap=this.ground.grass.roughnessMap;material.roughnessMap.repeat.set(80,80);}
     material.name = 'Procedural grass, cliff rock, shore sand and village cobblestone';
     material.onBeforeCompile = shader => {
       shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
+      shader.uniforms.terrainStone={value:this.ground?.cobble.map};shader.uniforms.terrainDirt={value:this.ground?.dirt.map};shader.uniforms.terrainGrass={value:this.ground?.grass.map};shader.uniforms.terrainStoneNormal={value:this.ground?.cobble.normalMap};shader.uniforms.terrainStoneRough={value:this.ground?.cobble.roughnessMap};
       shader.vertexShader = shader.vertexShader.replace('#include <common>', `
         #include <common>
         varying vec3 vTerrainPosition;
@@ -159,10 +165,18 @@ export class OpenWorldGenerator {
         #include <roughnessmap_fragment>
         float wetness = 1.0 - smoothstep(terrainWaterLevel - .3,
           terrainWaterLevel + .7, vTerrainPosition.y);
-        roughnessFactor = mix(.96, .38, wetness);
+        float villageRough=1.-smoothstep(16.,23.,length(vTerrainPosition.xz-vec2(0.,18.)));
+        roughnessFactor=mix(roughnessFactor,texture2D(terrainStoneRough,vTerrainPosition.xz*.22).g,villageRough)*mix(1.,.4,wetness);
       `);
     };
-    material.customProgramCacheKey = () => 'eterna-procedural-terrain-v2';
+    const terrainCompile=material.onBeforeCompile;
+    material.onBeforeCompile=(shader,renderer)=>{terrainCompile.call(material,shader,renderer);shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+      #ifdef USE_NORMALMAP_TANGENTSPACE
+        float cobbleNormalWeight=1.-smoothstep(16.,23.,length(vTerrainPosition.xz-vec2(0.,18.)));
+        vec3 stoneN=texture2D(terrainStoneNormal,vTerrainPosition.xz*.22).xyz*2.-1.;stoneN.xy*=.75;
+        normal=normalize(mix(normal,normalize(tbn*stoneN),cobbleNormalWeight));
+      #endif`);};
+    material.customProgramCacheKey = () => 'eterna-procedural-terrain-pbr-v4';
     return material;
   }
 
@@ -597,12 +611,20 @@ export class OpenWorldGenerator {
       if (p.scale > 1.8) this.colliders.push({ position: new THREE.Vector3(p.x, p.y + p.scale * .35, p.z), size: new THREE.Vector3(p.scale * 1.35, p.scale, p.scale * 1.3), type: 'climbable' });
     });
     rocks.castShadow = rocks.receiveShadow = true; rocks.computeBoundingSphere(); this.root.add(rocks);
-    const grass = new THREE.InstancedMesh(new THREE.ConeGeometry(.19, .8, 3), this.material({ color: '#8fa779', roughness: 1 }), 1600);
+    const bladeGeometry=new THREE.PlaneGeometry(.12,.75,1,3);bladeGeometry.translate(0,.375,0);
+    const bladePositions=bladeGeometry.getAttribute('position');for(let i=0;i<bladePositions.count;i++){const y=bladePositions.getY(i);bladePositions.setX(i,bladePositions.getX(i)*(1-y/.8));bladePositions.setZ(i,Math.pow(y,2)*.15);}bladeGeometry.computeVertexNormals();
+    const grassMaterial=this.material({color:'#647c3d',roughness:.95,side:THREE.DoubleSide});
+    grassMaterial.onBeforeCompile=shader=>{shader.uniforms.grassTime=this.wind;shader.vertexShader='uniform float grassTime;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+      float grassPhase=grassTime*1.4+instanceMatrix[3].x*.21+instanceMatrix[3].z*.18;
+      transformed.x+=sin(grassPhase)*position.y*position.y*.22;
+      transformed.z+=cos(grassPhase*.73)*position.y*position.y*.12;`);};
+    grassMaterial.customProgramCacheKey=()=> 'eterna-grass-blade-wind-v1';
+    const grass = new THREE.InstancedMesh(bladeGeometry,grassMaterial,3200);
     let grassCount = 0;
-    for (let i = 0; i < 3000 && grassCount < 1600; i++) {
+    for (let i = 0; i < 6000 && grassCount < 3200; i++) {
       const x = (this.random() - .5) * 250, z = (this.random() - .5) * 250, y = this.heightAt(x, z);
       if (y < 2.1 || Math.hypot(x, z - 18) < 25 || (Math.abs(x) < 4 && z < 5 && z > -75)) continue;
-      dummy.position.set(x, y + .3, z); dummy.rotation.set(0, this.random() * 6.28, 0);
+      dummy.position.set(x, y + .02, z); dummy.rotation.set(0, this.random() * 6.28, 0);
       dummy.scale.set(.7 + this.random() * .8, .5 + this.random(), .7 + this.random() * .8); dummy.updateMatrix();
       grass.setMatrixAt(grassCount++, dummy.matrix);
     }
@@ -637,26 +659,28 @@ export class OpenWorldGenerator {
   }
 
   private createTrail(): void {
-    const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
-    for (let i = 0; i <= 92; i++) {
-      const z = 18 - i, x = Math.sin(i * .075) * 2.3;
-      for (const side of [-1, 1]) {
-        const px = x + side * 2.1;
-        positions.push(px, this.heightAt(px, z) + .045, z);
-        uvs.push(side === -1 ? 0 : 1, i / 4);
-      }
-      if (i < 92) { const a = i * 2; indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    const positions:number[]=[],uvs:number[]=[],indices:number[]=[];
+    for(let row=0;row<=184;row++){
+      const z=18-row*.5,x=Math.sin(row*.5*.075)*2.3;
+      for(let col=0;col<=8;col++){const side=col/4-1,px=x+side*(2.65+Math.sin(z*.7)*.12);positions.push(px,this.heightAt(px,z)+.055,z);uvs.push(col/8,row/12);}
+      if(row<184)for(let col=0;col<8;col++){const a=row*9+col;indices.push(a,a+9,a+1,a+1,a+9,a+10);}
     }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-    geometry.setIndex(indices); geometry.computeVertexNormals();
-    const path = new THREE.Mesh(geometry, this.material({ color: '#ae9f7d', roughness: 1, side: THREE.DoubleSide }));
-    path.receiveShadow = true; this.root.add(path);
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();
+    const material=this.material({color:'#b4aa8d',roughness:.92,side:THREE.DoubleSide,transparent:true,depthWrite:false});
+    if(this.ground){material.map=this.ground.dirt.map;material.normalMap=this.ground.dirt.normalMap;material.roughnessMap=this.ground.dirt.roughnessMap;material.normalScale.set(.65,.65);}
+    material.onBeforeCompile=shader=>{shader.vertexShader='varying vec2 trailUv;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntrailUv=uv;');shader.fragmentShader='varying vec2 trailUv;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <alphamap_fragment>',`#include <alphamap_fragment>
+      float edge=min(trailUv.x,1.-trailUv.x);
+      float dust=sin(trailUv.y*73.1+trailUv.x*17.)*.03+sin(trailUv.y*29.)*.025;
+      diffuseColor.a*=smoothstep(.015,.20,edge+dust);`);};material.customProgramCacheKey=()=> 'eterna-rutted-trail-v2';
+    const trail=new THREE.Mesh(geometry,material);trail.name='Blended PBR cart track';trail.receiveShadow=true;this.root.add(trail);
+    // Broken edge stones establish width without a perfectly straight ribbon.
+    const border=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.21,1),this.material({color:'#797e69',roughness:.96}),184);
+    const dummy=new THREE.Object3D();let count=0;for(let i=0;i<92;i++)for(const side of [-1,1]){const z=18-i,x=Math.sin(i*.075)*2.3+side*(2.3+this.random()*.2);dummy.position.set(x,this.heightAt(x,z)+.09,z);dummy.rotation.set(this.random()*.4,this.random()*6,.2);dummy.scale.set(.6+this.random(),.45,.7+this.random());dummy.updateMatrix();border.setMatrixAt(count++,dummy.matrix);}border.receiveShadow=true;border.computeBoundingSphere();this.root.add(border);
   }
 
   update(dt: number, timeOfDay: number): void {
     this.elapsed += dt;
+    this.wind.value=this.elapsed;
     this.life.update(dt, timeOfDay);
     const brightness = .18 + Math.max(0, Math.sin(timeOfDay * Math.PI * 2)) * .82;
     if (this.water) {
@@ -685,6 +709,7 @@ export class OpenWorldGenerator {
 
   dispose(): void {
     this.life.dispose();
+    if(this.ground)Object.values(this.ground).forEach(set=>set.dispose());
     this.root.traverse(object => {
       if (object instanceof THREE.Mesh) object.geometry.dispose();
     });

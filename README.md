@@ -136,3 +136,13 @@ Esse comando recompila e copia o conteúdo de `dist` para o projeto nativo. `npm
 | `tests` | Testes automatizados da lógica e integração de sistemas |
 
 No modo de desenvolvimento, `window.__ETERNA__` permite inspecionar `diagnostics`, herói e sistemas pelo console. Esse acesso não é incluído na distribuição de produção.
+
+## Reforma visual: inventário, Epígrafo e atlas
+
+O inventário usa um paperdoll 3D do modelo real, oito posições de equipamento, mochila de slots ilustrados, refino no canto e sockets visuais. Cabeça, peito, arma, botas, anel, colar, luvas e cinto têm efeitos reais nos atributos; os seis equipamentos iniciais são preservados, e luvas/cinto são obtidos no loot. O catálogo original de 144 itens permanece compatível; 48 modelos adicionais completam os dois slots novos.
+
+Selecione um item para abrir a bigorna. Refinar anima martelo/faíscas; joias podem ser clicadas ou arrastadas para os sockets. Os comandos de venda, desmontagem e remoção de joias ficam em **Gerenciar item e joias**. A coleção mostra miniaturas ilustradas e um preview 3D que pode ser girado por arraste. O Epígrafo usa uma constelação específica de cada classe; investir um ponto acende a ligação do nodo.
+
+O atlas tem raster de relevo de 1120×1120 derivado da altura do terreno, curvas topográficas, símbolos desenhados de florestas/montanhas, caminhos, margens, ícones de chefes e teleportes salvos. A trilha GPS é pontilhada e dourada; o marcador do jogador pulsa. As texturas de chão são geradas localmente em 512×512, incluindo albedo, normal e roughness; a trilha tem sulcos de carroça, borda de pedras e transição alfa, e as lâminas de grama instanciadas recebem vento no shader. Corpos de personagens, NPCs e criaturas usam superfícies curvas, com túnica/capuz para conjuradores.
+
+`python3 scripts/smoke-visual.py` verifica os elementos gráficos e gera screenshots em `docs/visual-review`. Os frames de mundo desse teste usam resolução interna reduzida e sombras desligadas para o renderizador de software do ambiente; isso não altera as opções gráficas do jogo nem mede desempenho em aparelho físico.

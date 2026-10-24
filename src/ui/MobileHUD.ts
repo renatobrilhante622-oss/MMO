@@ -36,7 +36,7 @@ export interface HUDCallbacks {
 
 type Panel = 'inventory' | 'classes' | 'base' | 'codex' | 'help';
 const rarityNames: Record<string, string> = { common: 'Comum', uncommon: 'Incomum', rare: 'Raro', epic: 'Épico', legendary: 'Lendário', mythic: 'Mítico' };
-const slotNames: Record<EquipmentSlot, string> = { weapon: 'Arma', helmet: 'Elmo', armor: 'Armadura', boots: 'Botas', ring: 'Anel', amulet: 'Amuleto' };
+const slotNames: Record<EquipmentSlot, string> = { weapon: 'Arma', helmet: 'Elmo', armor: 'Armadura', boots: 'Botas', ring: 'Anel', amulet: 'Amuleto',gloves:'Manoplas',belt:'Cinto' };
 const stateNames: Record<HeroState, string> = { idle: 'Na vila', run: 'Explorando', jump: 'No ar', doubleJump: 'Salto duplo', fall: 'No ar', climb: 'Escalando', swim: 'Nadando', dive: 'Mergulhando', slide: 'Esquiva', mounted: 'Montado', dead: 'Retornando à vila' };
 const esc = (s: string): string => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const clamp = (n: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, n));
@@ -330,6 +330,7 @@ export class MobileHUD {
       this.el.classIcon.innerHTML = classIcon(model.classId);
       definition.skills.forEach((skill, index) => {
         this.el[`skillIcon${index}`].innerHTML = skillIcon(skill.id);
+        this.el[`skill${index}`].dataset.skillTooltip=translateText(skill.name,this.language);
         this.el[`skill${index}`].title = `${translateText(skill.name,this.language)} · ${skill.mana} mana · ${skill.cooldown}s\n${translateText(skill.description,this.language)}`;
       });
     }

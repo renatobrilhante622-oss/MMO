@@ -75,15 +75,15 @@ export class WorldLife {
       const root = new THREE.Group();
       root.name = ['Village smith','Village alchemist','Stable keeper','Village sentinel'][index];
       const cloth = this.material(clothColors[index]);
-      const torso = this.mesh(new THREE.CapsuleGeometry(.23,.42,3,7),cloth,root,0,1.02,0);
+      const torso = this.mesh(new THREE.CapsuleGeometry(.23,.42,6,14),cloth,root,0,1.02,0);
       torso.scale.z = .75;
       this.mesh(new THREE.CylinderGeometry(.255,.26,.11,8),belt,root,0,.83,0);
-      this.mesh(new THREE.BoxGeometry(.14,.12,.04),metal,root,0,.83,.2);
+      this.mesh(new THREE.SphereGeometry(1,10,8),metal,root,0,.83,.2).scale.set(.07,.06,.025);
       const head = new THREE.Group();
       head.position.y = 1.57;
       root.add(head);
-      this.mesh(new THREE.SphereGeometry(.18,8,7),skin,head,0,0,0);
-      const hair = this.mesh(new THREE.SphereGeometry(.19,8,6,0,Math.PI*2,0,Math.PI*.6),belt,head,0,.035,0);
+      this.mesh(new THREE.SphereGeometry(.16,16,12),skin,head,0,0,0);
+      const hair = this.mesh(new THREE.SphereGeometry(.17,16,10,0,Math.PI*2,0,Math.PI*.6),belt,head,0,.035,0);
       hair.rotation.x = -.12;
       for (const sign of [-1,1]) {
         this.mesh(new THREE.SphereGeometry(.018,4,3),boots,head,sign*.067,.025,.16);
@@ -99,10 +99,10 @@ export class WorldLife {
         legs[side].position.set(sign*.13,.77,0);
         root.add(legs[side]);
         this.mesh(new THREE.CapsuleGeometry(.09,.45,2,6),cloth,legs[side],0,-.27,0);
-        this.mesh(new THREE.BoxGeometry(.19,.14,.32),boots,legs[side],0,-.66,.075);
+        this.mesh(new THREE.SphereGeometry(1,12,8),boots,legs[side],0,-.66,.075).scale.set(.095,.075,.16);
       }
       // An apron, satchel and shoulder collar establish readable occupations.
-      if (index===0) this.mesh(new THREE.BoxGeometry(.36,.55,.045),belt,root,0,.91,.20);
+      if (index===0) this.mesh(new THREE.SphereGeometry(1,12,10),belt,root,0,.91,.20).scale.set(.18,.275,.05);
       if (index===1) {
         this.mesh(new THREE.SphereGeometry(.13,7,5),belt,root,.28,.85,0);
         this.mesh(new THREE.CylinderGeometry(.03,.03,.5,5),metal,root,-.33,.68,0).rotation.z = .2;

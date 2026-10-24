@@ -1,4 +1,4 @@
-import { BoxGeometry, CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Scene, SphereGeometry, Vector3 } from 'three';
+import { MathUtils, Scene, Vector3 } from 'three';
 import { EventBus, type Combatant, type LootDrop } from '../core/GameTypes';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { CompanionRig } from './CompanionRig';
@@ -15,9 +15,6 @@ export class PetAndMountSystem {
   powerMultiplier=1;
   private time = 0;
   private attackCooldown = 0;
-  private petLegs: Group[] = [];
-  private mountLegs: Group[] = [];
-  private petTail = new Group();
   private lastMountPosition = new Vector3();
   private mountMoving = 0;
 
@@ -85,8 +82,6 @@ export class PetAndMountSystem {
     }
     if (this.pet.position.distanceTo(this.hero.position) > 38) this.pet.position.copy(this.hero.position).add(new Vector3(-2, 0, 1));
     this.pet.position.y = Math.max(this.physics.terrainHeight(this.pet.position.x, this.pet.position.z), this.physics.waterLevel - 0.28);
-    const stride = distance > 0.65 ? Math.sin(this.time * speed * 1.8) * 0.65 : 0;
-    this.petLegs.forEach((leg, i) => { leg.rotation.x = stride * (i === 0 || i === 3 ? 1 : -1); });
     this.petRig.update(dt, distance > .65 ? speed : 0, this.time, !!target && nearest < 2);
     if (target && nearest < target.radius + 1.15 && this.attackCooldown === 0 && this.hero.alive) {
       this.attackCooldown = 1.1;
@@ -107,7 +102,6 @@ export class PetAndMountSystem {
       this.mount.position.copy(this.hero.position);
       this.mount.position.y -= this.hero.radius;
       this.mount.rotation.y = this.hero.model.rotation.y;
-      const gallop = Math.sin(this.time * 12) * Math.min(0.85, this.mountMoving * 0.1);
       this.mountRig.update(dt, this.mountMoving, this.time);
     }
     this.lastMountPosition.copy(this.hero.position);

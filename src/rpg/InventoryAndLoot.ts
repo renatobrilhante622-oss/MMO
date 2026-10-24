@@ -5,8 +5,9 @@ export const EQUIPMENT_SLOTS: readonly EquipmentSlot[] = ['weapon', 'helmet', 'a
 export const RARITY_COLORS: Record<Rarity, string> = {
   common: '#b6c5ce', uncommon: '#6cdd9d', rare: '#64b7ff', epic: '#bc8aff', legendary: '#ffcc73', mythic: '#ff809b',
 };
+export const ALL_EQUIPMENT_SLOTS: readonly EquipmentSlot[] = [...EQUIPMENT_SLOTS,'gloves','belt'];
 const rarityNames = ['do Viajante', 'do Bosque', 'da Aurora', 'do Eclipse', 'dos Antigos', 'da Eternidade'];
-const slotNames: Record<EquipmentSlot, string> = { weapon: 'Lâmina', helmet: 'Elmo', armor: 'Couraça', boots: 'Botas', ring: 'Anel', amulet: 'Amuleto' };
+const slotNames: Record<EquipmentSlot, string> = { weapon: 'Lâmina', helmet: 'Elmo', armor: 'Couraça', boots: 'Botas', ring: 'Anel', amulet: 'Amuleto',gloves:'Manoplas',belt:'Cinto' };
 const tierNames = ['', ' Temperado', ' Rúnico', ' Celestial'];
 const tiers = [1, 5, 10, 20];
 const rarityPower = [1, 1.32, 1.8, 2.5, 3.5, 5];
@@ -26,6 +27,9 @@ export const ITEM_CATALOG: readonly Item[] = Object.freeze(EQUIPMENT_SLOTS.flatM
     });
   }))),
 );
+
+/** Additional wearable slots coexist with the immutable original catalogue/save format. */
+export const COMPLETE_ITEM_CATALOG:readonly Item[]=Object.freeze([...ITEM_CATALOG,...(['gloves','belt'] as const).flatMap(slot=>RARITIES.flatMap((rarity,r)=>tiers.map(level=>Object.freeze({id:`catalog-${slot}-${rarity}-${level}`,name:`${slotNames[slot]} ${rarityNames[r]}`,slot,rarity,level,upgrade:0,attack:slot==='gloves'?Math.round(rarityPower[r]*(1+level*.16)*2):0,defense:Math.round(rarityPower[r]*(1+level*.16)*2),maxHp:Math.round(rarityPower[r]*(1+level*.16)*8),value:Math.round(12*rarityPower[r]*(1+level*.16)*(r+1))}))))]);
 
 export interface StatBonuses { attack: number; defense: number; maxHp: number; maxMana?: number; critChance?: number }
 export interface InventorySnapshot {
@@ -48,7 +52,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function readItem(value: unknown): Item | undefined {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.length || value.id.length > 160 || typeof value.name !== 'string') return;
-  if (!EQUIPMENT_SLOTS.includes(value.slot as EquipmentSlot) || !RARITIES.includes(value.rarity as Rarity)) return;
+  if (!ALL_EQUIPMENT_SLOTS.includes(value.slot as EquipmentSlot) || !RARITIES.includes(value.rarity as Rarity)) return;
   const item: Item = {
     id: value.id, name: value.name.slice(0, 100), slot: value.slot as EquipmentSlot, rarity: value.rarity as Rarity,
     level: numberIn(value.level, 1, 100), upgrade: numberIn(value.upgrade, 0, 15),
@@ -106,9 +110,9 @@ export class InventoryAndLoot {
     const rarityIndex = boss
       ? roll < 0.04 ? 5 : roll < 0.19 ? 4 : roll < 0.58 ? 3 : 2
       : roll < 0.004 ? 5 : roll < 0.022 ? 4 : roll < 0.085 ? 3 : roll < 0.26 ? 2 : roll < 0.58 ? 1 : 0;
-    const slot = EQUIPMENT_SLOTS[Math.floor(this.random() * EQUIPMENT_SLOTS.length)];
+    const slot = ALL_EQUIPMENT_SLOTS[Math.floor(this.random() * ALL_EQUIPMENT_SLOTS.length)];
     const itemLevel = [...tiers].reverse().find(tier => tier <= safeLevel) ?? 1;
-    const template = ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
+    const template = COMPLETE_ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
     const id = `drop-${++this.sequence}-${Math.floor(this.random() * 0xffffff).toString(36)}`;
     return {
       id,
@@ -193,7 +197,7 @@ export class InventoryAndLoot {
 
   getStatBonuses(): StatBonuses {
     const bonuses = { maxMana:0,critChance:0,attack: (this.level - 1) * 2, defense: this.level - 1, maxHp: (this.level - 1) * 12 };
-    for (const slot of EQUIPMENT_SLOTS) {
+    for (const slot of ALL_EQUIPMENT_SLOTS) {
       const item = this.items.find(candidate => candidate.id === this.equipment[slot] && candidate.slot === slot);
       if (!item) continue;
       bonuses.attack += item.attack;
@@ -231,7 +235,7 @@ export class InventoryAndLoot {
     this.items = items;
     this.equipment = {};
     if (isRecord(snapshot.equipment)) {
-      for (const slot of EQUIPMENT_SLOTS) {
+      for (const slot of ALL_EQUIPMENT_SLOTS) {
         const id = snapshot.equipment[slot];
         if (typeof id === 'string' && items.some(item => item.id === id && item.slot === slot)) this.equipment[slot] = id;
       }

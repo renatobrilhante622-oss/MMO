@@ -1,5 +1,5 @@
 import {
-  BoxGeometry, BufferGeometry, CapsuleGeometry, ConeGeometry, Group, MathUtils,
+  BufferGeometry, CapsuleGeometry, ConeGeometry, Group, MathUtils,
   Mesh, MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry,
 } from 'three';
 
@@ -44,7 +44,7 @@ export class CreatureRig {
   }
 
   private box(parent: Object3D, w: number, h: number, d: number, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
-    return this.mesh(parent, new BoxGeometry(w, h, d), material, x, y, z);
+    const mesh=this.mesh(parent,new SphereGeometry(1,12,10),material,x,y,z);mesh.scale.set(w*.6,h*.6,d*.6);return mesh;
   }
 
   private eyes(parent: Object3D, width: number, y: number, z: number, size: number): void {

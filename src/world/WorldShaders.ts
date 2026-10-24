@@ -30,6 +30,7 @@ ${WORLD_NOISE_GLSL}
 varying vec3 vTerrainPosition;
 varying vec3 vTerrainNormal;
 uniform float terrainWaterLevel;
+uniform sampler2D terrainStone,terrainDirt,terrainGrass,terrainStoneNormal,terrainStoneRough;
 vec3 grassAlbedo(vec2 p) {
   float patches = fbm(p * .31);
   float grain = valueNoise(p * 34.0);
@@ -39,15 +40,9 @@ vec3 grassAlbedo(vec2 p) {
   return c;
 }
 vec3 stoneAlbedo(vec2 p) {
-  vec2 cell = p * 1.55;
-  cell.x += mod(floor(cell.y), 2.0) * .5;
-  vec2 f = fract(cell);
-  float mortar = smoothstep(.03, .085, min(min(f.x, 1.0-f.x), min(f.y,1.0-f.y)));
-  float tile = hash21(floor(cell));
-  float surface = fbm(p * 9.0);
-  vec3 c = mix(vec3(.15, .16, .14), vec3(.35, .33, .26), tile);
-  c += (surface - .5) * .11;
-  return mix(vec3(.065,.07,.058), c, mortar);
+  vec2 warp=vec2(valueNoise(p*.3),valueNoise(p*.3+11.))*.07;
+  return texture2D(terrainStone,p*.22+warp).rgb;
+
 }
 vec3 sandAlbedo(vec2 p) {
   float ripple = sin(p.y * 7.0 + fbm(p * .8) * 4.0) * .018;
@@ -73,8 +68,9 @@ vec3 terrainAlbedo(vec3 p, vec3 n) {
   float lane = abs(p.x - sin((18.0 - p.z) * .075) * 2.3);
   float road = (1.0 - smoothstep(1.75, 2.65, lane + (macro - .5) * .7))
     * smoothstep(-76.0, -70.0, p.z) * (1.0 - smoothstep(18.0,25.0,p.z));
-  float cobble = max(village, road);
-  vec3 c = mix(grassAlbedo(uv), rockAlbedo(p,n), rock);
+  float cobble = village;
+  vec3 grassDetail=texture2D(terrainGrass,uv*.24).rgb;
+  vec3 c = mix(mix(grassAlbedo(uv),grassDetail,.65), rockAlbedo(p,n), rock);
   c = mix(c, sandAlbedo(uv), sand * (1.0-rock));
   c = mix(c, stoneAlbedo(uv), cobble);
   float desert=1.0-smoothstep(25.0,65.0,length(p.xz-vec2(-58.0,-35.0)));

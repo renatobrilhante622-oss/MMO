@@ -1,0 +1,12 @@
+import {describe,it,expect} from 'vitest';
+import {itemIcon,type IconKind} from '../src/ui/ItemIconRenderer';
+import {InventoryAndLoot,COMPLETE_ITEM_CATALOG,ALL_EQUIPMENT_SLOTS} from '../src/rpg/InventoryAndLoot';
+import {EventBus} from '../src/core/GameTypes';
+import {ArticulatedCharacter} from '../src/player/ArticulatedCharacter';
+import {CLASS_DEFINITIONS} from '../src/combat/ClassSystem';
+import {Mesh} from 'three';
+describe('illustrated RPG rendering and equipment',()=>{
+ it('renders distinct detailed equipment artwork with isolated gradients and escaped labels',()=>{const icons=(['sword','axe','staff','bow','helmet','armor','boots','gloves','belt','potion','ruby','skin'] as IconKind[]).map(kind=>itemIcon(kind,'legendary','<script>'));expect(new Set(icons).size).toBe(icons.length);for(const icon of icons){expect(icon).not.toContain('<script>');expect(icon).toContain('&lt;script&gt;');const ids=[...icon.matchAll(/id="([^"]+)"/g)].map(m=>m[1]);const references=[...icon.matchAll(/url\(#([^\)]+)\)/g)].map(m=>m[1]);expect(references.every(ref=>ids.includes(ref))).toBe(true);}});
+ it('offers eight functional slots and restores gloves/belt with their combat bonuses',()=>{const inv=new InventoryAndLoot(new EventBus());expect(ALL_EQUIPMENT_SLOTS).toHaveLength(8);for(const slot of ['gloves','belt'] as const){const item={...COMPLETE_ITEM_CATALOG.find(i=>i.slot===slot&&i.level===1&&i.rarity==='rare')!,id:'extra-'+slot};const before=inv.getStatBonuses();inv.items.push(item);expect(inv.equip(item.id)).toBe(true);expect(inv.getStatBonuses().defense).toBe(before.defense+item.defense);}const other=new InventoryAndLoot(new EventBus());other.restore(inv.snapshot());expect(other.equipment.gloves).toBe('extra-gloves');expect(other.equipment.belt).toBe('extra-belt');expect(other.getStatBonuses()).toEqual(inv.getStatBonuses());});
+ it('uses curved body meshes and a visible caster robe when switching classes',()=>{const rig=new ArticulatedCharacter(CLASS_DEFINITIONS.berserker);rig.setClass(CLASS_DEFINITIONS.warlock);expect(rig.root.getObjectByName('Tailored caster robe')?.visible).toBe(true);expect(rig.root.getObjectByName('Open cloth hood')?.visible).toBe(true);const boxes:string[]=[];rig.root.traverse(o=>{if(o instanceof Mesh&&!o.name.includes('weapon')&&o.geometry.type==='BoxGeometry')boxes.push(o.name);});expect(rig.head.children.filter(o=>o instanceof Mesh).every(o=>(o as Mesh).geometry.type!=='BoxGeometry')).toBe(true);rig.dispose();});
+});

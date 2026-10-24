@@ -3,7 +3,7 @@ import type { Vector3 } from 'three';
 export type ClassId = 'berserker' | 'paladin' | 'assassin' | 'ranger' | 'elementalist' | 'necromancer' | 'monk' | 'lanceman' | 'warlock';
 export type HeroState = 'idle' | 'run' | 'jump' | 'doubleJump' | 'fall' | 'climb' | 'swim' | 'dive' | 'slide' | 'mounted' | 'dead';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
-export type EquipmentSlot = 'weapon' | 'helmet' | 'armor' | 'boots' | 'ring' | 'amulet';
+export type EquipmentSlot = 'weapon' | 'helmet' | 'armor' | 'boots' | 'ring' | 'amulet' | 'gloves' | 'belt';
 export type DamageType = 'physical' | 'fire' | 'ice' | 'arcane' | 'holy' | 'poison';
 
 export interface CharacterStats {
