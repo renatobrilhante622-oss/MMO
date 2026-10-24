@@ -28,6 +28,15 @@ import { BaseBuilding } from '../rpg/BaseBuilding';
 import { CodexSystem } from '../rpg/CodexSystem';
 import { EnemyAI } from '../enemies/EnemyAI';
 import { DungeonBossManager } from '../enemies/DungeonBossManager';
+import { refine } from '../rpg/InventoryForgeSocket';
+import { EPIGRAPHS, cooldownMultiplier } from '../rpg/ClassEpigraphSystem';
+import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
+import { COSMETICS } from '../progression/AdventureProgress';
+import { AdventureHub } from '../ui/AdventureHub';
+import { GameI18n, translateText } from '../ui/I18n';
+import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
+import { route, type MapPoint } from '../world/Navigation';
+import { Line, LineBasicMaterial } from 'three';
 import { MobileHUD } from '../ui/MobileHUD';
 
 const SAVE_KEY = 'eterna-ninefold-save-v1';
@@ -49,6 +58,19 @@ export class Engine {
   readonly dungeon: DungeonBossManager;
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
+  readonly progress: AdventureProgress;
+  readonly hub: AdventureHub;
+  private readonly i18n: GameI18n;
+  gpsRoute: MapPoint[] = [];
+  private readonly gpsLine = new Line(new BufferGeometry(),new LineBasicMaterial({color:0x7aedd3,transparent:true,opacity:.75,depthTest:true}));
+  private readonly gpsLabel = document.createElement('div');
+  private readonly autoButton = document.createElement('button');
+  private channel: {remaining:number;x:number;z:number;start:Vector3;hp:number}|null = null;
+  private autoRoute: MapPoint[] = [];
+  private autoTimer = 0;
+  private recentCombat = 0;
+  private appearanceKey = '';
+
   readonly drops: LootDrop[] = [];
   readonly sound = new SoundEngine();
   private readonly composer: EffectComposer;
@@ -120,6 +142,7 @@ export class Engine {
     this.terrain.generate();
     this.physics = new PhysicsWorld(this.terrain);
     this.inventory = new InventoryAndLoot(this.events, 407);
+    this.progress = new AdventureProgress(this.inventory);
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
@@ -156,6 +179,7 @@ export class Engine {
     this.hud = new MobileHUD(this.container, {
       onStart: () => this.beginPlay(),
       onClassChange: id => this.changeClass(id),
+      onOpenProgression: tab => this.hub.open(tab),
       onEquip: id => { if (this.inventory.equip(id)) { this.refreshStats(); this.save(); } },
       onUpgradeItem: id => {
         if (this.hero.position.distanceTo(this.terrain.spawnPoint) > 28) {
@@ -169,6 +193,14 @@ export class Engine {
       onSoundChange: enabled => this.sound.setEnabled(enabled),
       onResetSave: () => { localStorage.removeItem(SAVE_KEY); location.reload(); },
     });
+    this.hub = new AdventureHub(this.container,this);
+    this.i18n = new GameI18n(this.container,this.progress.language);
+    const journey=document.createElement('button');journey.className='journey-button';journey.textContent='JORNADA / JOURNEY';journey.onclick=()=>this.hub.open('talents');this.container.append(journey);
+    this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.textContent='AUTO FARM';this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
+    this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
+    this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
+    this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
+    this.applyPreferences();
     this.bindEvents();
     this.setQuality(matchMedia('(pointer:coarse)').matches ? 'low' : 'high');
     this.resize();
@@ -210,6 +242,7 @@ export class Engine {
     // Called directly by the start button's user gesture. No autoplay bypass.
     void this.sound.unlock();
     this.playing = true;
+    if (!this.progress.chosen) this.hub.open('classes');
     this.lastTime = 0;
     this.hud.notify('O vale desperta. Explore a vila, encontre inimigos e procure o portal ao norte.', 'info');
   }
@@ -217,6 +250,8 @@ export class Engine {
   private bindEvents(): void {
     this.disposers.push(this.events.on('damage', ({ position, amount, critical, team }) => {
       this.sound.impact(critical);
+      this.recentCombat=6;
+      if (team==='hero') this.channel=null;
       if (team === 'hero') this.combat.particles.impact(position, 0xd84b52, critical);
       const projected = position.clone().addScaledVector(UP, 1.4).project(this.camera);
       if (projected.z < 1 && Math.abs(projected.x) < 1.2 && Math.abs(projected.y) < 1.2) {
@@ -224,6 +259,7 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
+      this.progress.earnKill(level,boss);
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
       const drop: LootDrop = { ...loot, position: position.clone() };
@@ -264,7 +300,10 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !document.hidden;
+    this.progress.tick(document.hidden?0:dt);
+    this.recentCombat=Math.max(0,this.recentCombat-dt);
+    this.updateJourney(dt,active,input);
     if (active) {
       const simDt = this.combat.hitstop > 0 ? dt * 0.13 : dt;
       this.timeOfDay = (this.timeOfDay + dt / 600) % 1;
@@ -273,13 +312,16 @@ export class Engine {
       this.physics.step(simDt);
       this.enemies.update(simDt, this.hero);
       this.companions.update(simDt, this.enemies.enemies, this.drops);
+      const clears=this.dungeon.clears;
       this.dungeon.update(simDt, this.hero);
+      if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
       const targets = this.enemies.enemies.filter(enemy => enemy.alive);
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
         this.sound.attack(this.classId, this.combat.combo);
       }
       if (input.skill !== null && this.hero.alive && this.combat.cast(input.skill, this.classId, this.hero, targets, this.hero.stats, this.hero.facing)) {
         this.sound.spell(this.classId, input.skill);
+        this.combat.cooldowns[input.skill]*=cooldownMultiplier(this.progress.talents[this.classId]?.spirit??0);
       }
       this.combat.update(dt);
       this.base.update(dt);
@@ -332,10 +374,114 @@ export class Engine {
     this.camera.position.sub(this.scratch);
   };
 
+  get currentClass(): ClassId { return this.classId; }
+  translate(text:string):string {return translateText(text,this.progress.language);}
+  epigraphDescription(key:Attribute):string {
+    return EPIGRAPHS[this.classId][key].description[this.progress.language==='pt'?0:1];
+  }
+  applyPreferences():void {
+    this.container.style.setProperty('--hud-scale',String(this.progress.hudScale));
+    this.container.style.setProperty('--controls-scale',String(this.progress.controlsScale));
+    this.container.style.setProperty('--hud-opacity',String(this.progress.hudOpacity));
+    this.i18n?.set(this.progress.language);this.save();
+  }
+  setHudPreference(key:string,value:number):void {
+    if(!Number.isFinite(value))return;
+    if(key==='hudScale'||key==='controlsScale')this.progress[key]=Math.max(.5,Math.min(1.5,value));
+    if(key==='autoHealthThreshold'||key==='autoManaThreshold')this.progress[key]=Math.max(.1,Math.min(.8,value));
+    if(key==='hudOpacity')this.progress.hudOpacity=Math.max(.3,Math.min(1,value));
+    this.applyPreferences();
+  }
+  setWaypoint(point:MapPoint|null):void {
+    this.progress.waypoint=point;this.gpsRoute=point?route(this.terrain,this.hero.position,point):[];
+    const points=[this.hero.position,...this.gpsRoute].map(p=>new Vector3(p.x,this.terrain.heightAt(p.x,p.z)+.15,p.z));
+    this.gpsLine.geometry.dispose();this.gpsLine.geometry=new BufferGeometry().setFromPoints(points);this.gpsLine.visible=!!point&&this.gpsRoute.length>0;
+  }
+  private travelBlocked():boolean {
+    return this.dungeon.active||!this.hero.alive||this.recentCombat>0||this.enemies.enemies.some(e=>e.boss&&e.alive&&e.position.distanceTo(this.hero.position)<30)||Math.hypot(this.hero.position.x,this.hero.position.z+70)<24;
+  }
+  adventureAction(action:string,data:{id:string;key:string;index:number;name:string}):string {
+    const p=this.progress,inv=this.inventory;
+    let ok=false;
+    switch(action){
+      case 'class':
+        if (!(data.id in CLASS_DEFINITIONS))break;
+        if(p.chosen&&(this.recentCombat>0||this.hero.position.distanceTo(this.terrain.spawnPoint)>28))break;
+        p.chosen=true;this.changeClass(data.id as ClassId);this.hub.open('talents');ok=true;break;
+      case 'talent':ok=p.allocate(this.classId,data.key as Attribute);this.refreshStats();break;
+      case 'talent-reset':ok=p.resetTalents(this.classId);this.refreshStats();break;
+      case 'equip':ok=inv.equip(data.id);this.refreshStats();break;
+      case 'lock':{const item=inv.items.find(i=>i.id===data.id);if(item){item.locked=!item.locked;ok=true;}break;}
+      case 'sell':ok=inv.sell(data.id);break;
+      case 'upgrade':if(this.hero.position.distanceTo(this.terrain.spawnPoint)<28){const result=refine(inv,data.id);if(result==='failure'){this.save();return p.language==='pt'?'Refino falhou: materiais consumidos; item preservado.':'Refinement failed: costs consumed; item preserved.';}ok=result==='success';}this.refreshStats();break;
+      case 'salvage':ok=p.salvage(data.id);break;
+      case 'socket':ok=p.socket(data.id,data.key as Gem);this.refreshStats();break;
+      case 'unsocket':ok=p.unsocket(data.id);this.refreshStats();break;
+      case 'gem-buy':ok=p.buyGem(data.key as Gem);break;
+      case 'gem-fuse':ok=p.fuseGem(data.key as Gem);break;
+      case 'gem-forge':ok=p.forgeGem(data.key as Gem);break;
+      case 'potion-buy':if(data.key==='health'||data.key==='mana')ok=p.buyPotion(data.key);break;
+      case 'potion-use':if(data.key==='health'||data.key==='mana')ok=this.usePotion(data.key);break;
+      case 'slot-buy':ok=p.buySlot();break;
+      case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked());break;
+      case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.channel={remaining:2,x:dest.x,z:dest.z,start:this.hero.position.clone(),hp:this.hero.hp};this.combat.particles.celebration(this.hero.position);this.hub.close();ok=true;}break;}
+      case 'vip':ok=p.buyVip();break;
+      case 'pass-buy':ok=p.buyPass();break;
+      case 'mission':if(data.key==='daily'||data.key==='weekly')ok=p.claimMission(data.key);break;
+      case 'pass-claim':ok=p.claimPass(data.index);break;
+      case 'banner':if(['skin','pet','mount','weapon'].includes(data.key)){p.banner=data.key as typeof p.banner;ok=true;}break;
+      case 'gacha':{const result=p.pull();if(result){this.sound.levelUp();this.save();return (p.language==='pt'?'Invocado: ':'Summoned: ')+result.cosmetic.name[p.language==='pt'?0:1]+(result.duplicate?(p.language==='pt'?' · duplicata convertida em fragmentos':' · duplicate converted to shards'):'');}break;}
+      case 'redeem':ok=p.redeem(data.id);break;
+      case 'cosmetic':ok=p.equipCosmetic(data.id);break;
+      case 'gps-region':case 'gps-boss':{const r=REGIONS.find(r=>r.id===data.id);if(r){this.setWaypoint(action==='gps-boss'?r.boss:r.center);ok=true;}break;}
+      case 'difficulty':if(['normal','elite','nightmare','abyssal'].includes(data.key)&&!this.dungeon.active){p.dungeonDifficulty=data.key;ok=true;}break;
+      case 'dungeon-select':case 'dungeon-start':{
+        const base=DUNGEONS.find(d=>d.id===data.id),d=base?dungeonVariant(base,p.dungeonDifficulty):undefined;if(d&&inv.level>=d.level&&!this.dungeon.active){p.selectedDungeon=d.id;ok=action==='dungeon-select'||this.dungeon.start(this.hero,d,inv.level);if(ok&&action==='dungeon-start')this.hub.close();}break;
+      }
+    }
+    this.save();
+    return ok?(p.language==='pt'?'Concluído.':'Done.'):(p.language==='pt'?'Indisponível: confira moedas, nível, recarga, combate e proximidade da vila/portal.':'Unavailable: check currency, level, cooldown, combat and distance to town/portal.');
+  }
+  private usePotion(type:'health'|'mana'):boolean {
+    if(!this.hero.alive||(type==='health'?this.hero.hp>=this.hero.maxHp:this.hero.mana>=this.hero.stats.maxMana)||!this.progress.usePotion(type))return false;
+    if(type==='health')this.hero.heal(this.hero.maxHp*.4);else this.hero.mana=Math.min(this.hero.stats.maxMana,this.hero.mana+this.hero.stats.maxMana*.4);
+    this.combat.particles.celebration(this.hero.position);return true;
+  }
+  private updateJourney(dt:number,active:boolean,input:ReturnType<typeof emptyInput>):void {
+    const p=this.progress,hero=this.hero;
+    this.autoButton.hidden=!p.vip;this.autoButton.classList.toggle('active',p.autoFarm);
+    const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
+    const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);
+    const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
+    const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
+    if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0);}
+    if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.textContent='➤ GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
+    if(!active)return;
+    if(this.channel){
+      if(Math.hypot(input.move.x,input.move.y)>.1||this.channel.start.distanceTo(hero.position)>1||hero.hp<this.channel.hp||!hero.alive){this.channel=null;this.hud.notify(p.language==='pt'?'Conjuração interrompida.':'Channel interrupted.');}
+      else{this.channel.remaining-=dt;if(this.channel.remaining<=0){hero.teleportTo(new Vector3(this.channel.x,this.terrain.heightAt(this.channel.x,this.channel.z)+1,this.channel.z));this.channel=null;this.combat.particles.celebration(hero.position);this.save();}}
+      input.move={x:0,y:0};input.attack=false;input.skill=null;return;
+    }
+    if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active)return;
+    if(Math.hypot(input.move.x,input.move.y)>.2||input.attack||input.skill!==null){p.autoFarm=false;return;}
+    if(hero.hp/hero.maxHp<p.autoHealthThreshold)this.usePotion('health');if(hero.mana/hero.stats.maxMana<p.autoManaThreshold)this.usePotion('mana');
+    const target=this.enemies.enemies.filter(e=>e.alive&&!e.boss&&e.level<=this.inventory.level+3&&regionAt(e.position.x,e.position.z).id===region.id).sort((a,b)=>a.position.distanceToSquared(hero.position)-b.position.distanceToSquared(hero.position))[0];
+    if(!target)return;
+    hero.mounted=false;const distance=target.position.distanceTo(hero.position);
+    if(distance>Math.max(2,hero.stats.range*.75)){
+      this.autoTimer-=dt;if(this.autoTimer<=0){this.autoTimer=1.5;this.autoRoute=route(this.terrain,hero.position,target.position);}
+      while(this.autoRoute.length&&Math.hypot(this.autoRoute[0].x-hero.position.x,this.autoRoute[0].z-hero.position.z)<2)this.autoRoute.shift();
+      if(this.autoRoute.length)input.move=hero.inputToward(this.autoRoute[0]);
+    }else{
+      hero.facing.copy(target.position).sub(hero.position).setY(0).normalize();input.attack=true;
+      const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);if(skill>=0)input.skill=skill;
+    }
+  }
+
   private interact(): void {
     const delta = this.hero.position.clone().sub(this.terrain.portalPosition); delta.y = 0;
     if (delta.length() < 12) {
-      this.dungeon.start(this.hero);
+      this.dungeon.start(this.hero,dungeonVariant(DUNGEONS.find(d=>d.id===this.progress.selectedDungeon)??DUNGEONS[0],this.progress.dungeonDifficulty),this.inventory.level);
     } else if (this.hero.position.distanceTo(this.terrain.spawnPoint) < 28) {
       this.hud.openPanel('inventory');
       this.hud.notify('Forja da vila: equipe, venda ou aprimore seu equipamento.', 'info');
@@ -348,10 +494,12 @@ export class Engine {
     if (!this.hero) return;
     const base = CLASS_DEFINITIONS[this.classId].stats;
     const equipment = this.inventory.getStatBonuses(), buildings = this.base.getBuffs(), codex = this.codex.getBuffs();
+    const talents=this.progress.bonuses(this.classId);
     this.hero.setStats({ ...base,
-      attack: base.attack + equipment.attack + buildings.attack + codex.attack,
-      defense: base.defense + equipment.defense + buildings.defense + codex.defense,
-      maxHp: base.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp,
+      maxMana:base.maxMana+talents.maxMana+(equipment.maxMana??0),critChance:Math.min(.6,base.critChance+talents.critChance+(equipment.critChance??0)),
+      attack: base.attack + talents.attack + equipment.attack + buildings.attack + codex.attack,
+      defense: base.defense + talents.defense + equipment.defense + buildings.defense + codex.defense,
+      maxHp: base.maxHp + talents.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp,
     });
   }
 
@@ -510,7 +658,7 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot() }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot() }));
     } catch {
       if (!this.saveErrorReported && this.hud) { this.hud.notify('Armazenamento local indisponível. Esta sessão continua sem salvar.', 'warning'); this.saveErrorReported = true; }
     }
@@ -525,6 +673,7 @@ export class Engine {
       const save = data as Record<string, unknown>;
       if (typeof save.classId === 'string' && Object.hasOwn(CLASS_DEFINITIONS, save.classId)) this.classId = save.classId as ClassId;
       this.inventory.restore(save.inventory);
+      this.progress.restore(save.progress);
       this.base.restore(save.base);
       this.codex.restore(save.codex);
     } catch { /* Invalid or unavailable browser storage starts a fresh, playable session. */ }
@@ -540,6 +689,7 @@ export class Engine {
     cancelAnimationFrame(this.frameId);
     this.save();
     this.disposers.splice(0).forEach(dispose => dispose());
+    this.hub.dispose();this.i18n.dispose();
     this.hud.dispose();
     this.sound.dispose();
     this.companions.dispose?.();

@@ -136,6 +136,18 @@ export class HeroController implements Combatant {
     this.cameraInitialized = false;
   }
 
+  inputToward(point:{x:number;z:number}):{x:number;y:number} {
+    const dx=point.x-this.position.x,dz=point.z-this.position.z,length=Math.max(.001,Math.hypot(dx,dz));
+    return {x:(dx*Math.cos(this.cameraYaw)-dz*Math.sin(this.cameraYaw))/length,y:(-dx*Math.sin(this.cameraYaw)-dz*Math.cos(this.cameraYaw))/length};
+  }
+  teleportTo(point:Vector3):void {
+    if(!this.alive)return;
+    this.body.position.set(point.x,point.y,point.z);this.body.previousPosition.copy(this.body.position);this.body.interpolatedPosition.copy(this.body.position);this.body.velocity.setZero();this.body.angularVelocity.setZero();this.position.copy(point);this.body.aabbNeedsUpdate=true;this.body.wakeUp();this.mounted=false;this.cameraInitialized=false;
+  }
+  setAppearance(color:number,refine:number):void {
+    this.rig.accent.color.setHex(color);this.rig.accent.emissive.setHex(color);this.rig.accent.emissiveIntensity=.15+Math.min(15,refine)*.08;
+  }
+
   update(dt: number, input: HeroInput): void {
     dt = Math.max(0, Math.min(dt, 0.05));
     this.time += dt;

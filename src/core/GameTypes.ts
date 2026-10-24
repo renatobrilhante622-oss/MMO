@@ -40,6 +40,9 @@ export interface ClassDefinition {
 export interface Item {
   id: string; name: string; slot: EquipmentSlot; rarity: Rarity; level: number;
   upgrade: number; attack: number; defense: number; maxHp: number; value: number;
+  locked?: boolean;
+  gemLevels?: number[];
+  sockets?: Array<'ruby' | 'sapphire' | 'emerald' | 'diamond'>;
 }
 
 export interface LootDrop {

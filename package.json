@@ -2,7 +2,9 @@
   "name": "eterna-ninefold",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "description": "Eterna Ninefold — action RPG 3D procedural com nove classes, mundo aberto e Android.",
   "scripts": {
@@ -13,7 +15,8 @@
     "test:watch": "vitest",
     "android:sync": "npm run build && cap sync android",
     "android:debug": "npm run android:sync && cd android && ./gradlew --no-daemon --max-workers=2 assembleDebug",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "server": "tsx server/index.ts"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
@@ -25,6 +28,7 @@
     "@capacitor/cli": "8.5.3",
     "@types/node": "^24.0.0",
     "@types/three": "0.186.0",
+    "tsx": "^4.20.6",
     "typescript": "5.9.3",
     "vite": "8.3.5",
     "vitest": "5.0.5"

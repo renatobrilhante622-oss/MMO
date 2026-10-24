@@ -77,6 +77,12 @@ vec3 terrainAlbedo(vec3 p, vec3 n) {
   vec3 c = mix(grassAlbedo(uv), rockAlbedo(p,n), rock);
   c = mix(c, sandAlbedo(uv), sand * (1.0-rock));
   c = mix(c, stoneAlbedo(uv), cobble);
+  float desert=1.0-smoothstep(25.0,65.0,length(p.xz-vec2(-58.0,-35.0)));
+  float frost=1.0-smoothstep(30.0,75.0,length(p.xz-vec2(95.0,-83.0)));
+  float corrupted=1.0-smoothstep(25.0,55.0,length(p.xz-vec2(0.0,-75.0)));
+  c=mix(c,sandAlbedo(uv)*1.3,desert*(1.0-cobble));
+  c=mix(c,vec3(.67,.76,.80)+fbm(uv*2.0)*.12,frost*(1.0-rock*.65));
+  c=mix(c,c*vec3(.68,.52,.81),corrupted);
   // Damp shores darken continuously, including the shallow lake bed.
   float damp = 1.0 - smoothstep(terrainWaterLevel-.25, terrainWaterLevel+.7,p.y);
   return c * mix(1.0, .55, damp);

@@ -20,6 +20,7 @@ export interface HUDModel {
 }
 
 export interface HUDCallbacks {
+  onOpenProgression?(tab:'talents'|'inventory'|'settings'):void;
   onClassChange(id: ClassId): void;
   onEquip(id: string): void;
   onUpgradeItem(id: string): void;
@@ -438,6 +439,9 @@ export class MobileHUD {
   get blocking(): boolean { return !this.started || this.activePanel !== null; }
 
   openPanel(panel: Panel): void {
+    if(this.callbacks.onOpenProgression && ['classes','inventory'].includes(panel)) {
+      this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':'inventory');return;
+    }
     this.clearInput();
     this.activePanel = panel;
     this.confirmingReset = false;

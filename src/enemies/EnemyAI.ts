@@ -4,6 +4,7 @@ import type { Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
 import type { PhysicsWorld } from '../physics/PhysicsWorld';
 import { calculateDamage } from '../combat/ClassSystem';
+import { REGIONS, regionAt, regionalLevel } from '../world/Regions';
 import { CreatureRig } from './CreatureRig';
 
 type EnemyState = 'patrol' | 'chase' | 'attack' | 'flee' | 'dead';
@@ -170,12 +171,13 @@ export class EnemyAI {
   private elapsed = 0;
   private spawnTimer = 4;
   private spawnIndex = 0;
+  private bossRespawn: Record<string, number> = {};
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
   constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus) {
     const locations: [number, number][] = [[-14, -8], [13, -9], [-24, -18], [22, -25], [9, -34], [-19, -43], [35, -47], [-44, -30], [28, -77], [-32, -82], [58, -52], [-60, -65], [-38, 46], [48, 45]];
     locations.forEach(([x, z], i) => {
       const height = physics.terrainHeight(x, z);
-      if (height > physics.waterLevel + .5) this.spawn(this.kinds[i % this.kinds.length], new Vector3(x, height + 1.5, z), 1 + Math.floor(i / 5));
+      if (height > physics.waterLevel + .5) this.spawn(regionAt(x,z).kinds[i % regionAt(x,z).kinds.length], new Vector3(x, height + 1.5, z), regionalLevel(x,z));
     });
   }
 
@@ -195,6 +197,14 @@ export class EnemyAI {
       const enemy = this.enemies[i]; enemy.tick(dt, hero, this.elapsed);
       if (!enemy.alive && enemy.deathTime > 1.1) { enemy.dispose(); this.enemies.splice(i, 1); }
     }
+    for (const region of REGIONS) {
+      this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
+      if (hero.position.distanceTo(new Vector3(region.boss.x,hero.position.y,region.boss.z)) < 55 && this.bossRespawn[region.id] === 0) {
+        this.bossRespawn[region.id]=300;
+        const x=region.boss.x,z=region.boss.z;
+        this.spawn('boss', new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);
+      }
+    }
     this.spawnTimer -= dt;
     const ambientCount = this.enemies.filter(enemy => !enemy.boss && enemy.alive).length;
     if (this.spawnTimer <= 0 && ambientCount < 18 && hero.alive) {
@@ -202,7 +212,7 @@ export class EnemyAI {
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;
       const y = this.physics.terrainHeight(x, z);
-      if (Math.abs(x) < 135 && Math.abs(z) < 135 && y > this.physics.waterLevel + .5 && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(this.kinds[this.spawnIndex % this.kinds.length], new Vector3(x, y + 1.5, z), 1 + Math.min(5, Math.floor(Math.hypot(x, z - 18) / 40)));
+      if (Math.abs(x) < 135 && Math.abs(z) < 135 && y > this.physics.waterLevel + .5 && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(regionAt(x,z).kinds[this.spawnIndex % regionAt(x,z).kinds.length], new Vector3(x, y + 1.5, z), regionalLevel(x,z));
     }
   }
 

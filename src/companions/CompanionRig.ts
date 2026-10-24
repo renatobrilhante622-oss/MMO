@@ -1,0 +1,115 @@
+import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending } from 'three';
+import type { Cosmetic } from '../progression/AdventureProgress';
+import { RARITIES } from '../rpg/InventoryAndLoot';
+interface Leg { hip:Group; knee:Group; ankle:Group; rear:boolean; side:number; }
+/** Anatomical horse/wolf rig. Lower joints absorb each planted stance instead of rotating rigid poles. */
+export class CompanionRig {
+  readonly root=new Group();
+  private readonly spine=new Group();
+  private readonly neck=new Group();
+  private readonly head=new Group();
+  private readonly tail=new Group();
+  private readonly legs:Leg[]=[];
+  private readonly materials=new Set<MeshStandardMaterial>();
+  private readonly coat:MeshStandardMaterial;
+  private readonly glow:MeshStandardMaterial;
+  private readonly aura:Mesh;
+  private readonly ornaments=new Group();
+  private phase=0;
+  private stride=0;
+  private rarity=0;
+  private isStag=false;
+  constructor(readonly horse:boolean){
+    this.root.name=horse?'Articulated horse mount':'Articulated wolf companion';
+    this.coat=this.material(horse?0x8a6041:0x8b969e,.88);
+    const dark=this.material(0x252328,.9),light=this.material(0xd6cab0,.88),leather=this.material(0x363331,.76),metal=this.material(0xc7ab6e,.3,.7);
+    this.glow=this.material(0xa9e8ff,.4);this.glow.emissive.setHex(0xa9e8ff);
+    this.root.add(this.spine);this.spine.position.y=horse?1.23:.68;
+    this.ellipsoid(this.spine,this.coat,[horse?.4:.25,horse?.5:.28,horse?.83:.53],[0,0,0]);
+    this.ellipsoid(this.spine,this.coat,[horse?.43:.3,horse?.53:.34,horse?.39:.29],[0,0,horse?.44:.29]);
+    this.ellipsoid(this.spine,this.coat,[horse?.43:.27,horse?.46:.29,horse?.38:.26],[0,0,horse?-.49:-.32]);
+    this.spine.add(this.neck);this.neck.position.set(0,horse?.23:.12,horse?.55:.36);
+    this.neck.rotation.x=horse?.3:.5;
+    this.ellipsoid(this.neck,this.coat,[horse?.23:.2,horse?.6:.28,horse?.27:.24],[0,horse?.34:.13,0]);
+    this.neck.add(this.head);this.head.position.set(0,horse?.82:.34,horse?.19:.13);
+    this.head.rotation.x=horse?-.22:-.3;
+    this.ellipsoid(this.head,this.coat,[horse?.22:.23,horse?.27:.22,horse?.42:.3],[0,0,.08]);
+    this.ellipsoid(this.head,horse?dark:light,[horse?.18:.15,horse?.15:.12,horse?.24:.22],[0,-.1,horse?.43:.34]);
+    this.ellipsoid(this.head,dark,[horse?.12:.09,.065,.05],[0,-.04,horse?.63:.54]);
+    for(const side of [-1,1]){
+      this.ellipsoid(this.head,dark,[.06,.065,.045],[side*(horse?.2:.22),.07,.21]);
+      this.ellipsoid(this.head,this.glow,[.024,.032,.025],[side*(horse?.239:.26),.074,.225]);
+      const ear=this.mesh(this.head,new ConeGeometry(horse?.085:.11,horse?.35:.26,7),this.coat,side*(horse?.15:.16),horse?.35:.29,-.04);ear.rotation.z=-side*.24;
+      this.ellipsoid(this.head,light,[horse?.04:.055,horse?.12:.08,.025],[side*.15,horse?.38:.3,-.005]);
+      for(const rear of [false,true]){
+        const hip=new Group(),knee=new Group(),ankle=new Group();
+        hip.position.set(side*(horse?.29:.19),horse?-.05:-.04,rear?(horse?-.53:-.32):(horse?.49:.34));this.spine.add(hip);
+        const upper=horse?.56:.28,lower=horse?.49:.25;
+        this.mesh(hip,new CapsuleGeometry(horse?.105:.07,upper*.7,4,8),this.coat,0,-upper*.45,0);
+        knee.position.y=-upper;hip.add(knee);
+        this.ellipsoid(knee,this.coat,[horse?.105:.075,.12,.095],[0,0,0]);
+        this.mesh(knee,new CylinderGeometry(horse?.064:.042,horse?.052:.038,lower,8),this.coat,0,-lower*.5,0);
+        ankle.position.y=-lower;knee.add(ankle);
+        this.ellipsoid(ankle,horse?dark:light,[horse?.1:.08,horse?.11:.065,horse?.14:.12],[0,-.06,.04]);
+        this.legs.push({hip,knee,ankle,rear,side});
+      }
+    }
+    this.spine.add(this.tail);this.tail.position.set(0,.1,horse?-.79:-.49);
+    for(let i=0;i<6;i++){
+      const t=i/5;this.ellipsoid(this.tail,horse?dark:this.coat,[horse?.085:.11,horse?.17:.12,horse?.08:.15],[Math.sin(t*.8)*.06,-t*(horse?.85:.2),-t*(horse?.2:.42)]);
+    }
+    if(horse){
+      // Individual mane locks, bridle, girth, pommel, stirrups and reins.
+      for(let i=0;i<10;i++)this.ellipsoid(this.neck,dark,[.065,.105,.085],[0,i*.065,-.2]);
+      this.ellipsoid(this.spine,leather,[.46,.105,.42],[0,.49,-.07]);
+      this.ellipsoid(this.spine,metal,[.34,.065,.055],[0,.6,-.3]);
+      this.ellipsoid(this.spine,leather,[.12,.1,.18],[0,.6,.17]);
+      const girth=this.mesh(this.spine,new TorusGeometry(.44,.035,5,24),leather,0,0,-.02);girth.scale.y=1.16;
+      for(const side of [-1,1]){
+        const stirrup=this.mesh(this.spine,new TorusGeometry(.1,.018,5,16),metal,side*.46,.06,-.1);stirrup.rotation.y=Math.PI/2;
+        this.between(this.head,new Vector3(side*.2,-.06,.4),new Vector3(side*.2,.21,-.03),.017,leather);
+        this.between(this.spine,new Vector3(side*.22,.53,.1),new Vector3(side*.18,1,.67),.015,leather);
+      }
+    }else{
+      const collar=this.mesh(this.neck,new TorusGeometry(.23,.03,5,20),metal,0,.08,0);collar.rotation.x=Math.PI/2;
+      for(let i=0;i<8;i++)this.ellipsoid(this.spine,light,[.065,.11,.085],[Math.sin(i*2.4)*.17,.15+Math.cos(i*2.4)*.16,.29]);
+    }
+    this.head.add(this.ornaments);
+    this.aura=new Mesh(new RingGeometry(.7,.75,48),new MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.3,transparent:true,opacity:.35,depthWrite:false,blending:AdditiveBlending,side:2}));
+    this.aura.rotation.x=-Math.PI/2;this.aura.position.y=.06;this.root.add(this.aura);this.aura.visible=false;
+  }
+  private material(color:number,roughness:number,metalness=.05):MeshStandardMaterial {const m=new MeshStandardMaterial({color,roughness,metalness});this.materials.add(m);return m;}
+  private mesh(parent:Object3D,geometry:CapsuleGeometry|ConeGeometry|CylinderGeometry|SphereGeometry|TorusGeometry,material:MeshStandardMaterial,x:number,y:number,z:number):Mesh {const m=new Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+  private ellipsoid(parent:Object3D,material:MeshStandardMaterial,size:number[],at:number[]):Mesh {const m=this.mesh(parent,new SphereGeometry(1,12,8),material,at[0],at[1],at[2]);m.scale.set(size[0],size[1],size[2]);return m;}
+  private between(parent:Object3D,a:Vector3,b:Vector3,radius:number,material:MeshStandardMaterial):void {const d=b.clone().sub(a);const m=this.mesh(parent,new CylinderGeometry(radius,radius,d.length(),6),material,0,0,0);m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new Vector3(0,1,0),d.normalize());}
+  appearance(c:Cosmetic):void {
+    this.rarity=RARITIES.indexOf(c.rarity);this.coat.color.setHex(c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.1+this.rarity*.2;
+    (this.aura.material as MeshStandardMaterial).emissive.setHex(c.color);this.aura.visible=this.rarity>=2;
+    const stag=c.id==='stag';if(stag===this.isStag)return;this.isStag=stag;
+    this.ornaments.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});this.ornaments.clear();
+    if(stag)for(const side of [-1,1]){
+      this.between(this.ornaments,new Vector3(side*.13,.2,-.1),new Vector3(side*.43,.9,-.25),.025,this.glow);
+      for(let i=0;i<3;i++)this.between(this.ornaments,new Vector3(side*(.21+i*.08),.4+i*.17,-.16),new Vector3(side*(.37+i*.09),.58+i*.17,.02),.015,this.glow);
+    }
+  }
+  update(dt:number,speed:number,time:number,attack=false):void {
+    const step=Math.min(.05,Math.max(0,dt));this.stride=MathUtils.damp(this.stride,Math.min(1,speed/(this.horse?10:6)),9,step);
+    this.phase+=step*(this.horse?5+speed*.7:6+speed*.9);
+    const gallop=speed>(this.horse?7:5),phase=this.phase;
+    for(const leg of this.legs){
+      const offset=gallop?(leg.rear?Math.PI:0)+leg.side*.36:(leg.side===1?Math.PI:0)+(leg.rear?Math.PI:0);
+      const cycle=Math.sin(phase+offset),lift=Math.max(0,-Math.cos(phase+offset));
+      leg.hip.rotation.x=cycle*this.stride*(gallop?.8:.45);
+      leg.knee.rotation.x=(leg.rear?-1:1)*lift*this.stride*(gallop?1.1:.65);
+      leg.ankle.rotation.x=-leg.hip.rotation.x*.25-leg.knee.rotation.x*.4;
+    }
+    this.spine.position.y=(this.horse?1.23:.68)+Math.abs(Math.sin(phase))*this.stride*(gallop?.09:.035);
+    this.spine.rotation.x=Math.sin(phase)*(gallop?.055:.018)*this.stride;
+    this.neck.rotation.x=(this.horse?.3:.5)+Math.sin(phase+.3)*this.stride*.06;
+    this.head.rotation.x=(this.horse?-.22:-.3)+Math.sin(time*1.1)*.025-(attack?.25:0);
+    this.tail.rotation.z=Math.sin(time*3+this.stride)*(.12+this.stride*.13);
+    this.tail.rotation.x=Math.sin(time*2)*.04+this.stride*.2;
+    this.aura.rotation.z=time*(.3+this.rarity*.1);this.aura.scale.setScalar((this.horse?1.3:.7)*(1+Math.sin(time*2)*.045));
+  }
+  dispose():void {const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
+}

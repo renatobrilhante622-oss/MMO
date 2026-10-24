@@ -1,0 +1,50 @@
+import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
+import type { Language } from '../progression/AdventureProgress';
+const PAIRS:Record<string,string>={
+  'Inventário':'Inventory','Epígrafo':'Epigraph','Classes':'Classes','Base':'Base','Codex':'Codex','Guia':'Guide','Itens':'Items','Montaria':'Mount','Esquiva':'Dodge','Pular':'Jump','ATACAR':'ATTACK','Atacar':'Attack','Mergulhar':'Dive','Interagir':'Interact','MOVER':'MOVE','SOM':'SOUND','MUDO':'MUTED',
+  'Na vila':'In town','Explorando':'Exploring','No ar':'Airborne','Escalando':'Climbing','Nadando':'Swimming','Mergulhando':'Diving','Montado':'Mounted','Retornando à vila':'Returning to town','Salto duplo':'Double jump',
+  'VALE DE ASTER':'ASTER VALE','Vale de Aster':'Aster Vale','AMANHECER':'DAWN','LUZ DO DIA':'DAYLIGHT','ENTARDECER':'DUSK','SOB AS ESTRELAS':'UNDER THE STARS','INICIAR JORNADA':'BEGIN JOURNEY','A SAGA DOS NOVE':'THE SAGA OF NINE','UM NOVO MUNDO PARA EXPLORAR':'A NEW WORLD TO EXPLORE','Uma terra ancestral. Nove caminhos.':'An ancient land. Nine paths.','Uma lenda que só você pode escrever.':'A legend only you can write.','9 CLASSES':'9 CLASSES','MUNDO ABERTO':'OPEN WORLD','PROGRESSO LOCAL':'LOCAL PROGRESS','QUALIDADE':'QUALITY','Alta · efeitos completos':'High · full effects','Leve · recomendado para celular':'Low · recommended for mobile','CONTROLES':'CONTROLS','WASD para explorar · Arraste para olhar · J para atacar':'WASD to explore · Drag to look · J to attack','Joystick para explorar · Arraste à direita para olhar':'Joystick to explore · Drag on the right to look','Jogo individual • Sem conta • Salvamento neste dispositivo':'Local PvE • Online arenas in Journey • Saved on this device','No celular, gire a tela para ampliar sua visão.':'On mobile, rotate your screen for a wider view.',
+  'Além dos portões':'Beyond the gates','A JORNADA COMEÇA':'THE JOURNEY BEGINS','SEU AVENTUREIRO':'YOUR ADVENTURER','Fechar janela':'Close window','Vida':'Health','Mana':'Mana','GUARDIÃO ANCESTRAL':'ANCIENT GUARDIAN','FASE':'PHASE','VIGÍLIA':'VIGIL','FÚRIA':'FURY','CATACLISMO':'CATACLYSM',
+  'Comum':'Common','Incomum':'Uncommon','Raro':'Rare','Épico':'Epic','Lendário':'Legendary','Mítico':'Mythic','Arma':'Weapon','Elmo':'Helmet','Armadura':'Armor','Botas':'Boots','Anel':'Ring','Amuleto':'Amulet',
+  'common':'Common','uncommon':'Uncommon','rare':'Rare','epic':'Epic','legendary':'Legendary','mythic':'Mythic','all':'All','equipped':'Equipped','weapon':'Weapon','helmet':'Helmet','armor':'Armor','boots':'Boots','ring':'Ring','amulet':'Amulet','ruby':'Ruby · Attack','sapphire':'Sapphire · Mana','emerald':'Emerald · Critical','diamond':'Diamond · Defense','skin':'Skin','pet':'Pet','mount':'Mount','strike':'Strike','spell':'Spell','guard':'Guard','leave':'Concede','leader':'Leader','officer':'Vice-leader','veteran':'Elder','elite':'Elite','member':'Member',
+  'Movimento':'Movement','Câmera':'Camera','Ataque':'Attack','Habilidades':'Skills','Pulo / duplo pulo':'Jump / double jump','Deslizar / esquiva':'Slide / dodge','Inventário / classes / base / Codex':'Inventory / classes / base / Codex','Salvar':'Save','Equipar':'Equip','Equipado':'Equipped','Vender':'Sell','Aprimorar':'Upgrade','Nível':'Level','Ouro':'Gold','Cristais':'Crystals','Defesa':'Defense','Vida máxima':'Maximum health','Qualidade gráfica':'Graphics quality','Limpar progresso':'Clear progress','Cancelar':'Cancel','Confirmar':'Confirm','Voltar':'Back',
+  'Explore o vale. Derrote criaturas e encontre o portal ao norte.':'Explore the vale. Defeat creatures and find the portal to the north.','Sobreviva às ondas. Evite as áreas vermelhas do Guardião.':'Survive the waves. Avoid the Guardian’s red zones.','O portal desperta. Toque em Interagir para começar o desafio.':'The portal awakens. Interact to start the challenge.','Sua jornada começou. Explore o vale ao norte da vila.':'Your journey has begun. Explore north of the village.','Mana insuficiente. Aguarde a regeneração.':'Not enough mana. Wait for regeneration.','Encontre terra firme para invocar sua montaria.':'Find dry ground to summon your mount.','Montaria invocada · velocidade aumentada':'Mount summoned · increased movement speed','Montaria dispensada':'Mount dismissed',
+};
+const descriptions=[
+  'Brutal axe. Heavy combos and area control.','Sacred sword. Strong armor and restorative healing.','Swift daggers. Critical strikes and precision attacks.','Precision bow. Master of ranged combat.','Elemental staff. Fire, frost and storms.','Ritual scythe. Drain life and master souls.','Jade fists. Fast rhythm and vital energy.','Long spear. Reach and devastating thrusts.','Void orb. Curses and arcane power.',
+];
+const skills=[
+ ['Seismic Cleave','A frontal cleave that pushes enemies away.'],['Whirlwind','Sweep your blade around the warrior.'],['Blood Rage','A violent rupture restores part of your health.'],['Celestial Axe','A burning wave pierces the front line.'],
+ ['Judgment','Sacred light strikes enemies ahead.'],['Sanctuary','A circle of light restores 35% health.'],['Radiant Lance','Fire a lance of light with an explosive impact.'],['Divine Verdict','Consecrate a wide area and recover vitality.'],
+ ['Shadow Cut','A flurry of blades strikes targets ahead.'],['Venom Star','A poisoned star explodes on contact.'],['Death Blossom','Daggers strike all surrounding enemies.'],['Nightfall','A shadow wave inflicts devastating critical damage.'],
+ ['Piercing Arrow','A fast, long-range projectile.'],['Multishot','A volley covers the cone ahead.'],['Forest Pulse','Natural energy repels nearby enemies and heals.'],['Starfall Arrow','An explosive arrow strikes a broad area.'],
+ ['Fireball','A burning sphere explodes on impact.'],['Frost Nova','Ice crystals burst around you.'],['Storm Wave','Lightning strikes a long frontal cone.'],['Cataclysm','The elements unleash a massive explosion.'],
+ ['Soul Reap','The scythe steals vitality from enemies ahead.'],['Spectral Plague','A pestilent sphere detonates on impact.'],['Grave Circle','Ancestral energy strikes nearby enemies.'],['Final Harvest','Reap the entire area and restore 40% health.'],
+ ['Tiger Palm','A focused strike with powerful knockback.'],['Dragon Breath','Flaming energy surges in a cone.'],['Inner Balance','Restore health while repelling threats.'],['Thousand Fists','A chi explosion strikes all nearby foes.'],
+ ['Impale','A long-reaching thrust.'],['Sweeping Lance','The spear sweeps around the hero.'],['Thunder Javelin','An electric throw with tremendous impact.'],['Dragon Spear','A draconic explosion channels your full power.'],
+ ['Void Bolt','A shadow projectile travels a long distance.'],['Hellfire','Supernatural flames engulf nearby foes.'],['Life Tap','Drain energy and recover health.'],['Singularity','A void star creates a tremendous explosion.'],
+];
+let index=0;CLASS_IDS.forEach((id,i)=>{const c=CLASS_DEFINITIONS[id];PAIRS[c.description]=descriptions[i];for(const skill of c.skills){PAIRS[skill.name]=skills[index][0];PAIRS[skill.description]=skills[index++][1];}});
+const PT_INTERNAL:Record<string,string>={common:'Comum',uncommon:'Incomum',rare:'Raro',epic:'Épico',legendary:'Lendário',mythic:'Mítico',all:'Todos',equipped:'Equipados',weapon:'Arma',helmet:'Elmo',armor:'Armadura',boots:'Botas',ring:'Anel',amulet:'Amuleto',ruby:'Rubi · Ataque',sapphire:'Safira · Mana',emerald:'Esmeralda · Crítico',diamond:'Diamante · Defesa',skin:'Skin',pet:'Mascote',mount:'Montaria',strike:'Golpear',spell:'Conjurar',guard:'Defender',leave:'Desistir',leader:'Líder',officer:'Vice-Líder',veteran:'Ancião',elite:'Elite',member:'Membro'};
+export function translateText(text:string,language:Language):string {
+  if(language==='pt')return PT_INTERNAL[text]??text;
+  if(PAIRS[text])return PAIRS[text];
+  const item=text.match(/^(Lâmina|Elmo|Couraça|Botas|Anel|Amuleto)( Temperado| Rúnico| Celestial)? (do Viajante|do Bosque|da Aurora|do Eclipse|dos Antigos|da Eternidade)$/);
+  if(item){const slot:Record<string,string>={'Lâmina':'Blade','Elmo':'Helm','Couraça':'Cuirass','Botas':'Boots','Anel':'Ring','Amuleto':'Amulet'};const tier:Record<string,string>={' Temperado':'Tempered ',' Rúnico':'Runic ',' Celestial':'Celestial '};const suffix:Record<string,string>={'do Viajante':'of the Traveler','do Bosque':'of the Grove','da Aurora':'of Dawn','do Eclipse':'of the Eclipse','dos Antigos':'of the Ancients','da Eternidade':'of Eternity'};return `${tier[item[2]]??''}${slot[item[1]]} ${suffix[item[3]]}`;}
+  return text.replace(/^Nível (\d+)! Seus atributos aumentaram\.$/,'Level $1! Your attributes increased.').replace(/^Desafio da masmorra · Onda (\d+)$/,'Dungeon challenge · Wave $1').replace(/^FASE (\d+) · /,'PHASE $1 · ').replace('VIGÍLIA','VIGIL').replace('FÚRIA','FURY').replace('CATACLISMO','CATACLYSM');
+}
+/** Restore source text on a language switch; observe new dialog/menu content too. */
+export class GameI18n {
+  private observer:MutationObserver;
+  private sources=new WeakMap<Text,{source:string;rendered:string}>();
+  constructor(private readonly root:HTMLElement,private language:Language){this.observer=new MutationObserver(()=>this.paint());this.observe();this.paint();}
+  private observe():void{this.observer.observe(this.root,{childList:true,subtree:true,characterData:true});}
+  set(language:Language):void{this.language=language;document.documentElement.lang=language==='pt'?'pt-BR':'en-US';this.paint();}
+  private paint():void {
+    this.observer.disconnect();
+    const walker=document.createTreeWalker(this.root,NodeFilter.SHOW_TEXT);let node:Node|null;
+    while((node=walker.nextNode())){const text=node as Text;if(text.parentElement?.closest('script,style,.adventure-layer'))continue;const prior=this.sources.get(text),source=prior&&text.data===prior.rendered?prior.source:text.data;const trimmed=source.trim(),translated=translateText(trimmed,this.language),rendered=source.replace(trimmed,translated);this.sources.set(text,{source,rendered});if(text.data!==rendered)text.data=rendered;}
+    this.observe();
+  }
+  dispose():void{this.observer.disconnect();}
+}

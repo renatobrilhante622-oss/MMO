@@ -27,7 +27,7 @@ export const ITEM_CATALOG: readonly Item[] = Object.freeze(EQUIPMENT_SLOTS.flatM
   }))),
 );
 
-export interface StatBonuses { attack: number; defense: number; maxHp: number }
+export interface StatBonuses { attack: number; defense: number; maxHp: number; maxMana?: number; critChance?: number }
 export interface InventorySnapshot {
   version: 1; items: Item[]; equipment: Partial<Record<EquipmentSlot, string>>;
   gold: number; crystals: number; level: number; xp: number; sequence: number; randomState: number; collected: string[];
@@ -49,12 +49,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function readItem(value: unknown): Item | undefined {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.length || value.id.length > 160 || typeof value.name !== 'string') return;
   if (!EQUIPMENT_SLOTS.includes(value.slot as EquipmentSlot) || !RARITIES.includes(value.rarity as Rarity)) return;
-  return {
+  const item: Item = {
     id: value.id, name: value.name.slice(0, 100), slot: value.slot as EquipmentSlot, rarity: value.rarity as Rarity,
     level: numberIn(value.level, 1, 100), upgrade: numberIn(value.upgrade, 0, 15),
     attack: numberIn(value.attack, 0, 100000), defense: numberIn(value.defense, 0, 100000),
     maxHp: numberIn(value.maxHp, 0, 1000000), value: numberIn(value.value, 1, 1000000),
   };
+  if (value.locked === true) item.locked = true;
+  if (Array.isArray(value.sockets)) item.sockets = value.sockets.filter((gem): gem is 'ruby'|'sapphire'|'emerald'|'diamond' => ['ruby','sapphire','emerald','diamond'].includes(gem)).slice(0, [1,1,2,3,3,4][RARITIES.indexOf(item.rarity)]);
+  if(item.sockets) item.gemLevels=item.sockets.map((_,i)=>Array.isArray(value.gemLevels)&&value.gemLevels[i]===2?2:1);
+  return item;
 }
 
 export class InventoryAndLoot {
@@ -174,27 +178,34 @@ export class InventoryAndLoot {
 
   sell(itemId: string): boolean {
     const index = this.items.findIndex(candidate => candidate.id === itemId);
-    if (index === -1 || Object.values(this.equipment).includes(itemId)) return false;
+    if (index === -1 || this.items[index].locked || this.items[index].sockets?.length || Object.values(this.equipment).includes(itemId)) return false;
     this.gold += this.items[index].value;
     this.items.splice(index, 1);
     return true;
   }
 
   getStatBonuses(): StatBonuses {
-    const bonuses = { attack: (this.level - 1) * 2, defense: this.level - 1, maxHp: (this.level - 1) * 12 };
+    const bonuses = { maxMana:0,critChance:0,attack: (this.level - 1) * 2, defense: this.level - 1, maxHp: (this.level - 1) * 12 };
     for (const slot of EQUIPMENT_SLOTS) {
       const item = this.items.find(candidate => candidate.id === this.equipment[slot] && candidate.slot === slot);
       if (!item) continue;
       bonuses.attack += item.attack;
       bonuses.defense += item.defense;
       bonuses.maxHp += item.maxHp;
+      (item.sockets ?? []).forEach((gem,index)=>{
+        const power=item.gemLevels?.[index]===2?2.5:1;
+        if (gem==='ruby') bonuses.attack+=Math.round(4*power);
+        if (gem==='sapphire') bonuses.maxMana+=Math.round(12*power);
+        if (gem==='emerald') bonuses.critChance+=.005*power;
+        if (gem==='diamond') bonuses.defense+=Math.round(4*power);
+      });
     }
     return bonuses;
   }
 
   snapshot(): InventorySnapshot {
     return {
-      version: 1, items: this.items.map(item => ({ ...item })), equipment: { ...this.equipment },
+      version: 1, items: this.items.map(item => ({ ...item, ...(item.sockets ? { sockets: [...item.sockets], gemLevels:[...(item.gemLevels??[])] } : {}) })), equipment: { ...this.equipment },
       gold: this.gold, crystals: this.crystals, level: this.level, xp: this.xp,
       sequence: this.sequence, randomState: this.randomState, collected: [...this.collected].slice(-512),
     };
