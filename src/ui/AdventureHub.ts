@@ -22,6 +22,7 @@ export class AdventureHub {
   readonly online=new OnlineClient();
   private tab:Tab='talents';
   private visible=false;
+  private resetScroll=false;
   private timer=0;
   private readonly abort=new AbortController();
   private selectedItem='';
@@ -85,7 +86,7 @@ export class AdventureHub {
   private label(value:readonly[string,string]):string{return value[this.game.progress.language==='pt'?0:1];}
   open(tab:Tab='talents'):void {
     if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
-    if(this.tab!==tab)this.lastResult='';
+    if(this.tab!==tab){this.lastResult='';this.resetScroll=true;}
     this.visible=true;this.tab=tab;this.root.hidden=false;this.game.progress.autoFarm=false;this.render();this.root.querySelector<HTMLElement>('[data-do=close]')?.focus();
     if(['arena','clan','market'].includes(tab))void this.poll();
   }
@@ -109,6 +110,7 @@ export class AdventureHub {
   private async poll():Promise<void>{await this.online.refresh();if(!this.visible||!['arena','clan','market'].includes(this.tab))return;const state=JSON.stringify(this.online.view)+this.online.error;if(state!==this.lastOnline&&!this.root.querySelector('input:focus,select:focus')){this.lastOnline=state;this.render();}}
   private render():void {
     if(!this.visible)return;
+    const scroll=this.resetScroll?0:(this.root.querySelector<HTMLElement>('.adventure-content')?.scrollTop??0);this.resetScroll=false;
     const p=this.game.progress,inv=this.game.inventory;
     const groups:Array<[string,Array<[Tab,string,string]>]>=[
       [this.t('PERSONAGEM','CHARACTER'),[['talents','Epígrafo','Epigraph'],['classes','Trocar classe','Switch class'],['inventory','Inventário e forja','Inventory & forge'],['collection','Coleção','Collection'],['base','Construções','Buildings'],['codex','Bestiário','Bestiary']]],
@@ -135,6 +137,7 @@ export class AdventureHub {
       default:content=this.onlinePanel();
     }
     this.root.innerHTML=`<section class="adventure-window" role="dialog" aria-modal="true" aria-label="${this.t('Jornada','Journey')}"><aside class="adventure-nav"><div class="adventure-brand">E<span>✦</span>TERNA</div>${groups.map(([title,links])=>`<small>${title}</small>${links.map(([id,pt,en])=>`<button data-hub="${id}" class="${this.tab===id?'selected':''}">${this.t(pt,en)}</button>`).join('')}`).join('')}</aside><main class="adventure-main"><header><div><small>${CLASS_DEFINITIONS[this.game.currentClass].name} · ${this.t('Nível','Level')} ${inv.level}</small><h1>${this.t(current[1],current[2])}</h1></div><button data-do="close" aria-label="${this.t('Fechar','Close')}">×</button></header><div class="adventure-wallet"><span>◈ ${inv.gold.toLocaleString()} ${this.t('ouro','gold')}</span><span>◇ ${inv.crystals} ${this.t('cristais','crystals')}</span><span>✦ ${p.vipDiamonds} ${this.t('diamantes VIP','VIP diamonds')} ${p.vip?'VIP ✓':''}</span></div><div class="adventure-feedback ${this.lastResult.startsWith('Summoned')||this.lastResult.startsWith('Invocado')?'summon-reveal':''}" role="status">${esc(this.game.translate(this.lastResult||this.online.error))}</div><div class="adventure-content">${content}</div></main></section>`;
+    const scrollContainer=this.root.querySelector<HTMLElement>('.adventure-content');if(scrollContainer)scrollContainer.scrollTop=scroll;
     if(this.tab==='map')this.drawMap();
     const previewHost=this.root.querySelector<HTMLElement>('[data-character-preview]');
     if(previewHost){this.preview??=new CharacterPreview();const equipped=this.game.inventory.items.find(i=>i.id===this.game.inventory.equipment.weapon);const skin=COSMETICS.find(c=>c.id===this.game.progress.equipped.skin)!;this.preview.mount(previewHost,this.game.currentClass,skin.color,equipped?.upgrade??0,this.tab==='collection'?COSMETICS.find(c=>c.id===this.selectedCosmetic):undefined);}else this.preview?.hide();
