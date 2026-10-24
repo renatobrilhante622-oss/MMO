@@ -13,6 +13,7 @@ with sync_playwright() as p:
   page.on('console',lambda e:(errors.append(e.text),print('CONSOLE ERROR',e.text,flush=True)) if e.type=='error' else None)
   page.add_init_script('window.requestAnimationFrame=()=>0;window.cancelAnimationFrame=()=>{};')
   page.goto(os.environ.get('ETERNA_URL','http://127.0.0.1:5173'),wait_until='networkidle',timeout=120000)
+  page.locator('[data-splash-start]').click()
   def open_tab(name):
    button=page.locator('[data-hub='+name+']')
    if not button.is_visible():page.locator('[data-do=toggle-nav]').click()

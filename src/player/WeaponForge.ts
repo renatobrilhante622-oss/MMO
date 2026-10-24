@@ -61,7 +61,7 @@ export class WeaponForge {
   private mesh(parent: Group, geometry: BufferGeometry, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
     const mesh = new Mesh(geometry, material);
     mesh.position.set(x, y, z);
-    mesh.castShadow = true;
+    mesh.frustumCulled=false;mesh.castShadow = true;
     mesh.receiveShadow = true;
     parent.add(mesh);
     return mesh;

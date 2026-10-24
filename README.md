@@ -184,4 +184,17 @@ Além do frustum culling do Three.js, monstros e NPCs ficam invisíveis e deixam
 
 A HUD agora concentra cinco atalhos compactos no topo, mantém o Auto-Farm circular na direita e coloca drops discretos abaixo da vida à esquerda; combo fica junto ao combate. A migração do layout v2 preserva os controles personalizados e reinicia apenas as antigas posições centrais de atalhos/Auto-Farm. Os oito retratos de perfil têm ilustrações próprias (Berserker, Arquimago, Lich, Ranger, Paladino, Assassino, Hellhound e Dragão), com compatibilidade dos avatares salvos anteriormente.
 
-A invocação usa um único Canvas 2D em proporção correta: círculo rúnico em perspectiva, cristal facetado, feixe vertical, partículas e clarão, seguido dos prêmios já concedidos. Não cria contexto WebGL adicional, não repete o sorteio ao pular e oferece Continuar / Invocar 1× / Invocar 10×. Os banners Equipamento e Asas têm nomes em português.
+A invocação usa um único Canvas 2D em proporção correta: círculo rúnico em perspectiva, cristal facetado, feixe vertical, partículas e clarão, seguido dos prêmios já concedidos. A animação não cria contexto WebGL adicional; os resultados usam uma única prévia 3D compartilhada entre os cards e não repetem o sorteio ao pular e oferece Continuar / Invocar 1× / Invocar 10×. Os banners Equipamento e Asas têm nomes em português.
+
+
+## Correções de apresentação, refino e entrada
+
+A tela inicial agora começa com uma splash **ETERNA: ACTION MMO** e **TOQUE PARA INICIAR**. O renderer/mundo só é criado após o toque e a transição; os estados splash/loading/menu/seleção/modal mantêm a HUD de gameplay oculta mesmo com VIP ou posições personalizadas salvas. Os testes de navegador existentes foram adaptados à nova entrada. O editor de HUD só mede os controles quando estão visíveis.
+
+`PlayerRenderer.ts` preserva a transformação original do GLB num wrapper com pivô nos pés, desativa o frustum culling das malhas/acessórios e usa câmera near=0,1/far=1000. Paperdoll e coleção reenquadram todos os cantos dos bounds visíveis, incluindo armas/asas, após resize e carregamento assíncrono. Os bounds de pele animada consideram as matrizes de bind atualizadas.
+
+O refino normal da interface é garantido e pode ser feito pelo painel sem a antiga restrição silenciosa de distância à vila. `InventorySystem.upgradeItem` valida item, proteção, limite +15 e recursos antes de qualquer escrita; sucesso paga a cotação atual uma vez, incrementa `level` e `upgrade`, aplica `ATK += 5 × level` e `DEF += 3 × level` e preserva joias. `requiredLevel` guarda o requisito original para refinar um item não torná-lo inequipável. A UI mostra cotação/próximo +, desabilita compras sem saldo e só anima martelo/faíscas após sucesso. O helper probabilístico antigo fica apenas para compatibilidade; a ação normal de refino não o utiliza.
+
+A loja usa cartas ilustradas de suprimentos/joias e banners com preview de ícones; textos extensos e probabilidades ficam em detalhes expansíveis. Os resultados 1×/10× usam nome e moldura de raridade localizados, ilustração vetorial por prêmio e seleção para uma prévia 3D compartilhada, evitando dez renderers simultâneos. Sem WebGL, a ilustração continua visível.
+
+O ícone oficial em `public/assets/icon.png` (1024×1024) retrata um mago monstruoso de capuz texturizado e olhos verdes, com partículas/runa. Os mipmaps Android, ícones adaptativos, favicon e referência do splash nativo usam a mesma identidade. `scripts/generate-app-icon.cjs` permite regenerar os recursos usando Sharp, sem compilar Android. Nenhum APK foi gerado ou atualizado no ambiente para esta entrega.

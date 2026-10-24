@@ -1,3 +1,4 @@
+import {upgradeItem as applyUpgrade} from './InventorySystem';
 import { EventBus, type EquipmentSlot, type Item, type LootDrop, type Rarity } from '../core/GameTypes';
 
 export const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
@@ -55,10 +56,11 @@ function readItem(value: unknown): Item | undefined {
   if (!ALL_EQUIPMENT_SLOTS.includes(value.slot as EquipmentSlot) || !RARITIES.includes(value.rarity as Rarity)) return;
   const item: Item = {
     id: value.id, name: value.name.slice(0, 100), slot: value.slot as EquipmentSlot, rarity: value.rarity as Rarity,
-    level: numberIn(value.level, 1, 100), upgrade: numberIn(value.upgrade, 0, 15),
+    level: numberIn(value.level, 1, 115), upgrade: numberIn(value.upgrade, 0, 15),
     attack: numberIn(value.attack, 0, 100000), defense: numberIn(value.defense, 0, 100000),
     maxHp: numberIn(value.maxHp, 0, 1000000), value: numberIn(value.value, 1, 1000000),
   };
+  if (typeof value.requiredLevel==='number')item.requiredLevel=numberIn(value.requiredLevel,1,100);
   if (value.locked === true) item.locked = true;
   if (Array.isArray(value.sockets)) item.sockets = value.sockets.filter((gem): gem is 'ruby'|'sapphire'|'emerald'|'diamond' => ['ruby','sapphire','emerald','diamond'].includes(gem)).slice(0, [1,1,2,3,3,4][RARITIES.indexOf(item.rarity)]);
   if(item.sockets) item.gemLevels=item.sockets.map((_,i)=>Array.isArray(value.gemLevels)&&value.gemLevels[i]===2?2:1);
@@ -156,7 +158,7 @@ export class InventoryAndLoot {
 
   equip(itemId: string): boolean {
     const item = this.items.find(candidate => candidate.id === itemId);
-    if (!item || item.level > this.level) return false;
+    if (!item || (item.requiredLevel??item.level) > this.level) return false;
     this.equipment[item.slot] = item.id;
     this.events.emit('message', { text: `${item.name} equipado`, tone: 'success' });
     return true;
@@ -168,24 +170,12 @@ export class InventoryAndLoot {
     return { gold: Math.round(25 * Math.pow(1.48, item.upgrade) * (1 + RARITIES.indexOf(item.rarity) * 0.3)), crystals: Math.max(1, Math.floor(item.upgrade / 3) + 1) };
   }
 
-  upgrade(itemId: string): boolean {
-    const item = this.items.find(candidate => candidate.id === itemId);
-    if (!item || item.upgrade >= 15) return false;
-    const cost = this.upgradeCost(itemId);
-    if (this.gold < cost.gold || this.crystals < cost.crystals) {
-      this.events.emit('message', { text: 'Ouro ou cristais insuficientes na Forja', tone: 'warning' });
-      return false;
-    }
-    this.gold -= cost.gold;
-    this.crystals -= cost.crystals;
-    item.upgrade++;
-    if (item.attack) item.attack += Math.max(1, Math.round(item.attack * 0.12));
-    if (item.defense) item.defense += Math.max(1, Math.round(item.defense * 0.12));
-    if (item.maxHp) item.maxHp += Math.max(2, Math.round(item.maxHp * 0.1));
-    item.value = Math.round(item.value * 1.15);
-    this.events.emit('message', { text: `${item.name} +${item.upgrade} — aprimoramento concluído`, tone: 'success' });
-    return true;
+  upgradeItem(itemId:string):boolean {
+    const result=applyUpgrade(this,itemId);
+    if(!result.ok){this.events.emit('message',{text:result.reason==='resources'?'Ouro ou cristais insuficientes na Forja':'Item indisponível para refino',tone:'warning'});return false;}
+    this.events.emit('message',{text:`${result.item.name} +${result.item.upgrade} — aprimoramento concluído`,tone:'success'});return true;
   }
+  upgrade(itemId:string):boolean {return this.upgradeItem(itemId);}
 
   sell(itemId: string): boolean {
     const index = this.items.findIndex(candidate => candidate.id === itemId);

@@ -1,16 +1,18 @@
-import type {Rarity} from '../core/GameTypes';
+import {PrizePreview3D} from './PrizePreview3D';
+import {prizeIcon,renderPrizeCards} from './ShopGachaUI';
+import type {EquipmentSlot,Rarity} from '../core/GameTypes';
 import {RARITIES,RARITY_COLORS} from '../rpg/InventoryAndLoot';
 import {itemIcon,type IconKind} from './ItemIconRenderer';
-export interface GachaPrize {name:string;rarity:Rarity;kind:IconKind;duplicate:boolean;}
+export interface GachaPrize {name:string;rarity:Rarity;kind:IconKind;duplicate:boolean;cosmeticId?:string;itemId?:string;itemSlot?:EquipmentSlot;}
 const esc=(text:string)=>text.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]!);
 /** Single lightweight canvas: no extra WebGL context or live world underneath the cutscene. */
 export class GachaCutscene {
   readonly root=document.createElement('section');
   private canvas?:HTMLCanvasElement;
   private frame=0;private started=0;private revealTimer=0;
-  private prizes:GachaPrize[]=[];private revealed=false;private banner='skin';
+  private prizes:GachaPrize[]=[];private revealed=false;private banner='skin';private selectedPrize=0;private preview?:PrizePreview3D;
   get blocking():boolean{return !this.root.hidden;}
-  constructor(container:HTMLElement,private summon:(count:1|10,banner:string)=>GachaPrize[]|null,private affordable:(count:1|10)=>boolean){this.root.setAttribute('role','dialog');this.root.setAttribute('aria-modal','true');this.root.className='expansion-modal gacha-cinema';this.root.hidden=true;container.append(this.root);this.root.onclick=e=>{const b=(e.target as Element).closest<HTMLElement>('[data-gacha]');if(!b)return;const action=b.dataset.gacha;if(action==='close')this.close();else if(action==='skip')this.reveal();else this.open(Number(action)===10?10:1,this.banner);};}
+  constructor(container:HTMLElement,private summon:(count:1|10,banner:string)=>GachaPrize[]|null,private affordable:(count:1|10)=>boolean){this.root.setAttribute('role','dialog');this.root.setAttribute('aria-modal','true');this.root.className='expansion-modal gacha-cinema';this.root.hidden=true;container.append(this.root);this.root.onclick=e=>{const b=(e.target as Element).closest<HTMLElement>('[data-gacha]');if(!b)return;const action=b.dataset.gacha;if(action==='close')this.close();else if(action==='skip')this.reveal();else if(action==='preview')this.selectPrize(Number(b.dataset.index));else this.open(Number(action)===10?10:1,this.banner);};}
   open(count:1|10,banner:string):boolean {
     const prizes=this.summon(count,banner);if(!prizes)return false;this.cleanup();this.prizes=prizes;this.banner=banner;this.root.hidden=false;this.revealed=false;
     this.root.innerHTML='<div class="gacha-stage" aria-label="Altar rúnico de invocação"><canvas></canvas></div><button class="gacha-skip" data-gacha="skip">Pular animação</button><div class="gacha-reveal" aria-live="polite"></div>';
@@ -34,8 +36,16 @@ export class GachaCutscene {
     c.fillStyle='#ffdfa3';for(let i=0;i<80+tier*12;i++){const phase=(i*.618+t*.25)%1,a=i*2.39996+t*.45,px=x+Math.cos(a)*r*(1-phase),py=y-phase*r*2;const alpha=Math.sin(phase*Math.PI)*(.25+charge*.5);c.globalAlpha=alpha;c.beginPath();c.arc(px,py,1+(i%3),0,Math.PI*2);c.fill();}c.globalAlpha=1;
     if(t>2.35){const flash=Math.max(0,1-Math.abs(t-2.55)*5);c.fillStyle=`rgba(255,236,208,${flash*.6})`;c.fillRect(0,0,w,h);}
   }
-  private reveal():void {if(this.revealed||this.root.hidden)return;this.revealed=true;cancelAnimationFrame(this.frame);clearTimeout(this.revealTimer);this.root.classList.add('revealed');this.root.querySelector('.gacha-reveal')!.innerHTML=`<h2>INVOCAÇÃO ANCESTRAL</h2><div class="gacha-prizes">${this.prizes.map(p=>`<article style="--rarity:${RARITY_COLORS[p.rarity]}">${itemIcon(p.kind,p.rarity)}<b>${esc(p.name)}</b><small>${esc(p.rarity)}${p.duplicate?' · Fragmentos':''}</small></article>`).join('')}</div><footer><button data-gacha="close">Continuar</button><button data-gacha="1" ${this.affordable(1)?'':'disabled'}>Invocar 1×</button><button data-gacha="10" ${this.affordable(10)?'':'disabled'}>Invocar 10×</button></footer>`;}
+  private reveal():void {
+    if(this.revealed||this.root.hidden)return;this.revealed=true;cancelAnimationFrame(this.frame);clearTimeout(this.revealTimer);this.root.classList.add('revealed');this.selectedPrize=0;this.renderResults();
+  }
+  private selectPrize(index:number):void {if(!this.revealed||!Number.isInteger(index)||index<0||index>=this.prizes.length)return;this.selectedPrize=index;this.renderResults();}
+  private renderResults():void {
+    const prize=this.prizes[this.selectedPrize];if(!prize)return;
+    this.root.querySelector('.gacha-reveal')!.innerHTML=`<h2>INVOCAÇÃO ANCESTRAL</h2><div class="gacha-results-layout"><div class="gacha-prizes">${renderPrizeCards(this.prizes,this.selectedPrize)}</div><aside class="gacha-prize-preview"><div class="gacha-prize-preview-stage" data-prize-stage>${prizeIcon(prize)}</div><h3 style="color:${RARITY_COLORS[prize.rarity]}">${esc(prize.name)}</h3><p>Selecione um prêmio para ver sua prévia 3D.</p></aside></div><footer><button data-gacha="close">Continuar</button><button data-gacha="1" ${this.affordable(1)?'':'disabled'}>Invocar 1×</button><button data-gacha="10" ${this.affordable(10)?'':'disabled'}>Invocar 10×</button></footer>`;
+    try{this.preview??=new PrizePreview3D();this.preview.mount(this.root.querySelector<HTMLElement>('[data-prize-stage]')!,prize);}catch{this.preview?.dispose();this.preview=undefined;/* The full SVG illustration remains available without WebGL. */}
+  }
   close():void{this.root.hidden=true;this.cleanup();}
-  private cleanup():void{cancelAnimationFrame(this.frame);clearTimeout(this.revealTimer);window.removeEventListener('resize',this.resize);this.root.classList.remove('revealed');this.canvas=undefined;}
-  dispose():void{this.close();this.root.remove();}
+  private cleanup():void{cancelAnimationFrame(this.frame);clearTimeout(this.revealTimer);window.removeEventListener('resize',this.resize);this.root.classList.remove('revealed');this.canvas=undefined;this.preview?.pause();}
+  dispose():void{this.close();this.preview?.dispose();this.preview=undefined;this.root.remove();}
 }

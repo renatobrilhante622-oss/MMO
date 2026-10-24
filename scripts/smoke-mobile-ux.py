@@ -12,6 +12,7 @@ with sync_playwright() as p:
   page.on('pageerror',lambda e:(errors.append(str(e)),print('ERROR',str(e),flush=True)))
   page.add_init_script('window.requestAnimationFrame=()=>0;window.cancelAnimationFrame=()=>{};')
   page.goto(URL,wait_until='networkidle',timeout=120000)
+  page.locator('[data-splash-start]').click()
   page.locator('[data-start]').click();page.locator('[data-do=class][data-id=warlock]').click()
   def tab(name):
    button=page.locator('[data-hub='+name+']')

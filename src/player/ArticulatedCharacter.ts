@@ -232,7 +232,7 @@ export class ArticulatedCharacter {
   private mesh(parent: Group, geometry: BufferGeometry, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
     const mesh = new Mesh(geometry, material);
     mesh.position.set(x, y, z);
-    mesh.castShadow = true;
+    mesh.frustumCulled=false;mesh.castShadow = true;
     mesh.receiveShadow = true;
     parent.add(mesh);
     return mesh;
@@ -390,10 +390,10 @@ export class ArticulatedCharacter {
     if(id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
     for(const side of [-1,1])for(let i=0;i<Math.max(2,rarity+1);i++){
-      const horn=new Mesh(new CapsuleGeometry(.035,.13+i*.025,4,10),mat);horn.position.set(side*(.29+i*.035),.1+i*.04,-.03);horn.rotation.z=-side*(.6+i*.18);this.skinGeometry.add(horn);
+      const horn=new Mesh(new CapsuleGeometry(.035,.13+i*.025,4,10),mat);horn.frustumCulled=false;horn.position.set(side*(.29+i*.035),.1+i*.04,-.03);horn.rotation.z=-side*(.6+i*.18);this.skinGeometry.add(horn);
     }
-    const collar=new Mesh(new TorusGeometry(.19+rarity*.012,.04,8,28,Math.PI*1.7),mat);collar.rotation.x=Math.PI/2;collar.position.y=.3;this.skinGeometry.add(collar);
-    if(rarity>=3)for(let i=0;i<rarity;i++){const crystal=new Mesh(new SphereGeometry(.045,8,6),mat);crystal.scale.y=2;crystal.position.set(Math.cos(i*6.28/rarity)*.42,.12,Math.sin(i*6.28/rarity)*.4);this.skinGeometry.add(crystal);}
+    const collar=new Mesh(new TorusGeometry(.19+rarity*.012,.04,8,28,Math.PI*1.7),mat);collar.frustumCulled=false;collar.rotation.x=Math.PI/2;collar.position.y=.3;this.skinGeometry.add(collar);
+    if(rarity>=3)for(let i=0;i<rarity;i++){const crystal=new Mesh(new SphereGeometry(.045,8,6),mat);crystal.frustumCulled=false;crystal.scale.y=2;crystal.position.set(Math.cos(i*6.28/rarity)*.42,.12,Math.sin(i*6.28/rarity)*.4);this.skinGeometry.add(crystal);}
     this.cape.mesh.scale.set(1+rarity*.08,1+rarity*.04,1);
   }
   weaponAppearance(color:number,refine:number,rarity:string):void {this.weapons.appearance(color,refine,rarity);}

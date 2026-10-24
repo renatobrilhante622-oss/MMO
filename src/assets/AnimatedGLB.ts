@@ -1,4 +1,5 @@
-import {AnimationAction,AnimationMixer,Box3,Color,Group,LoopOnce,Mesh,MeshStandardMaterial,Object3D,Vector3} from 'three';
+import {AnimationAction,AnimationMixer,Color,Group,Mesh,MeshStandardMaterial,Object3D,Vector3} from 'three';
+import {createFootPivot,disableCharacterCulling} from '../player/PlayerRenderer';
 import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
 const cache=new Map<string,Promise<GLTF>>();
@@ -23,20 +24,21 @@ export class AnimatedGLB {
     // Unit/SSR execution retains the procedural fallback and performs no network I/O.
     if(typeof document==='undefined')return;
     void loadModel(name).then(gltf=>{
-      if(this.disposed)return;const model=this.model=clone(gltf.scene),box=new Box3().setFromObject(model),size=box.getSize(new Vector3()),center=box.getCenter(new Vector3()),scale=height/Math.max(.01,size.y);
-      model.scale.setScalar(scale);model.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
-      if(name==='Soldier')model.rotation.y=Math.PI;
-      model.traverse(o=>{if(o.name.toLowerCase().includes('rightarm'))this.arm??=o;if(o instanceof Mesh){o.castShadow=castShadow;o.receiveShadow=castShadow;o.frustumCulled=true;
+      if(this.disposed)return;const model=this.model=clone(gltf.scene);
+      const pivot=createFootPivot(model,height,name==='Soldier'?Math.PI:0);
+      model.traverse(o=>{if(o.name.toLowerCase().includes('rightarm'))this.arm??=o;if(o instanceof Mesh){o.castShadow=castShadow;o.receiveShadow=castShadow;o.frustumCulled=false;
         const tint=(m:MeshStandardMaterial)=>{const mat=m.clone();this.materials.push(mat);mat.roughness=.85;mat.metalness=.1;return mat;};
         o.material=Array.isArray(o.material)?o.material.map(m=>tint(m as MeshStandardMaterial)):tint(o.material as MeshStandardMaterial);
       }});
-      this.root.add(model);this.mixer=new AnimationMixer(model);for(const clip of gltf.animations)this.actions.set(clip.name.toLowerCase(),this.mixer.clipAction(clip));this.ready=true;this.play('idle');this.tint(this.baseColor.getHex(),this.accent.getHex());this.onReady();
+      this.root.add(pivot);this.mixer=new AnimationMixer(model);for(const clip of gltf.animations)this.actions.set(clip.name.toLowerCase(),this.mixer.clipAction(clip));this.play('idle');this.mixer.update(0);this.tint(this.baseColor.getHex(),this.accent.getHex());this.ready=true;this.onReady();
+      // Notify bounds-based previews only after the whole model and equipped gear are installed.
+      let ancestor:Object3D|null=this.root;while(ancestor){ancestor.userData.characterRevision=(ancestor.userData.characterRevision??0)+1;ancestor=ancestor.parent;}
     }).catch(()=>{/* Offline/model failure keeps the functional fallback visible. */});
   }
   attachAt(name:string,object:Object3D,offset=new Vector3()):boolean {
     let socket:Object3D|undefined;this.model?.traverse(o=>{if(!socket&&o.name.toLowerCase().replace(/[^a-z0-9]/g,'').endsWith(name))socket=o;});if(!socket)return false;
-    this.root.updateMatrixWorld(true);const size=socket.getWorldScale(new Vector3()),factor=1/Math.max(.0001,Math.abs(size.x));
-    const authored=(object.userData.authoredScale as Vector3|undefined)??object.scale.clone();object.userData.authoredScale=authored;socket.add(object);object.position.copy(offset).multiplyScalar(factor);object.scale.copy(authored).multiplyScalar(factor);return true;
+    this.root.updateMatrixWorld(true);const size=socket.getWorldScale(new Vector3());const inverse=new Vector3(1/Math.max(.0001,Math.abs(size.x)),1/Math.max(.0001,Math.abs(size.y)),1/Math.max(.0001,Math.abs(size.z)));
+    const authored=(object.userData.authoredScale as Vector3|undefined)??object.scale.clone();object.userData.authoredScale=authored;socket.add(object);object.position.copy(offset).multiply(inverse);object.scale.copy(authored).multiply(inverse);disableCharacterCulling(object);return true;
   }
   tint(color:number,accent:number):void{this.baseColor.setHex(color);this.accent.setHex(accent);this.materials.forEach((m,i)=>{m.color.copy(i%2?this.accent:this.baseColor);});}
   play(state:string):void {const key=state==='run'?'run':state==='walk'?'walk':'idle';const action=this.actions.get(key)??this.actions.values().next().value;if(!action||action===this.active)return;action.reset().setEffectiveWeight(1).play();this.active?.crossFadeTo(action,.22,false);this.active=action;}

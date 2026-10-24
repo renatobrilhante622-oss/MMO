@@ -15,6 +15,7 @@ with sync_playwright() as p:
   # real frame explicitly below; this is not a device performance benchmark.
   page.add_init_script('window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};')
   page.goto(url,wait_until='networkidle',timeout=120000)
+  page.locator('[data-splash-start]').click()
   page.wait_for_function('!!window.__ETERNA__',timeout=120000)
   def open_tab(name):
    button=page.locator('[data-hub='+name+']')

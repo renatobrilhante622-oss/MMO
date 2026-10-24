@@ -104,7 +104,7 @@ export class CompanionRig {
     this.aura.rotation.x=-Math.PI/2;this.aura.position.y=.06;this.root.add(this.aura);this.aura.visible=false;
   }
   private material(color:number,roughness:number,metalness=.05):MeshStandardMaterial {const m=new MeshStandardMaterial({color,roughness,metalness});this.materials.add(m);return m;}
-  private mesh(parent:Object3D,geometry:CapsuleGeometry|ConeGeometry|CylinderGeometry|SphereGeometry|TorusGeometry,material:MeshStandardMaterial,x:number,y:number,z:number):Mesh {const m=new Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+  private mesh(parent:Object3D,geometry:CapsuleGeometry|ConeGeometry|CylinderGeometry|SphereGeometry|TorusGeometry,material:MeshStandardMaterial,x:number,y:number,z:number):Mesh {const m=new Mesh(geometry,material);m.position.set(x,y,z);m.frustumCulled=false;m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
   private ellipsoid(parent:Object3D,material:MeshStandardMaterial,size:number[],at:number[]):Mesh {const m=this.mesh(parent,new SphereGeometry(1,12,8),material,at[0],at[1],at[2]);m.scale.set(size[0],size[1],size[2]);return m;}
   private between(parent:Object3D,a:Vector3,b:Vector3,radius:number,material:MeshStandardMaterial):void {const d=b.clone().sub(a);const m=this.mesh(parent,new CylinderGeometry(radius,radius,d.length(),6),material,0,0,0);m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new Vector3(0,1,0),d.normalize());}
   appearance(c:Cosmetic):void {

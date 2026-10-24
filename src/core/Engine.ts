@@ -35,10 +35,11 @@ import { CodexSystem } from '../rpg/CodexSystem';
 import { EnemyAI } from '../enemies/EnemyAI';
 import { DungeonBossManager } from '../enemies/DungeonBossManager';
 import { planFarm } from '../systems/VipAndAutoFarm';
-import { refine } from '../rpg/InventoryForgeSocket';
 import { EPIGRAPHS, cooldownMultiplier, epigraphEffects } from '../rpg/ClassEpigraphSystem';
 import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
 import { COSMETICS } from '../progression/AdventureProgress';
+import {setScreenPhase} from '../ui/MainMenu';
+import {configureCharacterCamera,disableCharacterCulling} from '../player/PlayerRenderer';
 import { HudEditor } from '../ui/HudEditor';
 import { AdventureHub } from '../ui/AdventureHub';
 import { GameI18n, translateText } from '../ui/I18n';
@@ -52,7 +53,7 @@ const UP = new Vector3(0, 1, 0);
 
 export class Engine {
   readonly scene = new Scene();
-  readonly camera = new PerspectiveCamera(58, 1, 0.15, 320);
+  readonly camera = new PerspectiveCamera(58, 1, 0.1, 1000);
   readonly renderer: WebGLRenderer;
   readonly events = new EventBus();
   readonly terrain: OpenWorldGenerator;
@@ -165,6 +166,7 @@ export class Engine {
     this.restore();
     if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
     this.hero = new HeroController(this.scene, this.camera, this.physics, this.events, CLASS_DEFINITIONS[this.classId]);
+    configureCharacterCamera(this.camera);disableCharacterCulling(this.hero.model);
     this.hero.respawn(this.terrain.spawnPoint);
     this.hero.update(1 / 60, emptyInput());
     this.refreshStats();
@@ -266,8 +268,9 @@ export class Engine {
   private beginPlay(): void {
     // Called directly by the start button's user gesture. No autoplay bypass.
     void this.sound.unlock();
-    this.playing = true;this.hudEditor.initialize();
-    if (!this.progress.chosen) this.hub.open('classes');
+    this.playing = true;
+    if (!this.progress.chosen){setScreenPhase(this.container,'class-selection');this.hub.open('classes');}
+    else{setScreenPhase(this.container,'playing');this.hudEditor.initialize();}
     this.lastTime = 0;
     this.hud.notify('O vale desperta. Explore a vila, encontre inimigos e procure o portal ao norte.', 'info');
   }
@@ -378,7 +381,7 @@ export class Engine {
     });
     // Opaque menus and the summon canvas do not need a second live 3D scene underneath.
     if(this.playing&&(this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking)){this.updateHUD();return;}
-    this.shadowInstallTimer+=dt;if(this.shadowInstallTimer>2){this.installShadows();this.shadowInstallTimer=0;}
+    this.shadowInstallTimer+=dt;if(this.shadowInstallTimer>2){disableCharacterCulling(this.hero.model);this.installShadows();this.shadowInstallTimer=0;}
     if(matchMedia('(pointer:coarse)').matches&&active){const ratio=this.frameBudget.update(rawDt,this.renderer.getPixelRatio());if(ratio!==this.renderer.getPixelRatio()){this.renderer.setPixelRatio(ratio);this.composer.setPixelRatio(ratio);this.resize();}}
     this.shadowTimer+=dt;if(this.shadowTimer>=1/30){this.renderer.shadowMap.needsUpdate=true;this.shadowTimer=0;}
     this.updateDaylight();
@@ -457,7 +460,7 @@ export class Engine {
       case 'building':ok=this.base.upgrade(data.id);this.refreshStats();break;
       case 'lock':{const item=inv.items.find(i=>i.id===data.id);if(item){item.locked=!item.locked;ok=true;}break;}
       case 'sell':ok=inv.sell(data.id);break;
-      case 'upgrade':if(this.hero.position.distanceTo(this.terrain.spawnPoint)<28){const result=refine(inv,data.id);if(result==='failure'){this.save();return p.language==='pt'?'Refino falhou: materiais consumidos; item preservado.':'Refinement failed: costs consumed; item preserved.';}ok=result==='success';}this.refreshStats();break;
+      case 'upgrade':{ok=inv.upgradeItem(data.id);if(ok){this.refreshStats();this.updateHUD();this.sound.impact(true);this.combat.particles.burst(this.hero.position,0xffdc88,18);const item=inv.items.find(i=>i.id===data.id)!;this.save();return p.language==='pt'?`${item.name} +${item.upgrade} · Nível ${item.level} · Refino concluído!`:`${item.name} +${item.upgrade} · Level ${item.level} · Refinement complete!`;}break;}
       case 'salvage':ok=p.salvage(data.id);break;
       case 'socket':ok=p.socket(data.id,data.key as Gem);this.refreshStats();break;
       case 'unsocket':ok=p.unsocket(data.id);this.refreshStats();break;
