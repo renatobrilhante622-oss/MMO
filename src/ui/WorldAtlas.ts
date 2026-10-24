@@ -1,3 +1,4 @@
+import {WORLD_SITES} from '../world/WorldSites';
 import type { OpenWorldGenerator } from '../world/OpenWorldGenerator';
 import { regionAt,REGIONS } from '../world/Regions';
 import type { Bookmark,Language } from '../progression/AdventureProgress';
@@ -13,6 +14,7 @@ export class WorldAtlas {
     c.save();c.lineCap='round';c.lineJoin='round';
     if(path.length){c.beginPath();const [x,y]=p(player);c.moveTo(x,y);for(const point of path){const [px,py]=p(point);c.lineTo(px,py);}c.strokeStyle='#452f1a';c.lineWidth=10;c.stroke();c.setLineDash([4,14]);c.strokeStyle='#ffe29a';c.lineWidth=6;c.shadowColor='#ffd56b';c.shadowBlur=9;c.stroke();c.setLineDash([]);c.shadowBlur=0;const [ex,ey]=p(path.at(-1)!);c.strokeStyle='#fff0b9';c.lineWidth=3;c.beginPath();c.arc(ex,ey,13,0,Math.PI*2);c.stroke();}
     for(const region of REGIONS){const [x,y]=p(region.center);c.font='600 23px Georgia';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#dfd5ae';c.strokeText(region.name[language==='pt'?0:1],x,y-30);c.fillStyle='#243936';c.fillText(region.name[language==='pt'?0:1],x,y-30);c.font='15px serif';c.fillText(`Lv. ${region.minLevel}–${region.maxLevel}`,x,y-8);const [bx,by]=p(region.boss);this.boss(c,bx,by);}
+    for(const site of WORLD_SITES){const [sx,sy]=p(site);c.font='22px serif';c.textAlign='center';c.fillStyle=site.type==='cemetery'?'#413047':'#403b2b';c.fillText(site.type==='village'?'⌂':site.type==='cemetery'?'†':'♜',sx,sy);c.font='11px Georgia';c.fillText(site.name,sx,sy+14);}
     bookmarks.forEach((b,i)=>{if(!b)return;const [x,y]=p(b);c.save();c.translate(x,y);c.rotate(Math.PI/4);c.fillStyle='#405e7c';c.strokeStyle='#e9d8b1';c.lineWidth=3;c.fillRect(-11,-11,22,22);c.strokeRect(-11,-11,22,22);c.restore();c.font='bold 14px system-ui';c.textAlign='center';c.fillStyle='#fff2c7';c.fillText(String(i+1),x,y+5);});
     const [x,y]=p(player);c.save();c.translate(x,y);c.rotate(heading);c.shadowColor='#fff4ae';c.shadowBlur=15;c.fillStyle='#fff0a0';c.strokeStyle='#644e2d';c.lineWidth=3;c.beginPath();c.moveTo(0,-17);c.lineTo(12,14);c.lineTo(0,8);c.lineTo(-12,14);c.closePath();c.fill();c.stroke();c.restore();
     this.compass(c,N-86,96);c.restore();

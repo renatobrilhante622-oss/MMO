@@ -2,6 +2,7 @@ import { ACESFilmicToneMapping, CircleGeometry, DirectionalLight, HemisphereLigh
 import { ArticulatedCharacter } from '../player/ArticulatedCharacter';
 import { CLASS_DEFINITIONS } from '../combat/ClassSystem';
 import type { ClassId } from '../core/GameTypes';
+import {RARITIES} from '../rpg/InventoryAndLoot';
 import type { Cosmetic } from '../progression/AdventureProgress';
 import { CompanionRig } from '../companions/CompanionRig';
 /** Live paperdoll uses the exact character/companion assemblies from the world. */
@@ -32,7 +33,7 @@ export class CharacterPreview {
       if(cosmetic&&(cosmetic.type==='pet'||cosmetic.type==='mount')){this.animal=new CompanionRig(cosmetic.type==='mount');this.animal.appearance(cosmetic);this.scene.add(this.animal.root);}
       else{this.rig=new ArticulatedCharacter(CLASS_DEFINITIONS[id]);this.scene.add(this.rig.root);}
     }
-    if(this.rig){this.rig.accent.color.setHex(cosmetic?.color??color);this.rig.accent.emissive.setHex(cosmetic?.color??color);this.rig.weaponAppearance(cosmetic?.color??color,refine,cosmetic?.rarity??'rare');}
+    if(this.rig){if(cosmetic?.type==='weapon')this.rig.weapons.skin(cosmetic.id);if(cosmetic?.type==='skin')this.rig.skinAppearance(cosmetic.id,cosmetic.color,RARITIES.indexOf(cosmetic.rarity));if(cosmetic?.type==='wing')this.rig.wings.configure((['necrotic','celestial','glacial','magma','celestial','necrotic'] as const)[Number(cosmetic.id.split('-')[1])??0],Math.max(1,refine));this.rig.accent.color.setHex(cosmetic?.color??color);this.rig.accent.emissive.setHex(cosmetic?.color??color);this.rig.weaponAppearance(cosmetic?.color??color,refine,cosmetic?.rarity??'rare');}
     host.append(this.renderer.domElement);const width=Math.max(64,host.clientWidth),height=Math.max(100,host.clientHeight);this.renderer.setSize(width,height,false);this.camera.aspect=width/height;
     const animal=cosmetic?.type==='mount';const distance=Math.max(animal?6.2:4.4,(animal?2.5:1.05)/(2*Math.tan(16*Math.PI/180)*this.camera.aspect));this.camera.position.set(0,animal?1.9:1.25,distance);this.camera.lookAt(0,animal?1.2:1.05,0);this.camera.updateProjectionMatrix();
     this.draw(0);if(!this.frame)this.frame=requestAnimationFrame(this.animate);

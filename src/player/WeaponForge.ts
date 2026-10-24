@@ -12,6 +12,8 @@ export class WeaponForge {
   readonly tip = new Group();
   private materials = new Set<MeshStandardMaterial>();
   private moving: Array<{ object: Object3D; speed: number; axis: 'x' | 'y' | 'z' }> = [];
+  private readonly variant=new Group();
+  private skinId='';
   private bowString?: Mesh;
   private bowArrow?: Group;
   private definition: ClassDefinition;
@@ -32,9 +34,19 @@ export class WeaponForge {
     this.glow.emissiveIntensity = 2.7;
     this.right.name = `${definition.weapon}-right-grip`;
     this.left.name = `${definition.weapon}-left-grip`;
-    this.build();
+    this.build();this.right.add(this.variant);
   }
 
+  skin(id:string):void {
+    if(this.skinId===id)return;this.skinId=id;this.variant.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});this.variant.clear();
+    const tier=Math.max(0,['ironweapon','forestweapon','frostweapon','voidweapon','sunweapon','eternalweapon'].indexOf(id));
+    for(let i=0;i<tier;i++)for(const side of [-1,1]){
+      const curve=new CatmullRomCurve3([new Vector3(side*.04,.2+i*.12,0),new Vector3(side*(.15+i*.015),.3+i*.12,.015),new Vector3(side*.07,.48+i*.12,0)]);
+      this.mesh(this.variant,new TubeGeometry(curve,12,.016+i*.002,7,false),tier>2?this.glow:this.gold);
+    }
+    if(tier>1)for(let i=0;i<tier;i++){const rune=this.mesh(this.variant,new TorusGeometry(.07+i*.012,.008,6,20),this.glow,0,.35+i*.12,0);rune.rotation.x=Math.PI/2;}
+    if(tier>=4){const edge=this.mesh(this.variant,new ConeGeometry(.1,.48,6),this.steel,0,.7,0);edge.scale.z=.3;}
+  }
   appearance(color:number,refine:number,rarity:string):void {
     const tier=['common','uncommon','rare','epic','legendary','mythic'].indexOf(rarity);
     this.glow.color.setHex(color);this.glow.emissive.setHex(color);this.glow.emissiveIntensity=.1+Math.max(0,tier)*.35+Math.min(15,refine)*.12;

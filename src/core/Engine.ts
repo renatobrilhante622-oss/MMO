@@ -23,7 +23,12 @@ import { HeroController } from '../player/HeroController';
 import { CombatSystem } from '../combat/CombatSystem';
 import { CLASS_DEFINITIONS } from '../combat/ClassSystem';
 import { PetAndMountSystem } from '../companions/PetAndMountSystem';
-import { InventoryAndLoot } from '../rpg/InventoryAndLoot';
+import {AdminPanel} from '../ui/AdminPanel';
+import {GachaCutscene} from '../ui/GachaCutscene';
+import {PlayerJournal} from '../ui/PlayerJournal';
+import {summon,canSummon} from '../rpg/GachaService';
+import {WING_STYLES} from '../rpg/EvolutionSystem';
+import { InventoryAndLoot,COMPLETE_ITEM_CATALOG,scaleWorldItem,RARITIES } from '../rpg/InventoryAndLoot';
 import { BaseBuilding } from '../rpg/BaseBuilding';
 import { CodexSystem } from '../rpg/CodexSystem';
 import { EnemyAI } from '../enemies/EnemyAI';
@@ -63,6 +68,9 @@ export class Engine {
   readonly progress: AdventureProgress;
   readonly hub: AdventureHub;
   readonly hudEditor:HudEditor;
+  readonly admin:AdminPanel;
+  readonly gacha:GachaCutscene;
+  readonly journal:PlayerJournal;
   private readonly i18n: GameI18n;
   gpsRoute: MapPoint[] = [];
   private readonly gpsLine = new Line(new BufferGeometry(),new LineBasicMaterial({color:0x7aedd3,transparent:true,opacity:.75,depthTest:true}));
@@ -151,6 +159,7 @@ export class Engine {
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
+    if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
     this.hero = new HeroController(this.scene, this.camera, this.physics, this.events, CLASS_DEFINITIONS[this.classId]);
     this.hero.respawn(this.terrain.spawnPoint);
     this.hero.update(1 / 60, emptyInput());
@@ -204,6 +213,10 @@ export class Engine {
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.open('talents');this.container.querySelector('.menu-dock')!.append(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.textContent='AUTO FARM';this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
     this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
+    this.admin=new AdminPanel(this.container,()=>({gold:this.inventory.gold,crystals:this.inventory.crystals,diamonds:this.progress.vipDiamonds,tickets:this.progress.tickets,materials:this.progress.materials,level:this.inventory.level,god:this.hero.godMode,noCooldown:this.combat.noCooldown,oneHit:this.combat.oneHitKill}),(action,value)=>this.adminAction(action,value));
+    this.gacha=new GachaCutscene(this.container,(count,banner)=>{const rewards=summon(this.progress,count,banner);if(rewards){this.sound.levelUp();this.save();}return rewards;},count=>canSummon(this.progress,count));
+    this.journal=new PlayerJournal(this.container,this.progress,()=>({level:this.inventory.level,name:this.hub.online.view?.self.name??'Aventureiro',clan:this.hub.online.view?.clan?.name??'',attack:this.hero.stats.attack,defense:this.hero.stats.defense,hp:this.hero.maxHp}),()=>{this.refreshStats();this.save();},()=>this.hub.open('clan'));
+    const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span>⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.container.querySelector('.menu-dock')!.append(clan);this.disposers.push(()=>clan.remove());
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
@@ -267,7 +280,7 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
-      this.progress.earnKill(level,boss,regionAt(position.x,position.z).id);
+      this.progress.earnKill(level,boss,regionAt(position.x,position.z).id);if(boss)this.progress.profile.bossKills++;
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
       const drop: LootDrop = { ...loot, position: position.clone() };
@@ -279,6 +292,7 @@ export class Engine {
     this.disposers.push(this.events.on('loot', drop => {
       this.sound.coin();
       this.inventory.addLoot(drop);
+      this.progress.dropHistory.push({name:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.name:'Ouro / Cristais',rarity:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.rarity:'common',time:Date.now(),gold:drop.gold,crystals:drop.crystals});if(this.progress.dropHistory.length>100)this.progress.dropHistory.shift();
       const index = this.drops.findIndex(candidate => candidate.id === drop.id);
       if (index >= 0) this.drops.splice(index, 1);
       this.removeDropMesh(drop.id);
@@ -308,11 +322,13 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !document.hidden;
+    if(!active)this.hud.resetInput();
     this.progress.tick(document.hidden?0:dt);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
     if (active) {
+      this.progress.profile.playSeconds+=dt;
       const simDt = this.combat.hitstop > 0 ? dt * 0.13 : dt;
       this.timeOfDay = (this.timeOfDay + dt / 600) % 1;
       if (input.mount && this.hero.alive) this.companions.toggleMount();
@@ -418,6 +434,9 @@ export class Engine {
     const p=this.progress,inv=this.inventory;
     let ok=false;
     switch(action){
+      case 'admin-open':this.hub.close();this.admin.open();ok=true;break;
+      case 'evolution-open':this.hub.close();this.journal.open('wings');ok=true;break;
+      case 'gacha10':case 'gacha':{this.hud.resetInput();return this.gacha.open(action==='gacha10'?10:1,p.banner)?'Invocação iniciada / Summoning started':'Tickets / cristais insuficientes ou mochila cheia';}
       case 'edit-hud':this.hub.close();this.hud.resetInput();this.hudEditor.enter();ok=true;break;
       case 'class':
         if (!(data.id in CLASS_DEFINITIONS))break;
@@ -445,8 +464,8 @@ export class Engine {
       case 'pass-buy':ok=p.buyPass();break;
       case 'mission':if(data.key==='daily'||data.key==='weekly'||data.key==='forest')ok=p.claimMission(data.key);break;
       case 'pass-claim':ok=p.claimPass(data.index);break;
-      case 'banner':if(['skin','pet','mount','weapon'].includes(data.key)){p.banner=data.key as typeof p.banner;ok=true;}break;
-      case 'gacha':{const result=p.pull();if(result){this.sound.levelUp();this.save();return (p.language==='pt'?'Invocado: ':'Summoned: ')+result.cosmetic.name[p.language==='pt'?0:1]+(result.duplicate?(p.language==='pt'?' · duplicata convertida em fragmentos':' · duplicate converted to shards'):'');}break;}
+      case 'banner':if(['skin','pet','mount','weapon','wing','equipment'].includes(data.key)){p.banner=data.key as typeof p.banner;ok=true;}break;
+
       case 'redeem-vip':ok=p.redeemVip(data.id);break;
       case 'redeem':ok=p.redeem(data.id);break;
       case 'cosmetic':ok=p.equipCosmetic(data.id);break;
@@ -469,10 +488,12 @@ export class Engine {
     const p=this.progress,hero=this.hero;
     this.autoButton.hidden=!p.vip&&!this.hudEditor.active;this.autoButton.classList.toggle('active',p.autoFarm);
     const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
-    const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);
+    const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;hero.rig.skinAppearance(skin.id,skin.color,RARITIES.indexOf(skin.rarity));hero.rig.wings.configure(p.evolution.wings,p.evolution.wings?p.evolution.wingLevels[p.evolution.wings]:1);
+    const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);this.companions.setEvolution(p.evolution.level(pet.id),p.evolution.level(mount.id));
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
-    const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
+    const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
     if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0,COSMETICS.find(c=>c.id===p.equipped.weapon)!.color,weapon?.rarity??'common');}
+    hero.rig.weapons.skin(p.equipped.weapon);
     if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;
     if(this.channel){
@@ -512,19 +533,41 @@ export class Engine {
     }
   }
 
+  adminAction(action:string,zone='aurora'):string {
+    const p=this.progress,inv=this.inventory;
+    if(action==='gold')inv.gold+=100000;
+    else if(action==='crystals')inv.crystals+=10000;
+    else if(action==='diamonds')p.vipDiamonds+=5000;
+    else if(action==='tickets')p.tickets+=100;
+    else if(action==='materials'){p.materials+=1000;for(const key of Object.keys(p.gems) as Gem[])p.gems[key]+=1000;}
+    else if(action.startsWith('level')){const target=action==='level100'?100:Math.min(100,inv.level+(action==='level10'?10:1));while(inv.level<target)inv.addXp(inv.xpToNext-inv.xp);}
+    else if(action==='points')p.adminPoints+=50;
+    else if(action==='cooldowns'){this.combat.noCooldown=!this.combat.noCooldown;this.combat.resetCooldowns();}
+    else if(action==='god'){this.hero.godMode=!this.hero.godMode;if(!this.hero.alive)this.hero.respawn(this.terrain.spawnPoint);this.hero.heal(this.hero.maxHp);}
+    else if(action==='onehit')this.combat.oneHitKill=!this.combat.oneHitKill;
+    else if(action==='premium'){p.vipUntil=p.premiumUntil=Date.now()+30*86400000;}
+    else if(action==='unlock'){p.owned=COSMETICS.map(c=>c.id);p.evolution.wingOwned=[...WING_STYLES];for(const style of WING_STYLES)p.evolution.wingLevels[style]=10;for(const c of COSMETICS)p.evolution.levels[c.id]=10;}
+    else if(action==='mythic'){if(inv.items.length>=inv.capacity)return 'Mochila cheia';const item=scaleWorldItem(COMPLETE_ITEM_CATALOG.find(i=>i.rarity==='mythic'&&i.slot==='weapon')!,inv.level);item.id='admin-'+crypto.randomUUID();item.upgrade=15;item.attack*=4;item.defense*=4;item.maxHp*=4;item.sockets=['ruby','sapphire','emerald','diamond'];item.gemLevels=[2,2,2,2];inv.items.push(item);}
+    else if(action==='monster'||action==='boss'){const point=this.hero.position.clone().addScaledVector(this.hero.facing,5);this.enemies.spawn(action==='boss'?'boss':'wolf',point,inv.level,action==='boss');}
+    else if(action==='zone'){const region=REGIONS.find(r=>r.id===zone);if(!region)return 'Zona inválida';this.hero.teleportTo(new Vector3(region.center.x,this.terrain.heightAt(region.center.x,region.center.z)+1,region.center.z));}
+    else if(action==='dungeon'){if(this.dungeon.active)return 'Dungeon já está ativa';const d=DUNGEONS.find(d=>d.region===zone)??DUNGEONS[0];this.hero.teleportTo(this.terrain.portalPosition.clone().add(new Vector3(0,2,0)));this.dungeon.start(this.hero,d,Math.max(inv.level,d.level));}
+    else return 'Comando inválido';
+    this.refreshStats();this.updateHUD();this.save();return 'Comando aplicado ao PvE local.';
+  }
   private refreshStats(): void {
     if (!this.hero) return;
     const base = CLASS_DEFINITIONS[this.classId].stats;
     const equipment = this.inventory.getStatBonuses(), buildings = this.base.getBuffs(), codex = this.codex.getBuffs();
     const talents=this.progress.bonuses(this.classId);
+    const evo=this.progress.evolution.buffs(this.progress.equipped.pet,this.progress.equipped.mount);this.hero.mountSpeedBoost=evo.speed;
     const effects=epigraphEffects(this.classId,this.progress.talents[this.classId]);
     this.hero.combatModifiers=effects;
     if(this.companions)this.companions.powerMultiplier=1+effects.companionPower;
     this.hero.setStats({ ...base,
-      maxMana:base.maxMana+talents.maxMana+(equipment.maxMana??0),critChance:Math.min(.6,base.critChance+talents.critChance+(equipment.critChance??0)),
-      attack: base.attack + talents.attack + equipment.attack + buildings.attack + codex.attack,
-      defense: base.defense + talents.defense + equipment.defense + buildings.defense + codex.defense,
-      maxHp: base.maxHp + talents.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp,
+      maxMana:base.maxMana+talents.maxMana+evo.maxMana+(equipment.maxMana??0),critChance:Math.min(.6,base.critChance+talents.critChance+evo.crit+(equipment.critChance??0)),
+      attack: base.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack,
+      defense: base.defense + talents.defense + evo.defense + equipment.defense + buildings.defense + codex.defense,
+      maxHp: base.maxHp + talents.maxHp + evo.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp,
     });
   }
 
@@ -714,7 +757,7 @@ export class Engine {
     cancelAnimationFrame(this.frameId);
     this.save();
     this.disposers.splice(0).forEach(dispose => dispose());
-    this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
+    this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.hud.dispose();
     this.sound.dispose();
     this.companions.dispose?.();

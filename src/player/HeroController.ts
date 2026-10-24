@@ -18,6 +18,10 @@ export class HeroController implements Combatant {
   hp: number;
   mana: number;
   combatModifiers={armorPenetration:0,lifeSteal:0};
+  godMode=false;
+  mountSpeedBoost=0;
+  private aimTime=0;
+  private aimPoint=new Vector3();
   mounted = false;
   private classDef: ClassDefinition;
   readonly rig: ArticulatedCharacter;
@@ -67,7 +71,7 @@ export class HeroController implements Combatant {
   get maxHp(): number { return this.stats.maxHp; }
   get defense(): number { return this.stats.defense; }
   get alive(): boolean { return this.hp > 0; }
-  get invulnerable(): boolean { return this.machine.invulnerable || this.hurtTime > 0 || !this.alive; }
+  get invulnerable(): boolean { return this.godMode || this.machine.invulnerable || this.hurtTime > 0 || !this.alive; }
 
   /** Triggered only after CombatSystem accepts an attack or consumes a skill. */
   visualAttack(skillIndex?: number, combo = 1): void {
@@ -150,6 +154,12 @@ export class HeroController implements Combatant {
     this.rig.weaponAppearance(weaponColor,refine,rarity);
   }
 
+  aimAt(point:Vector3,lunge:number):void {
+    this.aimPoint.copy(point);this.aimTime=.4;
+    if(lunge>0&&lunge<2&&this.machine.state!=='swim'&&this.machine.state!=='climb'){
+      const d=point.clone().sub(this.position).setY(0).normalize();this.impulse.addScaledVector(d,Math.min(3,lunge*2));
+    }
+  }
   update(dt: number, input: HeroInput): void {
     dt = Math.max(0, Math.min(dt, 0.05));
     this.time += dt;
@@ -184,7 +194,7 @@ export class HeroController implements Combatant {
       if (input.dash && this.machine.tryDash()) {
         this.dashDirection.copy(movementLength > 0.08 ? this.moveDirection : this.facing).normalize();
       }
-      let speed = this.stats.speed * (this.mounted ? 1.85 : 1);
+      let speed = this.stats.speed * (this.mounted ? 1.85+this.mountSpeedBoost : 1);
       if (this.machine.state === 'swim' || this.machine.state === 'dive') {
         speed *= 0.68;
         const targetY = input.dive ? this.physics.waterLevel - 2.1 : this.physics.waterLevel - 0.12;
@@ -222,6 +232,7 @@ export class HeroController implements Combatant {
   private animate(dt: number, movement: number): void {
     this.model.position.copy(this.position);
     this.model.position.y -= this.radius;
+    if(this.aimTime>0){this.aimTime=Math.max(0,this.aimTime-dt);const d=this.aimPoint.clone().sub(this.position).setY(0);if(d.lengthSq()>.001)this.facing.lerp(d.normalize(),1-Math.exp(-dt*22)).normalize();}
     const targetRotation = Math.atan2(this.facing.x, this.facing.z);
     const delta = Math.atan2(Math.sin(targetRotation - this.model.rotation.y), Math.cos(targetRotation - this.model.rotation.y));
     this.model.rotation.y += delta * (1 - Math.exp(-dt * 16));

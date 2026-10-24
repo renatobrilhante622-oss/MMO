@@ -1,5 +1,5 @@
 import {
-  BufferGeometry, CapsuleGeometry, ConeGeometry, Group, MathUtils,
+  BufferGeometry, CapsuleGeometry, ConeGeometry, Group, MathUtils, CatmullRomCurve3, TubeGeometry, Vector3, LatheGeometry, Vector2,
   Mesh, MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry,
 } from 'three';
 
@@ -20,6 +20,7 @@ export class CreatureRig {
   private readonly bone: MeshStandardMaterial;
   private readonly scale: number;
   private attackBlend = 0;
+  private readonly tendrils:Group[]=[];
 
   constructor(readonly kind: string, readonly boss: boolean, private readonly body: MeshStandardMaterial) {
     this.eye = new MeshStandardMaterial({ color: boss ? 0xffdd80 : 0xbfffe5, emissive: boss ? 0xff682c : 0x63dfce, emissiveIntensity: 3.2, roughness: .25 });
@@ -127,7 +128,7 @@ export class CreatureRig {
   private humanoid(): void {
     this.spine.scale.setScalar(this.scale);
     this.spine.position.y = .03;
-    const chest = this.mesh(this.spine, new CapsuleGeometry(.34, .4, 4, this.kind === 'golem' ? 6 : 10), this.body, 0, .5);
+    const chest = this.mesh(this.spine, new LatheGeometry([new Vector2(.22,-.3),new Vector2(.24,-.1),new Vector2(.37,.15),new Vector2(.35,.3),new Vector2(.12,.4)],24), this.body, 0, .5);
     chest.scale.z = .7;
     this.mesh(this.spine, new SphereGeometry(.25, 7, 6), this.dark, 0, .02).scale.z = .7;
     this.skull.position.set(0, 1.15, .035);
@@ -163,7 +164,7 @@ export class CreatureRig {
         }
       }
       if (this.boss) {
-        const horn = this.mesh(this.skull, new ConeGeometry(.095, .54, 6), this.bone, side * .2, .28, -.03);
+        const horn = this.mesh(this.skull, new TubeGeometry(new CatmullRomCurve3([new Vector3(),new Vector3(side*.12,.25,0),new Vector3(side*.23,.4,.12),new Vector3(side*.14,.5,.2)]),18,.07,8,false), this.bone, side * .2, .28, -.03);
         horn.rotation.z = -side * .45;
         const crown = this.mesh(this.skull, new TorusGeometry(.25, .018, 4, 16), this.eye, 0, .27, 0);
         crown.rotation.x = Math.PI / 2;
@@ -182,6 +183,7 @@ export class CreatureRig {
     }
     this.box(this.spine, .035, .4, .025, this.eye, 0, .56, .26);
     if (this.boss) {
+      for(let i=0;i<5;i++){const joint=new Group();joint.position.set((i-2)*.18,.3,-.2);const curve=new CatmullRomCurve3([new Vector3(),new Vector3((i-2)*.2,-.1,-.5),new Vector3((i-2)*.3,-.3,-1),new Vector3((i-2)*.35,.1,-1.4)]);const tentacle=this.mesh(joint,new TubeGeometry(curve,20,.055,8,false),this.dark);joint.add(tentacle);this.spine.add(joint);this.tendrils.push(joint);}
       for (let i = 0; i < 3; i++) {
         const seal = this.mesh(this.spine, new TorusGeometry(.16 - i * .03, .013, 4, 18), this.eye, 0, .55, .3);
         seal.rotation.x = i * .12;
@@ -203,6 +205,7 @@ export class CreatureRig {
     this.jaw.rotation.x = this.attackBlend * .5 + Math.max(0, Math.sin(elapsed * 1.6)) * .05;
     this.tail.rotation.y = Math.sin(elapsed * 4.5) * .3;
     for (const limb of this.limbs) {
+      const oldUpper=limb.shoulder.rotation.clone(),oldLower=limb.elbow.rotation.clone();
       const alternate = limb.side * (limb.rear ? -1 : 1);
       const stride = Math.sin(phase + (alternate > 0 ? 0 : Math.PI)) * movement;
       limb.shoulder.rotation.x = stride * (this.kind === 'wolf' ? .7 : .5);
@@ -214,6 +217,7 @@ export class CreatureRig {
         limb.elbow.rotation.x = -.7 * preparation;
         limb.shoulder.rotation.z = limb.side * .22;
       }
+      for(const axis of ['x','y','z'] as const){limb.shoulder.rotation[axis]=MathUtils.damp(oldUpper[axis],limb.shoulder.rotation[axis],12,dt);limb.elbow.rotation[axis]=MathUtils.damp(oldLower[axis],limb.elbow.rotation[axis],12,dt);}
     }
     if (this.kind === 'slime') {
       this.spine.scale.set(1 + Math.sin(phase) * .035, 1 - Math.sin(phase) * .08, 1 + Math.sin(phase) * .035);
@@ -223,6 +227,7 @@ export class CreatureRig {
     } else {
       this.spine.position.y = .03 + Math.abs(Math.sin(phase)) * movement * .04 + breathe;
     }
+    this.tendrils.forEach((t,i)=>{t.rotation.x=Math.sin(elapsed*2+i)*.2;t.rotation.y=Math.sin(elapsed*1.7+i)*.25;});
     for (let i = 0; i < this.ornaments.length; i++) {
       const ornament = this.ornaments[i];
       if (this.kind === 'wraith') ornament.rotation.x = Math.sin(elapsed * 3 + i) * .2;

@@ -36,7 +36,7 @@ export const CLASS_DEFINITIONS: Record<ClassId, ClassDefinition> = {
     skill('stormwave', 'Onda da Tempestade', 'Raios em cone atingem uma longa faixa.', 'cone', 'arcane', 0xafb3ff, 3, 12, 30, 15, 6),
     skill('cataclysm', 'Cataclismo', 'O poder dos elementos causa uma explosão maciça.', 'circle', 'fire', 0xffc05b, 5.5, 26, 55, 0, 11),
   ] },
-  necromancer: { id: 'necromancer', name: 'Necromancer', description: 'Foice ritual. Drena vida e domina almas.', color: 0x99dcac, weapon: 'scythe', stats: stats(130, 160, 24, 13, 6, 3.8, 1.7, .15), skills: [
+  necromancer: { id: 'necromancer', name: 'Necromancer', description: 'Foice ritual. Drena vida e domina almas.', color: 0x99dcac, weapon: 'scythe', stats: stats(130, 160, 24, 13, 6, 16, 1.7, .15), skills: [
     skill('soulreap', 'Ceifar Almas', 'A foice rouba vitalidade dos inimigos à frente.', 'cone', 'arcane', 0xa6e5c1, 2.4, 6, 18, 7, 4, { heal: .12 }),
     skill('plague', 'Peste Espectral', 'Uma esfera pestilenta detona no impacto.', 'projectile', 'poison', 0x7edc87, 2.8, 9, 25, 25, 2.3),
     skill('gravecircle', 'Círculo dos Mortos', 'Energia ancestral atinge inimigos próximos.', 'circle', 'arcane', 0x9db5d7, 3, 13, 32, 0, 8),

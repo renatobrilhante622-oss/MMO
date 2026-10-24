@@ -5,6 +5,7 @@ import { EventBus } from '../core/GameTypes';
 import type { PhysicsWorld } from '../physics/PhysicsWorld';
 import { calculateDamage } from '../combat/ClassSystem';
 import { REGIONS, regionAt, regionalLevel } from '../world/Regions';
+import {WORLD_SITES} from '../world/WorldSites';
 import { CreatureRig } from './CreatureRig';
 
 type EnemyState = 'patrol' | 'chase' | 'attack' | 'flee' | 'dead';
@@ -63,6 +64,7 @@ export class Enemy implements Combatant {
     this.body.mass = boss ? 12 : 2;
     this.body.updateMassProperties();
     this.material = new MeshStandardMaterial({ color: data.color, roughness: .76, metalness: kind === 'golem' || boss ? .3 : .05, emissive: data.emissive, emissiveIntensity: .25 });
+    if(kind==='slime'&&!boss){this.material.transparent=true;this.material.opacity=.72;this.material.roughness=.14;this.material.metalness=.08;}
     this.rig = new CreatureRig(kind, boss, this.material);
     this.model.add(this.rig.root);
     this.model.position.copy(position); this.scene.add(this.model);
@@ -83,7 +85,8 @@ export class Enemy implements Combatant {
 
   receiveDamage(amount: number, knockback?: Vector3): number {
     if (!this.alive || !Number.isFinite(amount) || amount <= 0) return 0;
-    const dealt = Math.min(this.hp, Math.max(0, Math.round(amount)));
+    const dealt = Math.min(this.hp, Math.max(1, Math.round(amount)));
+    this.material.emissive.setHex(0xffeeee);this.material.emissiveIntensity=2.4;
     this.hp -= dealt; this.hitStun = .16; this.healthGroup.visible = true;
     this.healthFill.scale.x = Math.max(0, this.hp / this.maxHp);
     this.healthFill.position.x = -(1 - this.hp / this.maxHp) * (this.boss ? 1.75 : .66);
@@ -105,7 +108,8 @@ export class Enemy implements Combatant {
     this.model.position.copy(this.position);
     if (this.kind === 'wraith') this.model.position.y += Math.sin(elapsed * 2 + this.patrolPhase) * .2;
     this.healthGroup.lookAt(hero.position.x, this.model.position.y + this.healthGroup.position.y, hero.position.z);
-    this.material.emissiveIntensity = this.hitStun > 0 ? 1.2 : .25;
+    this.material.emissive.setHex(this.hitStun>0?0xffaaaa:this.archetype.emissive);
+    this.material.emissiveIntensity = this.hitStun > 0 ? 2.4 : .25;
     this.hitStun = Math.max(0, this.hitStun - dt);
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
     const delta = hero.position.clone().sub(this.position); delta.y = 0;
@@ -175,6 +179,7 @@ export class EnemyAI {
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
   constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus) {
     const locations: [number, number][] = [[-14, -8], [13, -9], [-24, -18], [22, -25], [9, -34], [-19, -43], [35, -47], [-44, -30], [28, -77], [-32, -82], [58, -52], [-60, -65], [-38, 46], [48, 45]];
+    for(const site of WORLD_SITES)for(let i=0;i<3;i++)locations.push([site.x+Math.cos(i*2.094)*12,site.z+Math.sin(i*2.094)*12]);
     locations.forEach(([x, z], i) => {
       const height = physics.terrainHeight(x, z);
       if (height > physics.waterLevel + .5) this.spawn(regionAt(x,z).kinds[i % regionAt(x,z).kinds.length], new Vector3(x, height + 1.5, z), i<5?1+Math.floor(i/2):regionalLevel(x,z));
@@ -207,7 +212,7 @@ export class EnemyAI {
     }
     this.spawnTimer -= dt;
     const ambientCount = this.enemies.filter(enemy => !enemy.boss && enemy.alive).length;
-    if (this.spawnTimer <= 0 && ambientCount < 18 && hero.alive) {
+    if (this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
       this.spawnTimer = 8;
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;

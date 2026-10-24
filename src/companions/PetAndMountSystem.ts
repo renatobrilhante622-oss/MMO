@@ -13,6 +13,8 @@ export class PetAndMountSystem {
   readonly pet = this.petRig.root;
   readonly mount = this.mountRig.root;
   powerMultiplier=1;
+  private petLevel=1;
+  setEvolution(pet:number,mount:number):void{this.petLevel=pet;this.mountRig.root.scale.setScalar(1+(mount-1)*.018);this.petRig.root.scale.setScalar(1+(pet-1)*.025);}
   private time = 0;
   private attackCooldown = 0;
   private lastMountPosition = new Vector3();
@@ -85,7 +87,7 @@ export class PetAndMountSystem {
     this.petRig.update(dt, distance > .65 ? speed : 0, this.time, !!target && nearest < 2);
     if (target && nearest < target.radius + 1.15 && this.attackCooldown === 0 && this.hero.alive) {
       this.attackCooldown = 1.1;
-      const damage = Math.max(1, Math.round(this.hero.stats.attack * 0.32 * this.powerMultiplier * 100 / (100 + target.defense)));
+      const damage = Math.max(1, Math.round(this.hero.stats.attack * 0.32 * (1+this.petLevel*.06) * this.powerMultiplier * 100 / (100 + target.defense)));
       const knockback = target.position.clone().sub(this.pet.position).setY(0).normalize().multiplyScalar(1.2);
       const dealt = target.receiveDamage(damage, knockback);
       if (dealt > 0) this.events.emit('damage', { position: target.position.clone().add(new Vector3(0, 1.2, 0)), amount: dealt, critical: false, team: 'enemy', color: 0x74ead4 });

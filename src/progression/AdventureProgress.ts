@@ -1,3 +1,4 @@
+import {EvolutionSystem} from '../rpg/EvolutionSystem';
 import {Vector3} from 'three';
 import type { ClassId, Rarity } from '../core/GameTypes';
 import { CLASS_IDS } from '../combat/ClassSystem';
@@ -10,7 +11,7 @@ export type Language = 'pt'|'en';
 export const ATTRIBUTES:readonly Attribute[]=['power','vitality','guard','spirit','precision'];
 export const ATTRIBUTE_NAMES:Record<Attribute,[string,string]>={power:['Poder','Power'],vitality:['Vitalidade','Vitality'],guard:['Proteção','Guard'],spirit:['Espírito','Spirit'],precision:['Precisão','Precision']};
 export interface Bookmark { name:string; x:number; z:number; region:string; }
-export interface Cosmetic { id:string; name:[string,string]; type:'skin'|'pet'|'mount'|'weapon'; rarity:Rarity; color:number; }
+export interface Cosmetic { id:string; name:[string,string]; type:'skin'|'pet'|'mount'|'weapon'|'wing'; rarity:Rarity; color:number; }
 export const COSMETICS:readonly Cosmetic[]=[
   {id:'traveler',name:['Viajante','Traveler'],type:'skin',rarity:'common',color:0xa8b9c4},
   {id:'forest',name:['Guardião do Bosque','Forest Warden'],type:'skin',rarity:'uncommon',color:0x67d891},
@@ -36,6 +37,15 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'voidweapon',name:['Fio Astral','Astral Edge'],type:'weapon',rarity:'epic',color:0xbd87ff},
   {id:'sunweapon',name:['Fio Solar','Solar Edge'],type:'weapon',rarity:'legendary',color:0xffd37c},
   {id:'eternalweapon',name:['Fio Eterno','Eternal Edge'],type:'weapon',rarity:'mythic',color:0xff8ac0},
+  {id:'hellhound',name:['Cachorro do Inferno','Hellhound'],type:'pet',rarity:'epic',color:0xff6329},
+  {id:'phoenix',name:['Fênix Solar','Solar Phoenix'],type:'pet',rarity:'legendary',color:0xffbd42},
+  {id:'dracolich',name:['Dracolich de Osso','Bone Dracolich'],type:'pet',rarity:'mythic',color:0x99e4d6},
+  {id:'nightmare',name:['Corcel do Pesadelo Abissal','Abyssal Nightmare'],type:'mount',rarity:'epic',color:0x9d62e3},
+  {id:'fenrir',name:['Lobo Fenrir Gigante','Giant Fenrir'],type:'mount',rarity:'legendary',color:0x80bfff},
+  {id:'spiritstag',name:['Cervo Espiritual','Spirit Stag'],type:'mount',rarity:'rare',color:0x82f0d8},
+  {id:'wyvern',name:['Dragão Wyvern','Wyvern Dragon'],type:'mount',rarity:'mythic',color:0xef7a46},
+  ...(['common','uncommon','rare','epic','legendary','mythic'] as Rarity[]).map((rarity,i)=>({id:'wing-'+i,name:['Asas '+['Necróticas','Celestiais','Glaciais','de Magma','Solares','Astrais'][i],'Wings '+['Necrotic','Celestial','Glacial','Magma','Solar','Astral'][i]] as [string,string],type:'wing' as const,rarity,color:[0xa477dd,0xffe3ab,0x84ddff,0xff6733,0xffd367,0xce85ff][i]})),
+
 ];
 export const GACHA_ODDS=[.50,.29,.14,.055,.014,.001] as const;
 export const SLOT_COSTS=[2000,5000,10000,18000] as const;
@@ -46,6 +56,11 @@ export function seasonId(now=Date.now()):string {return new Date(now).toISOStrin
 /** Local PvE progression. Never accepted as authoritative inventory by the online server. */
 export class AdventureProgress {
   talents:Partial<Record<ClassId,Partial<Record<Attribute,number>>>>={};
+  evolution=new EvolutionSystem();
+  tickets=0;
+  adminPoints=0;
+  profile={id:'',avatar:'traveler',playSeconds:0,bossKills:0};
+  dropHistory:Array<{name:string;rarity:Rarity;time:number;gold:number;crystals:number}>=[];
   chosen=false;
   gems:Record<Gem,number>={ruby:0,sapphire:0,emerald:0,diamond:0};
   greaterGems:Record<Gem,number>={ruby:0,sapphire:0,emerald:0,diamond:0};
@@ -53,10 +68,10 @@ export class AdventureProgress {
   materials=0;
   potions={health:3,mana:3};
   owned=['traveler','wolf','horse','ironweapon'];
-  equipped={skin:'traveler',pet:'wolf',mount:'horse',weapon:'ironweapon'};
+  equipped={skin:'traveler',pet:'wolf',mount:'horse',weapon:'ironweapon',wing:'wing-0'};
   vipDiamonds=0;
   shards=0;
-  banner:Cosmetic['type']='skin';
+  banner:Cosmetic['type']|'equipment'='skin';
   pulls=0;
   pity=0;
   bookmarks:Array<Bookmark|null>=Array.from({length:10},()=>null);
@@ -92,7 +107,7 @@ export class AdventureProgress {
   get slots():number{return 4+this.purchasedSlots+(this.vip?2:0);}
   slotUnlocked(index:number):boolean{return Number.isInteger(index)&&index>=0&&index<10&&(index<4||(index<8&&index<4+this.purchasedSlots)||(index>=8&&this.vip));}
   spent(id:ClassId):number{return ATTRIBUTES.reduce((n,key)=>n+(this.talents[id]?.[key]??0),0);}
-  points(id:ClassId):number{return Math.max(0,(this.inventory.level-1)*3-this.spent(id));}
+  points(id:ClassId):number{return Math.max(0,(this.inventory.level-1)*3+this.adminPoints-this.spent(id));}
   allocate(id:ClassId,attribute:Attribute):boolean {
     if(!CLASS_IDS.includes(id)||!ATTRIBUTES.includes(attribute)||this.points(id)<1||(this.talents[id]?.[attribute]??0)>=100)return false;
     const page=this.talents[id]??={};page[attribute]=(page[attribute]??0)+1;return true;
@@ -201,10 +216,10 @@ export class AdventureProgress {
     this.passXp+=60;this.inventory.gold+=dungeon.gold;this.inventory.crystals+=dungeon.crystals;
   }
   pull(random:()=>number=Math.random):{cosmetic:Cosmetic;duplicate:boolean}|null {
-    if(this.inventory.crystals<20)return null;
+    if(this.banner==='equipment'||(this.inventory.crystals<20&&this.tickets<1))return null;
     const roll=random();const typeRoll=random();const choice=random();
     if(![roll,typeRoll,choice].every(n=>Number.isFinite(n)&&n>=0&&n<1))return null;
-    this.inventory.crystals-=20;this.pulls++;this.pity++;
+    if(this.tickets>0)this.tickets--;else this.inventory.crystals-=20;this.pulls++;this.pity++;
     let rarity=0,sum=0;for(let i=0;i<GACHA_ODDS.length;i++){sum+=GACHA_ODDS[i];if(roll<sum){rarity=i;break;}}
     if(this.pity>=60)rarity=Math.max(4,rarity);
     else if(this.pulls%10===0)rarity=Math.max(2,rarity);
@@ -226,26 +241,29 @@ export class AdventureProgress {
     this.vipDiamonds-=cost;this.owned.push(id);return true;
   }
   equipCosmetic(id:string):boolean {
-    const c=COSMETICS.find(c=>c.id===id);if(!c||!this.owned.includes(id))return false;this.equipped[c.type]=id;return true;
+    const c=COSMETICS.find(c=>c.id===id);if(!c||!this.owned.includes(id))return false;this.equipped[c.type]=id;if(c.type==='wing'){const style=(['necrotic','celestial','glacial','magma','celestial','necrotic'] as const)[Number(id.split('-')[1])??0];if(!this.evolution.wingOwned.includes(style))this.evolution.wingOwned.push(style);this.evolution.wings=style;}return true;
   }
   snapshot():Record<string,unknown> {
     const {inventory,...data}=this;return structuredClone(data);
   }
   restore(raw:unknown):void {
     if(!object(raw))return;
+    this.evolution.restore(raw.evolution);this.tickets=integer(raw.tickets,0,99999);this.adminPoints=integer(raw.adminPoints,0,99999);
+    if(object(raw.profile)){this.profile={id:typeof raw.profile.id==='string'?raw.profile.id.slice(0,40):'',avatar:typeof raw.profile.avatar==='string'&&COSMETICS.some(c=>c.id===(raw.profile as Record<string,unknown>).avatar)?raw.profile.avatar:'traveler',playSeconds:integer(raw.profile.playSeconds,0,1e9),bossKills:integer(raw.profile.bossKills,0,1e9)};}
+    if(Array.isArray(raw.dropHistory))this.dropHistory=raw.dropHistory.slice(-100).filter((v):v is typeof this.dropHistory[number]=>object(v)&&typeof v.name==='string'&&RARITIES.includes(v.rarity as Rarity)&&typeof v.time==='number');
     this.chosen=raw.chosen===true;
     if(object(raw.missions))for(const [key,value]of Object.entries(raw.missions).slice(-30))this.missions[key]=integer(value,0,10000);
     if(Array.isArray(raw.missionClaims))this.missionClaims=raw.missionClaims.filter((v):v is string=>typeof v==='string').slice(-30);
     for(const key of ['autoHealthThreshold','autoManaThreshold'] as const)if(typeof raw[key]==='number')this[key]=Math.max(.1,Math.min(.8,raw[key]));
-    if(object(raw.talents))for(const id of CLASS_IDS){const page=raw.talents[id];if(!object(page))continue;let remaining=(this.inventory.level-1)*3;for(const key of ATTRIBUTES){const n=integer(page[key],0,Math.min(100,remaining));(this.talents[id]??={})[key]=n;remaining-=n;}}
+    if(object(raw.talents))for(const id of CLASS_IDS){const page=raw.talents[id];if(!object(page))continue;let remaining=(this.inventory.level-1)*3+this.adminPoints;for(const key of ATTRIBUTES){const n=integer(page[key],0,Math.min(100,remaining));(this.talents[id]??={})[key]=n;remaining-=n;}}
     if(object(raw.gems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.gems[key]=integer(raw.gems[key],0,99999);
     if(object(raw.greaterGems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.greaterGems[key]=integer(raw.greaterGems[key],0,99999);
     this.hudOpacity=typeof raw.hudOpacity==='number'?Math.max(.3,Math.min(1,raw.hudOpacity)):1;
     this.vipDiamonds=integer(raw.vipDiamonds,0,999999);this.materials=integer(raw.materials,0,999999);this.shards=integer(raw.shards,0,999999);
     if(object(raw.potions))for(const key of ['health','mana'] as const)this.potions[key]=integer(raw.potions[key],0,99);
     this.owned=[...new Set([...this.owned,...Array.isArray(raw.owned)?raw.owned.filter((id):id is string=>typeof id==='string'&&COSMETICS.some(c=>c.id===id)):[]])];
-    if(object(raw.equipped))for(const type of ['skin','pet','mount','weapon'] as const){const id=raw.equipped[type];if(typeof id==='string'&&this.owned.includes(id)&&COSMETICS.some(c=>c.id===id&&c.type===type))this.equipped[type]=id;}
-    if(['skin','pet','mount','weapon'].includes(String(raw.banner)))this.banner=raw.banner as Cosmetic['type'];
+    if(object(raw.equipped))for(const type of ['skin','pet','mount','weapon','wing'] as const){const id=raw.equipped[type];if(typeof id==='string'&&this.owned.includes(id)&&COSMETICS.some(c=>c.id===id&&c.type===type))this.equipped[type]=id;}
+    if(['skin','pet','mount','weapon','wing','equipment'].includes(String(raw.banner)))this.banner=raw.banner as typeof this.banner;
     this.pulls=integer(raw.pulls,0,1e9);this.pity=integer(raw.pity,0,59);this.purchasedSlots=integer(raw.purchasedSlots,0,4);
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;

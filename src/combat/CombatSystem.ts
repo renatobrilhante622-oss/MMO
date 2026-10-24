@@ -4,12 +4,14 @@ import { EventBus } from '../core/GameTypes';
 import { calculateDamage, getClass } from './ClassSystem';
 import { ParticleSystem3D } from './ParticleSystem3D';
 
-interface Projectile { group: Group; velocity: Vector3; remaining: number; source: Combatant; targets: Combatant[]; stats: CharacterStats; multiplier: number; radius: number; color: number }
+interface Projectile { group: Group; velocity: Vector3; remaining: number; source: Combatant; targets: Combatant[]; stats: CharacterStats; multiplier: number; radius: number; color: number; locked?:Combatant; lifetime:number }
 type Caster = Combatant & { mana: number; consumeMana(amount: number): boolean; heal(amount: number): void };
 
 export class CombatSystem {
   readonly cooldowns = [0, 0, 0, 0];
   readonly cooldownMax = [1, 1, 1, 1];
+  noCooldown=false;
+  oneHitKill=false;
   hitstop = 0;
   screenShake = 0;
   combo = 0;
@@ -26,17 +28,19 @@ export class CombatSystem {
   }
 
   attack(source: Combatant, targets: Combatant[], stats: CharacterStats, facing: Vector3): boolean {
-    if (!source.alive || this.attackCooldown > 0) return false;
+    if (!source.alive || (!this.noCooldown&&this.attackCooldown > 0)) return false;
     this.combo = this.comboWindow > 0 ? (this.combo % 3) + 1 : 1;
     this.comboWindow = 1.5;
     this.attackCooldown = 1 / Math.max(.1, stats.attackSpeed);
-    const direction = this.horizontalDirection(facing);
+    const lock=this.nearest(source,targets,stats.range+1.2);
+    const direction = lock?this.horizontalDirection(lock.position.clone().sub(source.position)):this.horizontalDirection(facing);
+    if(lock)(source as Combatant & {aimAt?:(point:Vector3,lunge:number)=>void}).aimAt?.(lock.position,stats.range>8?0:Math.max(0,source.position.distanceTo(lock.position)-stats.range+.4));
     const multiplier = this.combo === 3 ? 1.65 : 1 + (this.combo - 1) * .15;
     if (stats.range > 8) {
-      this.shoot(source, targets, stats, direction, stats.range, .5, multiplier, 0xc2efff);
+      this.shoot(source, targets, stats, direction, stats.range, .5, multiplier, 0xc2efff,lock);
     } else {
       const range = stats.range + (this.combo === 3 ? .65 : 0);
-      this.cone(source, targets, stats, direction, range, this.combo === 3 ? -.1 : .2, multiplier, 0xffd699);
+      this.cone(source, targets, stats, direction, range, Math.cos(70*Math.PI/180), multiplier, 0xffd699);
       const center = source.position.clone().addScaledVector(direction, Math.min(1.6, range * .4));
       center.y += .5;
       this.pulse(center, range * .6, 0xffd699, .17);
@@ -48,7 +52,7 @@ export class CombatSystem {
 
   cast(index: number, classId: ClassId, source: Caster, targets: Combatant[], stats: CharacterStats, facing: Vector3): boolean {
     const skill = getClass(classId).skills[index];
-    if (!skill || !source.alive || this.cooldowns[index] > 0) return false;
+    if (!skill || !source.alive || (!this.noCooldown&&this.cooldowns[index] > 0)) return false;
     if (!source.consumeMana(skill.mana)) {
       this.events.emit('message', { text: 'Mana insuficiente. Aguarde a regeneração.', tone: 'warning' });
       return false;
@@ -84,6 +88,10 @@ export class CombatSystem {
     return result.lengthSq() > .001 ? result.normalize() : result.set(0, 0, -1);
   }
 
+  private nearest(source:Combatant,targets:Combatant[],range:number):Combatant|undefined {
+    let result:Combatant|undefined,best=range;
+    for(const target of targets){if(!this.canHit(source,target)||Math.abs(target.position.y-source.position.y)>4+target.radius)continue;const d=Math.hypot(target.position.x-source.position.x,target.position.z-source.position.z)-target.radius;if(d<=best){best=d;result=target;}}return result;
+  }
   private canHit(source: Combatant, target: Combatant): boolean { return target.alive && target.team !== source.team && !target.invulnerable; }
 
   private cone(source: Combatant, targets: Combatant[], stats: CharacterStats, direction: Vector3, range: number, minimumDot: number, multiplier: number, color: number): void {
@@ -93,7 +101,7 @@ export class CombatSystem {
       if (Math.abs(delta.y) > 4 + target.radius) continue;
       delta.y = 0;
       const distance = delta.length();
-      if (distance <= range + target.radius && (distance < 1.2 || delta.normalize().dot(direction) >= minimumDot)) this.hit(source, target, stats, multiplier, color);
+      if (distance <= range + target.radius && (distance < source.radius+target.radius+1 || delta.normalize().dot(direction) >= minimumDot)) this.hit(source, target, stats, multiplier, color);
     }
   }
 
@@ -101,7 +109,7 @@ export class CombatSystem {
     if (!this.canHit(source, target)) return;
     const critical = Math.random() < stats.critChance;
     const modifiers=(source as Combatant & {combatModifiers?:{armorPenetration:number;lifeSteal:number}}).combatModifiers;
-    const damage = calculateDamage(stats.attack, target.defense*(1-(modifiers?.armorPenetration??0)), multiplier, critical, stats.critMultiplier);
+    const damage = this.oneHitKill?target.hp:Math.max(1,calculateDamage(stats.attack, target.defense*(1-(modifiers?.armorPenetration??0)), multiplier, critical, stats.critMultiplier));
     const knockback = target.position.clone().sub(source.position).setY(0).normalize().multiplyScalar(multiplier > 2 ? 7 : 3);
     knockback.y = .8;
     const dealt = target.receiveDamage(damage, knockback);
@@ -114,7 +122,7 @@ export class CombatSystem {
     this.screenShake = Math.max(this.screenShake, critical ? .16 : .055);
   }
 
-  private shoot(source: Combatant, targets: Combatant[], stats: CharacterStats, direction: Vector3, range: number, radius: number, multiplier: number, color: number): void {
+  private shoot(source: Combatant, targets: Combatant[], stats: CharacterStats, direction: Vector3, range: number, radius: number, multiplier: number, color: number,locked?:Combatant): void {
     if (this.projectiles.length >= 36) this.removeProjectile(this.projectiles.shift()!);
     const group = new Group();
     const orb = new Mesh(this.projectileGeometry, this.material(color));
@@ -125,7 +133,7 @@ export class CombatSystem {
     group.add(ring);
     group.position.copy(source.position).add(new Vector3(0, .6, 0)).addScaledVector(direction, source.radius + .3);
     this.scene.add(group);
-    this.projectiles.push({ group, velocity: direction.clone().multiplyScalar(25), remaining: Math.max(1, range), source, targets, stats: { ...stats }, multiplier, radius, color });
+    this.projectiles.push({ group, velocity: direction.clone().multiplyScalar(25), remaining: Math.max(1, range), source, targets, stats: { ...stats }, multiplier, radius, color,locked,lifetime:0 });
   }
 
   private material(color: number): MeshBasicMaterial {
@@ -143,6 +151,8 @@ export class CombatSystem {
   }
 
   update(dt: number): void {
+    dt=Math.max(0,Number.isFinite(dt)?dt:0);
+    if(this.noCooldown)this.resetCooldowns();
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
     this.comboWindow = Math.max(0, this.comboWindow - dt);
     this.hitstop = Math.max(0, this.hitstop - dt);
@@ -150,6 +160,11 @@ export class CombatSystem {
     for (let i = 0; i < 4; i++) this.cooldowns[i] = Math.max(0, this.cooldowns[i] - dt);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
+      projectile.lifetime+=dt;
+      if(projectile.locked){
+        if(!this.canHit(projectile.source,projectile.locked))projectile.locked=this.nearest(projectile.source,projectile.targets,Math.max(4,projectile.remaining));
+        if(projectile.locked){const delta=projectile.locked.position.clone().add(new Vector3(0,.5,0)).sub(projectile.group.position);const speed=Math.min(25,delta.length()/Math.max(.001,dt));projectile.velocity.copy(delta.normalize().multiplyScalar(speed));}
+      }
       const previous = projectile.group.position.clone();
       projectile.group.position.addScaledVector(projectile.velocity, dt);
       const next = projectile.group.position;
@@ -173,7 +188,7 @@ export class CombatSystem {
         } else this.hit(projectile.source, impacted, projectile.stats, projectile.multiplier, projectile.color);
         this.burst(next, projectile.color, 16);
       }
-      if (impacted || projectile.remaining <= 0 || !projectile.source.alive) { this.removeProjectile(projectile); this.projectiles.splice(i, 1); }
+      if (impacted || (!projectile.locked&&projectile.remaining <= 0) || projectile.lifetime>12 || !projectile.source.alive) { this.removeProjectile(projectile); this.projectiles.splice(i, 1); }
     }
     this.particles.update(dt);
   }

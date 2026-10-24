@@ -4,6 +4,8 @@ import {
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
+import {WingsSystem} from '../companions/WingsSystem';
+import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
 
 interface Limb {
@@ -148,6 +150,11 @@ export class ArticulatedCharacter {
   readonly armor: MeshStandardMaterial;
   readonly accent: MeshStandardMaterial;
   readonly cape: CapeCloth;
+  readonly wings=new WingsSystem();
+  private readonly casterOrbs=new Group();
+  private readonly skinGeometry=new Group();
+  private readonly skinAura=new RarityAura(.6);
+  private skinKey='';
   weapons: WeaponForge;
   private readonly materials = new Set<MeshStandardMaterial>();
   private readonly skin: MeshStandardMaterial;
@@ -189,6 +196,8 @@ export class ArticulatedCharacter {
     this.torso.position.y = .35;
     this.torso.name = 'thorax';
     this.pelvis.add(this.torso);
+    this.torso.add(this.wings.root,this.skinGeometry,this.skinAura);
+    this.pelvis.add(this.casterOrbs);for(let i=0;i<3;i++){const orb=this.mesh(this.casterOrbs,new SphereGeometry(.055,14,10),this.eye,Math.cos(i*2.094)*.58,.65,Math.sin(i*2.094)*.58);orb.name='Orbiting class focus';}
     this.buildTorso();
     this.buildHead();
     this.leftArm = this.arm(-1);
@@ -230,7 +239,7 @@ export class ArticulatedCharacter {
   private buildTorso(): void {
     const hips = this.mesh(this.pelvis, new CapsuleGeometry(.225, .13, 4, 10), this.leather);
     hips.scale.set(1.1, .65, .8);
-    const chest = this.mesh(this.torso, new CapsuleGeometry(.27, .3, 5, 12), this.armor);
+    const chest = this.mesh(this.torso, new LatheGeometry([new Vector2(.2,-.28),new Vector2(.22,-.16),new Vector2(.3,.12),new Vector2(.31,.24),new Vector2(.21,.32),new Vector2(.1,.36)],32), this.armor);
     chest.scale.set(1.06, 1, .7);
     this.box(this.torso, .51, .065, .36, this.leather, 0, -.29);
     this.box(this.torso, .105, .08, .055, this.gold, 0, -.29, .207);
@@ -350,10 +359,23 @@ export class ArticulatedCharacter {
   }
 
   private styleSilhouette(definition:ClassDefinition):void {
-    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
+    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
     this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
+  }
+  skinAppearance(id:string,color:number,rarity:number):void {
+    if(id===this.skinKey)return;this.skinKey=id;
+    this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
+    this.skinAura.configure(rarity,color);
+    if(id==='traveler')return;
+    const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
+    for(const side of [-1,1])for(let i=0;i<Math.max(2,rarity+1);i++){
+      const horn=new Mesh(new CapsuleGeometry(.035,.13+i*.025,4,10),mat);horn.position.set(side*(.29+i*.035),.1+i*.04,-.03);horn.rotation.z=-side*(.6+i*.18);this.skinGeometry.add(horn);
+    }
+    const collar=new Mesh(new TorusGeometry(.19+rarity*.012,.04,8,28,Math.PI*1.7),mat);collar.rotation.x=Math.PI/2;collar.position.y=.3;this.skinGeometry.add(collar);
+    if(rarity>=3)for(let i=0;i<rarity;i++){const crystal=new Mesh(new SphereGeometry(.045,8,6),mat);crystal.scale.y=2;crystal.position.set(Math.cos(i*6.28/rarity)*.42,.12,Math.sin(i*6.28/rarity)*.4);this.skinGeometry.add(crystal);}
+    this.cape.mesh.scale.set(1+rarity*.08,1+rarity*.04,1);
   }
   weaponAppearance(color:number,refine:number,rarity:string):void {this.weapons.appearance(color,refine,rarity);}
 
@@ -602,11 +624,14 @@ export class ArticulatedCharacter {
     this.blendLimb(this.rightLeg, pose.rightThigh, pose.rightKnee, pose.rightAnkle, blend);
     this.armor.emissive.setHex(hurt > 0 ? 0x9d2626 : 0x000000);
     this.armor.emissiveIntensity = hurt > 0 ? .5 + Math.sin(time * 60) * .2 : 0;
+    this.torso.scale.set(1+Math.sin(time*2.2)*.008,1+Math.sin(time*2.2)*.012,1+Math.sin(time*2.2)*.018);this.casterOrbs.rotation.y=time*.7;
     this.cape.update(dt, time, movement, this.turning, state === 'swim' || state === 'dive');
     this.weapons.update(dt, time, progress);
+    this.wings.update(dt,time,movement);this.skinAura.update(time);this.skinGeometry.rotation.y=Math.sin(time*.6)*.025;
   }
 
   dispose(): void {
+    this.wings.dispose();this.skinAura.dispose();
     this.weapons.dispose();
     const geometries = new Set<BufferGeometry>();
     this.root.traverse(object => {
