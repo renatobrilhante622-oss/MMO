@@ -87,7 +87,7 @@ with sync_playwright() as p:
   page.locator('[data-hud-opacity]').evaluate("e=>{e.value='.55';e.dispatchEvent(new Event('input',{bubbles:true}));}")
   page.screenshot(path=str(out/f'hud-editor-{width}.png'),timeout=120000,animations='disabled')
   page.locator('[data-hud-save]').click();assert page.locator('.hud-editor-toolbar').count()==0
-  saved=page.evaluate("JSON.parse(localStorage.getItem('eterna-hud-layout-v2'))")
+  saved=page.evaluate("JSON.parse(localStorage.getItem('eterna-hud-layout-v3'))")
   assert saved['joystick']['scale']==1.25 and saved['joystick']['opacity']==.55
   old=page.locator('[data-hud-edit-key=joystick]').bounding_box()
   page.reload(wait_until='networkidle');page.locator('[data-start]').click()

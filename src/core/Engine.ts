@@ -13,6 +13,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import {FrameBudget,cappedPixelRatio,withinActorRadius} from './RenderBudget';
 import { AtmospherePass } from './AtmospherePass';
 import { AtmosphericSky } from './AtmosphericSky';
 import { SoundEngine } from './SoundEngine';
@@ -98,6 +99,9 @@ export class Engine {
   private readonly csmMaterials = new Set<MeshStandardMaterial>();
   private readonly disposers: Array<() => void> = [];
   private classId: ClassId = 'berserker';
+  private readonly frameBudget=new FrameBudget();
+  private shadowTimer=0;
+  private shadowInstallTimer=0;
   private playing = false;
   private running = false;
   private frameId = 0;
@@ -169,8 +173,8 @@ export class Engine {
     this.dungeon = new DungeonBossManager(this.scene, this.enemies, this.events, this.terrain.portalPosition);
     this.companions = new PetAndMountSystem(this.scene, this.hero, this.physics, this.events);
     this.csm = new CSM({
-      camera: this.camera, parent: this.scene, cascades: 3, mode: 'practical',
-      maxFar: 150, shadowMapSize: 2048, lightDirection: new Vector3(-0.5, -0.85, 0.3),
+      camera: this.camera, parent: this.scene, cascades: matchMedia('(pointer:coarse)').matches?1:3, mode: 'practical',
+      maxFar: matchMedia('(pointer:coarse)').matches?55:150, shadowMapSize: 1024, lightDirection: new Vector3(-0.5, -0.85, 0.3),
       lightIntensity: 2.9, shadowBias: -0.00012, lightMargin: 80,
     });
     this.csm.fade = true;
@@ -211,12 +215,12 @@ export class Engine {
     this.hub = new AdventureHub(this.container,this);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.open('talents');this.container.querySelector('.menu-dock')!.append(journey);
-    this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.textContent='AUTO FARM';this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
+    this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
     this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
     this.admin=new AdminPanel(this.container,()=>({gold:this.inventory.gold,crystals:this.inventory.crystals,diamonds:this.progress.vipDiamonds,tickets:this.progress.tickets,materials:this.progress.materials,level:this.inventory.level,god:this.hero.godMode,noCooldown:this.combat.noCooldown,oneHit:this.combat.oneHitKill}),(action,value)=>this.adminAction(action,value));
     this.gacha=new GachaCutscene(this.container,(count,banner)=>{const rewards=summon(this.progress,count,banner);if(rewards){this.sound.levelUp();this.save();}return rewards;},count=>canSummon(this.progress,count));
     this.journal=new PlayerJournal(this.container,this.progress,()=>({level:this.inventory.level,name:this.hub.online.view?.self.name??'Aventureiro',clan:this.hub.online.view?.clan?.name??'',attack:this.hero.stats.attack,defense:this.hero.stats.defense,hp:this.hero.maxHp}),()=>{this.refreshStats();this.save();},()=>this.hub.open('clan'));
-    const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span>⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.container.querySelector('.menu-dock')!.append(clan);this.disposers.push(()=>clan.remove());
+    const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span aria-hidden="true">⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.container.querySelector('.menu-dock')!.append(clan);this.disposers.push(()=>clan.remove());
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
@@ -334,7 +338,7 @@ export class Engine {
       if (input.mount && this.hero.alive) this.companions.toggleMount();
       this.hero.update(simDt, this.hero.alive ? input : emptyInput());
       this.physics.step(simDt);
-      this.enemies.update(simDt, this.hero);
+      this.enemies.update(simDt, this.hero,this.camera.position);
       this.companions.update(simDt, this.enemies.enemies, this.drops);
       const clears=this.dungeon.clears;
       this.dungeon.update(simDt, this.hero);
@@ -348,7 +352,7 @@ export class Engine {
         this.combat.cooldowns[input.skill]*=cooldownMultiplier(this.progress.talents[this.classId]?.spirit??0);
         this.combat.cooldownMax[input.skill]=this.combat.cooldowns[input.skill];
       }
-      this.combat.update(dt);
+      this.combat.update(dt,this.camera.position);
 
       this.hero.mana = Math.min(this.hero.stats.maxMana, this.hero.mana + dt * 3.5);
       if (this.hero.alive && this.hero.position.distanceTo(this.terrain.spawnPoint) < 24) this.hero.heal(dt * 1.8);
@@ -356,7 +360,7 @@ export class Engine {
       this.updateDrops(dt);
       this.updateRespawn(dt);
       this.statClock += dt;
-      if (this.statClock > 0.5) { this.refreshStats(); this.statClock = 0; this.installShadows(); }
+      if (this.statClock > 0.5) { this.refreshStats(); this.statClock = 0; }
       this.saveClock += dt;
       if (this.saveClock >= 15) { this.save(); this.saveClock = 0; }
     }
@@ -372,8 +376,13 @@ export class Engine {
       inWater: this.hero.machine.state === 'swim' || this.hero.machine.state === 'dive',
       boss: active && !!boss,
     });
+    // Opaque menus and the summon canvas do not need a second live 3D scene underneath.
+    if(this.playing&&(this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking)){this.updateHUD();return;}
+    this.shadowInstallTimer+=dt;if(this.shadowInstallTimer>2){this.installShadows();this.shadowInstallTimer=0;}
+    if(matchMedia('(pointer:coarse)').matches&&active){const ratio=this.frameBudget.update(rawDt,this.renderer.getPixelRatio());if(ratio!==this.renderer.getPixelRatio()){this.renderer.setPixelRatio(ratio);this.composer.setPixelRatio(ratio);this.resize();}}
+    this.shadowTimer+=dt;if(this.shadowTimer>=1/30){this.renderer.shadowMap.needsUpdate=true;this.shadowTimer=0;}
     this.updateDaylight();
-    this.terrain.update(dt, this.timeOfDay);
+    this.terrain.update(dt, this.timeOfDay,this.camera.position);
     this.sky.position.copy(this.camera.position);
     this.stars.position.copy(this.camera.position);
     this.atmosphere.uniforms.time.value = this.elapsed;
@@ -396,7 +405,7 @@ export class Engine {
     }
     this.camera.position.add(this.scratch);
     this.renderer.info.reset();
-    this.composer.render(dt);
+    if(this.quality==='low')this.renderer.render(this.scene,this.camera);else this.composer.render(dt);
     this.camera.position.sub(this.scratch);
   };
 
@@ -638,6 +647,10 @@ export class Engine {
   private installShadows(): void {
     this.scene.traverse(object => {
       if (!(object instanceof Mesh)) return;
+      let parent=object.parent,hero=false;while(parent){if(parent===this.hero.model){hero=true;break;}parent=parent.parent;}
+      const building=object.name==='Batched village architecture'||object.userData.majorBuilding===true;
+      object.castShadow=(hero&&!object.name.includes('alpha wing'))||building;
+      if(!object.receiveShadow&&!object.castShadow)return;
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) if (material instanceof MeshStandardMaterial && !this.csmMaterials.has(material)) {
         // CSM installs an onBeforeCompile hook. Preserve procedural terrain
@@ -698,7 +711,7 @@ export class Engine {
 
   private setQuality(quality: 'low' | 'high'): void {
     this.quality = quality;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'high' ? 1.65 : 1));
+    this.renderer.setPixelRatio(cappedPixelRatio(window.devicePixelRatio,matchMedia('(pointer:coarse)').matches,quality==='high'));this.renderer.shadowMap.autoUpdate=false;this.renderer.shadowMap.needsUpdate=true;
     this.composer.setPixelRatio(this.renderer.getPixelRatio());
     this.bloom.enabled = quality === 'high';
     this.atmosphere.enabled = quality === 'high';
@@ -748,8 +761,8 @@ export class Engine {
   }
 
   /** Runtime diagnostics used by the documented browser smoke test. */
-  get diagnostics(): { playing: boolean; quality: string; drawCalls: number; triangles: number; enemies: number; drops: number; position: number[] } {
-    return { playing: this.playing, quality: this.quality, drawCalls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles, enemies: this.enemies.enemies.filter(enemy => enemy.alive).length, drops: this.drops.length, position: this.hero.position.toArray() };
+  get diagnostics(): { playing: boolean; quality: string;fps:number;pixelRatio:number;activeEnemies:number; drawCalls: number; triangles: number; enemies: number; drops: number; position: number[] } {
+    return { playing: this.playing, quality: this.quality, fps:this.fps,pixelRatio:this.renderer.getPixelRatio(),activeEnemies:this.enemies.enemies.filter(e=>e.alive&&!e.dormant).length, drawCalls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles, enemies: this.enemies.enemies.filter(enemy => enemy.alive).length, drops: this.drops.length, position: this.hero.position.toArray() };
   }
 
   dispose(): void {

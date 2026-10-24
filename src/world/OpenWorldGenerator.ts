@@ -590,17 +590,18 @@ export class OpenWorldGenerator {
       treePositions.push({ x, y, z, scale: .7 + this.random() * 1.05 });
     }
     const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.19, .37, 4.6, 5), this.material({ color: '#5b5140', roughness: 1 }), treePositions.length);
-    const foliage = new THREE.InstancedMesh(new THREE.ConeGeometry(2.2, 6.5, 7), this.material({ color: '#487662', roughness: .93 }), treePositions.length);
-    const canopy = new THREE.InstancedMesh(new THREE.ConeGeometry(1.7, 4.7, 7), this.material({ color: '#5b8c6b', roughness: .95 }), treePositions.length);
+    const foliage = new THREE.InstancedMesh<THREE.BufferGeometry>(new THREE.ConeGeometry(2.2, 6.5, 7), this.material({ color: '#487662', roughness: .93 }), treePositions.length);
+    // Two canopy tiers share one geometry/material and one draw call.
+    const canopyPart=new THREE.ConeGeometry(1.7,4.7,7);canopyPart.translate(0,2.8,0);const mergedCanopy=mergeGeometries([foliage.geometry,canopyPart])!;foliage.geometry.dispose();canopyPart.dispose();foliage.geometry=mergedCanopy;
     const dummy = new THREE.Object3D();
     treePositions.forEach((p, i) => {
       dummy.position.set(p.x, p.y + 2.3 * p.scale, p.z);
       dummy.scale.setScalar(p.scale); dummy.rotation.y = this.random() * Math.PI; dummy.updateMatrix(); trunk.setMatrixAt(i, dummy.matrix);
       dummy.position.y = p.y + 5.2 * p.scale; dummy.updateMatrix(); foliage.setMatrixAt(i, dummy.matrix);
-      dummy.position.y = p.y + 8 * p.scale; dummy.updateMatrix(); canopy.setMatrixAt(i, dummy.matrix);
+
       if (Math.hypot(p.x, p.z - 18) < 85) this.colliders.push({ position: new THREE.Vector3(p.x, p.y + 1.8 * p.scale, p.z), size: new THREE.Vector3(.55 * p.scale, 3.6 * p.scale, .55 * p.scale), type: 'climbable' });
     });
-    for (const mesh of [trunk, foliage, canopy]) { mesh.castShadow = mesh.receiveShadow = true; mesh.computeBoundingSphere(); this.root.add(mesh); }
+    for (const mesh of [trunk, foliage]) { mesh.name=mesh===trunk?'Vegetation batch: trunks':'Vegetation batch: crowns';mesh.userData.vegetation=true;mesh.castShadow = mesh.receiveShadow = false; mesh.computeBoundingSphere(); this.root.add(mesh); }
     const rockPositions: { x: number; y: number; z: number; scale: number }[] = [];
     for (let i = 0; i < 190; i++) {
       const x = (this.random() - .5) * 285, z = (this.random() - .5) * 285, y = this.heightAt(x, z);
@@ -613,7 +614,7 @@ export class OpenWorldGenerator {
       dummy.rotation.set(this.random(), this.random() * 6, this.random()); dummy.updateMatrix(); rocks.setMatrixAt(i, dummy.matrix);
       if (p.scale > 1.8) this.colliders.push({ position: new THREE.Vector3(p.x, p.y + p.scale * .35, p.z), size: new THREE.Vector3(p.scale * 1.35, p.scale, p.scale * 1.3), type: 'climbable' });
     });
-    rocks.castShadow = rocks.receiveShadow = true; rocks.computeBoundingSphere(); this.root.add(rocks);
+    rocks.name='Vegetation batch: rocks';rocks.userData.vegetation=true;rocks.castShadow = rocks.receiveShadow = false; rocks.computeBoundingSphere(); this.root.add(rocks);
     const bladeGeometry=new THREE.PlaneGeometry(.12,.75,1,3);bladeGeometry.translate(0,.375,0);
     const bladePositions=bladeGeometry.getAttribute('position');for(let i=0;i<bladePositions.count;i++){const y=bladePositions.getY(i);bladePositions.setX(i,bladePositions.getX(i)*(1-y/.8));bladePositions.setZ(i,Math.pow(y,2)*.15);}bladeGeometry.computeVertexNormals();
     const grassMaterial=this.material({color:'#647c3d',roughness:.95,side:THREE.DoubleSide});
@@ -631,7 +632,7 @@ export class OpenWorldGenerator {
       dummy.scale.set(.7 + this.random() * .8, .5 + this.random(), .7 + this.random() * .8); dummy.updateMatrix();
       grass.setMatrixAt(grassCount++, dummy.matrix);
     }
-    grass.count = grassCount; grass.receiveShadow = true; grass.computeBoundingSphere(); this.root.add(grass);
+    grass.name='Vegetation batch: grass';grass.userData.vegetation=true;grass.count = grassCount; grass.castShadow=grass.receiveShadow = false; grass.computeBoundingSphere(); this.root.add(grass);
   }
 
   private createPortal(): void {
@@ -681,10 +682,10 @@ export class OpenWorldGenerator {
     const dummy=new THREE.Object3D();let count=0;for(let i=0;i<92;i++)for(const side of [-1,1]){const z=18-i,x=Math.sin(i*.075)*2.3+side*(2.3+this.random()*.2);dummy.position.set(x,this.heightAt(x,z)+.09,z);dummy.rotation.set(this.random()*.4,this.random()*6,.2);dummy.scale.set(.6+this.random(),.45,.7+this.random());dummy.updateMatrix();border.setMatrixAt(count++,dummy.matrix);}border.receiveShadow=true;border.computeBoundingSphere();this.root.add(border);
   }
 
-  update(dt: number, timeOfDay: number): void {
+  update(dt: number, timeOfDay: number,camera?:THREE.Vector3): void {
     this.elapsed += dt;
     this.wind.value=this.elapsed;
-    this.life.update(dt, timeOfDay);
+    this.life.update(dt, timeOfDay,camera);
     const brightness = .18 + Math.max(0, Math.sin(timeOfDay * Math.PI * 2)) * .82;
     if (this.water) {
       this.water.material.uniforms.time.value = this.elapsed;

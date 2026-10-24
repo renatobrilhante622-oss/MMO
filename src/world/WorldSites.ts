@@ -1,4 +1,5 @@
 import {BoxGeometry,CylinderGeometry,Group,Mesh,MeshStandardMaterial,TorusGeometry,Vector3} from 'three';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type {WorldCollider} from './OpenWorldGenerator';
 export const WORLD_SITES=[
   {x:38,z:36,type:'village',name:'Porto dos Salgueiros'},
@@ -12,7 +13,7 @@ export const WORLD_SITES=[
 export function createWorldSites(height:(x:number,z:number)=>number,colliders:WorldCollider[]):Group {
   const root=new Group();root.name='Regional villages, cemeteries and ruined monster camps';
   const stone=new MeshStandardMaterial({color:0x686b70,roughness:.94}),wood=new MeshStandardMaterial({color:0x584333,roughness:.95}),roof=new MeshStandardMaterial({color:0x394451,roughness:.9}),rune=new MeshStandardMaterial({color:0xa682ce,emissive:0x7649bc,emissiveIntensity:.7});
-  const mesh=(parent:Group,geometry:BoxGeometry|CylinderGeometry|TorusGeometry,material:MeshStandardMaterial,x:number,y:number,z:number)=>{const m=new Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;parent.add(m);return m;};
+  const mesh=(parent:Group,geometry:BoxGeometry|CylinderGeometry|TorusGeometry,material:MeshStandardMaterial,x:number,y:number,z:number)=>{const m=new Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;m.userData.majorBuilding=geometry instanceof BoxGeometry&&geometry.parameters.height>=3;parent.add(m);return m;};
   for(const site of WORLD_SITES){const group=new Group();group.name=site.name;group.position.set(site.x,height(site.x,site.z),site.z);root.add(group);
     if(site.type==='village')for(let i=0;i<4;i++){
       const x=(i%2?1:-1)*5,z=Math.floor(i/2)*9-4,y=height(site.x+x,site.z+z)-group.position.y;
@@ -29,5 +30,8 @@ export function createWorldSites(height:(x:number,z:number)=>number,colliders:Wo
       const altar=mesh(group,new CylinderGeometry(2.5,3,.6,16),stone,0,.3,0);altar.name='Monster ritual spot';const ring=mesh(group,new TorusGeometry(2,.06,6,40),rune,0,.65,0);ring.rotation.x=Math.PI/2;
     }
   }
+  root.updateMatrixWorld(true);const batches=new Map<string,{material:MeshStandardMaterial;major:boolean;parts:import('three').BufferGeometry[]}>();
+  root.traverse(o=>{if(!(o instanceof Mesh))return;const material=o.material as MeshStandardMaterial,major=o.userData.majorBuilding===true,key=material.uuid+major;let batch=batches.get(key);if(!batch){batch={material,major,parts:[]};batches.set(key,batch);}batch.parts.push(o.geometry.clone().applyMatrix4(o.matrixWorld));o.geometry.dispose();});
+  root.clear();for(const {material,major,parts}of batches.values()){const geometry=mergeGeometries(parts,false)!;parts.forEach(p=>p.dispose());const merged=new Mesh(geometry,material);merged.name='Batched regional structures';merged.userData.majorBuilding=major;merged.castShadow=merged.receiveShadow=major;root.add(merged);}
   return root;
 }

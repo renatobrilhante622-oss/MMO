@@ -2,6 +2,7 @@ import { AdditiveBlending, Color, Group, IcosahedronGeometry, Mesh, MeshBasicMat
 import type { CharacterStats, ClassId, Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
 import { calculateDamage, getClass } from './ClassSystem';
+import {withinActorRadius} from '../core/RenderBudget';
 import { ParticleSystem3D } from './ParticleSystem3D';
 
 interface Projectile { group: Group; velocity: Vector3; remaining: number; source: Combatant; targets: Combatant[]; stats: CharacterStats; multiplier: number; radius: number; color: number; locked?:Combatant; lifetime:number }
@@ -150,7 +151,7 @@ export class CombatSystem {
     this.particles.burst(position, color, count);
   }
 
-  update(dt: number): void {
+  update(dt: number,camera?:Vector3): void {
     dt=Math.max(0,Number.isFinite(dt)?dt:0);
     if(this.noCooldown)this.resetCooldowns();
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
@@ -160,7 +161,8 @@ export class CombatSystem {
     for (let i = 0; i < 4; i++) this.cooldowns[i] = Math.max(0, this.cooldowns[i] - dt);
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
-      projectile.lifetime+=dt;
+      projectile.lifetime+=dt;projectile.group.visible=!camera||withinActorRadius(projectile.group.position,camera);
+      if(!projectile.group.visible){if(projectile.lifetime>12){this.removeProjectile(projectile);this.projectiles.splice(i,1);}continue;}
       if(projectile.locked){
         if(!this.canHit(projectile.source,projectile.locked))projectile.locked=this.nearest(projectile.source,projectile.targets,Math.max(4,projectile.remaining));
         if(projectile.locked){const delta=projectile.locked.position.clone().add(new Vector3(0,.5,0)).sub(projectile.group.position);const speed=Math.min(25,delta.length()/Math.max(.001,dt));projectile.velocity.copy(delta.normalize().multiplyScalar(speed));}
@@ -190,7 +192,7 @@ export class CombatSystem {
       }
       if (impacted || (!projectile.locked&&projectile.remaining <= 0) || projectile.lifetime>12 || !projectile.source.alive) { this.removeProjectile(projectile); this.projectiles.splice(i, 1); }
     }
-    this.particles.update(dt);
+    this.particles.update(dt,camera);
   }
 
   private removeProjectile(projectile: Projectile): void { this.scene.remove(projectile.group); }

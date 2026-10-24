@@ -4,6 +4,7 @@ import {
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
+import {AnimatedGLB} from '../assets/AnimatedGLB';
 import {WingsSystem} from '../companions/WingsSystem';
 import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
@@ -151,6 +152,10 @@ export class ArticulatedCharacter {
   readonly accent: MeshStandardMaterial;
   readonly cape: CapeCloth;
   readonly wings=new WingsSystem();
+  private readonly imported?:AnimatedGLB;
+  private importedArmor?:Mesh;
+  private importedHelmet?:Mesh;
+  private importedShoulders:Mesh[]=[];
   private readonly casterOrbs=new Group();
   private readonly skinGeometry=new Group();
   private readonly skinAura=new RarityAura(.6);
@@ -215,6 +220,7 @@ export class ArticulatedCharacter {
     this.casterRobe=new Mesh(robeGeometry,cloth);this.casterRobe.name='Tailored caster robe';this.casterRobe.castShadow=this.casterRobe.receiveShadow=true;this.pelvis.add(this.casterRobe);this.styleSilhouette(definition);
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
+    this.imported=new AnimatedGLB('Soldier',1.9,()=>{this.pelvis.visible=false;this.attachImportedGear();this.styleSilhouette(this.definition);},true);this.root.add(this.imported.root);
   }
 
   private material(color: number, metalness: number, roughness: number): MeshStandardMaterial {
@@ -240,7 +246,7 @@ export class ArticulatedCharacter {
     const hips = this.mesh(this.pelvis, new CapsuleGeometry(.225, .13, 4, 10), this.leather);
     hips.scale.set(1.1, .65, .8);
     const chest = this.mesh(this.torso, new LatheGeometry([new Vector2(.2,-.28),new Vector2(.22,-.16),new Vector2(.3,.12),new Vector2(.31,.24),new Vector2(.21,.32),new Vector2(.1,.36)],32), this.armor);
-    chest.scale.set(1.06, 1, .7);
+    chest.name='Organic fitted cuirass';chest.scale.set(1.06, 1, .7);
     this.box(this.torso, .51, .065, .36, this.leather, 0, -.29);
     this.box(this.torso, .105, .08, .055, this.gold, 0, -.29, .207);
     for (const side of [-1, 1]) {
@@ -358,10 +364,23 @@ export class ArticulatedCharacter {
     return { upper, lower, end };
   }
 
+  private attachImportedGear():void {
+    if(!this.imported?.ready)return;
+    this.imported.attachAt('righthand',this.weapons.right);this.imported.attachAt('lefthand',this.weapons.left);
+    this.imported.attachAt('head',this.hood,new Vector3(0,.06,0));
+    this.importedHelmet??=this.head.getObjectByName('Metal helmet') as Mesh|undefined;
+    this.importedArmor??=this.torso.getObjectByName('Organic fitted cuirass') as Mesh|undefined;
+    if(this.importedHelmet)this.imported.attachAt('head',this.importedHelmet,new Vector3(0,.08,0));
+    if(this.importedArmor)this.imported.attachAt('spine2',this.importedArmor,new Vector3(0,-.04,0));
+    if(!this.importedShoulders.length)for(const arm of [this.leftArm,this.rightArm]){const plate=arm.upper.children.find(o=>o instanceof Mesh&&o.material===this.armor&&o.geometry.type==='SphereGeometry') as Mesh|undefined;if(plate)this.importedShoulders.push(plate);}
+    this.importedShoulders.forEach((plate,i)=>this.imported!.attachAt(i?'rightarm':'leftarm',plate));
+    this.root.add(this.wings.root,this.casterRobe,this.cape.mesh,this.casterOrbs,this.skinGeometry);
+    this.wings.root.position.set(0,1.3,-.16);this.casterRobe.position.y=.83;this.cape.mesh.position.set(0,1.5,-.2);this.casterOrbs.position.y=.8;this.skinGeometry.position.y=1.3;
+  }
   private styleSilhouette(definition:ClassDefinition):void {
-    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
+    const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.importedHelmet??this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
-    this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
+    this.imported?.tint(caster?0x353242:0x3c4c5a,definition.color);this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
   }
   skinAppearance(id:string,color:number,rarity:number):void {
@@ -390,11 +409,11 @@ export class ArticulatedCharacter {
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
     this.styleSilhouette(definition);
-    this.attackClock = 0;
+    this.attachImportedGear();this.attackClock = 0;
   }
 
   attack(skillIndex?: number, combo = 1): void {
-    this.attackSkill = skillIndex;
+    this.imported?.attack();this.attackSkill = skillIndex;
     this.combo = combo;
     this.attackDuration = skillIndex === undefined ? Math.min(.68, .82 / this.definition.stats.attackSpeed) : .72 + Math.min(3, skillIndex) * .09;
     this.attackClock = this.attackDuration;
@@ -601,7 +620,7 @@ export class ArticulatedCharacter {
   }
 
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
-    dt = MathUtils.clamp(dt, 0, .05);
+    dt = MathUtils.clamp(dt, 0, .05);this.imported?.update(dt,movement);
     const angularDelta = Math.atan2(Math.sin(heading - this.lastHeading), Math.cos(heading - this.lastHeading));
     this.lastHeading = heading;
     this.turning = MathUtils.damp(this.turning, angularDelta / Math.max(dt, .001), 5, dt);
@@ -631,7 +650,7 @@ export class ArticulatedCharacter {
   }
 
   dispose(): void {
-    this.wings.dispose();this.skinAura.dispose();
+    if(this.imported?.ready){this.root.add(this.hood,...this.importedShoulders);if(this.importedArmor)this.root.add(this.importedArmor);if(this.importedHelmet)this.root.add(this.importedHelmet);}this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
     this.weapons.dispose();
     const geometries = new Set<BufferGeometry>();
     this.root.traverse(object => {

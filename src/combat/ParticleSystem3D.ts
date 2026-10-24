@@ -2,6 +2,7 @@ import {
   AdditiveBlending, BufferAttribute, BufferGeometry, Color, DoubleSide, DynamicDrawUsage,
   Group, Mesh, Points, RingGeometry, Scene, ShaderMaterial, Vector3,
 } from 'three';
+import {withinActorRadius} from '../core/RenderBudget';
 import type { SkillDefinition } from '../core/GameTypes';
 
 interface Emission {
@@ -57,6 +58,7 @@ const VERTEX = `
     gl_Position = projectionMatrix * mv;
     float envelope = smoothstep(0.0, 0.06, progress) * (1.0 - progress);
     float visible = step(0.0, clock - timing.x) * (1.0 - step(life, age));
+    if(length(mv.xyz)>45.)visible=0.0;
     gl_PointSize = clamp(timing.z * pixelScale / max(0.15, -mv.z), 1.0, 72.0) * visible;
     vColor = particleColor;
     vAlpha = envelope * visible;
@@ -417,7 +419,7 @@ export class ParticleSystem3D {
     }
   }
 
-  update(dt: number): void {
+  update(dt: number,camera?:Vector3): void {
     if (this.disposed) return;
     this.clock += Math.max(0, Math.min(dt, 0.1));
     this.material.uniforms.clock.value = this.clock;
@@ -429,6 +431,8 @@ export class ParticleSystem3D {
       const effect = this.rings[i];
       effect.age += dt;
       const p = Math.min(1, effect.age / effect.life);
+      effect.mesh.visible=!camera||withinActorRadius(effect.mesh.position,camera);
+      if(!effect.mesh.visible&&p<1)continue;
       effect.mesh.scale.setScalar(Math.max(0.01, effect.radius * (1 - Math.pow(1 - p, 3))));
       effect.mesh.material.uniforms.progress.value = p;
       effect.mesh.material.uniforms.opacity.value = (1 - p) * 0.85;

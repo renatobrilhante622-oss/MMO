@@ -5,6 +5,7 @@ import { EventBus } from '../core/GameTypes';
 import type { PhysicsWorld } from '../physics/PhysicsWorld';
 import { calculateDamage } from '../combat/ClassSystem';
 import { REGIONS, regionAt, regionalLevel } from '../world/Regions';
+import {withinActorRadius} from '../core/RenderBudget';
 import {WORLD_SITES} from '../world/WorldSites';
 import { CreatureRig } from './CreatureRig';
 
@@ -35,6 +36,7 @@ export class Enemy implements Combatant {
   readonly home: Vector3;
   hp: number;
   state: EnemyState = 'patrol';
+  dormant=false;
   deathTime = 0;
   attackCooldown = 1;
   attackWindup = -1;
@@ -66,7 +68,7 @@ export class Enemy implements Combatant {
     this.material = new MeshStandardMaterial({ color: data.color, roughness: .76, metalness: kind === 'golem' || boss ? .3 : .05, emissive: data.emissive, emissiveIntensity: .25 });
     if(kind==='slime'&&!boss){this.material.transparent=true;this.material.opacity=.72;this.material.roughness=.14;this.material.metalness=.08;}
     this.rig = new CreatureRig(kind, boss, this.material);
-    this.model.add(this.rig.root);
+    this.model.add(this.rig.root);this.rig.root.traverse(o=>{if(o instanceof Mesh)o.castShadow=o.receiveShadow=false;});
     this.model.position.copy(position); this.scene.add(this.model);
     const bg = new Mesh(new BoxGeometry(boss ? 3.6 : 1.4, .13, .025), new MeshBasicMaterial({ color: 0x182128, transparent: true, opacity: .88 }));
     this.healthFill = new Mesh(new BoxGeometry(boss ? 3.5 : 1.32, .085, .035), new MeshBasicMaterial({ color: boss ? 0xf36c80 : 0xf4ad7c }));
@@ -99,6 +101,10 @@ export class Enemy implements Combatant {
     return dealt;
   }
 
+  setActive(active:boolean):void {
+    this.model.visible=active;if(active&&this.dormant){this.body.collisionResponse=true;this.body.wakeUp();this.dormant=false;}
+    else if(!active&&!this.dormant){this.body.velocity.setZero();this.body.sleep();this.body.collisionResponse=false;this.telegraph.visible=false;this.attackWindup=-1;this.dormant=true;}
+  }
   tick(dt: number, hero: Combatant, elapsed: number): void {
     if (!this.alive) {
       this.deathTime += dt; this.model.scale.setScalar(Math.max(.01, 1 - this.deathTime)); this.model.rotation.z += dt * 1.6;
@@ -196,10 +202,12 @@ export class EnemyAI {
     this.enemies.push(enemy); return enemy;
   }
 
-  update(dt: number, hero: Combatant): void {
+  update(dt: number, hero: Combatant,camera=hero.position): void {
     this.elapsed += dt;
     for (let i = this.enemies.length - 1; i >= 0; i--) {
-      const enemy = this.enemies[i]; enemy.tick(dt, hero, this.elapsed);
+      const enemy = this.enemies[i];
+      if(enemy.alive){const active=withinActorRadius(enemy.position,camera);enemy.setActive(active);if(!active)continue;}
+      enemy.tick(dt, hero, this.elapsed);
       if (!enemy.alive && enemy.deathTime > 1.1) { enemy.dispose(); this.enemies.splice(i, 1); }
     }
     for (const region of REGIONS) {

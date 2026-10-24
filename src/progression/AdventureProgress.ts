@@ -1,3 +1,4 @@
+import {avatarId} from '../ui/AvatarRenderer';
 import {EvolutionSystem} from '../rpg/EvolutionSystem';
 import {Vector3} from 'three';
 import type { ClassId, Rarity } from '../core/GameTypes';
@@ -59,7 +60,7 @@ export class AdventureProgress {
   evolution=new EvolutionSystem();
   tickets=0;
   adminPoints=0;
-  profile={id:'',avatar:'traveler',playSeconds:0,bossKills:0};
+  profile={id:'',avatar:'berserker',playSeconds:0,bossKills:0};
   dropHistory:Array<{name:string;rarity:Rarity;time:number;gold:number;crystals:number}>=[];
   chosen=false;
   gems:Record<Gem,number>={ruby:0,sapphire:0,emerald:0,diamond:0};
@@ -249,7 +250,7 @@ export class AdventureProgress {
   restore(raw:unknown):void {
     if(!object(raw))return;
     this.evolution.restore(raw.evolution);this.tickets=integer(raw.tickets,0,99999);this.adminPoints=integer(raw.adminPoints,0,99999);
-    if(object(raw.profile)){this.profile={id:typeof raw.profile.id==='string'?raw.profile.id.slice(0,40):'',avatar:typeof raw.profile.avatar==='string'&&COSMETICS.some(c=>c.id===(raw.profile as Record<string,unknown>).avatar)?raw.profile.avatar:'traveler',playSeconds:integer(raw.profile.playSeconds,0,1e9),bossKills:integer(raw.profile.bossKills,0,1e9)};}
+    if(object(raw.profile)){this.profile={id:typeof raw.profile.id==='string'?raw.profile.id.slice(0,40):'',avatar:avatarId(typeof raw.profile.avatar==='string'?raw.profile.avatar:'berserker'),playSeconds:integer(raw.profile.playSeconds,0,1e9),bossKills:integer(raw.profile.bossKills,0,1e9)};}
     if(Array.isArray(raw.dropHistory))this.dropHistory=raw.dropHistory.slice(-100).filter((v):v is typeof this.dropHistory[number]=>object(v)&&typeof v.name==='string'&&RARITIES.includes(v.rarity as Rarity)&&typeof v.time==='number');
     this.chosen=raw.chosen===true;
     if(object(raw.missions))for(const [key,value]of Object.entries(raw.missions).slice(-30))this.missions[key]=integer(value,0,10000);

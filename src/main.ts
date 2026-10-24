@@ -2,6 +2,7 @@ import { Engine } from './core/Engine';
 import './ui/style.css';
 import './ui/mobile-ux.css';
 import './ui/expansion.css';
+import './ui/hud-clean.css';
 
 declare global { interface Window { __ETERNA__?: Engine } }
 

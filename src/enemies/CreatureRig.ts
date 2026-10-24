@@ -3,6 +3,8 @@ import {
   Mesh, MeshStandardMaterial, Object3D, SphereGeometry, TorusGeometry,
 } from 'three';
 
+import {RigidSkinBatch} from '../assets/RigidSkinBatch';
+
 interface CreatureLimb { shoulder: Group; elbow: Group; foot: Group; side: number; rear: boolean }
 
 /** Different silhouettes share joint control, not a single scaled box. */
@@ -19,6 +21,7 @@ export class CreatureRig {
   private readonly dark: MeshStandardMaterial;
   private readonly bone: MeshStandardMaterial;
   private readonly scale: number;
+  private readonly batch:RigidSkinBatch;
   private attackBlend = 0;
   private readonly tendrils:Group[]=[];
 
@@ -33,6 +36,7 @@ export class CreatureRig {
     if (kind === 'slime' && !boss) this.slime();
     else if (kind === 'wolf' && !boss) this.wolf();
     else this.humanoid();
+    this.batch=new RigidSkinBatch(this.root,this.body);
   }
 
   private mesh(parent: Object3D, geometry: BufferGeometry, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
@@ -233,9 +237,11 @@ export class CreatureRig {
       if (this.kind === 'wraith') ornament.rotation.x = Math.sin(elapsed * 3 + i) * .2;
       else if (this.boss) ornament.rotation.z += dt * (.4 + i * .2);
     }
+    this.batch.sync();
   }
 
   dispose(): void {
+    this.batch.dispose();
     this.root.traverse(object => { if (object instanceof Mesh) object.geometry.dispose(); });
     this.materials.forEach(material => material.dispose());
     this.materials.clear();

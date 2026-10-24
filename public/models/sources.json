@@ -1,0 +1,17 @@
+{
+  "Parrot.glb": {
+    "source": "https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Parrot.glb",
+    "sha256": "adcc5dae04d0b16957ce20b7bebb84d41c3bff1c01bf5ab1cf56d06345bc5170",
+    "bytes": 97024
+  },
+  "Soldier.glb": {
+    "source": "https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Soldier.glb",
+    "sha256": "dfb230fc1f942f259dd00281a1186953ad602fc5d69067ce63e24b2aa439736b",
+    "bytes": 2160468
+  },
+  "Horse.glb": {
+    "source": "https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Horse.glb",
+    "sha256": "bebaa4a60ba373317e25bf20f049f26ad0f5c86d4731ab67d46eb8c93c920947",
+    "bytes": 181808
+  }
+}

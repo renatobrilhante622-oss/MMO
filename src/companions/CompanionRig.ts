@@ -1,4 +1,6 @@
 import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending } from 'three';
+import {RigidSkinBatch} from '../assets/RigidSkinBatch';
+import {AnimatedGLB} from '../assets/AnimatedGLB';
 import {WingsSystem} from './WingsSystem';
 import { RarityAura } from './RarityAura';
 import type { Cosmetic } from '../progression/AdventureProgress';
@@ -19,6 +21,9 @@ export class CompanionRig {
   private readonly ornaments=new Group();
   private readonly morph=new Group();
   private readonly flight=new WingsSystem();
+  private batch?:RigidSkinBatch;
+  private imported?:AnimatedGLB;
+  private importedType='';
   private phase=0;
   private stride=0;
   private rarity=0;
@@ -103,10 +108,14 @@ export class CompanionRig {
   private ellipsoid(parent:Object3D,material:MeshStandardMaterial,size:number[],at:number[]):Mesh {const m=this.mesh(parent,new SphereGeometry(1,12,8),material,at[0],at[1],at[2]);m.scale.set(size[0],size[1],size[2]);return m;}
   private between(parent:Object3D,a:Vector3,b:Vector3,radius:number,material:MeshStandardMaterial):void {const d=b.clone().sub(a);const m=this.mesh(parent,new CylinderGeometry(radius,radius,d.length(),6),material,0,0,0);m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new Vector3(0,1,0),d.normalize());}
   appearance(c:Cosmetic):void {
-    if(this.appearanceId===c.id)return;this.appearanceId=c.id;this.rarity=RARITIES.indexOf(c.rarity);
+    if(this.appearanceId===c.id)return;this.batch?.dispose();this.batch=undefined;this.appearanceId=c.id;this.rarity=RARITIES.indexOf(c.rarity);
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
     const bird=c.id==='phoenix',dragon=['wyvern','dracolich'].includes(c.id),giant=['fenrir','nighthorse'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
+    const importedType=bird?'Parrot':this.horse&&!['fenrir','nighthorse','wyvern','stag','spiritstag'].includes(c.id)?'Horse':'';
+    if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=true;
+      if(importedType){this.imported=new AnimatedGLB(importedType as 'Horse'|'Parrot',bird?.9:2.1,()=>{this.spine.visible=false;if(this.batch)this.batch.mesh.visible=false;},false);this.root.add(this.imported.root);}}
+    this.imported?.tint(c.color,c.color);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
@@ -124,9 +133,10 @@ export class CompanionRig {
       if(c.id==='dracolich'){const rib=this.mesh(this.morph,new TorusGeometry(.29,.025,5,16,Math.PI),this.coat,0,0,-.36+i*.13);rib.rotation.y=Math.PI/2;}
     }
     if(this.rarity>=4){const halo=this.mesh(this.morph,new TorusGeometry(.37,.018,6,32),this.glow,0,.9,.35);halo.rotation.x=Math.PI/2;}
+    if(!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
   update(dt:number,speed:number,time:number,attack=false):void {
-    this.particles.update(time);this.flight.update(dt,time,speed*.1);
+    this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);
     this.wings.children.forEach(wing=>{wing.rotation.z=Math.sin(time*3.5)*.2*(wing.userData.side as number);});
     const step=Math.min(.05,Math.max(0,dt));this.stride=MathUtils.damp(this.stride,Math.min(1,speed/(this.horse?10:6)),9,step);
     this.phase+=step*(this.horse?5+speed*.7:6+speed*.9);
@@ -144,7 +154,8 @@ export class CompanionRig {
     this.head.rotation.x=(this.horse?-.22:-.3)+Math.sin(time*1.1)*.025-(attack?.25:0);
     this.tail.rotation.z=Math.sin(time*3+this.stride)*(.12+this.stride*.13);
     this.tail.rotation.x=Math.sin(time*2)*.04+this.stride*.2;
+    this.batch?.sync();
     this.aura.rotation.z=time*(.3+this.rarity*.1);this.aura.scale.setScalar((this.horse?1.3:.7)*(1+Math.sin(time*2)*.045));
   }
-  dispose():void {this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
+  dispose():void {this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
 }

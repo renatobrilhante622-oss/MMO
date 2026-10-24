@@ -15,7 +15,7 @@ export class HudEditor {
   private readonly abort=new AbortController();
   private initialized=false;
   constructor(private readonly container:HTMLElement,private readonly language:()=> 'pt'|'en',private readonly onFinish:()=>void){
-    try{this.saved=readHudLayout(JSON.parse(localStorage.getItem(HUD_STORAGE_KEY)??'{}'));}catch{/* Invalid storage uses the repository layout. */}
+    try{const current=localStorage.getItem(HUD_STORAGE_KEY);this.saved=readHudLayout(JSON.parse(current??localStorage.getItem('eterna-hud-layout-v2')??'{}'));if(!current){delete this.saved.shortcuts;delete this.saved.autofarm;}}catch{/* Invalid storage uses the repository layout. */}
     const options={capture:true,signal:this.abort.signal};
     container.addEventListener('click',event=>{if(this.active&&!(event.target as Element).closest('.hud-editor-toolbar')){event.preventDefault();event.stopImmediatePropagation();}},options);
     container.addEventListener('pointerdown',this.down,options);container.addEventListener('pointermove',this.move,options);container.addEventListener('pointerup',this.up,options);container.addEventListener('pointercancel',this.up,options);
@@ -26,7 +26,7 @@ export class HudEditor {
     if(this.initialized)return;this.initialized=true;
     for(const key of HUD_KEYS){const el=this.container.querySelector<HTMLElement>(SELECTORS[key]);if(!el)continue;this.elements.set(key,el);el.dataset.hudEditKey=key;
       const hidden=el.hidden;el.hidden=false;const rect=el.getBoundingClientRect(),width=el.offsetWidth||140,height=el.offsetHeight||60;el.hidden=hidden;this.sizes.set(key,{width,height});
-      this.defaults[key]={x:key==='autofarm'?Math.max(0,(innerWidth-width)/2)/innerWidth:rect.left/innerWidth,y:rect.top/innerHeight,scale:1,opacity:1};
+      this.defaults[key]={x:rect.left/innerWidth,y:rect.top/innerHeight,scale:1,opacity:1};
     }
     this.layout={...structuredClone(this.defaults),...structuredClone(this.saved)};
     // Preserve responsive CSS until a layout has actually been saved or edited.

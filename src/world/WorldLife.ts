@@ -1,3 +1,4 @@
+import {withinActorRadius} from '../core/RenderBudget';
 import * as THREE from 'three';
 
 interface Villager {
@@ -171,7 +172,7 @@ export class WorldLife {
           p.y+=age*(1.1+seed.y*.65);
           vec4 mv=modelViewMatrix*vec4(p,1.0);
           gl_PointSize=clamp((1.0-age)*85.0/max(1.0,-mv.z),1.0,23.0);
-          gl_Position=projectionMatrix*mv;
+          gl_Position=projectionMatrix*mv;if(length(mv.xyz)>45.){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;}
         }
       `,
       fragmentShader: /* glsl */ `
@@ -235,7 +236,7 @@ export class WorldLife {
           vec4 mv=modelViewMatrix*vec4(p,1.0);
           float size=seed.y>1.5?48.0:22.0;
           gl_PointSize=clamp(size*seed.z/max(1.0,-mv.z),1.0,15.0);
-          gl_Position=projectionMatrix*mv;
+          gl_Position=projectionMatrix*mv;if(length(mv.xyz)>45.){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;}
         }
       `,
       fragmentShader: /* glsl */ `
@@ -287,7 +288,7 @@ export class WorldLife {
           vSeed=seed.z;
           vec4 mv=modelViewMatrix*vec4(p,1.0);
           gl_PointSize=clamp((35.0+seed.z*22.0)/max(1.0,-mv.z),1.0,13.0);
-          gl_Position=projectionMatrix*mv;
+          gl_Position=projectionMatrix*mv;if(length(mv.xyz)>45.){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;}
         }
       `,
       fragmentShader: /* glsl */ `
@@ -323,20 +324,23 @@ export class WorldLife {
     this.vortex?.geometry.setDrawRange(0,low?160:480);
   }
 
-  update(dt:number,timeOfDay:number):void {
+  update(dt:number,timeOfDay:number,camera?:THREE.Vector3):void {
     this.elapsed+=dt;
     this.uniforms.time.value=this.elapsed;
+    if(camera&&this.vortex)this.vortex.visible=withinActorRadius(this.vortex.position,camera);
     const night=1-THREE.MathUtils.smoothstep(Math.sin(timeOfDay*Math.PI*2),-.1,.3);
     this.uniforms.night.value=night;
     this.torches.forEach((torch,index)=>{
+      const near=!camera||withinActorRadius(torch.light.position,camera);torch.light.visible=near&&(!this.lowQuality||index%2===0);torch.flame.visible=near;if(!near)return;
       const flicker=Math.sin(this.elapsed*11.3+torch.phase)*.45
         +Math.sin(this.elapsed*17.9+torch.phase*2)*.22;
       torch.light.intensity=(4.8+night*3.6)*(1+flicker*.16);
-      torch.light.visible=!this.lowQuality || index%2===0;
+
       torch.flame.scale.y=2.1+flicker*.7;
       torch.flame.rotation.z=Math.sin(this.elapsed*5+torch.phase)*.1;
     });
     for(const villager of this.villagers) {
+      villager.root.visible=!camera||withinActorRadius(villager.root.position,camera);if(!villager.root.visible)continue;
       villager.clock+=dt;
       if(villager.pause>0) {
         villager.pause-=dt;
