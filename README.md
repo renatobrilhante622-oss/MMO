@@ -99,6 +99,9 @@ O áudio é sintetizado localmente com WebAudio: cortes, impactos, magia, passos
 
 ## Android
 
+O botão **Baixar APK Android** está na tela inicial e em Configurações no navegador. O arquivo é servido em `/EternalHero-MMO-debug.apk`. As cópias publicadas ficam em `public/EternalHero-MMO-debug.apk` e `releases/EternalHero-MMO-debug.apk`; seus SHA256 estão em `releases/SHA256SUMS`. O build Android exclui arquivos `.apk` dos assets para impedir a inclusão recursiva do download dentro do próprio aplicativo.
+
+
 O projeto nativo está em `android/`. Requer **JDK 21 completo**, Android SDK Platform 36 e Build Tools 36.0.0/35.0.0. O instalador fixa o Eclipse Adoptium Temurin 21.0.13+9 e verifica o SHA256 publicado pelo fornecedor. Os componentes oficiais e caches foram preparados neste ambiente de nuvem. Gradle usa o wrapper versionado com verificação SHA256.
 
 ```sh
