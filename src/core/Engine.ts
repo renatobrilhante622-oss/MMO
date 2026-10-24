@@ -28,8 +28,9 @@ import { BaseBuilding } from '../rpg/BaseBuilding';
 import { CodexSystem } from '../rpg/CodexSystem';
 import { EnemyAI } from '../enemies/EnemyAI';
 import { DungeonBossManager } from '../enemies/DungeonBossManager';
+import { planFarm } from '../systems/VipAndAutoFarm';
 import { refine } from '../rpg/InventoryForgeSocket';
-import { EPIGRAPHS, cooldownMultiplier } from '../rpg/ClassEpigraphSystem';
+import { EPIGRAPHS, cooldownMultiplier, epigraphEffects } from '../rpg/ClassEpigraphSystem';
 import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
 import { COSMETICS } from '../progression/AdventureProgress';
 import { AdventureHub } from '../ui/AdventureHub';
@@ -68,6 +69,8 @@ export class Engine {
   private channel: {remaining:number;x:number;z:number;start:Vector3;hp:number}|null = null;
   private autoRoute: MapPoint[] = [];
   private autoTimer = 0;
+  private gpsTimer = 0;
+  private autoTarget = '';
   private recentCombat = 0;
   private appearanceKey = '';
 
@@ -201,6 +204,7 @@ export class Engine {
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
     this.applyPreferences();
+    if(this.progress.waypoint)this.setWaypoint(this.progress.waypoint);
     this.bindEvents();
     this.setQuality(matchMedia('(pointer:coarse)').matches ? 'low' : 'high');
     this.resize();
@@ -319,9 +323,10 @@ export class Engine {
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
         this.sound.attack(this.classId, this.combat.combo);
       }
-      if (input.skill !== null && this.hero.alive && this.combat.cast(input.skill, this.classId, this.hero, targets, this.hero.stats, this.hero.facing)) {
+      if (input.skill !== null && this.hero.alive && this.combat.cast(input.skill, this.classId, this.hero, targets, {...this.hero.stats,attack:this.hero.stats.attack*(1+epigraphEffects(this.classId,this.progress.talents[this.classId]).spellPower)}, this.hero.facing)) {
         this.sound.spell(this.classId, input.skill);
         this.combat.cooldowns[input.skill]*=cooldownMultiplier(this.progress.talents[this.classId]?.spirit??0);
+        this.combat.cooldownMax[input.skill]=this.combat.cooldowns[input.skill];
       }
       this.combat.update(dt);
       this.base.update(dt);
@@ -335,7 +340,7 @@ export class Engine {
       this.saveClock += dt;
       if (this.saveClock >= 15) { this.save(); this.saveClock = 0; }
     }
-    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive) : undefined;
+    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
     const bossPhase = boss ? (boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3) : 0;
     if (bossPhase > 0 && this.previousBossPhase > 0 && bossPhase !== this.previousBossPhase) this.sound.bossRoar();
     this.previousBossPhase = bossPhase;
@@ -383,8 +388,10 @@ export class Engine {
     this.container.style.setProperty('--hud-scale',String(this.progress.hudScale));
     this.container.style.setProperty('--controls-scale',String(this.progress.controlsScale));
     this.container.style.setProperty('--hud-opacity',String(this.progress.hudOpacity));
+    this.hud.setLanguage(this.progress.language);
     this.i18n?.set(this.progress.language);this.save();
   }
+  configureQuality(quality:'low'|'high'):void {this.setQuality(quality);}
   setHudPreference(key:string,value:number):void {
     if(!Number.isFinite(value))return;
     if(key==='hudScale'||key==='controlsScale')this.progress[key]=Math.max(.5,Math.min(1.5,value));
@@ -393,8 +400,10 @@ export class Engine {
     this.applyPreferences();
   }
   setWaypoint(point:MapPoint|null):void {
+    if(point&&(!Number.isFinite(point.x)||!Number.isFinite(point.z)||Math.abs(point.x)>140||Math.abs(point.z)>140))return;
     this.progress.waypoint=point;this.gpsRoute=point?route(this.terrain,this.hero.position,point):[];
-    const points=[this.hero.position,...this.gpsRoute].map(p=>new Vector3(p.x,this.terrain.heightAt(p.x,p.z)+.15,p.z));
+    const points:Vector3[]=[];const coarse=[this.hero.position,...this.gpsRoute];
+    for(let i=1;i<coarse.length;i++){const a=coarse[i-1],b=coarse[i],steps=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.z-b.z)));for(let j=0;j<=steps;j++){const x=a.x+(b.x-a.x)*j/steps,z=a.z+(b.z-a.z)*j/steps;points.push(new Vector3(x,this.terrain.heightAt(x,z)+.2,z));}}
     this.gpsLine.geometry.dispose();this.gpsLine.geometry=new BufferGeometry().setFromPoints(points);this.gpsLine.visible=!!point&&this.gpsRoute.length>0;
   }
   private travelBlocked():boolean {
@@ -411,6 +420,7 @@ export class Engine {
       case 'talent':ok=p.allocate(this.classId,data.key as Attribute);this.refreshStats();break;
       case 'talent-reset':ok=p.resetTalents(this.classId);this.refreshStats();break;
       case 'equip':ok=inv.equip(data.id);this.refreshStats();break;
+      case 'building':ok=this.base.upgrade(data.id);this.refreshStats();break;
       case 'lock':{const item=inv.items.find(i=>i.id===data.id);if(item){item.locked=!item.locked;ok=true;}break;}
       case 'sell':ok=inv.sell(data.id);break;
       case 'upgrade':if(this.hero.position.distanceTo(this.terrain.spawnPoint)<28){const result=refine(inv,data.id);if(result==='failure'){this.save();return p.language==='pt'?'Refino falhou: materiais consumidos; item preservado.':'Refinement failed: costs consumed; item preserved.';}ok=result==='success';}this.refreshStats();break;
@@ -431,8 +441,10 @@ export class Engine {
       case 'pass-claim':ok=p.claimPass(data.index);break;
       case 'banner':if(['skin','pet','mount','weapon'].includes(data.key)){p.banner=data.key as typeof p.banner;ok=true;}break;
       case 'gacha':{const result=p.pull();if(result){this.sound.levelUp();this.save();return (p.language==='pt'?'Invocado: ':'Summoned: ')+result.cosmetic.name[p.language==='pt'?0:1]+(result.duplicate?(p.language==='pt'?' · duplicata convertida em fragmentos':' · duplicate converted to shards'):'');}break;}
+      case 'redeem-vip':ok=p.redeemVip(data.id);break;
       case 'redeem':ok=p.redeem(data.id);break;
       case 'cosmetic':ok=p.equipCosmetic(data.id);break;
+      case 'gps-monster':{const enemy=this.enemies.enemies.find(e=>e.id===data.id&&e.alive);if(enemy){this.setWaypoint(enemy.position);ok=true;}break;}
       case 'gps-region':case 'gps-boss':{const r=REGIONS.find(r=>r.id===data.id);if(r){this.setWaypoint(action==='gps-boss'?r.boss:r.center);ok=true;}break;}
       case 'difficulty':if(['normal','elite','nightmare','abyssal'].includes(data.key)&&!this.dungeon.active){p.dungeonDifficulty=data.key;ok=true;}break;
       case 'dungeon-select':case 'dungeon-start':{
@@ -454,19 +466,23 @@ export class Engine {
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
     const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
-    if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0);}
-    if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.textContent='➤ GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
+    if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0,COSMETICS.find(c=>c.id===p.equipped.weapon)!.color,weapon?.rarity??'common');}
+    if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;
     if(this.channel){
       if(Math.hypot(input.move.x,input.move.y)>.1||this.channel.start.distanceTo(hero.position)>1||hero.hp<this.channel.hp||!hero.alive){this.channel=null;this.hud.notify(p.language==='pt'?'Conjuração interrompida.':'Channel interrupted.');}
       else{this.channel.remaining-=dt;if(this.channel.remaining<=0){hero.teleportTo(new Vector3(this.channel.x,this.terrain.heightAt(this.channel.x,this.channel.z)+1,this.channel.z));this.channel=null;this.combat.particles.celebration(hero.position);this.save();}}
       input.move={x:0,y:0};input.attack=false;input.skill=null;return;
     }
+    if(p.waypoint){this.gpsTimer-=dt;if(this.gpsTimer<=0){this.gpsTimer=3;this.setWaypoint(p.waypoint);}}
+    const decision=planFarm({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input},this.enemies.enemies.filter(e=>regionAt(e.position.x,e.position.z).id===region.id));
+    if(decision.stop)p.autoFarm=false;
     if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active)return;
     if(Math.hypot(input.move.x,input.move.y)>.2||input.attack||input.skill!==null){p.autoFarm=false;return;}
     if(hero.hp/hero.maxHp<p.autoHealthThreshold)this.usePotion('health');if(hero.mana/hero.stats.maxMana<p.autoManaThreshold)this.usePotion('mana');
-    const target=this.enemies.enemies.filter(e=>e.alive&&!e.boss&&e.level<=this.inventory.level+3&&regionAt(e.position.x,e.position.z).id===region.id).sort((a,b)=>a.position.distanceToSquared(hero.position)-b.position.distanceToSquared(hero.position))[0];
+    const target=this.enemies.enemies.find(e=>e.id===decision.target?.id);
     if(!target)return;
+    if(this.autoTarget!==target.id){this.autoTarget=target.id;this.autoTimer=0;this.autoRoute=[];}
     hero.mounted=false;const distance=target.position.distanceTo(hero.position);
     if(distance>Math.max(2,hero.stats.range*.75)){
       this.autoTimer-=dt;if(this.autoTimer<=0){this.autoTimer=1.5;this.autoRoute=route(this.terrain,hero.position,target.position);}
@@ -495,6 +511,9 @@ export class Engine {
     const base = CLASS_DEFINITIONS[this.classId].stats;
     const equipment = this.inventory.getStatBonuses(), buildings = this.base.getBuffs(), codex = this.codex.getBuffs();
     const talents=this.progress.bonuses(this.classId);
+    const effects=epigraphEffects(this.classId,this.progress.talents[this.classId]);
+    this.hero.combatModifiers=effects;
+    if(this.companions)this.companions.powerMultiplier=1+effects.companionPower;
     this.hero.setStats({ ...base,
       maxMana:base.maxMana+talents.maxMana+(equipment.maxMana??0),critChance:Math.min(.6,base.critChance+talents.critChance+(equipment.critChance??0)),
       attack: base.attack + talents.attack + equipment.attack + buildings.attack + codex.attack,
@@ -611,7 +630,7 @@ export class Engine {
   }
 
   private updateHUD(): void {
-    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive) : undefined;
+    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
     this.hud.update({
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
@@ -621,7 +640,7 @@ export class Engine {
       codex: this.codex.entries, cooldowns: this.combat.cooldowns, cooldownMax: this.combat.cooldownMax,
       player: { x: this.hero.position.x, z: this.hero.position.z, heading: Math.atan2(this.hero.facing.x, this.hero.facing.z) },
       enemies: this.enemies.enemies.filter(enemy => enemy.alive).map(enemy => ({ x: enemy.position.x, z: enemy.position.z, boss: enemy.boss })),
-      markers: this.terrain.markers, dungeon: { active: this.dungeon.active, wave: this.dungeon.wave, status: this.dungeon.status },
+      markers: this.terrain.markers, dungeon: { active: this.dungeon.active, wave: this.dungeon.wave,floor:this.dungeon.floor,maxFloors:this.dungeon.maxFloors, status: this.dungeon.status },
       mounted: this.hero.mounted, fps: Math.round(this.fps), timeOfDay: this.timeOfDay, combo: this.combat.combo,
       boss: boss ? { name: 'Guardião do Vazio', hp: boss.hp, maxHp: boss.maxHp,
         phase: boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3 } : undefined,

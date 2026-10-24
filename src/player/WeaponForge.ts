@@ -35,6 +35,11 @@ export class WeaponForge {
     this.build();
   }
 
+  appearance(color:number,refine:number,rarity:string):void {
+    const tier=['common','uncommon','rare','epic','legendary','mythic'].indexOf(rarity);
+    this.glow.color.setHex(color);this.glow.emissive.setHex(color);this.glow.emissiveIntensity=.1+Math.max(0,tier)*.35+Math.min(15,refine)*.12;
+    this.steel.emissive.setHex(color);this.steel.emissiveIntensity=Math.min(15,refine)*.022;
+  }
   private material(color: number, metalness: number, roughness: number): MeshStandardMaterial {
     const material = new MeshStandardMaterial({ color, metalness, roughness });
     this.materials.add(material);

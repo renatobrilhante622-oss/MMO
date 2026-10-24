@@ -26,9 +26,9 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'horse',name:['Cavalo de Viagem','Travel Horse'],type:'mount',rarity:'common',color:0x997454},
   {id:'stag',name:['Cervo do Bosque','Woodland Stag'],type:'mount',rarity:'uncommon',color:0x83ce99},
   {id:'frosthorse',name:['Corcel Glacial','Frost Courser'],type:'mount',rarity:'rare',color:0x80cbff},
-  {id:'nighthorse',name:['Corcel Astral','Astral Courser'],type:'mount',rarity:'epic',color:0xb88aff},
-  {id:'sunhorse',name:['Corcel Solar','Solar Courser'],type:'mount',rarity:'legendary',color:0xffcd78},
-  {id:'eternalhorse',name:['Corcel Eterno','Eternal Courser'],type:'mount',rarity:'mythic',color:0xff91c1},
+  {id:'nighthorse',name:['Lobo Gigante','Dire Wolf'],type:'mount',rarity:'epic',color:0xb88aff},
+  {id:'sunhorse',name:['Cavalo de Guerra Blindado','Armored Warhorse'],type:'mount',rarity:'legendary',color:0xffcd78},
+  {id:'eternalhorse',name:['Grifo Astral','Astral Griffin'],type:'mount',rarity:'mythic',color:0xff91c1},
   {id:'ironweapon',name:['Aço do Viajante','Traveler Steel'],type:'weapon',rarity:'common',color:0xb9c2c8},
   {id:'forestweapon',name:['Fio do Bosque','Forest Edge'],type:'weapon',rarity:'uncommon',color:0x73d49c},
   {id:'frostweapon',name:['Fio Glacial','Frost Edge'],type:'weapon',rarity:'rare',color:0x7bcdff},
@@ -53,6 +53,7 @@ export class AdventureProgress {
   potions={health:3,mana:3};
   owned=['traveler','wolf','horse','ironweapon'];
   equipped={skin:'traveler',pet:'wolf',mount:'horse',weapon:'ironweapon'};
+  vipDiamonds=0;
   shards=0;
   banner:Cosmetic['type']='skin';
   pulls=0;
@@ -77,6 +78,7 @@ export class AdventureProgress {
   season=seasonId();
   passXp=0;
   claimed:number[]=[];
+  claimedPremium:number[]=[];
   premiumUntil=0;
   killCount=0;
   dungeonCount=0;
@@ -123,7 +125,7 @@ export class AdventureProgress {
     this.teleportCooldown=Math.max(0,this.teleportCooldown-step);
     this.potionCooldown=Math.max(0,this.potionCooldown-step);
     if(!this.vip)this.autoFarm=false;
-    const next=seasonId();if(this.season!==next){this.season=next;this.passXp=0;this.claimed=[];}
+    const next=seasonId();if(this.season!==next){this.season=next;this.passXp=0;this.claimed=[];this.claimedPremium=[];}
   }
   buyPotion(type:'health'|'mana'):boolean {
     if(this.potions[type]>=99||this.inventory.gold<35)return false;
@@ -139,12 +141,12 @@ export class AdventureProgress {
   }
   socket(id:string,type:Gem):boolean {
     const item=this.inventory.items.find(i=>i.id===id);
-    if(!item||!['ruby','sapphire','emerald','diamond'].includes(type)||(this.gems[type]<1&&this.greaterGems[type]<1)||(item.sockets?.length??0)>=this.socketCapacity(item.rarity)||this.inventory.gold<100)return false;
+    if(!item||item.locked||!['ruby','sapphire','emerald','diamond'].includes(type)||(this.gems[type]<1&&this.greaterGems[type]<1)||(item.sockets?.length??0)>=this.socketCapacity(item.rarity)||this.inventory.gold<100)return false;
     this.inventory.gold-=100;const level=this.greaterGems[type]>0?2:1;if(level===2)this.greaterGems[type]--;else this.gems[type]--;item.sockets??=[];item.gemLevels??=item.sockets.map(()=>1);item.sockets.push(type);item.gemLevels.push(level);return true;
   }
   socketCapacity(rarity:Rarity):number{return [1,1,2,3,3,4][RARITIES.indexOf(rarity)];}
   unsocket(id:string):boolean {
-    const item=this.inventory.items.find(i=>i.id===id);if(!item?.sockets?.length||this.inventory.gold<200)return false;
+    const item=this.inventory.items.find(i=>i.id===id);if(item?.locked||!item?.sockets?.length||this.inventory.gold<200)return false;
     this.inventory.gold-=200;for(let i=0;i<item.sockets.length;i++){const gem=item.sockets[i];if(item.gemLevels?.[i]===2)this.greaterGems[gem]++;else this.gems[gem]++;}item.sockets=[];item.gemLevels=[];return true;
   }
   salvage(id:string):boolean {
@@ -162,14 +164,16 @@ export class AdventureProgress {
     if(!['ruby','sapphire','emerald','diamond'].includes(type)||this.materials<12||this.inventory.gold<150)return false;
     this.materials-=12;this.inventory.gold-=150;this.gems[type]++;return true;
   }
-  buyVip():boolean {if(this.vip||this.inventory.gold<25000)return false;this.inventory.gold-=25000;this.vipUntil=Date.now()+30*86400000;return true;}
+  buyVip():boolean {if(this.vip||this.inventory.gold<25000)return false;this.inventory.gold-=25000;this.vipUntil=Date.now()+30*86400000;this.vipDiamonds+=100;return true;}
   buyPass():boolean {if(this.premium||this.inventory.crystals<180)return false;this.inventory.crystals-=180;this.premiumUntil=Date.now()+30*86400000;return true;}
+  passClaimable(tier:number):boolean {return tier>=1&&tier<=this.passTier&&(!this.claimed.includes(tier)||(this.premium&&!this.claimedPremium.includes(tier)));}
   claimPass(tier:number):boolean {
-    if(!Number.isInteger(tier)||tier<1||tier>this.passTier||this.claimed.includes(tier))return false;
-    this.claimed.push(tier);this.inventory.gold+=tier*35;this.inventory.crystals+=tier%5===0?6:1;
-    if(this.premium)this.shards+=10;
+    if(!Number.isInteger(tier)||!this.passClaimable(tier))return false;
+    if(!this.claimed.includes(tier)){this.claimed.push(tier);this.inventory.gold+=tier*35;this.inventory.crystals+=tier%5===0?6:1;}
+    if(this.premium&&!this.claimedPremium.includes(tier)){this.claimedPremium.push(tier);this.shards+=10;}
     return true;
   }
+
   missionKey(period:'day'|'week'):string {return period==='day'?new Date().toISOString().slice(0,10):String(Math.floor((Date.now()-4*86400000)/(7*86400000)));}
   missionProgress(id:'daily'|'weekly'):number {return this.missions[(id==='daily'?'kill:':'dungeon:')+this.missionKey(id==='daily'?'day':'week')]??0;}
   missionClaimed(id:'daily'|'weekly'):boolean {return this.missionClaims.includes(id+':'+this.missionKey(id==='daily'?'day':'week'));}
@@ -210,6 +214,11 @@ export class AdventureProgress {
     const cost=[20,40,100,200,500,1200][RARITIES.indexOf(cosmetic.rarity)];if(this.shards<cost)return false;
     this.shards-=cost;this.owned.push(id);return true;
   }
+  redeemVip(id:string):boolean {
+    const c=COSMETICS.find(c=>c.id===id);if(!c||this.owned.includes(id))return false;
+    const cost=[5,10,25,50,100,200][RARITIES.indexOf(c.rarity)];if(this.vipDiamonds<cost)return false;
+    this.vipDiamonds-=cost;this.owned.push(id);return true;
+  }
   equipCosmetic(id:string):boolean {
     const c=COSMETICS.find(c=>c.id===id);if(!c||!this.owned.includes(id))return false;this.equipped[c.type]=id;return true;
   }
@@ -226,7 +235,7 @@ export class AdventureProgress {
     if(object(raw.gems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.gems[key]=integer(raw.gems[key],0,99999);
     if(object(raw.greaterGems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.greaterGems[key]=integer(raw.greaterGems[key],0,99999);
     this.hudOpacity=typeof raw.hudOpacity==='number'?Math.max(.3,Math.min(1,raw.hudOpacity)):1;
-    this.materials=integer(raw.materials,0,999999);this.shards=integer(raw.shards,0,999999);
+    this.vipDiamonds=integer(raw.vipDiamonds,0,999999);this.materials=integer(raw.materials,0,999999);this.shards=integer(raw.shards,0,999999);
     if(object(raw.potions))for(const key of ['health','mana'] as const)this.potions[key]=integer(raw.potions[key],0,99);
     this.owned=[...new Set([...this.owned,...Array.isArray(raw.owned)?raw.owned.filter((id):id is string=>typeof id==='string'&&COSMETICS.some(c=>c.id===id)):[]])];
     if(object(raw.equipped))for(const type of ['skin','pet','mount','weapon'] as const){const id=raw.equipped[type];if(typeof id==='string'&&this.owned.includes(id)&&COSMETICS.some(c=>c.id===id&&c.type===type))this.equipped[type]=id;}
@@ -235,12 +244,14 @@ export class AdventureProgress {
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;
     if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=140&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=140)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora'};}
+    if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=140&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=140)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
     if(Array.isArray(raw.discovered))this.discovered=[...new Set(['aurora',...raw.discovered.filter((id):id is string=>REGIONS.some(r=>r.id===id))])];
     if(object(raw.dungeonClears))for(const [key,n] of Object.entries(raw.dungeonClears))this.dungeonClears[key]=integer(n,0,1e6);
     if(['normal','elite','nightmare','abyssal'].includes(String(raw.dungeonDifficulty)))this.dungeonDifficulty=String(raw.dungeonDifficulty);
     if(typeof raw.selectedDungeon==='string')this.selectedDungeon=raw.selectedDungeon;
     this.season=typeof raw.season==='string'?raw.season:seasonId();this.passXp=integer(raw.passXp,0,3000);
     this.claimed=Array.isArray(raw.claimed)?[...new Set(raw.claimed.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=30))]:[];
+    this.claimedPremium=Array.isArray(raw.claimedPremium)?[...new Set(raw.claimedPremium.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=30))]:[];
     this.killCount=integer(raw.killCount,0,1e9);this.dungeonCount=integer(raw.dungeonCount,0,1e9);
     // Preserve cooldowns across reloads to prevent bypassing consumable/teleport limits.
     this.teleportCooldown=typeof raw.teleportCooldown==='number'?Math.max(0,Math.min(45,raw.teleportCooldown)):0;

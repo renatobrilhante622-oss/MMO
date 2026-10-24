@@ -25,7 +25,7 @@ const server=createServer(async(req,res)=>{
       try{const raw=JSON.parse(data||'{}');if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error();body=raw;}catch{throw new GameError('Invalid JSON.');}
     }
     if(req.method==='POST'&&req.url==='/api/session'){
-      const player=game.create(body.name);save();res.end(JSON.stringify({token:player.token,...game.view(player) as object}));return;
+      const player=game.create(body.name,body.classId);save();res.end(JSON.stringify({token:player.token,...game.view(player) as object}));return;
     }
     const auth=req.headers.authorization??'';const player=game.authenticate(auth.startsWith('Bearer ')?auth.slice(7):'');
     if(req.method==='POST'){
@@ -50,4 +50,6 @@ const server=createServer(async(req,res)=>{
   }catch(error){res.statusCode=error instanceof GameError?error.status:500;res.end(JSON.stringify({error:error instanceof GameError?error.message:'Server operation failed.'}));if(!(error instanceof GameError))console.error(error);}
 });
 server.listen(Number(process.env.PORT??8787),process.env.ETERNA_SERVER_HOST??'127.0.0.1',()=>console.log('Eterna development server listening on port '+(process.env.PORT??8787)));
+const simulation=setInterval(()=>game.tick(),250);
+simulation.unref();
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{save();server.close(()=>process.exit(0));});

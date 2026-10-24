@@ -61,6 +61,13 @@ function readItem(value: unknown): Item | undefined {
   return item;
 }
 
+/** Preserve the base catalogue while extending world drops to the monster's level tier. */
+export function scaleWorldItem(template:Item,monsterLevel:number):Item {
+  const level=Math.max(template.level,Math.min(100,Math.floor(monsterLevel/5)*5));
+  const ratio=(1+level*.16)/(1+template.level*.16);
+  return {...template,level,attack:Math.round(template.attack*ratio),defense:Math.round(template.defense*ratio),maxHp:Math.round(template.maxHp*ratio),value:Math.round(template.value*ratio)};
+}
+
 export class InventoryAndLoot {
   readonly capacity = 240;
   items: Item[] = [];
@@ -108,7 +115,7 @@ export class InventoryAndLoot {
       gold: Math.round((5 + safeLevel * 3) * (boss ? 14 : 1) * (0.85 + this.random() * 0.45)),
       crystals: boss ? 3 + Math.floor(safeLevel / 4) : this.random() < 0.12 ? 1 : 0,
       xp: Math.round((12 + safeLevel * 9) * (boss ? 12 : kind === 'golem' ? 1.7 : 1)),
-      item: boss || this.random() < 0.48 ? { ...template, id: `${template.id}-${id}` } : undefined,
+      item: boss || this.random() < 0.48 ? { ...scaleWorldItem(template,safeLevel), id: `${template.id}-${id}` } : undefined,
     };
   }
 

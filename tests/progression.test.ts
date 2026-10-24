@@ -19,3 +19,9 @@ describe('PvE progression',()=>{
  it('rejects unaffordable and invalid-random gacha without charging',()=>{const {p,inv}=fixture();expect(p.pull()).toBeNull();inv.crystals=100;expect(p.pull(()=>NaN)).toBeNull();expect(inv.crystals).toBe(100);});
  it('claims pass rewards once and resets tracks on a new calendar month',()=>{const {p,inv}=fixture();p.passXp=100;const before=inv.gold;expect(p.claimPass(1)).toBe(true);expect(p.claimPass(1)).toBe(false);expect(p.claimPass(2)).toBe(false);expect(inv.gold).toBe(before+35);p.season='2000-01';p.tick(0);expect(p.passXp).toBe(0);expect(p.claimed).toEqual([]);});
 });
+
+describe('premium track and settings persistence',()=>{
+ it('allows retroactive premium claims without duplicating the free reward',()=>{const {p,inv}=fixture();p.passXp=100;expect(p.claimPass(1)).toBe(true);const gold=inv.gold;inv.crystals=200;expect(p.buyPass()).toBe(true);expect(p.claimPass(1)).toBe(true);expect(inv.gold).toBe(gold);expect(p.shards).toBe(10);expect(p.claimPass(1)).toBe(false);});
+ it('stores full HUD ranges, opacity, GPS and socket ranks',()=>{const {p,inv}=fixture();p.hudScale=.5;p.controlsScale=1.5;p.hudOpacity=.4;p.waypoint={x:20,z:30};const copy=new AdventureProgress(inv);copy.restore(p.snapshot());expect(copy.hudScale).toBe(.5);expect(copy.controlsScale).toBe(1.5);expect(copy.hudOpacity).toBe(.4);expect(copy.waypoint).toEqual({x:20,z:30});});
+ it('spends VIP test currency only on owned-checked cosmetics',()=>{const {p,inv}=fixture();inv.gold=25000;expect(p.buyVip()).toBe(true);expect(p.vipDiamonds).toBe(100);expect(p.redeemVip('sunhorse')).toBe(true);expect(p.vipDiamonds).toBe(0);expect(p.redeemVip('sunhorse')).toBe(false);expect(p.redeemVip('eternalhorse')).toBe(false);});
+});

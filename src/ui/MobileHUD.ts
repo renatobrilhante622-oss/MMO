@@ -1,6 +1,8 @@
 import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
 import { emptyInput, type ClassId, type EquipmentSlot, type HeroInput, type HeroState, type Item } from '../core/GameTypes';
 import { classIcon, skillIcon } from './IconAtlas';
+import { translateText } from './I18n';
+import type { Language } from '../progression/AdventureProgress';
 import { VitalMeter } from './VitalMeter';
 import './style.css';
 
@@ -14,13 +16,13 @@ export interface HUDModel {
   player: { x: number; z: number; heading: number };
   enemies: Array<{ x: number; z: number; boss: boolean }>;
   markers: Array<{ x: number; z: number; label: string; color: string }>;
-  dungeon: { active: boolean; wave: number; status: string };
+  dungeon: { active: boolean; wave: number; status: string;floor?:number;maxFloors?:number };
   boss?: { name: string; hp: number; maxHp: number; phase: number };
   mounted: boolean; fps: number; timeOfDay: number; combo: number;
 }
 
 export interface HUDCallbacks {
-  onOpenProgression?(tab:'talents'|'inventory'|'settings'):void;
+  onOpenProgression?(tab:'talents'|'inventory'|'settings'|'base'|'codex'):void;
   onClassChange(id: ClassId): void;
   onEquip(id: string): void;
   onUpgradeItem(id: string): void;
@@ -85,6 +87,8 @@ export class MobileHUD {
   private lastClass?: ClassId;
   private bossPhase = 0;
   private soundEnabled = true;
+  private language:Language='pt';
+  setLanguage(language:Language):void {this.language=language;this.lastClass=undefined;}
 
 
   constructor(container: HTMLElement, private readonly callbacks: HUDCallbacks) {
@@ -319,14 +323,14 @@ export class MobileHUD {
     const className = definition.name;
     setText('className', className);
     setText('level', `${model.level}`);
-    setText('state', stateNames[model.state]);
+    setText('state', translateText(stateNames[model.state],this.language));
     this.el.crest.style.setProperty('--class-color', `#${definition.color.toString(16).padStart(6, '0')}`);
     if (model.classId !== this.lastClass) {
       this.lastClass = model.classId;
       this.el.classIcon.innerHTML = classIcon(model.classId);
       definition.skills.forEach((skill, index) => {
         this.el[`skillIcon${index}`].innerHTML = skillIcon(skill.id);
-        this.el[`skill${index}`].title = `${skill.name} · ${skill.mana} mana · ${skill.cooldown}s\n${skill.description}`;
+        this.el[`skill${index}`].title = `${translateText(skill.name,this.language)} · ${skill.mana} mana · ${skill.cooldown}s\n${translateText(skill.description,this.language)}`;
       });
     }
     this.meters[0].set(model.hp, model.maxHp, now);
@@ -347,7 +351,7 @@ export class MobileHUD {
     this.el.diveButton.classList.toggle('visible', model.state === 'swim' || model.state === 'dive');
     const nearPortal = Math.hypot(model.player.x, model.player.z + 70) < 14;
     this.el.interactionHint.classList.toggle('visible', nearPortal);
-    setText('questTitle', model.dungeon.active ? `Desafio da masmorra · Onda ${model.dungeon.wave}` : 'Além dos portões');
+    setText('questTitle', model.dungeon.active ? `${this.language==='pt'?'Masmorra · Andar':'Dungeon · Floor'} ${model.dungeon.floor??1}/${model.dungeon.maxFloors??3} · ${this.language==='pt'?'Onda':'Wave'} ${model.dungeon.wave}` : 'Além dos portões');
     setText('questText', model.dungeon.active ? 'Sobreviva às ondas. Evite as áreas vermelhas do Guardião.' : nearPortal ? 'O portal desperta. Toque em Interagir para começar o desafio.' : 'Explore o vale. Derrote criaturas e encontre o portal ao norte.');
     setText('dungeonStatus', model.dungeon.status || 'NORTE ↑  PORTAL ANCESTRAL');
     for (let i = 0; i < 4; i++) {
@@ -359,7 +363,7 @@ export class MobileHUD {
       button.classList.toggle('no-mana', (definition.skills[i]?.mana ?? 0) > model.mana);
       button.setAttribute('aria-label', `${definition.skills[i]?.name ?? `Habilidade ${i + 1}`}${cooldown > 0 ? `, recarga ${Math.ceil(cooldown)} segundos` : ''}`);
       setText(`cooldown${i}`, cooldown > 0 ? `${Math.ceil(cooldown)}` : '');
-      setText(`skillName${i}`, definition.skills[i]?.name ?? '');
+      setText(`skillName${i}`, translateText(definition.skills[i]?.name ?? '',this.language));
       button.style.setProperty('--skill-color', `#${(definition.skills[i]?.color ?? definition.color).toString(16).padStart(6, '0')}`);
     }
     if (this.activePanel) this.renderPanel();
@@ -424,7 +428,7 @@ export class MobileHUD {
       if (x < 8 || x > w - 8 || y < 8 || y > h - 8) continue;
       ctx.fillStyle = marker.color;
       ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-3, -3, 6, 6); ctx.restore();
-      ctx.fillStyle = '#ccd8cb'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(marker.label, x, y + 15);
+      ctx.fillStyle = '#ccd8cb'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(translateText(marker.label,this.language), x, y + 15);
     }
     for (const enemy of model.enemies) {
       const [x, y] = project(enemy.x, enemy.z);
@@ -439,8 +443,8 @@ export class MobileHUD {
   get blocking(): boolean { return !this.started || this.activePanel !== null; }
 
   openPanel(panel: Panel): void {
-    if(this.callbacks.onOpenProgression && ['classes','inventory'].includes(panel)) {
-      this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':'inventory');return;
+    if(this.callbacks.onOpenProgression) {
+      this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':panel==='help'?'settings':panel);return;
     }
     this.clearInput();
     this.activePanel = panel;

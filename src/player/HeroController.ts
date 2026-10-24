@@ -17,6 +17,7 @@ export class HeroController implements Combatant {
   stats: CharacterStats;
   hp: number;
   mana: number;
+  combatModifiers={armorPenetration:0,lifeSteal:0};
   mounted = false;
   private classDef: ClassDefinition;
   readonly rig: ArticulatedCharacter;
@@ -144,8 +145,9 @@ export class HeroController implements Combatant {
     if(!this.alive)return;
     this.body.position.set(point.x,point.y,point.z);this.body.previousPosition.copy(this.body.position);this.body.interpolatedPosition.copy(this.body.position);this.body.velocity.setZero();this.body.angularVelocity.setZero();this.position.copy(point);this.body.aabbNeedsUpdate=true;this.body.wakeUp();this.mounted=false;this.cameraInitialized=false;
   }
-  setAppearance(color:number,refine:number):void {
+  setAppearance(color:number,refine:number,weaponColor=color,rarity:string='common'):void {
     this.rig.accent.color.setHex(color);this.rig.accent.emissive.setHex(color);this.rig.accent.emissiveIntensity=.15+Math.min(15,refine)*.08;
+    this.rig.weaponAppearance(weaponColor,refine,rarity);
   }
 
   update(dt: number, input: HeroInput): void {

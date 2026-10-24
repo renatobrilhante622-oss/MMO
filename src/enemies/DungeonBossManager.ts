@@ -1,6 +1,7 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, RingGeometry, Scene, Vector3 } from 'three';
 import type { Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
+import { DungeonArchitecture } from './DungeonArchitecture';
 import { DUNGEONS, type DungeonDefinition } from '../world/Regions';
 import { calculateDamage } from '../combat/ClassSystem';
 import { Enemy, EnemyAI } from './EnemyAI';
@@ -10,6 +11,9 @@ interface Telegraph { group: Group; center: Vector3; radius: number; remaining: 
 export class DungeonBossManager {
   definition: DungeonDefinition = DUNGEONS[0];
   clears = 0;
+  floor=1;
+  readonly maxFloors=3;
+  private readonly architecture:DungeonArchitecture;
   active = false;
   wave = 0;
   completed = false;
@@ -24,6 +28,7 @@ export class DungeonBossManager {
   private elapsed = 0;
 
   constructor(private scene: Scene, private enemies: EnemyAI, private events: EventBus, private portalPosition: Vector3) {
+    this.architecture=new DungeonArchitecture(scene,portalPosition,(x,z)=>enemies.terrainHeight(x,z));
     this.arenaRing = new Mesh(new RingGeometry(20.7, 21, 96), new MeshBasicMaterial({ color: 0xba7efa, transparent: true, opacity: .35, depthWrite: false, side: DoubleSide }));
     this.arenaRing.rotation.x = -Math.PI / 2;
     this.arenaRing.position.copy(portalPosition); this.arenaRing.position.y += .15;
@@ -32,9 +37,9 @@ export class DungeonBossManager {
 
   start(hero: Combatant, definition: DungeonDefinition = this.definition, playerLevel = 1): boolean {
     if (playerLevel < definition.level) { this.events.emit('message', {text: `Nível ${definition.level} necessário / Level required`, tone: 'warning'}); return false; }
-    this.definition = definition;
     if (this.active || !hero.alive) return false;
     if (hero.position.distanceTo(this.portalPosition) > 13) { this.events.emit('message', { text: 'Aproxime-se do portal violeta para entrar na masmorra.', tone: 'info' }); return false; }
+    this.definition = definition;this.floor=1;
     this.active = true; this.completed = false; this.wave = 0; this.boss = null; this.bossPhase = 0; this.waveDelay = .75;
     this.waveEnemies.length = 0; this.arenaRing.visible = true;
     this.status = 'Desafio da masmorra · preparando a primeira onda';
@@ -44,6 +49,7 @@ export class DungeonBossManager {
 
   update(dt: number, hero: Combatant): void {
     this.elapsed += dt;
+    this.architecture.update(this.active,this.floor,this.elapsed);
     this.updateTelegraphs(dt, hero);
     if (!this.active) return;
     if (!hero.alive || hero.position.distanceTo(this.portalPosition) > 65) {
@@ -56,7 +62,10 @@ export class DungeonBossManager {
     (this.arenaRing.material as MeshBasicMaterial).opacity = .3 + Math.sin(this.elapsed * 2) * .1;
     const living = this.waveEnemies.filter(enemy => enemy.alive);
     if (living.length === 0) {
-      if (this.wave === this.definition.waves + 1) { this.finish(); return; }
+      if (this.wave === this.definition.waves + 1) {
+        if(this.floor<this.maxFloors){this.floor++;this.wave=0;this.boss=null;this.bossPhase=0;this.waveDelay=5;this.waveEnemies=[];this.events.emit('message',{text:`Andar ${this.floor} / ${this.maxFloors} · Floor`,tone:'success'});}
+        else{this.finish();return;}
+      }
       this.waveDelay -= dt;
       if (this.waveDelay <= 0) this.spawnWave(hero);
       else this.status = `Onda ${this.wave} concluída · próxima em ${Math.ceil(this.waveDelay)}s`;
@@ -86,7 +95,7 @@ export class DungeonBossManager {
     this.wave++; this.waveEnemies.length = 0; this.waveDelay = 3;
     if (this.wave === this.definition.waves + 1) {
       const position = this.portalPosition.clone().add(new Vector3(0, 3, -8));
-      this.boss = this.enemies.spawn('boss', position, this.definition.level + 2, true);
+      this.boss = this.enemies.spawn('boss', position, this.definition.level + 2 + (this.floor-1)*3, true);
       this.waveEnemies.push(this.boss); this.bossTimer = 2;
       this.events.emit('message', { text: 'O Guardião do Vazio despertou. Saia das áreas vermelhas!', tone: 'warning' });
       return;
@@ -97,7 +106,7 @@ export class DungeonBossManager {
       const angle = i * Math.PI * 2 / count + this.wave;
       const point = this.portalPosition.clone().add(new Vector3(Math.cos(angle) * 13, 2, Math.sin(angle) * 13));
       if (point.distanceTo(hero.position) < 4) point.add(new Vector3(4, 0, -3));
-      this.waveEnemies.push(this.enemies.spawn(kinds[i % kinds.length], point, this.definition.level + this.wave - 1));
+      this.waveEnemies.push(this.enemies.spawn(kinds[i % kinds.length], point, this.definition.level + this.wave - 1 + (this.floor-1)*3));
     }
     this.events.emit('message', { text: `Onda ${this.wave} · ${count} criaturas atravessaram o portal.`, tone: 'info' });
   }
@@ -152,5 +161,5 @@ export class DungeonBossManager {
   }
   private disposeTelegraph(zone: Telegraph): void { this.scene.remove(zone.group); zone.group.traverse(child => { if (child instanceof Mesh) { child.geometry.dispose(); (child.material as MeshBasicMaterial).dispose(); } }); }
   private clearTelegraphs(): void { this.telegraphs.forEach(zone => this.disposeTelegraph(zone)); this.telegraphs.length = 0; }
-  dispose(): void { this.clearTelegraphs(); this.scene.remove(this.arenaRing); this.arenaRing.geometry.dispose(); (this.arenaRing.material as MeshBasicMaterial).dispose(); }
+  dispose(): void { this.architecture.dispose();this.clearTelegraphs(); this.scene.remove(this.arenaRing); this.arenaRing.geometry.dispose(); (this.arenaRing.material as MeshBasicMaterial).dispose(); }
 }

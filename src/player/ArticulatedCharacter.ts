@@ -4,6 +4,7 @@ import {
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { WeaponForge } from './WeaponForge';
 
 interface Limb {
@@ -215,7 +216,7 @@ export class ArticulatedCharacter {
   }
 
   private box(parent: Group, width: number, height: number, depth: number, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
-    return this.mesh(parent, new BoxGeometry(width, height, depth), material, x, y, z);
+    return this.mesh(parent, new RoundedBoxGeometry(width, height, depth, 2, Math.min(width,height,depth)*.18), material, x, y, z);
   }
 
   private buildTorso(): void {
@@ -334,6 +335,8 @@ export class ArticulatedCharacter {
     this.box(end, .15, .045, .09, this.gold, 0, -.032, .163);
     return { upper, lower, end };
   }
+
+  weaponAppearance(color:number,refine:number,rarity:string):void {this.weapons.appearance(color,refine,rarity);}
 
   setClass(definition: ClassDefinition): void {
     this.definition = definition;

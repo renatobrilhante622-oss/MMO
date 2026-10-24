@@ -100,11 +100,14 @@ export class CombatSystem {
   private hit(source: Combatant, target: Combatant, stats: CharacterStats, multiplier: number, color: number): void {
     if (!this.canHit(source, target)) return;
     const critical = Math.random() < stats.critChance;
-    const damage = calculateDamage(stats.attack, target.defense, multiplier, critical, stats.critMultiplier);
+    const modifiers=(source as Combatant & {combatModifiers?:{armorPenetration:number;lifeSteal:number}}).combatModifiers;
+    const damage = calculateDamage(stats.attack, target.defense*(1-(modifiers?.armorPenetration??0)), multiplier, critical, stats.critMultiplier);
     const knockback = target.position.clone().sub(source.position).setY(0).normalize().multiplyScalar(multiplier > 2 ? 7 : 3);
     knockback.y = .8;
     const dealt = target.receiveDamage(damage, knockback);
     if (dealt <= 0) return;
+    const healer=source as Combatant & {heal?:(amount:number)=>void};
+    if(modifiers?.lifeSteal)healer.heal?.(dealt*modifiers.lifeSteal);
     this.events.emit('damage', { position: target.position.clone().add(new Vector3(0, 1.2, 0)), amount: dealt, critical, team: target.team, color });
     this.particles.impact(target.position.clone().add(new Vector3(0, .7, 0)), color, critical);
     this.hitstop = Math.max(this.hitstop, critical ? .065 : .03);

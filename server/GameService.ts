@@ -3,10 +3,10 @@ export type Role='leader'|'officer'|'veteran'|'elite'|'member';
 export interface OnlineItem { id:string; name:string; rarity:number; }
 export interface Player {
   id:string; name:string; token:string; level:number; wins:number; losses:number; rating:number;
-  coins:number; items:OnlineItem[]; clan:string|null; bossAttackAt:number; rewardedWeek:string; clanMarks?:number;
+  coins:number; items:OnlineItem[]; clan:string|null; classId?:string; bossAttackAt:number; rewardedWeek:string; clanMarks?:number;
 }
 interface Queue { id:string; size:1|2|3; since:number; }
-export interface Fighter { id:string; team:number; hp:number; maxHp:number; energy:number; guardUntil:number; nextAction:number; }
+export interface Fighter { id:string; team:number; hp:number; maxHp:number; energy:number; guardUntil:number; nextAction:number;tactical?:boolean; }
 export interface Match { id:string; size:number; started:number; ended:number; winner:number|null; fighters:Fighter[]; log:string[]; }
 interface Clan { id:string; name:string; members:Record<string,Role>; week:string; bossHp:number; contributors:string[]; damage?:Record<string,number>; level?:number; }
 interface Listing { id:string; seller:string; item:OnlineItem; price:number; }
@@ -26,14 +26,15 @@ export class GameService {
   constructor(private readonly now:()=>number=Date.now,store?:Store){
     if(store){for(const p of store.players??[])this.players.set(p.id,p);for(const c of store.clans??[])this.clans.set(c.id,c);for(const l of store.listings??[])this.listings.set(l.id,l);}
   }
-  create(name:unknown):Player {
+  create(name:unknown,classId:unknown='berserker'):Player {
     const safe=clean(name,24);if(!/^[\p{L}\p{N} _-]{3,24}$/u.test(safe))throw new GameError('Use 3–24 letters or numbers for your name.');
     if(this.players.size>=10000)throw new GameError('Server capacity reached.',503);
     const p:Player={id:randomUUID(),name:safe,token:randomBytes(32).toString('hex'),level:1,wins:0,losses:0,rating:1000,coins:100,items:[{id:randomUUID(),name:'Traveler crest',rarity:0}],clan:null,bossAttackAt:0,rewardedWeek:''};
+    p.classId=['berserker','paladin','assassin','ranger','elementalist','necromancer','monk','lanceman','warlock'].includes(String(classId))?String(classId):'berserker';
     this.players.set(p.id,p);this.seen.set(p.id,this.now());return p;
   }
   authenticate(token:string):Player {
-    if(token.length!==64)throw new GameError('Session required.',401);
+    if(!/^[a-f0-9]{64}$/.test(token))throw new GameError('Session required.',401);
     const p=[...this.players.values()].find(p=>safeEqual(p.token,token));if(!p)throw new GameError('Session not found.',401);
     this.seen.set(p.id,this.now());return p;
   }
@@ -68,6 +69,7 @@ export class GameService {
     const m=this.activeMatch(p.id);if(!m)throw new GameError('No active match.');
     const f=m.fighters.find(f=>f.id===p.id)!;const now=this.now();
     if(f.hp<=0||now<f.nextAction)throw new GameError('Action unavailable or cooling down.');
+    if(kind==='tactical'){f.tactical=!f.tactical;return;}
     if(!['strike','spell','guard','leave'].includes(kind as string))throw new GameError('Unknown arena action.');
     if(kind==='leave'){f.hp=0;m.log.push(`${p.name} conceded.`);this.finishMatch(m);return;}
     if(kind==='guard'){f.guardUntil=now+2500;f.energy=Math.min(100,f.energy+20);f.nextAction=now+1800;m.log.push(`${p.name} guards.`);return;}
@@ -78,6 +80,17 @@ export class GameService {
     f.nextAction=now+(kind==='spell'?2300:1300);
     const damage=Math.round((kind==='spell'?180:95)*(target.guardUntil>now?.35:1));target.hp=Math.max(0,target.hp-damage);
     m.log.push(`${p.name}: ${kind} → ${this.player(target.id).name} (${damage})`);m.log=m.log.slice(-30);this.finishMatch(m);
+  }
+  tick():void {
+    this.pair();
+    for(const m of this.matches.values()){
+      this.finishMatch(m);if(m.ended)continue;
+      for(const fighter of m.fighters){if(!fighter.tactical||fighter.hp<=0||fighter.nextAction>this.now())continue;
+        const target=m.fighters.filter(f=>f.team!==fighter.team&&f.hp>0).sort((a,b)=>a.hp-b.hp)[0];if(!target)break;
+        const action=fighter.energy<30&&fighter.hp<fighter.maxHp*.4?'guard':fighter.energy>=60?'spell':'strike';
+        this.fight(this.player(fighter.id),action,target.id);if(m.ended)break;
+      }
+    }
   }
   private finishMatch(m:Match):void {
     if(m.ended)return;
@@ -145,7 +158,7 @@ export class GameService {
     const c=p.clan?this.clans.get(p.clan):null;if(c)this.resetWeek(c);
     const {token,...self}=p;
     return {self,queue:this.queue.find(q=>q.id===p.id)??null,waiting:[1,2,3].map(size=>({size,count:this.queue.filter(q=>q.size===size).length})),
-      match:recent?{...recent,fighters:recent.fighters.map(f=>({...f,name:this.player(f.id).name}))}:null,
+      match:recent?{...recent,fighters:recent.fighters.map(f=>({...f,name:this.player(f.id).name,classId:this.player(f.id).classId}))}:null,
       clans:[...this.clans.values()].map(c=>({id:c.id,name:c.name,count:Object.keys(c.members).length})),
       clan:c?{...c,members:Object.entries(c.members).map(([id,role])=>({id,name:this.player(id).name,level:this.player(id).level,role}))}:null,
       listings:[...this.listings.values()].slice(-200).map(l=>({...l,sellerName:this.player(l.seller).name})),serverTime:this.now()};

@@ -177,7 +177,7 @@ export class EnemyAI {
     const locations: [number, number][] = [[-14, -8], [13, -9], [-24, -18], [22, -25], [9, -34], [-19, -43], [35, -47], [-44, -30], [28, -77], [-32, -82], [58, -52], [-60, -65], [-38, 46], [48, 45]];
     locations.forEach(([x, z], i) => {
       const height = physics.terrainHeight(x, z);
-      if (height > physics.waterLevel + .5) this.spawn(regionAt(x,z).kinds[i % regionAt(x,z).kinds.length], new Vector3(x, height + 1.5, z), regionalLevel(x,z));
+      if (height > physics.waterLevel + .5) this.spawn(regionAt(x,z).kinds[i % regionAt(x,z).kinds.length], new Vector3(x, height + 1.5, z), i<5?1+Math.floor(i/2):regionalLevel(x,z));
     });
   }
 
@@ -199,7 +199,7 @@ export class EnemyAI {
     }
     for (const region of REGIONS) {
       this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
-      if (hero.position.distanceTo(new Vector3(region.boss.x,hero.position.y,region.boss.z)) < 55 && this.bossRespawn[region.id] === 0) {
+      if (hero.position.distanceTo(new Vector3(region.boss.x,hero.position.y,region.boss.z)) < 55 && this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-region.boss.x,e.home.z-region.boss.z)<5)) {
         this.bossRespawn[region.id]=300;
         const x=region.boss.x,z=region.boss.z;
         this.spawn('boss', new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);

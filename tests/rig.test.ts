@@ -10,10 +10,10 @@ const states: HeroState[] = ['idle', 'run', 'jump', 'doubleJump', 'fall', 'climb
 function expectFiniteTransforms(rig: ArticulatedCharacter): void {
   rig.root.updateMatrixWorld(true);
   rig.root.traverse(object => {
-    for (const value of object.matrixWorld.elements) expect(Number.isFinite(value)).toBe(true);
+    expect(object.matrixWorld.elements.every(Number.isFinite)).toBe(true);
     if (object instanceof Mesh) {
       const positions = object.geometry.attributes.position;
-      for (let i = 0; i < positions.array.length; i++) expect(Number.isFinite(positions.array[i])).toBe(true);
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true);
     }
   });
 }
