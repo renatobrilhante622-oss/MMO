@@ -201,7 +201,7 @@ export class Engine {
     });
     this.hub = new AdventureHub(this.container,this);
     this.i18n = new GameI18n(this.container,this.progress.language);
-    const journey=document.createElement('button');journey.className='journey-button';journey.textContent='JORNADA / JOURNEY';journey.onclick=()=>this.hub.open('talents');this.container.append(journey);
+    const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.open('talents');this.container.querySelector('.menu-dock')!.append(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.textContent='AUTO FARM';this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
     this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
@@ -267,7 +267,7 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
-      this.progress.earnKill(level,boss);
+      this.progress.earnKill(level,boss,regionAt(position.x,position.z).id);
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
       const drop: LootDrop = { ...loot, position: position.clone() };
@@ -443,7 +443,7 @@ export class Engine {
       case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.channel={remaining:2,x:dest.x,z:dest.z,start:this.hero.position.clone(),hp:this.hero.hp};this.combat.particles.celebration(this.hero.position);this.hub.close();ok=true;}break;}
       case 'vip':ok=p.buyVip();break;
       case 'pass-buy':ok=p.buyPass();break;
-      case 'mission':if(data.key==='daily'||data.key==='weekly')ok=p.claimMission(data.key);break;
+      case 'mission':if(data.key==='daily'||data.key==='weekly'||data.key==='forest')ok=p.claimMission(data.key);break;
       case 'pass-claim':ok=p.claimPass(data.index);break;
       case 'banner':if(['skin','pet','mount','weapon'].includes(data.key)){p.banner=data.key as typeof p.banner;ok=true;}break;
       case 'gacha':{const result=p.pull();if(result){this.sound.levelUp();this.save();return (p.language==='pt'?'Invocado: ':'Summoned: ')+result.cosmetic.name[p.language==='pt'?0:1]+(result.duplicate?(p.language==='pt'?' · duplicata convertida em fragmentos':' · duplicate converted to shards'):'');}break;}

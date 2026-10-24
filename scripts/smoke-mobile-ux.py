@@ -26,10 +26,20 @@ with sync_playwright() as p:
   assert page.locator('.adventure-content').evaluate('(e)=>e.scrollHeight<=e.clientHeight+1')
   for selector in ['.paper-boots','.paperdoll-stats','[data-do=upgrade]','.forge-socket-rack']:
    box=page.locator(selector).bounding_box();assert box and box['y']>=42 and box['y']+box['height']<=height+1,(selector,box)
+  page.locator('[data-do=forge-open]').click();assert page.locator('.forge-dedicated').is_visible()
+  page.locator('[data-do=forge-tab][data-key=sockets]').click();assert page.locator('.forge-socket-rack').is_visible()
+  page.locator('[data-do=forge-back]').click()
+  page.locator('[name=rarity-filter]').select_option('mythic');assert page.locator('.rpg-bag-grid .has-item').count()==0
+  page.locator('[name=rarity-filter]').select_option('all')
   page.mouse.move(0,0);page.screenshot(path=str(out/f'inventory-{width}.png'),timeout=120000,animations='disabled')
   for name,selector in [('pass','.vip-splash'),('base','.building-art'),('codex','.beast-portrait'),('classes','.class-banner')]:
    tab(name);assert page.locator(selector).count()>0
    page.screenshot(path=str(out/f'{name}-{width}.png'),timeout=120000,animations='disabled')
+   if name=='pass':
+    assert page.locator('.reward-track-cell').count()==100
+    page.locator('[data-do=pass-tab][data-key=missions]').click();assert page.locator('.journey-quest').count()==3
+    page.screenshot(path=str(out/f'journeys-{width}.png'),timeout=120000,animations='disabled')
+    page.locator('[data-do=pass-tab][data-key=rewards]').click()
   assert page.locator('.adventure-content').evaluate('(e)=>getComputedStyle(e).overflowY')=='hidden'
   page.locator('[data-do=close]').click()
   page.locator('.map-card').click()
@@ -40,6 +50,8 @@ with sync_playwright() as p:
   page.locator('[data-world-map]').click(position={'x':70,'y':70});page.locator('[data-do=gps-apply]').click()
   assert page.evaluate('window.__ETERNA__.gpsRoute.length')>0
   assert page.locator('.tab-map .adventure-nav').is_hidden()
+  for button in page.locator('[data-do=teleport-record]').all():
+   r=button.bounding_box();assert r['x']>=0 and r['x']+r['width']<=width,(width,r)
   page.screenshot(path=str(out/f'map-{width}.png'),timeout=120000,animations='disabled')
   page.locator('[data-do=close]').click();page.locator('.journey-button').click();tab('settings')
   page.locator('[data-do=edit-hud]').click();assert page.locator('.hud-editor-toolbar').is_visible()
@@ -70,7 +82,10 @@ with sync_playwright() as p:
   assert abs(new['x']-old['x'])<2 and abs(new['y']-old['y'])<2,(old,new)
   assert page.locator('[data-hud-edit-key=joystick]').evaluate('(e)=>Number(getComputedStyle(e).opacity)')==.55
   # Resizing the joystick must preserve its local radius and input strength.
-  joy=page.locator('[data-hud-edit-key=joystick]').bounding_box();jx=joy['x']+joy['width']*.2;jy=joy['y']+joy['height']*.6
+  joy=page.locator('[data-hud-edit-key=joystick]').bounding_box()
+  point=page.evaluate('''r=>{for(const a of [.15,.4,.65])for(const b of [.15,.4,.65]){const x=r.x+r.width*a,y=r.y+r.height*b;if(document.elementFromPoint(x,y)?.closest('[data-hud-edit-key=joystick]'))return {x,y};}return null;}''',joy)
+  assert point,joy
+  jx=point['x'];jy=point['y']
   page.mouse.move(jx,jy);page.mouse.down();page.mouse.move(jx+27.5,jy,steps=5)
   strength=page.evaluate('window.__ETERNA__.hud.readInput().move.x');page.mouse.up();assert abs(strength-.5)<.02,strength
   print(json.dumps({'viewport':[width,height],'header':42,'columns':3,'teleports':10,'hud_saved':True,'draggable_controls':7,'errors':errors}),flush=True)

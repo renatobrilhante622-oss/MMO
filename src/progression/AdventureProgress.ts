@@ -88,7 +88,7 @@ export class AdventureProgress {
   constructor(readonly inventory:InventoryAndLoot){}
   get vip():boolean{return this.vipUntil>Date.now();}
   get premium():boolean{return this.premiumUntil>Date.now();}
-  get passTier():number{return Math.min(30,Math.floor(this.passXp/100));}
+  get passTier():number{return Math.min(50,Math.floor(this.passXp/100));}
   get slots():number{return 4+this.purchasedSlots+(this.vip?2:0);}
   slotUnlocked(index:number):boolean{return Number.isInteger(index)&&index>=0&&index<10&&(index<4||(index<8&&index<4+this.purchasedSlots)||(index>=8&&this.vip));}
   spent(id:ClassId):number{return ATTRIBUTES.reduce((n,key)=>n+(this.talents[id]?.[key]??0),0);}
@@ -180,14 +180,15 @@ export class AdventureProgress {
   }
 
   missionKey(period:'day'|'week'):string {return period==='day'?new Date().toISOString().slice(0,10):String(Math.floor((Date.now()-4*86400000)/(7*86400000)));}
-  missionProgress(id:'daily'|'weekly'):number {return this.missions[(id==='daily'?'kill:':'dungeon:')+this.missionKey(id==='daily'?'day':'week')]??0;}
-  missionClaimed(id:'daily'|'weekly'):boolean {return this.missionClaims.includes(id+':'+this.missionKey(id==='daily'?'day':'week'));}
-  claimMission(id:'daily'|'weekly'):boolean {
-    const target=id==='daily'?15:5;if(this.missionProgress(id)<target||this.missionClaimed(id))return false;
-    this.missionClaims.push(id+':'+this.missionKey(id==='daily'?'day':'week'));this.missionClaims=this.missionClaims.slice(-30);
-    this.passXp+=id==='daily'?60:200;this.inventory.gold+=id==='daily'?120:600;return true;
+  missionProgress(id:'daily'|'weekly'|'forest'):number {return this.missions[(id==='weekly'?'dungeon:':id==='forest'?'forest:':'kill:')+this.missionKey(id==='weekly'?'week':'day')]??0;}
+  missionClaimed(id:'daily'|'weekly'|'forest'):boolean {return this.missionClaims.includes(id+':'+this.missionKey(id==='weekly'?'week':'day'));}
+  claimMission(id:'daily'|'weekly'|'forest'):boolean {
+    const target=id==='daily'?15:id==='forest'?50:3;if(this.missionProgress(id)<target||this.missionClaimed(id))return false;
+    this.missionClaims.push(id+':'+this.missionKey(id==='weekly'?'week':'day'));this.missionClaims=this.missionClaims.slice(-30);
+    this.passXp+=id==='daily'?60:id==='forest'?180:200;this.inventory.gold+=id==='daily'?120:id==='forest'?350:600;return true;
   }
-  earnKill(level:number,boss:boolean):void {
+  earnKill(level:number,boss:boolean,region?:string):void {
+    if(region==='lake'){const forest='forest:'+this.missionKey('day');this.missions[forest]=(this.missions[forest]??0)+1;}
     const key='kill:'+this.missionKey('day');this.missions[key]=(this.missions[key]??0)+1;
     this.killCount++;this.passXp+=boss?25:3;
     // Materials are an explicit sink/source, with a predictable one per five kills.
@@ -254,9 +255,9 @@ export class AdventureProgress {
     if(object(raw.dungeonClears))for(const [key,n] of Object.entries(raw.dungeonClears))this.dungeonClears[key]=integer(n,0,1e6);
     if(['normal','elite','nightmare','abyssal'].includes(String(raw.dungeonDifficulty)))this.dungeonDifficulty=String(raw.dungeonDifficulty);
     if(typeof raw.selectedDungeon==='string')this.selectedDungeon=raw.selectedDungeon;
-    this.season=typeof raw.season==='string'?raw.season:seasonId();this.passXp=integer(raw.passXp,0,3000);
-    this.claimed=Array.isArray(raw.claimed)?[...new Set(raw.claimed.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=30))]:[];
-    this.claimedPremium=Array.isArray(raw.claimedPremium)?[...new Set(raw.claimedPremium.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=30))]:[];
+    this.season=typeof raw.season==='string'?raw.season:seasonId();this.passXp=integer(raw.passXp,0,5000);
+    this.claimed=Array.isArray(raw.claimed)?[...new Set(raw.claimed.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=50))]:[];
+    this.claimedPremium=Array.isArray(raw.claimedPremium)?[...new Set(raw.claimedPremium.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=50))]:[];
     this.killCount=integer(raw.killCount,0,1e9);this.dungeonCount=integer(raw.dungeonCount,0,1e9);
     // Preserve cooldowns across reloads to prevent bypassing consumable/teleport limits.
     this.teleportCooldown=typeof raw.teleportCooldown==='number'?Math.max(0,Math.min(45,raw.teleportCooldown)):0;
