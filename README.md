@@ -49,13 +49,23 @@ O progresso é salvo automaticamente no armazenamento local, ao coletar loot e a
 
 ## Renderização e desempenho
 
-O pipeline combina materiais PBR, ambiente procedural, sombras CSM de três cascatas, ciclo dia/noite, bloom, ACES e neblina de altura integrada em 12 amostras com profundidade. A água usa ondas GLSL e reflexão aproximada do céu com Fresnel; não utiliza reflexos planares completos. Árvores e grama usam `InstancedMesh`. A física é simulada em passos fixos de 60 Hz, com alturas compartilhadas entre terreno visível e colisores.
+O pipeline usa um render target HDR de meia precisão, materiais PBR, sombras CSM de três cascatas, neblina de altura com profundidade, `UnrealBloomPass`, `SMAAPass` e conversão final ACES. O céu procedural combina fases de dispersão Rayleigh/Mie aproximadas, nuvens FBM, disco solar, lua com detalhes de superfície e estrelas. A água usa quatro ondas GLSL com normais analíticas, Fresnel, espuma baseada na altura real do terreno e brilho especular do sol/lua. A reflexão do céu é uma aproximação procedural; não há reflexão planar ou ray tracing.
 
-**Alta** ativa neblina volumétrica, bloom e sombras de 2048 pixels. **Leve**, padrão para touch, remove esses dois pós-efeitos, usa resolução de tela reduzida e sombras de 1024 pixels. A câmera e o mundo continuam 3D. A taxa de quadros depende do aparelho e da GPU; 60 FPS é a meta do loop, não uma garantia de desempenho. Requer WebGL 2 e aceleração gráfica.
+O terreno mistura grama detalhada, areia úmida nas margens, rocha por inclinação e pavimento da vila/estrada em um shader PBR. Árvores e grama usam `InstancedMesh`. A vila inclui detalhes de carpintaria e alvenaria, moradores em patrulha, tochas animadas e partículas de fogo; a fenda possui um vórtice em espiral. Poeira, folhas e vagalumes acompanham o ciclo dia/noite. A física continua em passos fixos de 60 Hz, compartilhando alturas com a renderização.
+
+**Alta** ativa neblina, bloom, SMAA e sombras de 2048 pixels. **Leve**, padrão para touch, desativa esses pós-efeitos, reduz partículas ambientais, usa resolução menor e sombras de 1024 pixels. A câmera e o mundo continuam 3D. A taxa de quadros depende do aparelho e da GPU; 60 FPS é a meta do loop, não uma garantia de desempenho. Requer WebGL 2 e aceleração gráfica.
+
+## Animação, efeitos e áudio
+
+Herói e inimigos humanoides possuem hierarquias de articulações com antebraços, joelhos, mãos, pés e armadura. Os nove arquétipos têm armas próprias. A animação procedural combina passada oposta, inclinação, amortecimento de pose, escalada, nado horizontal e ataques/conjurações por classe; a capa usa uma malha deformável. As animações de ataque são disparadas apenas quando o combate aceita a ação.
+
+As partículas de combate usam buffers de capacidade fixa: emissão e reciclagem na CPU; movimento, arrasto, gravidade, tamanho e fade no vertex shader. Trilhas de lâmina, estilhaços, faíscas, ondas de choque e pilares de recompensa complementam as habilidades. Esses efeitos não alteram os cálculos de dano, hitboxes ou recargas.
+
+O áudio é sintetizado localmente com WebAudio: cortes, impactos, magia, passos, moedas, rugido e ambiente. Ele é liberado pelo botão **Iniciar jornada**, respeitando a política de gesto do navegador; o Guia permite silenciá-lo. Não há downloads de MP3. A HUD possui emblemas SVG das classes/habilidades, medidores com dano residual e barra do Guardião com fases. Preferências de movimento reduzido são respeitadas nas animações da interface.
 
 ## Android
 
-O projeto nativo está em `android/`. Requer **JDK 21 completo**, Android SDK Platform 36 e Build Tools 36.0.0. Os componentes oficiais e caches já foram preparados neste ambiente de nuvem. Gradle usa o wrapper versionado.
+O projeto nativo está em `android/`. Requer **JDK 21 completo**, Android SDK Platform 36 e Build Tools 36.0.0/35.0.0. O instalador fixa o Eclipse Adoptium Temurin 21.0.13+9 e verifica o SHA256 publicado pelo fornecedor. Os componentes oficiais e caches foram preparados neste ambiente de nuvem. Gradle usa o wrapper versionado com verificação SHA256.
 
 ```sh
 export ANDROID_HOME=/workspace/.android-sdk

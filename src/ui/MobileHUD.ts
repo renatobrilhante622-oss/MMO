@@ -1,5 +1,7 @@
 import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
 import { emptyInput, type ClassId, type EquipmentSlot, type HeroInput, type HeroState, type Item } from '../core/GameTypes';
+import { classIcon, skillIcon } from './IconAtlas';
+import { VitalMeter } from './VitalMeter';
 import './style.css';
 
 export interface HUDModel {
@@ -13,6 +15,7 @@ export interface HUDModel {
   enemies: Array<{ x: number; z: number; boss: boolean }>;
   markers: Array<{ x: number; z: number; label: string; color: string }>;
   dungeon: { active: boolean; wave: number; status: string };
+  boss?: { name: string; hp: number; maxHp: number; phase: number };
   mounted: boolean; fps: number; timeOfDay: number; combo: number;
 }
 
@@ -25,6 +28,7 @@ export interface HUDCallbacks {
   onStart(): void;
   onQualityChange?(quality: 'low' | 'high'): void;
   onResetSave?(): void;
+  onSoundChange?(enabled: boolean): void;
 }
 
 type Panel = 'inventory' | 'classes' | 'base' | 'codex' | 'help';
@@ -73,6 +77,14 @@ export class MobileHUD {
   private lookPosition = { x: 0, y: 0 };
   private joystickOrigin = { x: 0, y: 0 };
   private readonly el: Record<string, HTMLElement> = {};
+  private readonly meters: VitalMeter[] = [];
+  private readonly reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  private animationId = 0;
+  private animationTime = 0;
+  private lastClass?: ClassId;
+  private bossPhase = 0;
+  private soundEnabled = true;
+
 
   constructor(container: HTMLElement, private readonly callbacks: HUDCallbacks) {
     this.root = document.createElement('div');
@@ -80,15 +92,17 @@ export class MobileHUD {
     this.root.innerHTML = `
       <div class="look-zone" data-ref="lookZone" aria-label="Arraste para mover a câmera"></div>
       <div class="move-zone" data-ref="moveZone" aria-label="Joystick: arraste para caminhar"><div class="joystick" data-ref="joystick"><span></span><i data-ref="joystickThumb"></i></div><span class="move-hint">MOVER</span></div>
-      <header class="hud-top"><div class="hero-card"><div class="hero-crest" data-ref="crest">B<span data-ref="level">1</span></div><div class="hero-vitals"><div class="hero-name"><span data-ref="className">Berserker</span><small data-ref="state">Na vila</small></div><div class="vital-bar hp"><i data-ref="hpFill"></i><span data-ref="hpText"></span></div><div class="vital-bar mana"><i data-ref="manaFill"></i><span data-ref="manaText"></span></div><div class="xp-bar"><i data-ref="xpFill"></i></div></div></div>
+      <header class="hud-top"><div class="hero-card"><div class="hero-crest" data-ref="crest"><div data-ref="classIcon">${classIcon('berserker')}</div><span data-ref="level">1</span></div><div class="hero-vitals"><div class="hero-name"><span data-ref="className">Berserker</span><small data-ref="state">Na vila</small></div><div class="vital-bar hp" data-ref="hpTrack" aria-label="Vida"><b class="vital-residual" data-ref="hpResidual"></b><i data-ref="hpFill"></i><span data-ref="hpText"></span></div><div class="vital-bar mana" data-ref="manaTrack" aria-label="Mana"><b class="vital-residual" data-ref="manaResidual"></b><i data-ref="manaFill"></i><span data-ref="manaText"></span></div><div class="xp-bar"><i data-ref="xpFill"></i></div></div></div>
       <div class="world-banner"><span class="overline">ETERNA</span><strong>Vale de Aster</strong><span data-ref="worldTime">AMANHECER</span></div>
       <div class="map-card"><div class="map-heading"><span>VALE DE ASTER</span><span class="map-north">N</span></div><canvas data-ref="minimap" width="260" height="220" aria-label="Minimapa em tempo real"></canvas><div class="map-footer"><span data-ref="coordinates">0, 18</span><span data-ref="fps">60 FPS</span></div></div></header>
+      <section class="boss-hud" data-ref="bossPanel" hidden aria-label="Vida do chefe da masmorra"><div class="boss-title"><span class="boss-flourish" aria-hidden="true">◇</span><div><span class="boss-overline">GUARDIÃO ANCESTRAL</span><strong data-ref="bossName"></strong></div><span class="boss-flourish" aria-hidden="true">◇</span></div><div class="boss-health-track" data-ref="bossTrack" aria-label="Vida do chefe"><b class="vital-residual" data-ref="bossResidual"></b><i data-ref="bossFill"></i><div class="boss-segments" aria-hidden="true"></div></div><div class="boss-status"><span data-ref="bossPhase"></span><div class="boss-phase-marks" data-ref="bossPips" aria-hidden="true"><i></i><i></i><i></i></div><span data-ref="bossHealth"></span></div></section>
+      <button class="sound-toggle" data-sound aria-label="Silenciar áudio" aria-pressed="false" title="Áudio procedural"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m4 9 4 0 5-4v14l-5-4H4V9Z"/><path class="sound-waves" d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-slash" d="m16 9 6 6m0-6-6 6"/></svg><span data-ref="soundLabel">SOM</span></button>
       <aside class="quest-card"><div class="quest-label"><span class="quest-diamond"></span> A JORNADA COMEÇA</div><strong data-ref="questTitle">Além dos portões</strong><p data-ref="questText">Explore o vale. Derrote criaturas e encontre o portal ao norte.</p><div class="quest-progress" data-ref="dungeonStatus"></div></aside>
       <div class="resource-bar"><span class="gold-dot"></span><span data-ref="gold">0</span><span class="crystal-dot"></span><span data-ref="crystals">0</span><span class="save-indicator" title="Progresso salvo automaticamente neste dispositivo">AUTO SAVE</span></div>
       <nav class="menu-dock" aria-label="Menus do aventureiro"><button data-panel="inventory" title="Inventário (I)">${icon('bag')}<span>Itens</span><kbd>I</kbd></button><button data-panel="classes" title="Classes (C)">${icon('classes')}<span>Classes</span><kbd>C</kbd></button><button data-panel="base" title="Base (B)">${icon('base')}<span>Base</span><kbd>B</kbd></button><button data-panel="codex" title="Codex (K)">${icon('codex')}<span>Codex</span><kbd>K</kbd></button><button data-panel="help" title="Controles e opções">${icon('help')}<span>Guia</span></button></nav>
       <button class="dive-action action-button" data-action="dive" data-ref="diveButton" aria-label="Segure para mergulhar na água">↓<small>Mergulhar</small></button>
       <div class="interaction-hint" data-ref="interactionHint"><button data-action="interact">${icon('interact')}<span>Interagir</span><kbd>E</kbd></button></div>
-      <div class="combat-controls"><div class="skills-row">${[0, 1, 2, 3].map(i => `<button class="skill-button" data-skill="${i}" data-ref="skill${i}" aria-label="Habilidade ${i + 1}"><span class="skill-glyph">${['✦', '◇', '⌁', '✧'][i]}</span><span class="cooldown-number" data-ref="cooldown${i}"></span><small data-ref="skillName${i}"></small><kbd>${i + 1}</kbd></button>`).join('')}</div><div class="movement-actions"><button class="action-button mount-action" data-action="mount" data-ref="mountButton" aria-label="Invocar montaria (M)">${icon('mount')}<small>Montaria</small><kbd>M</kbd></button><button class="action-button" data-action="dash" aria-label="Deslizar (Shift)">${icon('dash')}<small>Esquiva</small><kbd>⇧</kbd></button><button class="action-button" data-action="jump" aria-label="Pular / duplo pulo (Espaço)">${icon('jump')}<small>Pular</small><kbd>␣</kbd></button><button class="attack-button" data-action="attack" aria-label="Atacar (J)">${icon('sword')}<small>ATACAR</small><kbd>J</kbd></button></div></div>
+      <div class="combat-controls"><div class="skills-row">${[0, 1, 2, 3].map(i => `<button class="skill-button" data-skill="${i}" data-ref="skill${i}" aria-label="Habilidade ${i + 1}"><span class="skill-glyph" data-ref="skillIcon${i}">${skillIcon(CLASS_DEFINITIONS.berserker.skills[i].id)}</span><span class="cooldown-number" data-ref="cooldown${i}"></span><small data-ref="skillName${i}"></small><kbd>${i + 1}</kbd></button>`).join('')}</div><div class="movement-actions"><button class="action-button mount-action" data-action="mount" data-ref="mountButton" aria-label="Invocar montaria (M)">${icon('mount')}<small>Montaria</small><kbd>M</kbd></button><button class="action-button" data-action="dash" aria-label="Deslizar (Shift)">${icon('dash')}<small>Esquiva</small><kbd>⇧</kbd></button><button class="action-button" data-action="jump" aria-label="Pular / duplo pulo (Espaço)">${icon('jump')}<small>Pular</small><kbd>␣</kbd></button><button class="attack-button" data-action="attack" aria-label="Atacar (J)">${icon('sword')}<small>ATACAR</small><kbd>J</kbd></button></div></div>
       <div class="combo-label" data-ref="combo"></div><div class="screen-vignette" data-ref="vignette"></div>
       <div class="damage-layer" data-ref="damageLayer" aria-hidden="true"></div><div class="toast-stack" data-ref="toasts" role="status" aria-live="polite"></div>
       <div class="modal-backdrop" data-ref="modal" hidden><section class="game-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="overline" data-ref="modalSubtitle">SEU AVENTUREIRO</span><h1 id="modal-title" data-ref="modalTitle"></h1></div><button class="close-button" data-close aria-label="Fechar janela">×</button></header><div class="modal-body" data-ref="modalBody"></div></section></div>
@@ -96,6 +110,13 @@ export class MobileHUD {
     container.append(this.root);
     this.root.querySelectorAll<HTMLElement>('[data-ref]').forEach(node => this.el[node.dataset.ref!] = node);
     this.root.querySelectorAll<HTMLSelectElement>('[data-quality]').forEach(select => select.value = this.quality);
+    const reduce = (): boolean => this.reducedMotion.matches;
+    this.meters.push(
+      new VitalMeter(this.el.hpFill, this.el.hpResidual, this.el.hpTrack, reduce),
+      new VitalMeter(this.el.manaFill, this.el.manaResidual, this.el.manaTrack, reduce),
+      new VitalMeter(this.el.bossFill, this.el.bossResidual, this.el.bossTrack, reduce),
+    );
+    this.animationId = requestAnimationFrame(this.animateMeters);
     this.bindEvents();
     this.bindJoystick();
     this.bindCamera();
@@ -117,6 +138,13 @@ export class MobileHUD {
         this.root.classList.add('is-playing');
         this.callbacks.onStart();
         this.notify('Sua jornada começou. Explore o vale ao norte da vila.', 'success');
+      } else if (target.hasAttribute('data-sound')) {
+        this.soundEnabled = !this.soundEnabled;
+        this.root.classList.toggle('sound-muted', !this.soundEnabled);
+        target.setAttribute('aria-pressed', `${!this.soundEnabled}`);
+        target.setAttribute('aria-label', this.soundEnabled ? 'Silenciar áudio' : 'Ativar áudio');
+        this.el.soundLabel.textContent = this.soundEnabled ? 'SOM' : 'MUDO';
+        this.callbacks.onSoundChange?.(this.soundEnabled);
       } else if (target.hasAttribute('data-close')) this.closePanel();
       else if (target.dataset.panel) this.openPanel(target.dataset.panel as Panel);
       else if (target.dataset.class) this.callbacks.onClassChange(target.dataset.class as ClassId);
@@ -292,10 +320,17 @@ export class MobileHUD {
     setText('level', `${model.level}`);
     setText('state', stateNames[model.state]);
     this.el.crest.style.setProperty('--class-color', `#${definition.color.toString(16).padStart(6, '0')}`);
-    const crestText = this.el.crest.firstChild;
-    if (crestText?.nodeType === Node.TEXT_NODE) crestText.textContent = className.charAt(0);
-    this.el.hpFill.style.width = percentage(model.hp, model.maxHp);
-    this.el.manaFill.style.width = percentage(model.mana, model.maxMana);
+    if (model.classId !== this.lastClass) {
+      this.lastClass = model.classId;
+      this.el.classIcon.innerHTML = classIcon(model.classId);
+      definition.skills.forEach((skill, index) => {
+        this.el[`skillIcon${index}`].innerHTML = skillIcon(skill.id);
+        this.el[`skill${index}`].title = `${skill.name} · ${skill.mana} mana · ${skill.cooldown}s\n${skill.description}`;
+      });
+    }
+    this.meters[0].set(model.hp, model.maxHp, now);
+    this.meters[1].set(model.mana, model.maxMana, now);
+    this.updateBoss(model, now);
     this.el.xpFill.style.width = percentage(model.xp, model.xpToNext);
     setText('hpText', `${Math.ceil(model.hp)} / ${Math.ceil(model.maxHp)}`);
     setText('manaText', `${Math.floor(model.mana)} / ${Math.ceil(model.maxMana)}`);
@@ -327,6 +362,39 @@ export class MobileHUD {
       button.style.setProperty('--skill-color', `#${(definition.skills[i]?.color ?? definition.color).toString(16).padStart(6, '0')}`);
     }
     if (this.activePanel) this.renderPanel();
+  }
+
+  private readonly animateMeters = (now: number): void => {
+    const dt = this.animationTime ? Math.min(0.05, (now - this.animationTime) / 1000) : 1 / 60;
+    this.animationTime = now;
+    this.meters.forEach(meter => meter.tick(dt, now));
+    this.animationId = requestAnimationFrame(this.animateMeters);
+  };
+
+  private updateBoss(model: HUDModel, now: number): void {
+    const boss = model.boss;
+    const visible = Boolean(boss && boss.hp > 0 && model.dungeon.active);
+    this.el.bossPanel.hidden = !visible;
+    this.root.classList.toggle('boss-encounter', visible);
+    if (!visible || !boss) {
+      this.bossPhase = 0;
+      return;
+    }
+    this.el.bossName.textContent = boss.name;
+    const phase = clamp(Math.round(boss.phase), 1, 3);
+    this.el.bossPhase.textContent = `FASE ${phase} · ${['VIGÍLIA', 'FÚRIA', 'CATACLISMO'][phase - 1]}`;
+    this.el.bossHealth.textContent = `${Math.ceil(boss.hp).toLocaleString('pt-BR')} / ${Math.ceil(boss.maxHp).toLocaleString('pt-BR')}`;
+    this.el.bossPips.querySelectorAll('i').forEach((node, index) => {
+      node.classList.toggle('active', index < phase);
+    });
+    this.el.bossPanel.style.setProperty('--boss-phase', `${phase}`);
+    if (this.bossPhase !== phase) {
+      this.el.bossPanel.classList.remove('phase-change');
+      // Restart the brief phase flourish without layout reads.
+      this.later(() => this.el.bossPanel.classList.add('phase-change'), 0);
+      this.bossPhase = phase;
+    }
+    this.meters[2].set(boss.hp, boss.maxHp, now);
   }
 
   private drawMinimap(model: HUDModel): void {
@@ -419,7 +487,7 @@ export class MobileHUD {
     this.el.modalBody.innerHTML = `<p class="panel-intro">Troque seu estilo de combate a qualquer momento. Equipamentos e progresso acompanham você.</p><div class="class-grid">${CLASS_IDS.map(id => {
       const c = CLASS_DEFINITIONS[id];
       const active = model?.classId === id;
-      return `<article class="class-card ${active ? 'active' : ''}" style="--accent:#${c.color.toString(16).padStart(6, '0')}"><div class="class-card-top"><span class="class-sigil">${esc(c.name.charAt(0))}</span><span class="class-selected">${active ? 'EM USO' : 'CLASSE'}</span></div><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p><div class="class-stats"><span>ATQ <b>${c.stats.attack}</b></span><span>DEF <b>${c.stats.defense}</b></span><span>HP <b>${c.stats.maxHp}</b></span></div><div class="class-skills">${c.skills.map(s => `<span title="${esc(s.description)}">${esc(s.name)}</span>`).join('')}</div><button class="outline-button" data-class="${id}" ${active ? 'disabled' : ''}>${active ? 'Classe selecionada' : 'Escolher caminho'}</button></article>`;
+      return `<article class="class-card ${active ? 'active' : ''}" style="--accent:#${c.color.toString(16).padStart(6, '0')}"><div class="class-card-top"><span class="class-sigil">${classIcon(id)}</span><span class="class-selected">${active ? 'EM USO' : 'CLASSE'}</span></div><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p><div class="class-stats"><span>ATQ <b>${c.stats.attack}</b></span><span>DEF <b>${c.stats.defense}</b></span><span>HP <b>${c.stats.maxHp}</b></span></div><div class="class-skills">${c.skills.map(s => `<span title="${esc(s.description)} · ${s.mana} mana · ${s.cooldown}s">${skillIcon(s.id)}${esc(s.name)}</span>`).join('')}</div><button class="outline-button" data-class="${id}" ${active ? 'disabled' : ''}>${active ? 'Classe selecionada' : 'Escolher caminho'}</button></article>`;
     }).join('')}</div>`;
   }
 
@@ -487,6 +555,7 @@ export class MobileHUD {
   }
 
   dispose(): void {
+    cancelAnimationFrame(this.animationId);
     this.abort.abort();
     for (const timer of this.timers) clearTimeout(timer);
     this.timers.clear();

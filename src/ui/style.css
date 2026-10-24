@@ -16,3 +16,332 @@
 
 /* Keep the objective readable against bright terrain and village walls. */
 .quest-card{padding-top:7px;padding-bottom:7px;padding-right:8px;background:linear-gradient(90deg,rgba(7,20,25,.72),rgba(7,20,25,.28) 82%,transparent);border-radius:0 3px 3px 0}
+
+/* The combat HUD uses local vectors and composited fill layers. */
+.eterna-hud {
+  --metal-edge: rgba(230, 196, 132, .64);
+  --glass-deep: rgba(7, 13, 24, .83);
+  --glass-light: rgba(32, 39, 56, .65);
+}
+.hero-crest > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 43px;
+  height: 43px;
+  margin-top: -8px;
+}
+.hero-crest .atlas-class {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 1px 2px #000a);
+}
+.hero-vitals {
+  padding: 5px 7px 7px;
+  background: linear-gradient(110deg, rgba(4, 11, 20, .72), rgba(9, 20, 31, .04));
+  border-radius: 2px;
+}
+.eterna-hud .vital-bar {
+  border-color: rgba(219, 192, 144, .51);
+  box-shadow: 0 1px 4px #000a, inset 0 1px 3px #000;
+  isolation: isolate;
+}
+.eterna-hud .vital-bar > i,
+.boss-health-track > i,
+.vital-residual {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  transition: none;
+}
+.vital-residual {
+  background: linear-gradient(0deg, #d17a67, #fff2d5 80%);
+  opacity: .94;
+  z-index: -1;
+}
+.eterna-hud .vital-bar.hp > i {
+  background: linear-gradient(0deg, #561a26 0%, #a53043 47%, #db6971 82%, #f3a29a 100%);
+}
+.eterna-hud .vital-bar.mana > i {
+  background: linear-gradient(0deg, #143664, #336eaf 55%, #6fc5e4);
+}
+.eterna-hud .vital-bar.mana > .vital-residual {
+  background: linear-gradient(0deg, #8b89be, #d1f3ff);
+}
+.vital-bar.is-critical > i {
+  filter: brightness(1.15);
+}
+.vital-bar.is-depleted > i {
+  visibility: hidden;
+}
+.vital-bar > span {
+  z-index: 2;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}
+.xp-bar {
+  border-radius: 1px;
+  box-shadow: 0 0 4px #ddaa4d22;
+}
+.xp-bar > i {
+  transition: width .35s ease-out;
+  background: linear-gradient(90deg, #795f3c, #dfc07c, #fff0c2);
+}
+.atlas-icon {
+  overflow: visible;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+.skill-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66%;
+  height: 66%;
+}
+.skill-glyph .atlas-skill {
+  width: 100%;
+  height: 100%;
+}
+.skill-button {
+  background: radial-gradient(ellipse at 40% 22%, #374253 0%, #172131 45%, #070d18 79%);
+  border-color: var(--metal-edge);
+  box-shadow: inset 0 0 0 3px #0a101d, inset 0 0 0 4px #d4ad6829, 0 4px 12px #0009;
+  transition: border-color .18s, filter .18s, box-shadow .18s;
+}
+.skill-button:not(.cooling):not(.no-mana):hover {
+  border-color: #ffe3a6;
+  box-shadow: inset 0 0 0 3px #0a101d, 0 0 13px #d9b77955;
+}
+.skill-button.no-mana {
+  border-color: #765e78;
+}
+.skill-button.no-mana::before {
+  content: '';
+  position: absolute;
+  bottom: 9px;
+  right: 9px;
+  width: 6px;
+  height: 8px;
+  border-radius: 70% 30% 60% 40%;
+  border: 1px solid #d7afd4;
+  background: #473654;
+  z-index: 3;
+  transform: rotate(30deg);
+}
+.skill-button.is-pressed .skill-glyph {
+  transform: scale(.9);
+}
+.class-sigil .atlas-class {
+  width: 33px;
+  height: 33px;
+}
+.class-skills > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.class-skills .atlas-skill {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  filter: none;
+}
+.class-card {
+  background: linear-gradient(145deg, rgba(43, 47, 60, .31), rgba(7, 16, 26, .6));
+  border-top-color: var(--accent);
+  box-shadow: inset 0 1px 0 #fff1;
+}
+.class-card.active {
+  box-shadow: inset 0 0 28px color-mix(in srgb, var(--accent) 10%, transparent), 0 2px 12px #0003;
+}
+.game-modal {
+  background: linear-gradient(145deg, rgba(21, 28, 42, .97), rgba(6, 17, 25, .97));
+  box-shadow: 0 18px 90px #000a, inset 0 0 0 3px #ddbe7d0a;
+  border-color: #cdb4795c;
+  backdrop-filter: blur(18px);
+  scrollbar-color: #8b7952 #0c1721;
+}
+.menu-dock,
+.map-card,
+.quest-card {
+  backdrop-filter: blur(6px) saturate(.8);
+}
+.boss-hud {
+  position: absolute;
+  top: max(28px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(520px, 42vw);
+  transform: translateX(-50%);
+  text-align: center;
+  color: #f4dfc3;
+  filter: drop-shadow(0 3px 6px #000);
+}
+.boss-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 17px;
+  margin-bottom: 8px;
+}
+.boss-title > div {
+  min-width: 0;
+}
+.boss-overline {
+  display: block;
+  font-size: 6px;
+  letter-spacing: .34em;
+  color: #bc9e85;
+  margin-bottom: 3px;
+}
+.boss-title strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: clamp(13px, 1.4vw, 20px);
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.boss-flourish {
+  color: #d0a77b;
+  font-size: 25px;
+  text-shadow: 0 0 10px #ed806755;
+}
+.boss-health-track {
+  position: relative;
+  height: 12px;
+  border: 1px solid #c5a47f;
+  background: #100b12;
+  box-shadow: 0 2px 5px #000b, inset 0 0 0 2px #000a;
+  isolation: isolate;
+  clip-path: polygon(0 50%, 7px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 7px 100%);
+}
+.boss-health-track > i {
+  background: linear-gradient(0deg, #59162c, #a83348 47%, #e17474 90%);
+}
+.boss-health-track .vital-residual {
+  background: linear-gradient(0deg, #b76d66, #ffe3ce);
+}
+.boss-segments {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), #1d081b99 calc(10% - 1px), #1d081b99 10%);
+  pointer-events: none;
+}
+.boss-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 7px 9px 0;
+  font-size: 7px;
+  letter-spacing: .1em;
+  color: #d0b496;
+  font-variant-numeric: tabular-nums;
+}
+.boss-phase-marks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.boss-phase-marks > i {
+  width: 5px;
+  height: 5px;
+  background: #402438;
+  border: 1px solid #ac806a;
+  transform: rotate(45deg);
+}
+.boss-phase-marks > i.active {
+  background: #ffd9aa;
+  box-shadow: 0 0 7px #ff916b;
+}
+.boss-encounter .world-banner {
+  visibility: hidden;
+}
+.phase-change .boss-flourish {
+  animation: phase-flare .8s ease-out;
+}
+.sound-toggle {
+  position: absolute;
+  right: max(28px, env(safe-area-inset-right));
+  top: 237px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 7px;
+  border: 1px solid #c5ad773b;
+  border-radius: 3px;
+  background: #091722b8;
+  color: #cdbd98;
+  z-index: 11;
+}
+.sound-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+.sound-toggle > span {
+  font-size: 6px;
+  letter-spacing: .12em;
+}
+.sound-slash,
+.sound-muted .sound-waves {
+  display: none;
+}
+.sound-muted .sound-slash {
+  display: initial;
+}
+.eterna-hud:not(.is-playing) .sound-toggle {
+  top: max(28px, env(safe-area-inset-top));
+}
+.eterna-hud:not(.is-playing) .boss-hud,
+.has-modal .boss-hud {
+  visibility: hidden;
+}
+@keyframes phase-flare {
+  0% { color: #fff8df; text-shadow: 0 0 18px #ff945c; transform: scale(1.4); }
+  100% { color: #d0a77b; text-shadow: 0 0 10px #ed806755; transform: scale(1); }
+}
+@media (max-width: 1000px) {
+  .boss-hud { width: 39vw; }
+  .boss-overline { font-size: 5px; }
+  .boss-title { gap: 9px; }
+  .boss-status { font-size: 6px; margin-inline: 4px; }
+  .sound-toggle { top: 235px; right: 23px; }
+}
+@media (max-height: 560px) and (min-width: 650px) {
+  .boss-hud { top: 16px; width: min(330px, 39vw); }
+  .boss-title { margin-bottom: 5px; }
+  .boss-overline { font-size: 4px; letter-spacing: .16em; }
+  .boss-title strong { font-size: 13px; }
+  .boss-flourish { font-size: 19px; }
+  .boss-health-track { height: 9px; }
+  .boss-status { margin-top: 4px; font-size: 5px; }
+  .sound-toggle { top: 156px; right: 19px; padding: 3px 5px; }
+  .hero-crest > div { width: 34px; height: 33px; }
+  .hero-crest .atlas-class { width: 29px; height: 29px; }
+}
+@media (max-width: 649px) {
+  .boss-hud { top: 178px; width: calc(100% - 50px); }
+  .boss-title { margin-bottom: 6px; }
+  .boss-overline { font-size: 5px; }
+  .boss-title strong { font-size: 15px; }
+  .boss-status { font-size: 6px; }
+  .boss-encounter .menu-dock { top: 268px; }
+  .sound-toggle { top: 157px; right: 15px; padding: 4px 5px; }
+  .sound-toggle > span { font-size: 5px; }
+  .hero-crest > div { width: 34px; height: 34px; }
+  .hero-crest .atlas-class { width: 29px; height: 29px; }
+  .class-sigil .atlas-class { width: 29px; height: 29px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phase-change .boss-flourish { animation: none; }
+  .xp-bar > i { transition: none; }
+}

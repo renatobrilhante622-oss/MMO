@@ -4,6 +4,7 @@ import type { Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
 import type { PhysicsWorld } from '../physics/PhysicsWorld';
 import { calculateDamage } from '../combat/ClassSystem';
+import { CreatureRig } from './CreatureRig';
 
 type EnemyState = 'patrol' | 'chase' | 'attack' | 'flee' | 'dead';
 interface Archetype { hp: number; attack: number; defense: number; speed: number; radius: number; color: number; emissive: number }
@@ -42,7 +43,7 @@ export class Enemy implements Combatant {
   private telegraph: Mesh;
   private bodyRemoved = false;
   private material: MeshStandardMaterial;
-  private limbs: Mesh[] = [];
+  private readonly rig: CreatureRig;
   private archetype: Archetype;
 
   constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus, readonly kind: string, position: Vector3, readonly level = 1, readonly boss = false) {
@@ -61,7 +62,8 @@ export class Enemy implements Combatant {
     this.body.mass = boss ? 12 : 2;
     this.body.updateMassProperties();
     this.material = new MeshStandardMaterial({ color: data.color, roughness: .76, metalness: kind === 'golem' || boss ? .3 : .05, emissive: data.emissive, emissiveIntensity: .25 });
-    this.buildModel();
+    this.rig = new CreatureRig(kind, boss, this.material);
+    this.model.add(this.rig.root);
     this.model.position.copy(position); this.scene.add(this.model);
     const bg = new Mesh(new BoxGeometry(boss ? 3.6 : 1.4, .13, .025), new MeshBasicMaterial({ color: 0x182128, transparent: true, opacity: .88 }));
     this.healthFill = new Mesh(new BoxGeometry(boss ? 3.5 : 1.32, .085, .035), new MeshBasicMaterial({ color: boss ? 0xf36c80 : 0xf4ad7c }));
@@ -77,44 +79,6 @@ export class Enemy implements Combatant {
   }
 
   get alive(): boolean { return this.hp > 0; }
-
-  private part(geometry: BoxGeometry | SphereGeometry | CylinderGeometry | ConeGeometry, position: Vector3, material = this.material): Mesh {
-    const mesh = new Mesh(geometry, material); mesh.position.copy(position); mesh.castShadow = true; mesh.receiveShadow = true; this.model.add(mesh); return mesh;
-  }
-
-  private buildModel(): void {
-    const eyeMaterial = new MeshStandardMaterial({ color: this.boss ? 0xffc56d : 0xd7ffdd, emissive: this.boss ? 0xff643f : 0x7bccba, emissiveIntensity: 1.8, roughness: .3 });
-    if (this.kind === 'slime' && !this.boss) {
-      const body = this.part(new SphereGeometry(.72, 14, 10), new Vector3(0, .08, 0)); body.scale.set(1, .72, 1);
-      for (const x of [-.23, .23]) this.part(new SphereGeometry(.065, 6, 6), new Vector3(x, .23, .57), eyeMaterial);
-    } else if (this.kind === 'wolf' && !this.boss) {
-      const body = this.part(new BoxGeometry(.9, .65, 1.6), new Vector3(0, .25, -.1)); body.rotation.x = -.08;
-      this.part(new BoxGeometry(.58, .6, .7), new Vector3(0, .65, .8));
-      for (const x of [-.21, .21]) {
-        const ear = this.part(new ConeGeometry(.16, .42, 4), new Vector3(x, 1.05, .7)); ear.rotation.x = -.2;
-        this.part(new SphereGeometry(.055, 6, 6), new Vector3(x, .75, 1.15), eyeMaterial);
-        for (const z of [-.65, .52]) this.limbs.push(this.part(new BoxGeometry(.17, .62, .18), new Vector3(x * 1.5, -.25, z)));
-      }
-      const tail = this.part(new ConeGeometry(.2, .9, 6), new Vector3(0, .35, -1.05)); tail.rotation.x = -1.2;
-    } else {
-      const scale = this.boss ? 2.45 : this.kind === 'golem' ? 1.5 : 1;
-      this.part(new BoxGeometry(.85 * scale, 1.02 * scale, .48 * scale), new Vector3(0, .5 * scale, 0));
-      const head = this.part(new SphereGeometry(.34 * scale, this.kind === 'golem' || this.boss ? 6 : 10, 7), new Vector3(0, 1.3 * scale, 0));
-      if (this.kind === 'wraith') {
-        const robe = this.part(new ConeGeometry(.65, 1.3, 9), new Vector3(0, -.1, 0)); robe.rotation.z = Math.PI;
-      } else for (const x of [-.23, .23]) this.limbs.push(this.part(new BoxGeometry(.25 * scale, .85 * scale, .28 * scale), new Vector3(x * scale, -.38 * scale, 0)));
-      for (const side of [-1, 1]) {
-        this.limbs.push(this.part(new BoxGeometry(.26 * scale, .95 * scale, .3 * scale), new Vector3(side * .63 * scale, .45 * scale, 0)));
-        this.part(new SphereGeometry(.065 * scale, 6, 6), new Vector3(side * .13 * scale, 1.36 * scale, .3 * scale), eyeMaterial);
-        if (this.boss) {
-          const horn = this.part(new ConeGeometry(.22, 1, 5), new Vector3(side * .7, 4.05, -.1)); horn.rotation.z = -side * .5;
-          this.part(new ConeGeometry(.4, .9, 5), new Vector3(side * 1.3, 2.5, 0));
-        }
-      }
-      if (this.kind === 'skeleton') this.part(new BoxGeometry(.12, 1.1, .25), new Vector3(.75, .15, .4), eyeMaterial);
-      head.rotation.z = this.kind === 'wraith' ? .08 : 0;
-    }
-  }
 
   receiveDamage(amount: number, knockback?: Vector3): number {
     if (!this.alive || !Number.isFinite(amount) || amount <= 0) return 0;
@@ -138,7 +102,6 @@ export class Enemy implements Combatant {
     }
     this.position.set(this.body.position.x, this.body.position.y, this.body.position.z);
     this.model.position.copy(this.position);
-    if (this.kind === 'slime') this.model.scale.y = 1 + Math.sin(elapsed * 5 + this.patrolPhase) * .09;
     if (this.kind === 'wraith') this.model.position.y += Math.sin(elapsed * 2 + this.patrolPhase) * .2;
     this.healthGroup.lookAt(hero.position.x, this.model.position.y + this.healthGroup.position.y, hero.position.z);
     this.material.emissiveIntensity = this.hitStun > 0 ? 1.2 : .25;
@@ -180,10 +143,7 @@ export class Enemy implements Combatant {
       if (walk.length() > .5) { this.move(walk.normalize().multiplyScalar(this.speed * .35), dt); this.model.rotation.y = Math.atan2(walk.x, walk.z); }
       else { this.body.velocity.x *= .8; this.body.velocity.z *= .8; }
     }
-    if (this.hitStun <= 0) {
-      const moving = Math.hypot(this.body.velocity.x, this.body.velocity.z) > .5;
-      this.limbs.forEach((limb, index) => { limb.rotation.x = moving ? Math.sin(elapsed * 8 + index * Math.PI) * .5 : Math.sin(elapsed * 2 + index) * .035; });
-    }
+    this.rig.update(dt, elapsed + this.patrolPhase, Math.hypot(this.body.velocity.x, this.body.velocity.z), this.state === 'attack', this.attackWindup, this.hitStun);
     if (this.body.position.y < -25) this.receiveDamage(this.hp);
   }
 
@@ -199,6 +159,7 @@ export class Enemy implements Combatant {
   private removeBody(): void { if (!this.bodyRemoved) { this.physics.removeBody(this.body); this.bodyRemoved = true; } }
   dispose(): void {
     this.removeBody(); this.scene.remove(this.model, this.telegraph);
+    this.rig.dispose(); this.material.dispose();
     this.model.traverse(child => { if (child instanceof Mesh) { child.geometry.dispose(); if (Array.isArray(child.material)) child.material.forEach(m => m.dispose()); else child.material.dispose(); } });
     this.telegraph.geometry.dispose(); (this.telegraph.material as MeshBasicMaterial).dispose();
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Official Android and Microsoft artifacts; SHA256 values published by their vendors.
+# Official Android and Eclipse Adoptium artifacts; SHA256 values published by their vendors.
 android_setup_root="${CLOUD_ANDROID_ROOT:-/workspace/.android-sdk}"
 android_setup_cache="${CLOUD_ANDROID_CACHE:-/workspace/.cache/android}"
 mkdir -p "$android_setup_root" "$android_setup_cache" "$android_setup_cache/user/.android"
@@ -20,9 +20,9 @@ if [ ! -x "$android_setup_root/cmdline-tools/latest/bin/sdkmanager" ]; then
   rmdir "$android_sdk_temp"
 fi
 if [ ! -x "$android_setup_root/jdk-21/bin/javac" ]; then
-  android_fetch_verified 'https://aka.ms/download-jdk/microsoft-jdk-21.0.12.1-linux-x64.tar.gz' "$android_setup_cache/microsoft-jdk-21.0.12.1-linux-x64.tar.gz" '4c0c7f5cd0b6bb81109d01f13a1678ee0f73f36c1020080d97c4de3ce3cac207'
+  android_fetch_verified 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz' "$android_setup_cache/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz" 'd7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c'
   mkdir -p "$android_setup_root/jdk-21"
-  tar -xzf "$android_setup_cache/microsoft-jdk-21.0.12.1-linux-x64.tar.gz" --strip-components=1 -C "$android_setup_root/jdk-21"
+  tar -xzf "$android_setup_cache/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz" --strip-components=1 -C "$android_setup_root/jdk-21"
 fi
 export ANDROID_HOME="$android_setup_root"
 export ANDROID_SDK_ROOT="$android_setup_root"

@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { TERRAIN_GLSL, WATER_VERTEX_GLSL, WATER_FRAGMENT_GLSL, PORTAL_VERTEX_GLSL, PORTAL_FRAGMENT_GLSL } from './WorldShaders';
+import { WorldLife } from './WorldLife';
 
 export interface WorldCollider {
   position: THREE.Vector3;
@@ -25,6 +28,7 @@ export class OpenWorldGenerator {
   readonly terrainSegments = SEGMENTS;
   private readonly root = new THREE.Group();
   private readonly grid: Float32Array;
+  private readonly life: WorldLife;
   private generated = false;
   private elapsed = 0;
   private water?: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
@@ -37,6 +41,7 @@ export class OpenWorldGenerator {
 
   constructor(private readonly scene: THREE.Scene, private readonly seed = 61857) {
     this.randomState = seed >>> 0;
+    this.life = new WorldLife((x, z) => this.heightAt(x, z));
     this.grid = new Float32Array((SEGMENTS + 1) * (SEGMENTS + 1));
     for (let x = 0; x <= SEGMENTS; x++) {
       for (let z = 0; z <= SEGMENTS; z++) {
@@ -101,6 +106,11 @@ export class OpenWorldGenerator {
     this.createVegetation();
     this.createPortal();
     this.createTrail();
+    this.root.add(this.life.root);
+    this.life.createVillagers();
+    this.life.createAmbient();
+    this.life.createVortex(this.portalPosition);
+    this.life.createFire();
     this.markers.push(
       { x: 0, z: 18, label: 'Vila Aurora', color: '#edc278' },
       { x: 47, z: -3, label: 'Lago Espelhado', color: '#72c9de' },
@@ -115,22 +125,45 @@ export class OpenWorldGenerator {
     return material;
   }
 
-  private makeGroundTexture(): THREE.DataTexture {
-    const size = 128, data = new Uint8Array(size * size * 4);
-    for (let i = 0; i < size * size; i++) {
-      const variation = Math.floor(this.random() * 37);
-      data[i * 4] = 101 + variation;
-      data[i * 4 + 1] = 111 + variation;
-      data[i * 4 + 2] = 81 + Math.floor(variation * .7);
-      data[i * 4 + 3] = 255;
-    }
-    const texture = new THREE.DataTexture(data, size, size);
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(85, 85);
-    texture.colorSpace = THREE.SRGBColorSpace;
+  /** A float height field lets the water shader query the same shore as physics. */
+  private makeHeightTexture(): THREE.DataTexture {
+    const texture = new THREE.DataTexture(this.grid, SEGMENTS + 1, SEGMENTS + 1,
+      THREE.RedFormat, THREE.FloatType);
+    texture.minFilter = texture.magFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
     texture.needsUpdate = true;
     this.textures.add(texture);
     return texture;
+  }
+
+  private terrainMaterial(): THREE.MeshStandardMaterial {
+    const material = this.material({ color: 0xffffff, roughness: .96 });
+    material.name = 'Procedural grass, cliff rock, shore sand and village cobblestone';
+    material.onBeforeCompile = shader => {
+      shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', `
+        #include <common>
+        varying vec3 vTerrainPosition;
+        varying vec3 vTerrainNormal;
+      `).replace('#include <begin_vertex>', `
+        #include <begin_vertex>
+        vTerrainPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        vTerrainNormal = normalize(mat3(modelMatrix) * normal);
+      `);
+      shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `
+        #include <common>
+        ${TERRAIN_GLSL}
+      `).replace('#include <map_fragment>', `
+        diffuseColor.rgb *= terrainAlbedo(vTerrainPosition, normalize(vTerrainNormal));
+      `).replace('#include <roughnessmap_fragment>', `
+        #include <roughnessmap_fragment>
+        float wetness = 1.0 - smoothstep(terrainWaterLevel - .3,
+          terrainWaterLevel + .7, vTerrainPosition.y);
+        roughnessFactor = mix(.96, .38, wetness);
+      `);
+    };
+    material.customProgramCacheKey = () => 'eterna-procedural-terrain-v2';
+    return material;
   }
 
   private createTerrain(): void {
@@ -165,7 +198,7 @@ export class OpenWorldGenerator {
     geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
-    const terrain = new THREE.Mesh(geometry, this.material({ map: this.makeGroundTexture(), vertexColors: true, roughness: .97 }));
+    const terrain = new THREE.Mesh(geometry, this.terrainMaterial());
     terrain.name = 'Triangulated terrain';
     terrain.receiveShadow = true;
     this.root.add(terrain);
@@ -178,53 +211,20 @@ export class OpenWorldGenerator {
       side: THREE.DoubleSide,
       uniforms: {
         time: { value: 0 }, day: { value: 1 },
+        waterLevel: { value: this.waterLevel },
+        heightMap: { value: this.makeHeightTexture() },
         waterColor: { value: new THREE.Color('#237b8b') },
         skyColor: { value: new THREE.Color('#b5d9dd') },
+        sunDirection: { value: new THREE.Vector3(.2,.8,-.45).normalize() },
       },
-      vertexShader: `
-        uniform float time;
-        varying vec3 vWorld;
-        varying vec3 vNormal;
-        void main() {
-          vec3 p = position;
-          p.z += sin(p.x * .35 + time * 1.1) * .09 + sin(p.y * .48 - time * .8) * .065;
-          vec4 world = modelMatrix * vec4(p, 1.0);
-          vWorld = world.xyz;
-          vec3 localNormal = normalize(vec3(-cos(p.x * .35 + time * 1.1) * .0315,
-            -cos(p.y * .48 - time * .8) * .0312, 1.0));
-          vNormal = normalize(mat3(modelMatrix) * localNormal);
-          gl_Position = projectionMatrix * viewMatrix * world;
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform float day;
-        uniform vec3 waterColor;
-        uniform vec3 skyColor;
-        varying vec3 vWorld;
-        varying vec3 vNormal;
-        void main() {
-          vec3 viewDirection = normalize(cameraPosition - vWorld);
-          float fresnel = pow(1.0 - max(dot(viewDirection, vNormal), 0.0), 3.0);
-          vec3 reflection = reflect(-viewDirection, vNormal);
-          float cloud = sin(reflection.x * 28.0 + time * .06) * sin(reflection.z * 17.0);
-          vec3 skyReflection = skyColor + cloud * .045;
-          vec3 sunDirection = normalize(vec3(-.45, .8, -.25));
-          float specular = pow(max(dot(reflect(-sunDirection, vNormal), viewDirection), 0.0), 110.0);
-          float ripple = sin(vWorld.x * 2.0 + time * 2.0) * sin(vWorld.z * 1.7 - time) * .018;
-          vec3 color = mix(waterColor, skyReflection, .25 + fresnel * .65) * (.35 + day * .65);
-          color += vec3(1.0, .91, .69) * specular * day * 1.4 + ripple;
-          gl_FragColor = vec4(color, .83);
-          #include <tonemapping_fragment>
-          #include <colorspace_fragment>
-        }
-      `,
+      vertexShader: WATER_VERTEX_GLSL,
+      fragmentShader: WATER_FRAGMENT_GLSL,
     });
     this.materials.add(material);
-    this.water = new THREE.Mesh(new THREE.PlaneGeometry(75, 75, 48, 48), material);
+    this.water = new THREE.Mesh(new THREE.PlaneGeometry(75, 75, 96, 96), material);
     this.water.rotation.x = -Math.PI / 2;
     this.water.position.set(47, this.waterLevel, -3);
-    this.water.name = 'Fresnel lake';
+    this.water.name = 'Displaced Fresnel lake, terrain depth shoreline foam and celestial glint';
     this.root.add(this.water);
   }
 
@@ -265,13 +265,25 @@ export class OpenWorldGenerator {
         this.box(g, new THREE.Vector3(1.1, 1.3, .12), new THREE.Vector3(sign * (building.width / 2 - 1.5), 3.2, building.depth / 2 + .25), glass);
       }
       this.box(g, new THREE.Vector3(2, 1.8, .4), new THREE.Vector3(0, 4.4, building.depth / 2), wood, true, 'climbable');
-      const roofGeometry = new THREE.CylinderGeometry(0, 1, 1, 4, 1);
-      roofGeometry.rotateY(Math.PI / 4);
+      const roofShape = new THREE.Shape();
+      roofShape.moveTo(-(building.width + 1.5) / 2, 0);
+      roofShape.lineTo(0, 2.5);
+      roofShape.lineTo((building.width + 1.5) / 2, 0);
+      roofShape.closePath();
+      const roofGeometry = new THREE.ExtrudeGeometry(roofShape,
+        { depth: building.depth + 1.5, bevelEnabled: false });
+      roofGeometry.translate(0, 0, -(building.depth + 1.5) / 2);
       const roofMesh = new THREE.Mesh(roofGeometry, roof);
-      roofMesh.position.y = 6.25;
-      roofMesh.scale.set((building.width + 1.5) / Math.SQRT2, 2.5, (building.depth + 1.5) / Math.SQRT2);
+      roofMesh.position.y = 5;
       roofMesh.castShadow = true;
       g.add(roofMesh);
+      this.decorateBuilding(g, building.width, building.depth, building.name,
+        { stone, plaster, wood, roof, gold, glass });
+      for (const side of [-1, 1]) {
+        this.life.addTorch(new THREE.Vector3(building.x + side * 1.45,
+          g.position.y + 2.8, building.z + building.depth / 2 + .65),
+          building.x * .17 + side * 3);
+      }
       this.addLabel(building.name, new THREE.Vector3(building.x, g.position.y + 5.15, building.z + building.depth / 2 + .5), building.color, 3.6);
       this.markers.push({ x: building.x, z: building.z, label: building.name, color: building.color });
       if (building.name === 'FORJA') {
@@ -293,6 +305,7 @@ export class OpenWorldGenerator {
       } else {
         for (let i = 0; i < 3; i++) this.box(g, new THREE.Vector3(2, .8, 1.3), new THREE.Vector3(i * 3 - 3, .7, -1.7), this.material({ color: '#b3a35a', roughness: 1 }));
       }
+      this.batchStaticMeshes(g);
     }
     const fountain = new THREE.Group();
     fountain.position.set(0, 5, 23);
@@ -312,8 +325,225 @@ export class OpenWorldGenerator {
       const finial = new THREE.Mesh(new THREE.OctahedronGeometry(.22), gold);
       finial.position.set(sign * 5.5, 11.6, 2); this.root.add(finial);
     }
+    this.createVillageStreetFurniture(stone, wood, gold);
     // A shallow training slope is represented by actual terrain and a slide surface zone.
     this.colliders.push({ position: new THREE.Vector3(-25, this.heightAt(-25, 1) - 1, 1), size: new THREE.Vector3(9, .4, 12), type: 'slide' });
+  }
+
+  /** Bake rigid architecture by material so detail does not multiply mobile draw calls. */
+  private batchStaticMeshes(group: THREE.Group): void {
+    const batches = new Map<THREE.Material, THREE.Mesh[]>();
+    for (const child of [...group.children]) {
+      if (!(child instanceof THREE.Mesh) || child instanceof THREE.InstancedMesh
+        || Array.isArray(child.material)) continue;
+      const batch = batches.get(child.material) ?? [];
+      batch.push(child);
+      batches.set(child.material, batch);
+    }
+    for (const [material, meshes] of batches) {
+      if (meshes.length < 2) continue;
+      const copies = meshes.map(mesh => {
+        mesh.updateMatrix();
+        const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
+        // Decorative primitives have different UV layouts but share position/normal/UV.
+        geometry.applyMatrix4(mesh.matrix);
+        return geometry;
+      });
+      const merged = mergeGeometries(copies, false);
+      copies.forEach(geometry => geometry.dispose());
+      if (!merged) continue;
+      merged.computeBoundingSphere();
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = 'Batched village architecture';
+      mesh.castShadow = mesh.receiveShadow = true;
+      group.add(mesh);
+      for (const original of meshes) {
+        original.removeFromParent();
+        original.geometry.dispose();
+      }
+    }
+  }
+
+  private decorateBuilding(group: THREE.Group, width: number, depth: number, name: string,
+    palette: Record<'stone' | 'plaster' | 'wood' | 'roof' | 'gold' | 'glass', THREE.Material>): void {
+    const { stone, wood, roof, gold, glass } = palette;
+    // Raised footing, projecting cornices and corner quoins give walls a solid silhouette.
+    for (const sign of [-1, 1]) {
+      this.box(group, new THREE.Vector3(width + .7, .21, .48),
+        new THREE.Vector3(0, .72, sign * depth / 2), stone);
+      this.box(group, new THREE.Vector3(width + .8, .18, .55),
+        new THREE.Vector3(0, 5.25, sign * depth / 2), wood);
+      for (const x of [-width / 2, width / 2]) {
+        for (let row = 0; row < 7; row++) {
+          this.box(group, new THREE.Vector3(.63, .43, .58),
+            new THREE.Vector3(x, .95 + row * .65, sign * depth / 2), stone);
+        }
+      }
+      for (const x of [-width / 2 + 1.5, width / 2 - 1.5]) {
+        // Window frames, transoms and deep sill, all opaque and shadow casting.
+        for (const side of [-1, 1]) {
+          this.box(group, new THREE.Vector3(.09, 1.6, .16),
+            new THREE.Vector3(x + side * .64, 3.2, sign * (depth / 2 + .3)), wood);
+        }
+        for (const y of [2.43, 3.2, 3.98]) {
+          this.box(group, new THREE.Vector3(1.4, .10, .18),
+            new THREE.Vector3(x, y, sign * (depth / 2 + .34)), wood);
+        }
+        this.box(group, new THREE.Vector3(.07, 1.45, .13),
+          new THREE.Vector3(x, 3.2, sign * (depth / 2 + .36)), gold);
+        this.box(group, new THREE.Vector3(1.5, .16, .52),
+          new THREE.Vector3(x, 2.35, sign * (depth / 2 + .38)), stone);
+      }
+    }
+    // Timber frame braces run diagonally across side walls.
+    for (const sign of [-1, 1]) {
+      for (const z of [-depth * .28, depth * .28]) {
+        const brace = this.box(group, new THREE.Vector3(.18, 3.1, .18),
+          new THREE.Vector3(sign * (width / 2 + .25), 3.2, z), wood);
+        brace.rotation.x = sign * .55;
+      }
+      this.box(group, new THREE.Vector3(.3, .25, depth + .55),
+        new THREE.Vector3(sign * (width / 2 + .1), 3.5, 0), wood);
+    }
+    // A porch has structural columns, stair treads and a sloped rain shelter.
+    const porchZ = depth / 2 + 1.3;
+    this.box(group, new THREE.Vector3(3.8, .28, 2.4),
+      new THREE.Vector3(0, .45, porchZ), stone);
+    for (let step = 0; step < 3; step++) {
+      this.box(group, new THREE.Vector3(2.6, .14, .45),
+        new THREE.Vector3(0, .1 + step * .14, porchZ + 1.9 - step * .43), stone);
+    }
+    for (const sign of [-1, 1]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(.13, .17, 3.6, 8), wood);
+      pillar.position.set(sign * 1.65, 2.35, porchZ + .65);
+      pillar.castShadow = true;
+      group.add(pillar);
+      for (const y of [.65, 3.95]) {
+        this.box(group, new THREE.Vector3(.42, .18, .42),
+          new THREE.Vector3(sign * 1.65, y, porchZ + .65), stone);
+      }
+      const support = this.box(group, new THREE.Vector3(.16, 1.0, .16),
+        new THREE.Vector3(sign * 1.35, 3.7, porchZ + .65), wood);
+      support.rotation.z = sign * .7;
+    }
+    const awning = this.box(group, new THREE.Vector3(4.1, .18, 2.8),
+      new THREE.Vector3(0, 4.25, porchZ), roof);
+    awning.rotation.x = .12;
+    this.box(group, new THREE.Vector3(3.9, .2, .18),
+      new THREE.Vector3(0, 4.04, porchZ + 1.35), wood);
+    // Roof tiles are instanced: hundreds of relief silhouettes use one draw per roof.
+    const columns = 12, rows = 5, tiles = columns * rows * 2;
+    const geometry = new THREE.BoxGeometry(.62, .075, .84);
+    const shingles = new THREE.InstancedMesh(geometry, roof, tiles);
+    const dummy = new THREE.Object3D();
+    let instance = 0;
+    for (const sign of [-1, 1]) {
+      for (let row = 0; row < rows; row++) {
+        const fraction = (row + .5) / rows;
+        const slopeWidth = (width + 1.5) * .5;
+        for (let col = 0; col < columns; col++) {
+          const z = -depth * .52 + (col + .5) * depth * 1.04 / columns;
+          dummy.position.set(sign * fraction * slopeWidth,
+            7.5 - fraction * 2.5 + .10, z);
+          dummy.rotation.set(0, 0, -sign * Math.atan2(2.5, slopeWidth));
+          dummy.scale.set(slopeWidth / rows / .62 * 1.10, 1,
+            depth * 1.04 / columns / .84 * 1.06);
+          dummy.updateMatrix();
+          shingles.setMatrixAt(instance++, dummy.matrix);
+        }
+      }
+    }
+    shingles.count = instance;
+    shingles.castShadow = shingles.receiveShadow = true;
+    shingles.computeBoundingSphere();
+    group.add(shingles);
+    const ridge = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, depth + 1.8, 8), wood);
+    ridge.rotation.x = Math.PI / 2;
+    ridge.position.y = 7.55;
+    ridge.castShadow = true;
+    group.add(ridge);
+    // Storage shelves inside each open door are visible from the approach.
+    for (let shelf = 0; shelf < 3; shelf++) {
+      this.box(group, new THREE.Vector3(2.6, .12, .55),
+        new THREE.Vector3(width / 2 - 1.6, 1.2 + shelf * .65, -depth / 2 + .5), wood);
+      for (let jar = 0; jar < 4; jar++) {
+        const vessel = new THREE.Mesh(new THREE.CylinderGeometry(.11, .17, .30, 7),
+          name === 'ALQUIMIA' ? glass : stone);
+        vessel.position.set(width / 2 - 2.55 + jar * .6, 1.41 + shelf * .65, -depth / 2 + .5);
+        group.add(vessel);
+      }
+    }
+  }
+
+  private createVillageStreetFurniture(stone: THREE.Material, wood: THREE.Material,
+    gold: THREE.Material): void {
+    const band = this.material({ color: '#343638', metalness: .65, roughness: .55 });
+    const cloth = this.material({ color: '#7d383f', roughness: .96, side: THREE.DoubleSide });
+    // Market stall: four posts, angled canvas, crates and a brass scale.
+    const market = new THREE.Group();
+    market.position.set(10, this.heightAt(10, 30), 30);
+    this.root.add(market);
+    for (const x of [-1.7, 1.7]) for (const z of [-1, 1]) {
+      this.box(market, new THREE.Vector3(.14, 2.9, .14), new THREE.Vector3(x, 1.45, z), wood);
+    }
+    this.box(market, new THREE.Vector3(3.7, .15, 2.2), new THREE.Vector3(0, 1.05, 0), wood);
+    for (const sign of [-1, 1]) {
+      const canvas = this.box(market, new THREE.Vector3(3.9, .06, 1.3),
+        new THREE.Vector3(0, 3.03, sign * .58), cloth);
+      canvas.rotation.x = sign * .27;
+    }
+    const basketMat = this.material({ color: '#a68c55', roughness: 1 });
+    const produceMat = this.material({ color: '#9d4939', roughness: .6 });
+    for (let basket = 0; basket < 3; basket++) {
+      const x = (basket - 1) * 1.0;
+      const tray = new THREE.Mesh(new THREE.CylinderGeometry(.4, .3, .23, 9, 1, true), basketMat);
+      tray.position.set(x, 1.25, 0); market.add(tray);
+      for (let fruit = 0; fruit < 5; fruit++) {
+        const apple = new THREE.Mesh(new THREE.SphereGeometry(.115, 6, 5), produceMat);
+        const angle = fruit * 2.4;
+        apple.position.set(x + Math.cos(angle) * .2, 1.38 + (fruit % 2) * .04, Math.sin(angle) * .2);
+        market.add(apple);
+      }
+    }
+    this.batchStaticMeshes(market);
+    // Barrel bodies use real hoops, with shared materials and no transparent layers.
+    for (let barrel = 0; barrel < 7; barrel++) {
+      const x = -19 + barrel % 3 * 1.1, z = 20 + Math.floor(barrel / 3) * 1.1;
+      const y = this.heightAt(x,z);
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(.44,.40,1.0,10), wood);
+      body.position.set(x,y+.5,z); body.castShadow=true; this.root.add(body);
+      for (const h of [.2,.8]) {
+        const hoop = new THREE.Mesh(new THREE.TorusGeometry(.44,.035,4,12),band);
+        hoop.rotation.x=Math.PI/2; hoop.position.set(x,y+h,z); this.root.add(hoop);
+      }
+    }
+    // A handcart is parked beside the stable; spokes are actual radial meshes.
+    const cart = new THREE.Group();
+    cart.position.set(-5, this.heightAt(-5,37),37);
+    cart.rotation.y=-.35;
+    this.root.add(cart);
+    this.box(cart,new THREE.Vector3(2,.16,2.8),new THREE.Vector3(0,.85,0),wood);
+    for(const sign of [-1,1]) {
+      for(let slat=0;slat<3;slat++) this.box(cart,new THREE.Vector3(.08,.15,2.8),
+        new THREE.Vector3(sign,1.05+slat*.23,0),wood);
+      this.box(cart,new THREE.Vector3(.10,.1,2.2),new THREE.Vector3(sign*.65,.8,2),wood);
+      const wheel=new THREE.Mesh(new THREE.TorusGeometry(.65,.10,5,14),wood);
+      wheel.rotation.y=Math.PI/2; wheel.position.set(sign*1.2,.65,0); wheel.castShadow=true;
+      cart.add(wheel);
+      for(let spoke=0;spoke<6;spoke++) {
+        const shaft=this.box(cart,new THREE.Vector3(.07,1.2,.07),new THREE.Vector3(sign*1.2,.65,0),gold);
+        shaft.rotation.x=spoke*Math.PI/3;
+      }
+    }
+    this.batchStaticMeshes(cart);
+    // Curved low cemetery wall outlines the safe southern edge without closing routes.
+    for(let i=0;i<14;i++) {
+      const a=.15+i/13*Math.PI*.7;
+      const x=Math.cos(a)*24,z=18+Math.sin(a)*24;
+      const piece=this.box(this.root,new THREE.Vector3(3,.8,.7),
+        new THREE.Vector3(x,this.heightAt(x,z)+.4,z),stone);
+      piece.rotation.y=-a-Math.PI/2;
+    }
   }
 
   private addLabel(text: string, position: THREE.Vector3, color: string, width: number): void {
@@ -395,11 +625,9 @@ export class OpenWorldGenerator {
     const material = new THREE.ShaderMaterial({
       transparent: true, side: THREE.DoubleSide, depthWrite: false,
       uniforms: { time: { value: 0 } },
-      vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-      fragmentShader: `uniform float time; varying vec2 vUv; void main(){ vec2 p=(vUv-.5)*2.; float r=length(p); float a=atan(p.y,p.x); float swirl=sin(a*5.-r*16.+time*2.); float core=1.-smoothstep(.7,1.,r); vec3 c=mix(vec3(.13,.08,.3),vec3(.65,.4,1.),.5+.5*swirl); c+=vec3(.2,.35,.5)*pow(1.-r,3.); gl_FragColor=vec4(c,core*.87); #include <tonemapping_fragment>\n#include <colorspace_fragment> }`,
+      vertexShader: PORTAL_VERTEX_GLSL,
+      fragmentShader: PORTAL_FRAGMENT_GLSL,
     });
-    // Shader include directives must begin on a separate line for Three's preprocessor.
-    material.fragmentShader = material.fragmentShader.replace('; #include', ';\n#include');
     this.materials.add(material);
     const surface = new THREE.Mesh(new THREE.CircleGeometry(3.8, 48), material);
     surface.position.set(0, 4, .08); group.add(surface);
@@ -429,10 +657,16 @@ export class OpenWorldGenerator {
 
   update(dt: number, timeOfDay: number): void {
     this.elapsed += dt;
+    this.life.update(dt, timeOfDay);
     const brightness = .18 + Math.max(0, Math.sin(timeOfDay * Math.PI * 2)) * .82;
     if (this.water) {
       this.water.material.uniforms.time.value = this.elapsed;
       this.water.material.uniforms.day.value = brightness;
+      const angle = timeOfDay * Math.PI * 2;
+      (this.water.material.uniforms.sunDirection.value as THREE.Vector3)
+        .set(Math.cos(angle) * .75, Math.sin(angle), -.45).normalize();
+      (this.water.material.uniforms.skyColor.value as THREE.Color)
+        .set('#15223d').lerp(new THREE.Color('#b5d9dd'), brightness);
     }
     if (this.portal) {
       const material = this.portal.userData.portalMaterial as THREE.ShaderMaterial;
@@ -445,7 +679,12 @@ export class OpenWorldGenerator {
     });
   }
 
+  setQuality(quality: 'low' | 'high'): void {
+    this.life.setQuality(quality === 'low');
+  }
+
   dispose(): void {
+    this.life.dispose();
     this.root.traverse(object => {
       if (object instanceof THREE.Mesh) object.geometry.dispose();
     });

@@ -1,8 +1,8 @@
 import {
-  ACESFilmicToneMapping, AdditiveBlending, AmbientLight, BackSide, BufferGeometry, Color,
-  DepthTexture, Float32BufferAttribute, FogExp2, Group, HemisphereLight, Mesh,
+  ACESFilmicToneMapping, AdditiveBlending, AmbientLight, BufferGeometry, Color,
+  DepthTexture, Float32BufferAttribute, FogExp2, Group, HalfFloatType, HemisphereLight, Mesh,
   MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera,
-  PlaneGeometry, PMREMGenerator, Points, PointsMaterial, Scene, ShaderMaterial,
+  PlaneGeometry, PMREMGenerator, Points, PointsMaterial, Scene,
   SphereGeometry, SRGBColorSpace, TorusGeometry, Vector2, Vector3, WebGLRenderer,
   WebGLRenderTarget,
 } from 'three';
@@ -10,9 +10,12 @@ import { CSM } from 'three/addons/csm/CSM.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { AtmospherePass } from './AtmospherePass';
+import { AtmosphericSky } from './AtmosphericSky';
+import { SoundEngine } from './SoundEngine';
 import { ClassId, emptyInput, EventBus, LootDrop } from './GameTypes';
 import { OpenWorldGenerator } from '../world/OpenWorldGenerator';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
@@ -47,12 +50,14 @@ export class Engine {
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
   readonly drops: LootDrop[] = [];
+  readonly sound = new SoundEngine();
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
+  private readonly smaa: SMAAPass;
   private readonly atmosphere: AtmospherePass;
   private readonly csm: CSM;
   private readonly hemisphere = new HemisphereLight(0xbadbe7, 0x434831, 2.1);
-  private readonly sky: Mesh<SphereGeometry, ShaderMaterial>;
+  private readonly sky: AtmosphericSky;
   private readonly stars: Points;
   private readonly dropMeshes = new Map<string, Group>();
   private readonly csmMaterials = new Set<MeshStandardMaterial>();
@@ -72,6 +77,8 @@ export class Engine {
   private quality: 'low' | 'high' = 'high';
   private saveErrorReported = false;
   private readonly scratch = new Vector3();
+  private previousBossPhase = 0;
+  private contextLost = false;
 
   constructor(private readonly container: HTMLElement) {
     this.renderer = new WebGLRenderer({ antialias: false, powerPreference: 'high-performance', alpha: false });
@@ -96,18 +103,7 @@ export class Engine {
     pmrem.dispose();
     this.disposers.push(() => envTarget.dispose());
 
-    this.sky = new Mesh(new SphereGeometry(290, 32, 20), new ShaderMaterial({
-      side: BackSide, depthWrite: false,
-      uniforms: {
-        top: { value: new Color('#3d849c') }, horizon: { value: new Color('#b7d5d0') },
-        sunDirection: { value: new Vector3(0.3, 0.7, -0.5) },
-      },
-      vertexShader: `varying vec3 vDirection;void main(){vDirection=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-      fragmentShader: `varying vec3 vDirection;uniform vec3 top,horizon,sunDirection;
-        void main(){vec3 d=normalize(vDirection);float h=pow(max(d.y,0.),.55);
-        vec3 c=mix(horizon,top,h);float s=max(dot(d,normalize(sunDirection)),0.);
-        c+=vec3(1.,.77,.38)*(pow(s,450.)*3.+pow(s,18.)*.16);gl_FragColor=vec4(c,1.);}`,
-    }));
+    this.sky = new AtmosphericSky();
     this.scene.add(this.sky);
     const starVertices: number[] = [];
     for (let i = 0; i < 280; i++) {
@@ -143,7 +139,9 @@ export class Engine {
     this.csm.fade = true;
     this.installShadows();
 
-    const target = new WebGLRenderTarget(1, 1, { depthBuffer: true });
+    // Bloom thresholds above one require HDR storage. An 8-bit render target
+    // would clamp emissive blades and fire before the bright-pass extraction.
+    const target = new WebGLRenderTarget(1, 1, { depthBuffer: true, type: HalfFloatType });
     target.depthTexture = new DepthTexture(1, 1);
     this.composer = new EffectComposer(this.renderer, target);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
@@ -151,6 +149,9 @@ export class Engine {
     this.composer.addPass(this.atmosphere);
     this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.38, 0.5, 1.15);
     this.composer.addPass(this.bloom);
+    // Three r186 SMAA operates on linear HDR, before the output transform.
+    this.smaa = new SMAAPass();
+    this.composer.addPass(this.smaa);
     this.composer.addPass(new OutputPass());
     this.hud = new MobileHUD(this.container, {
       onStart: () => this.beginPlay(),
@@ -165,6 +166,7 @@ export class Engine {
       onSellItem: id => { if (this.inventory.sell(id)) this.save(); },
       onUpgradeBuilding: id => { if (this.base.upgrade(id)) { this.refreshStats(); this.save(); } },
       onQualityChange: quality => this.setQuality(quality),
+      onSoundChange: enabled => this.sound.setEnabled(enabled),
       onResetSave: () => { localStorage.removeItem(SAVE_KEY); location.reload(); },
     });
     this.bindEvents();
@@ -178,6 +180,24 @@ export class Engine {
     window.addEventListener('beforeunload', persist);
     document.addEventListener('visibilitychange', visibility);
     this.disposers.push(() => window.removeEventListener('resize', resize), () => window.removeEventListener('beforeunload', persist), () => document.removeEventListener('visibilitychange', visibility));
+    const lost = (event: Event) => {
+      event.preventDefault();
+      this.contextLost = true;
+      this.save();
+      this.hud.notify('A GPU foi interrompida. Restaurando o vale…', 'warning');
+    };
+    const restored = () => {
+      this.contextLost = false;
+      this.lastTime = 0;
+      this.resize();
+      this.hud.notify('Renderização restaurada.', 'success');
+    };
+    this.renderer.domElement.addEventListener('webglcontextlost', lost);
+    this.renderer.domElement.addEventListener('webglcontextrestored', restored);
+    this.disposers.push(
+      () => this.renderer.domElement.removeEventListener('webglcontextlost', lost),
+      () => this.renderer.domElement.removeEventListener('webglcontextrestored', restored),
+    );
   }
 
   start(): void {
@@ -187,6 +207,8 @@ export class Engine {
   }
 
   private beginPlay(): void {
+    // Called directly by the start button's user gesture. No autoplay bypass.
+    void this.sound.unlock();
     this.playing = true;
     this.lastTime = 0;
     this.hud.notify('O vale desperta. Explore a vila, encontre inimigos e procure o portal ao norte.', 'info');
@@ -194,6 +216,8 @@ export class Engine {
 
   private bindEvents(): void {
     this.disposers.push(this.events.on('damage', ({ position, amount, critical, team }) => {
+      this.sound.impact(critical);
+      if (team === 'hero') this.combat.particles.impact(position, 0xd84b52, critical);
       const projected = position.clone().addScaledVector(UP, 1.4).project(this.camera);
       if (projected.z < 1 && Math.abs(projected.x) < 1.2 && Math.abs(projected.y) < 1.2) {
         this.hud.showDamage({ x: (projected.x * 0.5 + 0.5) * this.container.clientWidth, y: (-projected.y * 0.5 + 0.5) * this.container.clientHeight }, amount, critical, team);
@@ -205,9 +229,11 @@ export class Engine {
       const drop: LootDrop = { ...loot, position: position.clone() };
       this.drops.push(drop);
       this.createDropMesh(drop);
+      if (drop.item?.rarity === 'mythic') this.combat.particles.celebration(position, true);
       this.statClock = 1;
     }));
     this.disposers.push(this.events.on('loot', drop => {
+      this.sound.coin();
       this.inventory.addLoot(drop);
       const index = this.drops.findIndex(candidate => candidate.id === drop.id);
       if (index >= 0) this.drops.splice(index, 1);
@@ -216,6 +242,8 @@ export class Engine {
       this.save();
     }));
     this.disposers.push(this.events.on('levelUp', ({ level }) => {
+      this.sound.levelUp();
+      this.combat.particles.celebration(this.hero.position);
       this.refreshStats();
       if (this.hero.alive) {
         this.hero.hp = this.hero.maxHp;
@@ -229,6 +257,7 @@ export class Engine {
   private readonly frame = (now: number): void => {
     if (!this.running) return;
     this.frameId = requestAnimationFrame(this.frame);
+    if (this.contextLost) return;
     const rawDt = this.lastTime ? (now - this.lastTime) / 1000 : 1 / 60;
     this.lastTime = now;
     const dt = Math.min(0.05, Math.max(0.001, rawDt));
@@ -246,8 +275,12 @@ export class Engine {
       this.companions.update(simDt, this.enemies.enemies, this.drops);
       this.dungeon.update(simDt, this.hero);
       const targets = this.enemies.enemies.filter(enemy => enemy.alive);
-      if (input.attack && this.hero.alive) this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing);
-      if (input.skill !== null && this.hero.alive) this.combat.cast(input.skill, this.classId, this.hero, targets, this.hero.stats, this.hero.facing);
+      if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
+        this.sound.attack(this.classId, this.combat.combo);
+      }
+      if (input.skill !== null && this.hero.alive && this.combat.cast(input.skill, this.classId, this.hero, targets, this.hero.stats, this.hero.facing)) {
+        this.sound.spell(this.classId, input.skill);
+      }
       this.combat.update(dt);
       this.base.update(dt);
       this.hero.mana = Math.min(this.hero.stats.maxMana, this.hero.mana + dt * 3.5);
@@ -260,6 +293,17 @@ export class Engine {
       this.saveClock += dt;
       if (this.saveClock >= 15) { this.save(); this.saveClock = 0; }
     }
+    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive) : undefined;
+    const bossPhase = boss ? (boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3) : 0;
+    if (bossPhase > 0 && this.previousBossPhase > 0 && bossPhase !== this.previousBossPhase) this.sound.bossRoar();
+    this.previousBossPhase = bossPhase;
+    this.sound.update(dt, {
+      daylight: Math.max(0, Math.sin(this.timeOfDay * Math.PI * 2)),
+      moving: active && this.hero.alive && ['run', 'swim', 'dive'].includes(this.hero.machine.state)
+        && Math.hypot(input.move.x, input.move.y) > 0.1,
+      inWater: this.hero.machine.state === 'swim' || this.hero.machine.state === 'dive',
+      boss: active && !!boss,
+    });
     this.updateDaylight();
     this.terrain.update(dt, this.timeOfDay);
     this.sky.position.copy(this.camera.position);
@@ -269,7 +313,19 @@ export class Engine {
     this.uiClock += dt;
     if (this.uiClock >= 0.1) { this.updateHUD(); this.uiClock = 0; }
     // Camera shake only offsets this frame, avoiding accumulated camera drift.
-    this.scratch.set((Math.random() - 0.5) * this.combat.screenShake, (Math.random() - 0.5) * this.combat.screenShake, 0);
+    const trauma = this.combat.screenShake;
+    this.scratch.set(
+      (Math.sin(this.elapsed * 71) + Math.sin(this.elapsed * 113) * 0.4) * trauma * 0.45,
+      (Math.sin(this.elapsed * 83 + 0.8) + Math.sin(this.elapsed * 137) * 0.3) * trauma * 0.35,
+      0,
+    );
+    const targetFov = this.hero.machine.state === 'slide' ? 66 : active && this.hero.machine.state === 'run' ? 61 : 58;
+    const fov = this.camera.fov + (targetFov - this.camera.fov) * (1 - Math.exp(-dt * 5));
+    if (Math.abs(fov - this.camera.fov) > 0.001) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+      this.csm.updateFrustums();
+    }
     this.camera.position.add(this.scratch);
     this.renderer.info.reset();
     this.composer.render(dt);
@@ -368,7 +424,15 @@ export class Engine {
       if (!(object instanceof Mesh)) return;
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) if (material instanceof MeshStandardMaterial && !this.csmMaterials.has(material)) {
+        // CSM installs an onBeforeCompile hook. Preserve procedural terrain
+        // and cloth shader extensions rather than silently replacing them.
+        const previousCompile = material.onBeforeCompile;
         this.csm.setupMaterial(material);
+        const shadowCompile = material.onBeforeCompile;
+        material.onBeforeCompile = (shader, renderer) => {
+          previousCompile.call(material, shader, renderer);
+          shadowCompile.call(material, shader, renderer);
+        };
         material.needsUpdate = true;
         this.csmMaterials.add(material);
         material.addEventListener('dispose', () => {
@@ -386,9 +450,7 @@ export class Engine {
     const twilight = Math.max(0, 1 - Math.abs(sun.y) * 3);
     const top = new Color('#09152c').lerp(new Color('#477f9d'), daylight);
     const horizon = new Color('#192f49').lerp(new Color('#b4d1c6'), daylight).lerp(new Color('#e9b69b'), twilight * 0.32);
-    this.sky.material.uniforms.top.value.copy(top);
-    this.sky.material.uniforms.horizon.value.copy(horizon);
-    this.sky.material.uniforms.sunDirection.value.copy(sun);
+    this.sky.update(this.elapsed, sun, top, horizon);
     this.csm.lightDirection.copy(sun).negate();
     if (this.csm.lightDirection.y > -0.15) this.csm.lightDirection.y = -0.15;
     this.csm.lights.forEach(light => { light.intensity = 0.24 + daylight * 2.5; light.color.set(daylight > 0.2 ? '#fff0d6' : '#8facd8'); });
@@ -401,6 +463,7 @@ export class Engine {
   }
 
   private updateHUD(): void {
+    const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive) : undefined;
     this.hud.update({
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
@@ -412,6 +475,8 @@ export class Engine {
       enemies: this.enemies.enemies.filter(enemy => enemy.alive).map(enemy => ({ x: enemy.position.x, z: enemy.position.z, boss: enemy.boss })),
       markers: this.terrain.markers, dungeon: { active: this.dungeon.active, wave: this.dungeon.wave, status: this.dungeon.status },
       mounted: this.hero.mounted, fps: Math.round(this.fps), timeOfDay: this.timeOfDay, combo: this.combat.combo,
+      boss: boss ? { name: 'Guardião do Vazio', hp: boss.hp, maxHp: boss.maxHp,
+        phase: boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3 } : undefined,
     });
   }
 
@@ -421,6 +486,10 @@ export class Engine {
     this.composer.setPixelRatio(this.renderer.getPixelRatio());
     this.bloom.enabled = quality === 'high';
     this.atmosphere.enabled = quality === 'high';
+    this.smaa.enabled = quality === 'high';
+    this.sky.setQuality(quality);
+    this.terrain.setQuality(quality);
+    this.combat.particles.setQuality(quality);
     this.csm.lights.forEach(light => {
       light.castShadow = true;
       const size = quality === 'high' ? 2048 : 1024;
@@ -435,6 +504,7 @@ export class Engine {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
     this.composer.setSize(width, height);
+    this.combat.particles.setViewportHeight(height * this.renderer.getPixelRatio());
     this.csm.updateFrustums();
   }
 
@@ -471,6 +541,7 @@ export class Engine {
     this.save();
     this.disposers.splice(0).forEach(dispose => dispose());
     this.hud.dispose();
+    this.sound.dispose();
     this.companions.dispose?.();
     this.dungeon.dispose(); this.enemies.dispose(); this.hero.dispose(); this.combat.dispose();
     this.terrain.dispose();
@@ -479,7 +550,7 @@ export class Engine {
     this.physics.dispose();
     this.composer.passes.forEach(pass => pass.dispose());
     this.composer.dispose();
-    this.sky.geometry.dispose(); this.sky.material.dispose();
+    this.sky.dispose();
     this.stars.geometry.dispose(); (this.stars.material as PointsMaterial).dispose();
     this.renderer.dispose();
   }

@@ -1,10 +1,9 @@
-import { AdditiveBlending, Color, Group, IcosahedronGeometry, Mesh, MeshBasicMaterial, RingGeometry, Scene, TorusGeometry, Vector3 } from 'three';
+import { AdditiveBlending, Color, Group, IcosahedronGeometry, Mesh, MeshBasicMaterial, Scene, TorusGeometry, Vector3 } from 'three';
 import type { CharacterStats, ClassId, Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
 import { calculateDamage, getClass } from './ClassSystem';
+import { ParticleSystem3D } from './ParticleSystem3D';
 
-interface Particle { mesh: Mesh; velocity: Vector3; age: number; life: number; scale: number }
-interface Pulse { mesh: Mesh; age: number; life: number; radius: number }
 interface Projectile { group: Group; velocity: Vector3; remaining: number; source: Combatant; targets: Combatant[]; stats: CharacterStats; multiplier: number; radius: number; color: number }
 type Caster = Combatant & { mana: number; consumeMana(amount: number): boolean; heal(amount: number): void };
 
@@ -16,16 +15,15 @@ export class CombatSystem {
   combo = 0;
   private attackCooldown = 0;
   private comboWindow = 0;
-  private particles: Particle[] = [];
-  private pulses: Pulse[] = [];
+  readonly particles: ParticleSystem3D;
   private projectiles: Projectile[] = [];
   private materials = new Map<number, MeshBasicMaterial>();
-  private geometry = new IcosahedronGeometry(.13, 0);
   private projectileGeometry = new IcosahedronGeometry(.3, 1);
-  private ringGeometry = new RingGeometry(.88, 1, 48);
   private torusGeometry = new TorusGeometry(.45, .035, 4, 16);
 
-  constructor(private scene: Scene, private events: EventBus) {}
+  constructor(private scene: Scene, private events: EventBus) {
+    this.particles = new ParticleSystem3D(scene);
+  }
 
   attack(source: Combatant, targets: Combatant[], stats: CharacterStats, facing: Vector3): boolean {
     if (!source.alive || this.attackCooldown > 0) return false;
@@ -43,6 +41,8 @@ export class CombatSystem {
       center.y += .5;
       this.pulse(center, range * .6, 0xffd699, .17);
     }
+    this.visualAttack(source, undefined, this.combo);
+    if (stats.range <= 8) this.particles.slash(source.position, direction, 0xffd699, this.combo);
     return true;
   }
 
@@ -68,8 +68,15 @@ export class CombatSystem {
       this.pulse(source.position.clone(), skill.radius, skill.color, .65);
       this.burst(source.position, skill.color, 28);
     }
+    this.particles.cast(source.position, direction, skill, index);
+    this.visualAttack(source, index, 1);
     this.screenShake = Math.max(this.screenShake, index === 3 ? .24 : .1);
     return true;
+  }
+
+  private visualAttack(source: Combatant, index: number | undefined, combo: number): void {
+    const animated = source as Combatant & { visualAttack?: (skillIndex?: number, combo?: number) => void };
+    animated.visualAttack?.(index, combo);
   }
 
   private horizontalDirection(direction: Vector3): Vector3 {
@@ -99,7 +106,7 @@ export class CombatSystem {
     const dealt = target.receiveDamage(damage, knockback);
     if (dealt <= 0) return;
     this.events.emit('damage', { position: target.position.clone().add(new Vector3(0, 1.2, 0)), amount: dealt, critical, team: target.team, color });
-    this.burst(target.position.clone().add(new Vector3(0, .7, 0)), color, critical ? 16 : 8);
+    this.particles.impact(target.position.clone().add(new Vector3(0, .7, 0)), color, critical);
     this.hitstop = Math.max(this.hitstop, critical ? .065 : .03);
     this.screenShake = Math.max(this.screenShake, critical ? .16 : .055);
   }
@@ -125,23 +132,11 @@ export class CombatSystem {
   }
 
   private pulse(position: Vector3, radius: number, color: number, life: number): void {
-    if (this.pulses.length >= 20) { const old = this.pulses.shift()!; this.scene.remove(old.mesh); (old.mesh.material as MeshBasicMaterial).dispose(); }
-    const material = this.material(color).clone();
-    const mesh = new Mesh(this.ringGeometry, material);
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.copy(position); mesh.position.y += .12;
-    mesh.scale.setScalar(.1); this.scene.add(mesh);
-    this.pulses.push({ mesh, age: 0, life, radius });
+    this.particles.shockwave(position, radius, color, life);
   }
 
   private burst(position: Vector3, color: number, count: number): void {
-    for (let i = 0; i < count && this.particles.length < 180; i++) {
-      const mesh = new Mesh(this.geometry, this.material(color));
-      mesh.position.copy(position);
-      const scale = .5 + Math.random(); mesh.scale.setScalar(scale);
-      this.scene.add(mesh);
-      this.particles.push({ mesh, velocity: new Vector3((Math.random() - .5) * 7, 1 + Math.random() * 5, (Math.random() - .5) * 7), age: 0, life: .3 + Math.random() * .4, scale });
-    }
+    this.particles.burst(position, color, count);
   }
 
   update(dt: number): void {
@@ -155,6 +150,7 @@ export class CombatSystem {
       const previous = projectile.group.position.clone();
       projectile.group.position.addScaledVector(projectile.velocity, dt);
       const next = projectile.group.position;
+      this.particles.projectile(next, projectile.velocity, projectile.color, dt);
       const segment = next.clone().sub(previous);
       projectile.remaining -= segment.length();
       projectile.group.rotation.z += dt * 7;
@@ -176,29 +172,16 @@ export class CombatSystem {
       }
       if (impacted || projectile.remaining <= 0 || !projectile.source.alive) { this.removeProjectile(projectile); this.projectiles.splice(i, 1); }
     }
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i]; p.age += dt;
-      p.velocity.y -= dt * 8; p.mesh.position.addScaledVector(p.velocity, dt);
-      p.mesh.scale.setScalar(p.scale * Math.max(0, 1 - p.age / p.life));
-      if (p.age >= p.life) { this.scene.remove(p.mesh); this.particles.splice(i, 1); }
-    }
-    for (let i = this.pulses.length - 1; i >= 0; i--) {
-      const pulse = this.pulses[i]; pulse.age += dt;
-      const progress = Math.min(1, pulse.age / pulse.life);
-      pulse.mesh.scale.setScalar(Math.max(.01, pulse.radius * Math.sin(progress * Math.PI / 2)));
-      (pulse.mesh.material as MeshBasicMaterial).opacity = .8 * (1 - progress);
-      if (progress >= 1) { this.scene.remove(pulse.mesh); (pulse.mesh.material as MeshBasicMaterial).dispose(); this.pulses.splice(i, 1); }
-    }
+    this.particles.update(dt);
   }
 
   private removeProjectile(projectile: Projectile): void { this.scene.remove(projectile.group); }
   resetCooldowns(): void { this.cooldowns.fill(0); this.combo = 0; this.comboWindow = 0; this.attackCooldown = 0; }
   dispose(): void {
-    for (const p of this.particles) this.scene.remove(p.mesh);
-    for (const p of this.pulses) { this.scene.remove(p.mesh); (p.mesh.material as MeshBasicMaterial).dispose(); }
+    this.particles.dispose();
     for (const p of this.projectiles) this.removeProjectile(p);
     this.materials.forEach(material => material.dispose());
-    this.geometry.dispose(); this.projectileGeometry.dispose(); this.ringGeometry.dispose(); this.torusGeometry.dispose();
-    this.particles.length = 0; this.pulses.length = 0; this.projectiles.length = 0;
+    this.projectileGeometry.dispose(); this.torusGeometry.dispose();
+    this.projectiles.length = 0;
   }
 }
