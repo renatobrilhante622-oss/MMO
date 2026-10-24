@@ -1,0 +1,38 @@
+{
+  "drawerButtons": [
+    "Bolsa / InventárioI",
+    "Ferreiro / Forja & Sockets",
+    "Asas & Coleção",
+    "✧Jornada",
+    "⚑Clã"
+  ],
+  "forgeUpgrade": {
+    "before": {
+      "id": "starter-weapon",
+      "level": 1,
+      "rank": 0,
+      "attack": 8,
+      "defense": 0,
+      "gold": 100000,
+      "crystals": 1000,
+      "cost": {
+        "gold": 25,
+        "crystals": 1
+      }
+    },
+    "after": {
+      "level": 2,
+      "rank": 1,
+      "attack": 18,
+      "defense": 6,
+      "gold": 99975,
+      "crystals": 999
+    },
+    "ui": "Comum · Nível 2\nLâmina do Viajante +1\n\n⚔ 18 · ◈ 6 · ♥ 0"
+  },
+  "limitations": [
+    "O teste focado parou ao procurar o botão Pular após a revelação automática da invocação; esse botão já estava oculto. Nenhuma nova tentativa de inicialização foi feita para respeitar a economia de execução.",
+    "As verificações focadas de arrastar/salvar HUD, recolher drops e reabrir a Bolsa após a Forja não chegaram a executar nesta passagem.",
+    "O renderizador do mundo teve seu RAF interrompido após um frame; na passagem focada o RAF global foi controlado para evitar saturar a GPU de software. A apresentação não mede FPS em aparelho físico."
+  ]
+}

@@ -1,0 +1,620 @@
+{
+  "landscape": {
+    "size": [
+      844,
+      390
+    ],
+    "hud": {
+      ".hero-card": {
+        "x": 12,
+        "y": 12,
+        "width": 224,
+        "height": 56
+      },
+      ".map-card": {
+        "x": 720,
+        "y": 12,
+        "width": 112,
+        "height": 114
+      },
+      ".menu-dock": {
+        "x": 573,
+        "y": 12,
+        "width": 132,
+        "height": 44
+      },
+      ".combat-controls": {
+        "x": 576,
+        "y": 260,
+        "width": 250,
+        "height": 114
+      },
+      ".move-zone": {
+        "x": 8,
+        "y": 218,
+        "width": 160,
+        "height": 160
+      },
+      ".autofarm-button": null,
+      ".journey-widgets": {
+        "x": 12,
+        "y": 120,
+        "width": 150,
+        "height": 23
+      }
+    },
+    "drawerVisible": true,
+    "mapTeleportSlots": 10,
+    "inventory": {
+      "title": "Inventário e forja",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": {
+          "x": 641,
+          "y": 47,
+          "width": 198,
+          "height": 338
+        },
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "forge-refine": {
+      ".forge-tabs": {
+        "x": 190,
+        "y": 80.296875,
+        "width": 624,
+        "height": 26
+      },
+      ".forge-inspect-heading": {
+        "x": 190,
+        "y": 110.296875,
+        "width": 624,
+        "height": 64.390625
+      },
+      ".forge-workbench": {
+        "x": 352,
+        "y": 178.6875,
+        "width": 300,
+        "height": 85
+      },
+      ".forge-socket-rack": null,
+      ".gem-pouch": null,
+      ".forge-action-row": {
+        "x": 287,
+        "y": 267.6875,
+        "width": 430,
+        "height": 62
+      },
+      ".forge-management": {
+        "x": 287,
+        "y": 332.6875,
+        "width": 430,
+        "height": 19
+      },
+      "viewportOverflow": {
+        "scrollHeight": 281,
+        "clientHeight": 281,
+        "bodyScroll": false
+      }
+    },
+    "forge-sockets": {
+      ".forge-tabs": {
+        "x": 190,
+        "y": 65.109375,
+        "width": 624,
+        "height": 26
+      },
+      ".forge-inspect-heading": {
+        "x": 190,
+        "y": 95.109375,
+        "width": 624,
+        "height": 64.390625
+      },
+      ".forge-workbench": {
+        "x": 352,
+        "y": 163.5,
+        "width": 300,
+        "height": 35
+      },
+      ".forge-socket-rack": {
+        "x": 342,
+        "y": 203.5,
+        "width": 320,
+        "height": 43
+      },
+      ".gem-pouch": {
+        "x": 376,
+        "y": 249.5,
+        "width": 252,
+        "height": 51
+      },
+      ".forge-action-row": {
+        "x": 287,
+        "y": 318.890625,
+        "width": 430,
+        "height": 26
+      },
+      ".forge-management": {
+        "x": 287,
+        "y": 347.890625,
+        "width": 430,
+        "height": 19
+      },
+      "viewportOverflow": {
+        "scrollHeight": 312,
+        "clientHeight": 312,
+        "bodyScroll": false
+      }
+    },
+    "collection": {
+      "title": "Coleção",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": {
+          "x": 165,
+          "y": 121,
+          "width": 327,
+          "height": 261
+        },
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "shop": {
+      "title": "Mercador da Aurora",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasSummonAction": false
+    },
+    "summon": {
+      "title": "Santuário de Invocação",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasPotionAction": false
+    },
+    "vip": {
+      "title": "Privilégios VIP",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasBattleTrack": false
+    },
+    "pass": {
+      "title": "Passe de Batalha",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": {
+          "x": 165,
+          "y": 119,
+          "width": 674,
+          "height": 266
+        }
+      },
+      "hasVipPurchase": false
+    },
+    "clan": {
+      "title": "Clã",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 844,
+          "height": 390
+        },
+        ".adventure-content": {
+          "x": 161,
+          "y": 43,
+          "width": 682,
+          "height": 346
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "errors": []
+  },
+  "portrait": {
+    "size": [
+      390,
+      844
+    ],
+    "hud": {
+      ".hero-card": {
+        "x": 10,
+        "y": 10,
+        "width": 205,
+        "height": 55
+      },
+      ".map-card": {
+        "x": 276,
+        "y": 10,
+        "width": 104,
+        "height": 108
+      },
+      ".menu-dock": {
+        "x": 256,
+        "y": 116,
+        "width": 124,
+        "height": 41
+      },
+      ".combat-controls": {
+        "x": 160,
+        "y": 651,
+        "width": 220,
+        "height": 177
+      },
+      ".move-zone": {
+        "x": 8,
+        "y": 697,
+        "width": 135,
+        "height": 135
+      },
+      ".autofarm-button": null,
+      ".journey-widgets": {
+        "x": 12,
+        "y": 137,
+        "width": 144,
+        "height": 23
+      }
+    },
+    "drawerVisible": true,
+    "mapTeleportSlots": 10,
+    "inventory": {
+      "title": "Inventário e forja",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": {
+          "x": 272.796875,
+          "y": 47,
+          "width": 112.1875,
+          "height": 792
+        },
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "forge-refine": {
+      ".forge-tabs": {
+        "x": 27,
+        "y": 220.953125,
+        "width": 336,
+        "height": 30
+      },
+      ".forge-inspect-heading": {
+        "x": 27,
+        "y": 259.953125,
+        "width": 336,
+        "height": 113.078125
+      },
+      ".forge-workbench": {
+        "x": 45,
+        "y": 382.03125,
+        "width": 300,
+        "height": 140
+      },
+      ".forge-socket-rack": null,
+      ".gem-pouch": null,
+      ".forge-action-row": {
+        "x": 27,
+        "y": 531.03125,
+        "width": 336,
+        "height": 91
+      },
+      ".forge-management": {
+        "x": 27,
+        "y": 630.03125,
+        "width": 336,
+        "height": 35
+      },
+      "viewportOverflow": {
+        "scrollHeight": 468,
+        "clientHeight": 468,
+        "bodyScroll": false
+      }
+    },
+    "forge-sockets": {
+      ".forge-tabs": {
+        "x": 27,
+        "y": 183.453125,
+        "width": 336,
+        "height": 30
+      },
+      ".forge-inspect-heading": {
+        "x": 27,
+        "y": 222.453125,
+        "width": 336,
+        "height": 113.078125
+      },
+      ".forge-workbench": {
+        "x": 45,
+        "y": 344.53125,
+        "width": 300,
+        "height": 85
+      },
+      ".forge-socket-rack": {
+        "x": 35,
+        "y": 439.53125,
+        "width": 320,
+        "height": 55
+      },
+      ".gem-pouch": {
+        "x": 69,
+        "y": 502.53125,
+        "width": 252,
+        "height": 76
+      },
+      ".forge-action-row": {
+        "x": 27,
+        "y": 615.53125,
+        "width": 336,
+        "height": 44
+      },
+      ".forge-management": {
+        "x": 27,
+        "y": 667.53125,
+        "width": 336,
+        "height": 35
+      },
+      "viewportOverflow": {
+        "scrollHeight": 543,
+        "clientHeight": 543,
+        "bodyScroll": false
+      }
+    },
+    "collection": {
+      "title": "Coleção",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": {
+          "x": 5,
+          "y": 121,
+          "width": 187.5,
+          "height": 715
+        },
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "shop": {
+      "title": "Mercador da Aurora",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasSummonAction": false
+    },
+    "summon": {
+      "title": "Santuário de Invocação",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasPotionAction": false
+    },
+    "vip": {
+      "title": "Privilégios VIP",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      },
+      "hasBattleTrack": false
+    },
+    "pass": {
+      "title": "Passe de Batalha",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": {
+          "x": 5,
+          "y": 160,
+          "width": 380,
+          "height": 679
+        }
+      },
+      "hasVipPurchase": false
+    },
+    "clan": {
+      "title": "Clã",
+      "geometry": {
+        ".adventure-window": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        ".adventure-content": {
+          "x": 1,
+          "y": 43,
+          "width": 388,
+          "height": 800
+        },
+        ".paperdoll-layout": null,
+        ".rpg-forge": null,
+        ".collection-showcase": null,
+        ".vip-splash": null,
+        ".horizontal-reward-track": null
+      }
+    },
+    "errors": []
+  }
+}

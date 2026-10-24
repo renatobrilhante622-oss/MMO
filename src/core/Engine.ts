@@ -34,7 +34,8 @@ import { BaseBuilding } from '../rpg/BaseBuilding';
 import { CodexSystem } from '../rpg/CodexSystem';
 import { EnemyAI } from '../enemies/EnemyAI';
 import { DungeonBossManager } from '../enemies/DungeonBossManager';
-import { planFarm } from '../systems/VipAndAutoFarm';
+import { AutoFarmController } from '../systems/VipAndAutoFarm';
+import {purchaseMerchant} from '../rpg/MerchantEconomy';
 import { EPIGRAPHS, cooldownMultiplier, epigraphEffects } from '../rpg/ClassEpigraphSystem';
 import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
 import { COSMETICS } from '../progression/AdventureProgress';
@@ -83,6 +84,7 @@ export class Engine {
   private autoTimer = 0;
   private gpsTimer = 0;
   private autoTarget = '';
+  private readonly farmController=new AutoFarmController();
   private recentCombat = 0;
   private appearanceKey = '';
 
@@ -199,8 +201,12 @@ export class Engine {
     this.hud = new MobileHUD(this.container, {
       onStart: () => this.beginPlay(),
       onOpenMap:()=>this.hub.open('map'),
+      onOpenForge:()=>this.hub.openForge(),
+      onOpenCollection:()=>this.hub.open('collection'),
+      onOpenVip:()=>this.hub.open('vip'),
+      onOpenPass:()=>this.hub.open('pass'),
       onClassChange: id => this.changeClass(id),
-      onOpenProgression: tab => this.hub.open(tab),
+      onOpenProgression: tab => tab==='inventory'?this.hub.openInventory():this.hub.open(tab),
       onEquip: id => { if (this.inventory.equip(id)) { this.refreshStats(); this.save(); } },
       onUpgradeItem: id => {
         if (this.hero.position.distanceTo(this.terrain.spawnPoint) > 28) {
@@ -216,13 +222,13 @@ export class Engine {
     });
     this.hub = new AdventureHub(this.container,this);
     this.i18n = new GameI18n(this.container,this.progress.language);
-    const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.open('talents');this.container.querySelector('.menu-dock')!.append(journey);
-    this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
+    const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
+    this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
     this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
     this.admin=new AdminPanel(this.container,()=>({gold:this.inventory.gold,crystals:this.inventory.crystals,diamonds:this.progress.vipDiamonds,tickets:this.progress.tickets,materials:this.progress.materials,level:this.inventory.level,god:this.hero.godMode,noCooldown:this.combat.noCooldown,oneHit:this.combat.oneHitKill}),(action,value)=>this.adminAction(action,value));
-    this.gacha=new GachaCutscene(this.container,(count,banner)=>{const rewards=summon(this.progress,count,banner);if(rewards){this.sound.levelUp();this.save();}return rewards;},count=>canSummon(this.progress,count));
+    this.gacha=new GachaCutscene(this.container,(count,banner)=>{const rewards=summon(this.progress,count,banner);if(rewards){this.sound.levelUp();this.save();}return rewards;},count=>canSummon(this.progress,count),()=>this.hub.refresh());
     this.journal=new PlayerJournal(this.container,this.progress,()=>({level:this.inventory.level,name:this.hub.online.view?.self.name??'Aventureiro',clan:this.hub.online.view?.clan?.name??'',attack:this.hero.stats.attack,defense:this.hero.stats.defense,hp:this.hero.maxHp}),()=>{this.refreshStats();this.save();},()=>this.hub.open('clan'));
-    const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span aria-hidden="true">⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.container.querySelector('.menu-dock')!.append(clan);this.disposers.push(()=>clan.remove());
+    const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span aria-hidden="true">⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.hud.registerShortcut(clan);this.disposers.push(()=>clan.remove());
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
@@ -448,7 +454,7 @@ export class Engine {
     switch(action){
       case 'admin-open':this.hub.close();this.admin.open();ok=true;break;
       case 'evolution-open':this.hub.close();this.journal.open('wings');ok=true;break;
-      case 'gacha10':case 'gacha':{this.hud.resetInput();return this.gacha.open(action==='gacha10'?10:1,p.banner)?'Invocação iniciada / Summoning started':'Tickets / cristais insuficientes ou mochila cheia';}
+      case 'gacha10':case 'gacha':{this.hud.resetInput();return this.gacha.open(action==='gacha10'?10:1,p.banner)?'Invocação iniciada / Summoning started':(p.language==='pt'?'Tickets insuficientes ou mochila cheia':'Not enough tickets or inventory full');}
       case 'edit-hud':this.hub.close();this.hud.resetInput();this.hudEditor.enter();ok=true;break;
       case 'class':
         if (!(data.id in CLASS_DEFINITIONS))break;
@@ -469,6 +475,8 @@ export class Engine {
       case 'gem-forge':ok=p.forgeGem(data.key as Gem);break;
       case 'potion-buy':if(data.key==='health'||data.key==='mana')ok=p.buyPotion(data.key);break;
       case 'potion-use':if(data.key==='health'||data.key==='mana')ok=this.usePotion(data.key);break;
+      case 'crystal-buy':ok=purchaseMerchant(p,'crystals');break;
+      case 'ticket-buy':ok=purchaseMerchant(p,'tickets');break;
       case 'slot-buy':ok=p.buySlot();break;
       case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked());break;
       case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.channel={remaining:2,x:dest.x,z:dest.z,start:this.hero.position.clone(),hp:this.hero.hp};this.combat.particles.celebration(this.hero.position);this.hub.close();ok=true;}break;}
@@ -514,22 +522,30 @@ export class Engine {
       input.move={x:0,y:0};input.attack=false;input.skill=null;return;
     }
     if(p.waypoint){this.gpsTimer-=dt;if(this.gpsTimer<=0){this.gpsTimer=3;this.setWaypoint(p.waypoint);}}
-    const decision=planFarm({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input},this.enemies.enemies.filter(e=>regionAt(e.position.x,e.position.z).id===region.id));
+    const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},this.enemies.enemies.filter(e=>regionAt(e.position.x,e.position.z).id===region.id),this.drops,dt);
     if(decision.stop)p.autoFarm=false;
-    if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active)return;
-    if(Math.hypot(input.move.x,input.move.y)>.2||input.attack||input.skill!==null){p.autoFarm=false;return;}
-    if(hero.hp/hero.maxHp<p.autoHealthThreshold)this.usePotion('health');if(hero.mana/hero.stats.maxMana<p.autoManaThreshold)this.usePotion('mana');
-    const target=this.enemies.enemies.find(e=>e.id===decision.target?.id);
-    if(!target)return;
-    if(this.autoTarget!==target.id){this.autoTarget=target.id;this.autoTimer=0;this.autoRoute=[];}
-    hero.mounted=false;const distance=target.position.distanceTo(hero.position);
-    if(distance>Math.max(2,hero.stats.range*.75)){
-      this.autoTimer-=dt;if(this.autoTimer<=0){this.autoTimer=1.5;this.autoRoute=route(this.terrain,hero.position,target.position);}
-      while(this.autoRoute.length&&Math.hypot(this.autoRoute[0].x-hero.position.x,this.autoRoute[0].z-hero.position.z)<2)this.autoRoute.shift();
+    if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active){this.autoTarget='';this.autoRoute=[];return;}
+    if(decision.healthPotion)this.usePotion('health');
+    if(decision.manaPotion)this.usePotion('mana');
+    const destination=decision.destination;
+    if(!destination)return;
+    const target=decision.target;
+    const navigationKey=decision.loot?'loot:'+decision.loot.id:target?.id??'anchor';
+    if(this.autoTarget!==navigationKey){this.autoTarget=navigationKey;this.autoTimer=0;this.autoRoute=[];}
+    hero.mounted=false;
+    const distance=Math.hypot(destination.x-hero.position.x,destination.z-hero.position.z);
+    const reach=target?Math.max(2,hero.stats.range*.75):1.6;
+    if(distance>reach){
+      this.autoTimer-=dt;
+      if(this.autoTimer<=0){this.autoTimer=1;this.autoRoute=route(this.terrain,hero.position,destination);}
+      while(this.autoRoute.length&&Math.hypot(this.autoRoute[0].x-hero.position.x,this.autoRoute[0].z-hero.position.z)<1.4)this.autoRoute.shift();
       if(this.autoRoute.length)input.move=hero.inputToward(this.autoRoute[0]);
-    }else{
-      hero.facing.copy(target.position).sub(hero.position).setY(0).normalize();input.attack=true;
-      const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);if(skill>=0)input.skill=skill;
+      else if(distance<=4)input.move=hero.inputToward(destination);
+      else{this.farmController.avoidTarget(navigationKey);this.autoTarget='';}
+    }else if(target){
+      hero.facing.set(target.position.x-hero.position.x,0,target.position.z-hero.position.z).normalize();input.attack=true;
+      const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);
+      if(skill>=0)input.skill=skill;
     }
   }
 

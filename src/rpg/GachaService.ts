@@ -3,7 +3,7 @@ import type {AdventureProgress} from '../progression/AdventureProgress';
 import {GACHA_ODDS,COSMETICS} from '../progression/AdventureProgress';
 import {COMPLETE_ITEM_CATALOG,RARITIES,scaleWorldItem} from './InventoryAndLoot';
 import type {GachaPrize} from '../ui/GachaCutscene';
-export function canSummon(p:AdventureProgress,count:number):boolean{return [1,10].includes(count)&&p.tickets+Math.floor(p.inventory.crystals/20)>=count;}
+export function canSummon(p:AdventureProgress,count:number):boolean{return [1,10].includes(count)&&Number.isSafeInteger(p.tickets)&&p.tickets>=count;}
 /** Preflight the entire batch before charging. Random streams are injectable for repeatable tests. */
 export function summon(p:AdventureProgress,count:1|10,banner:string,random:()=>number=Math.random):GachaPrize[]|null {
   if(!canSummon(p,count)||!['equipment','pet','mount','wing','skin','weapon'].includes(banner))return null;
@@ -16,7 +16,7 @@ export function summon(p:AdventureProgress,count:1|10,banner:string,random:()=>n
       result.push({name:roll.cosmetic.name[p.language==='pt'?0:1],rarity:roll.cosmetic.rarity,kind:roll.cosmetic.type==='wing'?'skin':roll.cosmetic.type==='weapon'?'sword':roll.cosmetic.type,duplicate:roll.duplicate,cosmeticId:roll.cosmetic.id});
     }else{
       const roll=rolls[cursor++],slotRoll=rolls[cursor++];cursor++;let tier=0,total=0;for(let i=0;i<GACHA_ODDS.length;i++){total+=GACHA_ODDS[i];if(roll<total){tier=i;break;}}
-      if(p.tickets>0)p.tickets--;else p.inventory.crystals-=20;p.pulls++;p.pity++;
+      p.tickets--;p.pulls++;p.pity++;
       if(p.pity>=60)tier=Math.max(4,tier);else if(p.pulls%10===0)tier=Math.max(2,tier);if(tier>=4)p.pity=0;
       const pool=COMPLETE_ITEM_CATALOG.filter(i=>i.rarity===RARITIES[tier]&&i.level===1),item={...scaleWorldItem(pool[Math.floor(slotRoll*pool.length)],p.inventory.level),id:'summon-'+p.pulls+'-'+Date.now()};
       p.inventory.addLoot({id:item.id,position:new Vector3(),gold:0,crystals:0,xp:0,item});result.push({name:item.name,rarity:item.rarity,kind:item.slot,duplicate:false,itemId:item.id,itemSlot:item.slot});

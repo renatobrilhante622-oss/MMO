@@ -12,7 +12,7 @@ export class GachaCutscene {
   private frame=0;private started=0;private revealTimer=0;
   private prizes:GachaPrize[]=[];private revealed=false;private banner='skin';private selectedPrize=0;private preview?:PrizePreview3D;
   get blocking():boolean{return !this.root.hidden;}
-  constructor(container:HTMLElement,private summon:(count:1|10,banner:string)=>GachaPrize[]|null,private affordable:(count:1|10)=>boolean){this.root.setAttribute('role','dialog');this.root.setAttribute('aria-modal','true');this.root.className='expansion-modal gacha-cinema';this.root.hidden=true;container.append(this.root);this.root.onclick=e=>{const b=(e.target as Element).closest<HTMLElement>('[data-gacha]');if(!b)return;const action=b.dataset.gacha;if(action==='close')this.close();else if(action==='skip')this.reveal();else if(action==='preview')this.selectPrize(Number(b.dataset.index));else this.open(Number(action)===10?10:1,this.banner);};}
+  constructor(container:HTMLElement,private summon:(count:1|10,banner:string)=>GachaPrize[]|null,private affordable:(count:1|10)=>boolean,private readonly onClose?:()=>void){this.root.setAttribute('role','dialog');this.root.setAttribute('aria-modal','true');this.root.className='expansion-modal gacha-cinema';this.root.hidden=true;container.append(this.root);this.root.onclick=e=>{const b=(e.target as Element).closest<HTMLElement>('[data-gacha]');if(!b)return;const action=b.dataset.gacha;if(action==='close')this.close();else if(action==='skip')this.reveal();else if(action==='preview')this.selectPrize(Number(b.dataset.index));else this.open(Number(action)===10?10:1,this.banner);};}
   open(count:1|10,banner:string):boolean {
     const prizes=this.summon(count,banner);if(!prizes)return false;this.cleanup();this.prizes=prizes;this.banner=banner;this.root.hidden=false;this.revealed=false;
     this.root.innerHTML='<div class="gacha-stage" aria-label="Altar rúnico de invocação"><canvas></canvas></div><button class="gacha-skip" data-gacha="skip">Pular animação</button><div class="gacha-reveal" aria-live="polite"></div>';
@@ -45,7 +45,7 @@ export class GachaCutscene {
     this.root.querySelector('.gacha-reveal')!.innerHTML=`<h2>INVOCAÇÃO ANCESTRAL</h2><div class="gacha-results-layout"><div class="gacha-prizes">${renderPrizeCards(this.prizes,this.selectedPrize)}</div><aside class="gacha-prize-preview"><div class="gacha-prize-preview-stage" data-prize-stage>${prizeIcon(prize)}</div><h3 style="color:${RARITY_COLORS[prize.rarity]}">${esc(prize.name)}</h3><p>Selecione um prêmio para ver sua prévia 3D.</p></aside></div><footer><button data-gacha="close">Continuar</button><button data-gacha="1" ${this.affordable(1)?'':'disabled'}>Invocar 1×</button><button data-gacha="10" ${this.affordable(10)?'':'disabled'}>Invocar 10×</button></footer>`;
     try{this.preview??=new PrizePreview3D();this.preview.mount(this.root.querySelector<HTMLElement>('[data-prize-stage]')!,prize);}catch{this.preview?.dispose();this.preview=undefined;/* The full SVG illustration remains available without WebGL. */}
   }
-  close():void{this.root.hidden=true;this.cleanup();}
+  close():void{const wasOpen=!this.root.hidden;this.root.hidden=true;this.cleanup();if(wasOpen)this.onClose?.();}
   private cleanup():void{cancelAnimationFrame(this.frame);clearTimeout(this.revealTimer);window.removeEventListener('resize',this.resize);this.root.classList.remove('revealed');this.canvas=undefined;this.preview?.pause();}
   dispose():void{this.close();this.preview?.dispose();this.preview=undefined;this.root.remove();}
 }

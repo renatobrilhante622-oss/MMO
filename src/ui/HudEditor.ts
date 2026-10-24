@@ -15,7 +15,13 @@ export class HudEditor {
   private readonly abort=new AbortController();
   private initialized=false;
   constructor(private readonly container:HTMLElement,private readonly language:()=> 'pt'|'en',private readonly onFinish:()=>void){
-    try{const current=localStorage.getItem(HUD_STORAGE_KEY);this.saved=readHudLayout(JSON.parse(current??localStorage.getItem('eterna-hud-layout-v2')??'{}'));if(!current){delete this.saved.shortcuts;delete this.saved.autofarm;}}catch{/* Invalid storage uses the repository layout. */}
+    try{
+      const current=localStorage.getItem(HUD_STORAGE_KEY),v3=localStorage.getItem('eterna-hud-layout-v3');
+      this.saved=readHudLayout(JSON.parse(current??v3??localStorage.getItem('eterna-hud-layout-v2')??'{}'));
+      // The new drawer has a smaller anchor than the previous shortcut row.
+      // Retain custom combat controls while returning this changed anchor to the screen edge.
+      if(!current){delete this.saved.shortcuts;if(!v3)delete this.saved.autofarm;}
+    }catch{/* Invalid storage uses the repository layout. */}
     const options={capture:true,signal:this.abort.signal};
     container.addEventListener('click',event=>{if(this.active&&!(event.target as Element).closest('.hud-editor-toolbar')){event.preventDefault();event.stopImmediatePropagation();}},options);
     container.addEventListener('pointerdown',this.down,options);container.addEventListener('pointermove',this.move,options);container.addEventListener('pointerup',this.up,options);container.addEventListener('pointercancel',this.up,options);

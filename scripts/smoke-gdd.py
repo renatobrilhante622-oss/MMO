@@ -28,7 +28,7 @@ with sync_playwright() as p:
   open_tab('talents')
   page.locator('[data-do=talent][data-key=power]').click()
   assert page.evaluate('window.__ETERNA__.progress.spent("necromancer")')==1
-  for tab in ['inventory','shop','collection','dungeons','pass','settings']:
+  for tab in ['inventory','shop','summon','collection','dungeons','vip','pass','settings']:
    open_tab(tab)
    assert page.locator('.adventure-content').inner_text().strip(),tab
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),tab
@@ -45,7 +45,7 @@ with sync_playwright() as p:
   page.locator('[data-do=close]').click()
   page.evaluate('''() => { const e=window.__ETERNA__; e.frame(1000); }''')
   assert page.evaluate('window.__ETERNA__.diagnostics.drawCalls')>0
-  page.locator('.journey-button').click()
+  page.locator('[data-hud-menu]').click();page.locator('.journey-button').click()
   open_tab('arena')
   page.locator('[name=nickname]').fill('Smoke '+str(width))
   page.locator('[data-do="online:connect"]').click()

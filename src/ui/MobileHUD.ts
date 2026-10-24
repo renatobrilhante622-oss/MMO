@@ -4,6 +4,7 @@ import { classIcon, skillIcon } from './IconAtlas';
 import { translateText } from './I18n';
 import type { Language } from '../progression/AdventureProgress';
 import { VitalMeter } from './VitalMeter';
+import { itemIcon } from './ItemIconRenderer';
 import './style.css';
 
 export interface HUDModel {
@@ -24,6 +25,10 @@ export interface HUDModel {
 export interface HUDCallbacks {
   onOpenProgression?(tab:'talents'|'inventory'|'settings'|'base'|'codex'):void;
   onOpenMap?():void;
+  onOpenForge?():void;
+  onOpenCollection?():void;
+  onOpenVip?():void;
+  onOpenPass?():void;
   onClassChange(id: ClassId): void;
   onEquip(id: string): void;
   onUpgradeItem(id: string): void;
@@ -71,6 +76,7 @@ export class MobileHUD {
   private activePanel: Panel | null = null;
   private panelSignature = '';
   private started = false;
+  private drawerOpen = false;
   private lastPaint = 0;
   private lastMap = 0;
   private damageNodes: HTMLElement[] = [];
@@ -89,7 +95,12 @@ export class MobileHUD {
   private bossPhase = 0;
   private soundEnabled = true;
   private language:Language='pt';
-  setLanguage(language:Language):void {this.language=language;this.lastClass=undefined;}
+  setLanguage(language:Language):void {
+    if(this.language===language)return;
+    this.language=language;this.lastClass=undefined;
+    this.root.querySelectorAll<HTMLElement>('[data-hud-pt]').forEach(node=>{node.textContent=language==='pt'?node.dataset.hudPt!:node.dataset.hudEn!;});
+    this.root.querySelector<HTMLElement>('[data-drawer-toggle]')?.setAttribute('aria-label',language==='pt'?'Abrir menu do aventureiro':'Open adventurer menu');
+  }
 
 
   constructor(container: HTMLElement, private readonly callbacks: HUDCallbacks) {
@@ -105,7 +116,25 @@ export class MobileHUD {
       <button class="sound-toggle" data-sound aria-label="Silenciar áudio" aria-pressed="false" title="Áudio procedural"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m4 9 4 0 5-4v14l-5-4H4V9Z"/><path class="sound-waves" d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-slash" d="m16 9 6 6m0-6-6 6"/></svg><span data-ref="soundLabel">SOM</span></button>
       <aside class="quest-card"><div class="quest-label"><span class="quest-diamond"></span> A JORNADA COMEÇA</div><strong data-ref="questTitle">Além dos portões</strong><p data-ref="questText">Explore o vale. Derrote criaturas e encontre o portal ao norte.</p><div class="quest-progress" data-ref="dungeonStatus"></div></aside>
       <div class="resource-bar"><span class="gold-dot"></span><span data-ref="gold">0</span><span class="crystal-dot"></span><span data-ref="crystals">0</span><span class="save-indicator" title="Progresso salvo automaticamente neste dispositivo">AUTO SAVE</span></div>
-      <nav class="menu-dock" aria-label="Menus do aventureiro"><button data-panel="inventory" title="Inventário (I)">${icon('bag')}<span>Inventário</span><kbd>I</kbd></button><button data-panel="classes" title="Classes (C)">${icon('classes')}<span>Classes</span><kbd>C</kbd></button><button data-panel="base" title="Base (B)">${icon('base')}<span>Base</span><kbd>B</kbd></button><button data-panel="codex" title="Codex (K)">${icon('codex')}<span>Codex</span><kbd>K</kbd></button><button data-panel="help" title="Controles e opções">${icon('help')}<span>Guia</span></button></nav>
+      <nav class="menu-dock" aria-label="Menus do aventureiro">
+        <button class="hud-vip-shortcut" data-drawer-action="vip" title="VIP" aria-label="VIP"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m4 10 7 7 5-12 5 12 7-7-4 17H8Z" fill="#d8b968" stroke="#ffebac"/><path d="M9 23h14" stroke="#735020" stroke-width="2"/><circle cx="16" cy="21" r="2.5" fill="#b87cff"/></svg><span>VIP</span></button>
+        <button class="hud-pass-shortcut" data-drawer-action="pass" title="Passe de Batalha / Battle Pass" aria-label="Passe de Batalha / Battle Pass"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4h17v22H8L5 23V7Z" fill="#dbc392" stroke="#ffe7ac"/><path d="M9 4v19l-4 1m4-14h12m-12 4h12m-12 4h7" fill="none" stroke="#77562d"/><path d="m23 15 2 4 4 1-3 3 1 5-4-2-4 2 1-5-3-3 4-1Z" fill="#9473c5" stroke="#ddc3ff"/></svg><span data-hud-pt="Passe" data-hud-en="Pass">Passe</span></button>
+        <button class="hud-menu-toggle" data-drawer-toggle data-hud-menu aria-controls="adventurer-drawer" aria-expanded="false" aria-label="Abrir menu do aventureiro" title="Menu"><svg viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h18M5 14h18M5 21h18"/><circle cx="9" cy="7" r="2" fill="#13212e"/><circle cx="19" cy="14" r="2" fill="#13212e"/><circle cx="11" cy="21" r="2" fill="#13212e"/></svg><span>Menu</span></button>
+        <section class="hud-drawer" id="adventurer-drawer" aria-label="Atalhos do aventureiro" hidden>
+          <header><span data-hud-pt="SEU AVENTUREIRO" data-hud-en="YOUR ADVENTURER">SEU AVENTUREIRO</span><button data-drawer-close aria-label="Fechar menu / Close menu">×</button></header>
+          <div class="hud-drawer-primary">
+            <button data-panel="inventory">${itemIcon('chest','legendary')}<span data-hud-pt="Bolsa / Inventário" data-hud-en="Bag / Inventory">Bolsa / Inventário</span><kbd>I</kbd></button>
+            <button data-drawer-action="forge">${itemIcon('axe','legendary')}<span data-hud-pt="Ferreiro / Forja & Sockets" data-hud-en="Blacksmith / Forge & Sockets">Ferreiro / Forja & Sockets</span></button>
+            <button data-drawer-action="collection">${itemIcon('skin','epic')}<span data-hud-pt="Asas & Coleção" data-hud-en="Wings & Collection">Asas & Coleção</span></button>
+          </div>
+          <div class="hud-drawer-secondary">
+            <button data-panel="classes">${icon('classes')}<span data-hud-pt="Classes" data-hud-en="Classes">Classes</span><kbd>C</kbd></button>
+            <button data-panel="base">${icon('base')}<span data-hud-pt="Construções" data-hud-en="Buildings">Construções</span><kbd>B</kbd></button>
+            <button data-panel="codex">${icon('codex')}<span>Codex</span><kbd>K</kbd></button>
+            <button data-panel="help">${icon('help')}<span data-hud-pt="Configurações" data-hud-en="Settings">Configurações</span></button>
+          </div>
+        </section>
+      </nav>
       <button class="dive-action action-button" data-action="dive" data-ref="diveButton" aria-label="Segure para mergulhar na água">↓<small>Mergulhar</small></button>
       <div class="interaction-hint" data-ref="interactionHint"><button data-action="interact">${icon('interact')}<span>Interagir</span><kbd>E</kbd></button></div>
       <div class="combat-controls"><div class="skills-row">${[0, 1, 2, 3].map(i => `<button class="skill-button" data-skill="${i}" data-ref="skill${i}" aria-label="Habilidade ${i + 1}"><span class="skill-glyph" data-ref="skillIcon${i}">${skillIcon(CLASS_DEFINITIONS.berserker.skills[i].id)}</span><span class="cooldown-number" data-ref="cooldown${i}"></span><small data-ref="skillName${i}"></small><kbd>${i + 1}</kbd></button>`).join('')}</div><div class="movement-actions"><button class="action-button mount-action" data-action="mount" data-ref="mountButton" aria-label="Invocar montaria (M)">${icon('mount')}<small>Montaria</small><kbd>M</kbd></button><button class="action-button" data-action="dash" aria-label="Deslizar (Shift)">${icon('dash')}<small>Esquiva</small><kbd>⇧</kbd></button><button class="action-button" data-action="jump" aria-label="Pular / duplo pulo (Espaço)">${icon('jump')}<small>Pular</small><kbd>␣</kbd></button><button class="attack-button" data-action="attack" aria-label="Atacar (J)">${icon('sword')}<small>ATACAR</small><kbd>J</kbd></button></div></div>
@@ -157,6 +186,15 @@ export class MobileHUD {
         target.setAttribute('aria-label', this.soundEnabled ? 'Silenciar áudio' : 'Ativar áudio');
         this.el.soundLabel.textContent = this.soundEnabled ? 'SOM' : 'MUDO';
         this.callbacks.onSoundChange?.(this.soundEnabled);
+      } else if (target.hasAttribute('data-drawer-toggle')) this.setDrawerOpen(!this.drawerOpen);
+      else if(target.hasAttribute('data-drawer-close'))this.setDrawerOpen(false);
+      else if(target.dataset.drawerAction){
+        this.setDrawerOpen(false);this.clearInput();
+        const action=target.dataset.drawerAction;
+        if(action==='forge')this.callbacks.onOpenForge?.();
+        else if(action==='collection')this.callbacks.onOpenCollection?.();
+        else if(action==='vip')this.callbacks.onOpenVip?.();
+        else if(action==='pass')this.callbacks.onOpenPass?.();
       } else if (target.hasAttribute('data-close')) this.closePanel();
       else if (target.dataset.panel) this.openPanel(target.dataset.panel as Panel);
       else if (target.dataset.class) this.callbacks.onClassChange(target.dataset.class as ClassId);
@@ -185,7 +223,7 @@ export class MobileHUD {
     this.el.modal.addEventListener('pointerdown', event => { if (event.target === this.el.modal) this.closePanel(); }, opts);
     this.root.querySelectorAll<HTMLButtonElement>('[data-action], [data-skill]').forEach(button => {
       button.addEventListener('pointerdown', event => {
-        if (!this.started || this.activePanel) return;
+        if (this.blocking) return;
         event.preventDefault();
         button.setPointerCapture(event.pointerId);
         button.classList.add('is-pressed');
@@ -205,11 +243,19 @@ export class MobileHUD {
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(code) && this.started) {
         if (code !== 'Tab') event.preventDefault();
       }
-      if (code === 'Escape') { this.closePanel(); return; }
+      if (code === 'Escape') {if(this.drawerOpen){this.setDrawerOpen(false);this.root.querySelector<HTMLButtonElement>('[data-drawer-toggle]')?.focus();}else this.closePanel();return;}
+      if(this.drawerOpen&&code==='Tab'){
+        const buttons=Array.from(this.root.querySelectorAll<HTMLButtonElement>('.menu-dock button:not([disabled])'));
+        const first=buttons[0],last=buttons.at(-1);
+        if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}
+        else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}
+        return;
+      }
       if (this.activePanel && code === 'Tab') { this.trapFocus(event); return; }
       if (!this.started) return;
       const panels: Record<string, Panel> = { KeyI: 'inventory', KeyC: 'classes', KeyB: 'base', KeyK: 'codex', KeyH: 'help' };
       if (panels[code] && !event.repeat) { this.activePanel === panels[code] ? this.closePanel() : this.openPanel(panels[code]); return; }
+      if (this.drawerOpen) return;
       if (this.activePanel) {
         if (code === 'Tab') this.trapFocus(event);
         return;
@@ -226,6 +272,14 @@ export class MobileHUD {
     window.addEventListener('blur', () => this.clearInput(), opts);
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.clearInput(); }, opts);
     this.root.addEventListener('contextmenu', event => event.preventDefault(), opts);
+    document.addEventListener('pointerdown',event=>{
+      if(this.drawerOpen&&!(event.target as Element).closest('.menu-dock')){
+        this.setDrawerOpen(false);event.preventDefault();event.stopPropagation();
+      }
+    },{capture:true,signal:this.abort.signal});
+    this.root.querySelector('.hud-drawer')!.addEventListener('click',event=>{
+      if((event.target as Element).closest('button'))this.setDrawerOpen(false);
+    },opts);
   }
 
   private bindJoystick(): void {
@@ -233,7 +287,7 @@ export class MobileHUD {
     const stick = this.el.joystick;
     const opts = { signal: this.abort.signal };
     zone.addEventListener('pointerdown', event => {
-      if (!this.started || this.activePanel || this.movePointer !== null) return;
+      if (this.blocking || this.movePointer !== null) return;
       event.preventDefault();
       zone.setPointerCapture(event.pointerId);
       this.movePointer = event.pointerId;
@@ -274,7 +328,7 @@ export class MobileHUD {
     const zone = this.el.lookZone;
     const opts = { signal: this.abort.signal };
     zone.addEventListener('pointerdown', event => {
-      if (!this.started || this.activePanel || this.lookPointer !== null) return;
+      if (this.blocking || this.lookPointer !== null) return;
       event.preventDefault();
       zone.setPointerCapture(event.pointerId);
       this.lookPointer = event.pointerId;
@@ -308,7 +362,7 @@ export class MobileHUD {
   }
 
   readInput(): HeroInput {
-    if (!this.started || this.activePanel) { this.input = emptyInput(); return emptyInput(); }
+    if (this.blocking) { this.input = emptyInput(); return emptyInput(); }
     const result = this.input;
     let x = this.joystick.x + Number(this.keys.has('KeyD') || this.keys.has('ArrowRight')) - Number(this.keys.has('KeyA') || this.keys.has('ArrowLeft'));
     let y = this.joystick.y + Number(this.keys.has('KeyW') || this.keys.has('ArrowUp')) - Number(this.keys.has('KeyS') || this.keys.has('ArrowDown'));
@@ -451,9 +505,32 @@ export class MobileHUD {
     ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(5, 6); ctx.lineTo(0, 3); ctx.lineTo(-5, 6); ctx.closePath(); ctx.fill(); ctx.restore();
   }
 
-  get blocking(): boolean { return !this.started || this.activePanel !== null; }
+  get blocking(): boolean { return !this.started || this.activePanel !== null || this.drawerOpen; }
+
+  /** Extension shortcuts remain inside the drawer and keep their own action handlers. */
+  registerShortcut(button:HTMLButtonElement):void {
+    button.type='button';
+    this.root.querySelector('.hud-drawer-primary')!.append(button);
+  }
+
+  private setDrawerOpen(open:boolean):void {
+    this.drawerOpen=open;this.clearInput();
+    const drawer=this.root.querySelector<HTMLElement>('.hud-drawer')!;drawer.hidden=!open;
+    this.root.querySelector('[data-drawer-toggle]')!.setAttribute('aria-expanded',String(open));
+    this.root.classList.toggle('drawer-open',open);
+    if(open){
+      drawer.style.translate='none';
+      const dock=this.root.querySelector<HTMLElement>('.menu-dock')!,scale=dock.getBoundingClientRect().width/Math.max(1,dock.offsetWidth);
+      drawer.style.maxHeight=`${Math.max(100,(innerHeight-24)/scale)}px`;
+      const rect=drawer.getBoundingClientRect();
+      const dx=Math.max(8-rect.left,Math.min(0,innerWidth-8-rect.right));
+      const dy=Math.max(8-rect.top,Math.min(0,innerHeight-8-rect.bottom));
+      drawer.style.translate=`${dx/scale}px ${dy/scale}px`;
+    }
+  }
 
   openPanel(panel: Panel): void {
+    this.setDrawerOpen(false);
     if(this.callbacks.onOpenProgression) {
       this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':panel==='help'?'settings':panel);return;
     }

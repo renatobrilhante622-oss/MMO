@@ -2,7 +2,7 @@ export const HUD_KEYS=['joystick','combat','movement','minimap','vitals','shortc
 export type HudKey=typeof HUD_KEYS[number];
 export interface HudPlacement {x:number;y:number;scale:number;opacity:number;}
 export type HudLayout=Partial<Record<HudKey,HudPlacement>>;
-export const HUD_STORAGE_KEY='eterna-hud-layout-v3';
+export const HUD_STORAGE_KEY='eterna-hud-layout-v4';
 const finite=(v:unknown,fallback:number)=>typeof v==='number'&&Number.isFinite(v)?v:fallback;
 export function readHudLayout(value:unknown):HudLayout {
   const result:HudLayout={};if(!value||typeof value!=='object')return result;

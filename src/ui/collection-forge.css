@@ -1,0 +1,71 @@
+/* Scoped above the legacy menu rules: controls stay inside their own fixed viewport. */
+.adventure-layer .collection-showcase{isolation:isolate;background:radial-gradient(ellipse at 50% 15%,color-mix(in srgb,var(--rarity) 24%,#121728),#070c16 75%)!important;box-shadow:inset 0 0 45px #0009,0 0 20px color-mix(in srgb,var(--rarity) 10%,transparent);border-color:color-mix(in srgb,var(--rarity) 60%,#403b4d)}
+.adventure-layer .collection-showcase [data-character-preview]{position:relative;z-index:1;isolation:isolate;background:radial-gradient(ellipse at 50% 85%,color-mix(in srgb,var(--rarity) 12%,transparent),transparent 65%)}
+.adventure-layer .collection-showcase>.collection-rarity,.adventure-layer .collection-showcase>h2,.adventure-layer .collection-showcase>.collection-actions{position:relative;z-index:2}
+.collection-stage-scenery{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.stage-spotlight{position:absolute;top:-12%;width:58%;height:120%;opacity:.4;filter:blur(8px);background:linear-gradient(180deg,color-mix(in srgb,var(--rarity) 65%,#fff) 0%,transparent 85%);clip-path:polygon(48% 0,52% 0,100% 100%,0 100%);transform-origin:50% 0}
+.stage-spotlight-left{left:-13%;transform:rotate(-18deg)}.stage-spotlight-right{right:-13%;transform:rotate(18deg);opacity:.2}
+.stage-arch{position:absolute;inset:8% 11% 2%;border:1px solid color-mix(in srgb,var(--rarity) 28%,transparent);border-radius:48% 48% 5% 5%;box-shadow:inset 0 0 0 6px #0004,0 0 0 6px #a3a3b20a,inset 0 0 35px #0008}
+.stage-arch:after{content:'✦';position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:var(--rarity);background:#131629;padding:0 8px;text-shadow:0 0 15px var(--rarity)}
+.stage-floor-rune{position:absolute;left:12%;right:12%;bottom:8%;height:14%;border-radius:50%;border:1px solid color-mix(in srgb,var(--rarity) 40%,transparent);box-shadow:inset 0 0 25px color-mix(in srgb,var(--rarity) 12%,transparent),0 0 20px #000}
+.adventure-layer button.collection-thumbnail{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(140deg,#273044,#0b1421 60%);border-color:color-mix(in srgb,var(--rarity) 45%,#263044);transition:transform .2s,box-shadow .2s}
+.adventure-layer button.collection-thumbnail:hover{transform:translateY(-2px)}
+.adventure-layer button.collection-thumbnail.collection-rarity-epic{animation:collectionBorderPulse 3.4s ease-in-out infinite}
+.adventure-layer button.collection-thumbnail.collection-rarity-legendary{animation:collectionBorderPulse 2.6s ease-in-out infinite}
+.adventure-layer button.collection-thumbnail.collection-rarity-mythic{animation:collectionBorderPulse 1.9s ease-in-out infinite}
+.adventure-layer button.collection-thumbnail:is(.collection-rarity-epic,.collection-rarity-legendary,.collection-rarity-mythic):after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,#ffffff15 49%,transparent 63%);background-size:250% 100%;animation:collectionLightSweep 5s linear infinite}
+.adventure-layer .rpg-inventory-layout .rpg-forge{position:relative;justify-content:center;gap:5px;background:radial-gradient(ellipse at 50% 43%,#a9672229,transparent 52%),linear-gradient(125deg,#1e2633,#0a111b);border:1px solid #bb945269;box-shadow:inset 0 0 30px #0006}
+.adventure-layer .rpg-forge .forge-inspect-heading{justify-content:center;text-align:center;border-bottom:1px solid #c5a46a33;padding:0 0 7px;min-height:45px}
+.adventure-layer .rpg-forge .forge-inspect-heading h3 b{font-size:1.2em;text-shadow:0 0 9px #ffc96577}
+.adventure-layer .rpg-forge .forge-workbench{flex:0 1 115px;width:min(100%,300px);height:115px;max-height:23dvh;min-height:55px;margin:2px auto;filter:drop-shadow(0 4px 10px #0008)}
+.adventure-layer .rpg-forge .forge-placed-icon{width:40px;height:40px;top:1%;left:30%;filter:drop-shadow(0 0 9px var(--rarity))}
+.adventure-layer .rpg-forge .forge-socket-rack{align-items:flex-start;flex-shrink:0;max-width:320px;width:calc(100% - 8px);box-sizing:border-box;margin:1px auto;box-shadow:inset 0 2px 9px #0008,0 0 0 1px #cfb57a15}
+.adventure-layer .rpg-forge .gem-pouch{flex-shrink:0;margin:0 auto;align-items:center;padding-top:5px}
+.adventure-layer .rpg-forge .forge-action-row{width:100%;max-width:430px;align-self:center}
+.adventure-layer .rpg-forge .forge-refine-button{display:flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(180deg,#977042,#624021)!important;border-color:#edc37a;box-shadow:inset 0 1px #f8dc9d55,0 2px 8px #0005}
+.adventure-layer .rpg-forge.forge-mode-sockets [data-do=upgrade]{display:none}
+.forge-refine-label{font-weight:750;letter-spacing:.5px}.forge-refine-cost{font-size:9px;color:#ffe4b4;white-space:nowrap}.forge-refine-cost i{font-style:normal;opacity:.5}
+.adventure-layer .rpg-forge .forge-management{align-self:center;width:100%;max-width:430px;text-align:center;margin-top:1px}
+.adventure-layer .rpg-inventory-layout.forge-expanded{display:flex;align-items:center;justify-content:center;padding:3px;box-sizing:border-box}
+.adventure-layer .forge-expanded .rpg-forge.forge-dedicated{height:auto;max-height:100%;width:min(100%,650px);margin:0;padding:12px 18px;flex:0 1 auto;gap:7px;box-shadow:inset 0 0 50px #0008,0 0 40px #ab682916}
+.adventure-layer .forge-dedicated .forge-tabs{justify-content:center;min-height:30px;flex:0 0 30px;margin-bottom:2px}
+.adventure-layer .forge-dedicated .forge-inspect-heading>.item-illustration{width:52px;height:52px}
+.adventure-layer .forge-dedicated .forge-workbench{height:140px;flex-basis:140px;max-height:25dvh;min-height:60px}
+.adventure-layer .forge-dedicated .forge-socket-rack{flex-basis:55px}
+.adventure-layer .forge-dedicated .forge-socket{height:35px;width:35px}
+.adventure-layer .forge-dedicated .forge-socket small{top:37px}
+.adventure-layer .forge-dedicated .forge-management[open]{position:absolute;bottom:5px;right:5px;max-width:calc(100% - 10px);width:auto;z-index:8}
+.adventure-layer .rpg-forge.forge-mode-sockets .forge-workbench{height:85px;flex-basis:85px;max-height:15dvh}
+@keyframes collectionBorderPulse{0%,100%{box-shadow:inset 0 0 8px color-mix(in srgb,var(--rarity) 10%,transparent),0 0 3px color-mix(in srgb,var(--rarity) 15%,transparent)}50%{box-shadow:inset 0 0 16px color-mix(in srgb,var(--rarity) 22%,transparent),0 0 11px color-mix(in srgb,var(--rarity) 30%,transparent);border-color:var(--rarity)}}
+@keyframes collectionLightSweep{from{background-position:180% 0}to{background-position:-120% 0}}
+@media(max-height:520px){
+ .adventure-layer .rpg-inventory-layout .rpg-forge:not(.forge-dedicated){padding:4px;gap:2px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-inspect-heading{min-height:32px;padding-bottom:2px;gap:3px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-inspect-heading>.item-illustration{width:28px;height:28px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-inspect-heading h3{font-size:10px;margin:1px 0}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-inspect-heading small,.adventure-layer .rpg-forge:not(.forge-dedicated) .forge-inspect-heading p{font-size:7px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-workbench{height:35px;flex-basis:35px;min-height:30px;max-height:35px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-placed-icon{height:25px;width:25px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-socket-rack{flex-basis:40px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .gem-pouch{flex-basis:33px;padding-top:1px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-hint{display:none}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-action-row{gap:3px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-action-row button{min-height:23px;padding:3px}
+ .adventure-layer .rpg-forge:not(.forge-dedicated) .forge-action-row button:first-child{min-height:26px}
+ .adventure-layer .forge-expanded .rpg-forge.forge-dedicated{padding:5px 12px;gap:2px}
+ .adventure-layer .forge-dedicated .forge-inspect-heading{min-height:32px;padding-bottom:3px}
+ .adventure-layer .forge-dedicated .forge-inspect-heading>.item-illustration{width:35px;height:35px}
+ .adventure-layer .forge-dedicated .forge-tabs{height:26px;min-height:26px;flex-basis:26px}
+ .adventure-layer .forge-dedicated .forge-tabs button{min-height:25px;font-size:9px}
+ .adventure-layer .forge-dedicated .forge-workbench{height:85px;flex-basis:85px;min-height:45px;max-height:22dvh}
+ .adventure-layer .forge-dedicated.forge-mode-sockets .forge-workbench{height:35px;flex-basis:35px;min-height:30px;max-height:35px}
+ .adventure-layer .forge-dedicated .forge-action-row button{min-height:26px}
+ .adventure-layer .forge-dedicated .forge-management{padding-top:1px}
+ .adventure-layer .forge-dedicated .forge-hint{margin:2px 0!important}
+ .adventure-layer .forge-dedicated .gem-pouch{padding-top:1px;flex-basis:35px}
+ .adventure-layer .forge-dedicated .forge-socket-rack{flex-basis:43px}
+ .adventure-layer .forge-dedicated .forge-socket{width:27px;height:27px}
+ .adventure-layer .forge-dedicated .forge-socket small{top:28px}
+}
+@media(max-width:600px){.adventure-layer .rpg-forge .forge-refine-button{flex-wrap:wrap;gap:1px}.adventure-layer .rpg-forge .forge-refine-cost{font-size:8px}.adventure-layer .rpg-forge .forge-placed-icon{width:28px;height:28px}.adventure-layer .forge-dedicated .forge-refine-button{flex-wrap:nowrap;gap:8px}}
+@media(prefers-reduced-motion:reduce){.adventure-layer button.collection-thumbnail,.adventure-layer button.collection-thumbnail:after{animation:none!important}}

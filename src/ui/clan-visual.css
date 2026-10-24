@@ -1,0 +1,49 @@
+/* Scoped selectors outrank the older absolute-positioned fortress room rules. */
+.adventure-layer .clan-visual-hub.clan-fortress{position:relative;display:block;min-height:0;isolation:isolate;overflow:hidden;border:1px solid #a38b63;border-radius:7px;background:#111723;box-shadow:inset 0 0 0 3px #151e2c,0 8px 28px #0007;margin:0 0 12px}
+.clan-visual-hub .fortress-scene{position:relative;height:clamp(180px,26vw,290px);overflow:hidden;background:#111521;border-bottom:1px solid #b4935c70}
+.clan-visual-hub .fortress-panorama{width:100%;height:100%;display:block;min-height:0}
+.clan-visual-hub .fortress-scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#070d19e8,transparent 65%),linear-gradient(0deg,#0c1324e6,transparent 27%)}
+.clan-visual-hub .fortress-scene-title{position:absolute;left:24px;top:22px;z-index:2;text-shadow:0 2px 9px #000;max-width:53%}
+.clan-visual-hub .fortress-scene-title>span{font:9px system-ui;letter-spacing:2.5px;color:#d3bd95}
+.adventure-layer .clan-visual-hub .fortress-scene-title h2{font:clamp(20px,3.1vw,34px) Georgia,serif;color:#f0ddae;line-height:1.15;margin:8px 0}
+.clan-visual-hub .fortress-scene-title p{font:11px system-ui;color:#bbb4bc;margin:6px 0}
+.clan-visual-hub .fortress-crest{position:absolute;left:26px;bottom:28px;width:64px;height:77px;z-index:2;filter:drop-shadow(0 0 15px #cfac704d)}
+.clan-visual-hub .fortress-crest>svg{width:100%;height:100%}
+.clan-visual-hub .fortress-online-status{display:flex;align-items:center;gap:6px;position:absolute;right:14px;top:12px;z-index:2;background:#0d1526dc;border:1px solid #8d805553;border-radius:20px;padding:5px 10px;font:9px system-ui;color:#b8c8bf}
+.clan-visual-hub .fortress-online-status i,.clan-visual-hub .fortress-status i{display:inline-block;width:5px;height:5px;border-radius:100%;background:#7c8290;box-shadow:0 0 5px #7c829055;flex:none}
+.clan-visual-hub [data-status=active] .fortress-status i,.clan-visual-hub .fortress-online-status[data-status=active] i{background:#8ae4bb;box-shadow:0 0 7px #8ae4bb88}
+.clan-visual-hub [data-status=cooldown] .fortress-status i{background:#f0bd73;box-shadow:0 0 7px #f0bd7355}
+.clan-visual-hub [data-status=defeated] .fortress-status i{background:#bb9ae6}
+.clan-visual-hub .fortress-modules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px;background:linear-gradient(#232834,#111b29)}
+.adventure-layer .clan-visual-hub .fortress-room.fortress-module{position:relative;inset:auto;display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-rows:auto 20px;gap:3px 5px;max-width:none;min-width:0;min-height:112px;width:100%;text-align:left;align-items:center;padding:10px 8px!important;border:1px solid #99856b8c!important;border-radius:4px;background:repeating-linear-gradient(115deg,#ffffff02 0 1px,transparent 1px 5px),linear-gradient(135deg,#41404b,#1b2533 42%,#111b27)!important;box-shadow:inset 0 1px #e9d4ad52,inset 0 -3px #090f19,0 3px 9px #0005;transition:border-color .18s,box-shadow .18s,transform .18s;color:#eee0bd;cursor:pointer}
+.adventure-layer .clan-visual-hub .fortress-module:before,.adventure-layer .clan-visual-hub .fortress-module:after{content:"";position:absolute;width:4px;height:4px;border-radius:100%;border:1px solid #a89a80;background:#444453;left:4px;top:4px;box-shadow:0 1px 1px #000}
+.adventure-layer .clan-visual-hub .fortress-module:after{left:auto;right:4px;top:auto;bottom:4px}
+.adventure-layer .clan-visual-hub .fortress-module:hover,.adventure-layer .clan-visual-hub .fortress-module:focus-visible{outline:0;border-color:#e0c794!important;box-shadow:inset 0 1px #f2e6b94d,0 0 14px #af965130;transform:translateY(-1px)}
+.clan-visual-hub .fortress-module-icon{grid-row:1;display:flex;align-items:center;justify-content:center;width:56px;height:63px;filter:drop-shadow(0 2px 7px #080d16)}
+.adventure-layer .clan-visual-hub .fortress-module-icon>svg{width:56px;height:63px;max-height:none}
+.clan-visual-hub .fortress-module-copy{display:flex;flex-direction:column;gap:5px;min-width:0;padding-right:7px}
+.clan-visual-hub .fortress-module-copy strong{font:12px Georgia,serif;color:#ebd7aa;line-height:1.2}
+.clan-visual-hub .fortress-status{display:flex;align-items:center;gap:5px;font:9px system-ui;color:#b4d2c5;line-height:1.2}
+.clan-visual-hub [data-status=cooldown] .fortress-status{color:#e8c489}
+.clan-visual-hub [data-status=locked] .fortress-status{color:#a3a7b3}
+.clan-visual-hub .fortress-module-copy small{font:8px system-ui;color:#a9afbc;line-height:1.3}
+.clan-visual-hub .fortress-module-meter{grid-column:1/-1;display:flex;align-items:center;justify-content:center;width:100%;height:20px;margin-top:4px;border-top:1px solid #ad946b21}
+.clan-visual-hub .fortress-module-arrow{position:absolute;right:7px;top:38%;font:19px Georgia;color:#bea775;opacity:.7}
+.clan-visual-hub .fortress-health-track{height:5px;width:90%;display:block;overflow:hidden;background:#0a101c;border:1px solid #ab7b7b44;border-radius:10px}
+.clan-visual-hub .fortress-health-track>i{display:block;height:100%;background:linear-gradient(90deg,#642c4c,#d0809c);box-shadow:0 0 6px #e597ae55}
+.clan-visual-hub .fortress-mini-ranks{display:flex;align-items:center;justify-content:center;gap:10px;color:#677180}
+.clan-visual-hub .fortress-mini-ranks i{font:13px Georgia;font-style:normal;opacity:.5}
+.clan-visual-hub .fortress-mini-ranks i.is-filled{color:#dfca98;opacity:1;text-shadow:0 0 7px #dcc17455}
+.clan-visual-hub .fortress-buff-runes{font:10px Georgia;color:#c5a865;letter-spacing:5px}
+.clan-visual-hub .fortress-buff-runes b{color:#e2ce92;letter-spacing:0;font-weight:normal}
+.clan-visual-hub .fortress-embers{position:absolute;z-index:1;width:3px;height:3px;background:#ffc276;border-radius:50%;left:42%;top:80%;box-shadow:8px 8px #ffb868,18px -15px #ffb86888,-17px -9px #ffe2aa66,109px 10px #ffc06c,119px -12px #ffbb7d80,139px -2px #f0d7ad;animation:fortressEmbers 5s linear infinite;pointer-events:none}
+.clan-visual-hub .fortress-fog{animation:fortressFog 23s ease-in-out infinite alternate}
+.clan-visual-hub .fortress-fog-back{animation-duration:36s;animation-direction:alternate-reverse}
+.clan-visual-hub .fortress-torch{animation:fortressFlame 2.7s ease-in-out infinite alternate}
+@keyframes fortressEmbers{0%{transform:translateY(0);opacity:0}20%{opacity:.7}80%{opacity:.45}100%{transform:translate(12px,-70px);opacity:0}}
+@keyframes fortressFog{to{transform:translateX(75px)}}
+@keyframes fortressFlame{0%{opacity:.7}25%{opacity:.9}55%{opacity:.8}100%{opacity:1}}
+@media(max-width:720px){.clan-visual-hub .fortress-scene{height:190px}.clan-visual-hub .fortress-scene-title{left:15px;top:20px}.clan-visual-hub .fortress-scene-title>span{font-size:7px;letter-spacing:1.4px}.clan-visual-hub .fortress-scene-title p{font-size:9px}.clan-visual-hub .fortress-crest{left:18px;bottom:20px;width:48px;height:58px}.clan-visual-hub .fortress-online-status{font-size:7px;padding:4px 7px}.clan-visual-hub .fortress-modules{gap:5px;padding:6px}.adventure-layer .clan-visual-hub .fortress-room.fortress-module{grid-template-columns:1fr;grid-template-rows:44px auto 16px;text-align:center;min-height:150px;padding:8px 5px!important;gap:4px}.clan-visual-hub .fortress-module-icon{width:100%;height:44px;grid-row:1}.adventure-layer .clan-visual-hub .fortress-module-icon>svg{width:48px;height:44px}.clan-visual-hub .fortress-module-copy{padding:0;align-items:center;gap:4px}.clan-visual-hub .fortress-module-copy strong{font-size:10px}.clan-visual-hub .fortress-status{font-size:7px;gap:3px}.clan-visual-hub .fortress-module-copy small{font-size:7px}.clan-visual-hub .fortress-module-arrow{display:none}.clan-visual-hub .fortress-module-meter{height:16px;margin:0}.clan-visual-hub .fortress-mini-ranks{gap:6px}.clan-visual-hub .fortress-buff-runes{font-size:9px;letter-spacing:1px}}
+@media(max-height:480px) and (min-width:600px){.clan-visual-hub .fortress-scene{height:155px}.clan-visual-hub .fortress-crest{width:41px;height:50px;bottom:15px}.clan-visual-hub .fortress-scene-title{top:15px}.adventure-layer .clan-visual-hub .fortress-scene-title h2{font-size:25px}.adventure-layer .clan-visual-hub .fortress-room.fortress-module{min-height:95px}}
+@media(prefers-reduced-motion:reduce){.clan-visual-hub .fortress-fog,.clan-visual-hub .fortress-torch,.clan-visual-hub .fortress-embers{animation:none}.adventure-layer .clan-visual-hub .fortress-module{transition:none}}
+.adventure-layer .clan-nameplate{display:flex;align-items:center;gap:10px;margin:14px 0 8px;padding:10px 12px;border-bottom:1px solid #c3a36555;background:linear-gradient(90deg,#705c3929,transparent)}.adventure-layer .clan-nameplate>span{font-size:27px;color:#ddc38b}.adventure-layer .clan-nameplate h2{margin:0;font-size:20px}.adventure-layer .clan-nameplate>small{margin-left:auto;color:#a89e90;font-size:8px;letter-spacing:1px}

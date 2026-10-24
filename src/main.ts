@@ -4,6 +4,10 @@ import './ui/style.css';
 import './ui/mobile-ux.css';
 import './ui/expansion.css';
 import './ui/hud-clean.css';
+import './ui/shop-gacha.css';
+import './ui/clan-visual.css';
+import './ui/collection-forge.css';
+import './ui/vip.css';
 import './ui/intro.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}

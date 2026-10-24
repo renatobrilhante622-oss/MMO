@@ -35,7 +35,7 @@ with sync_playwright() as p:
   page.locator('[name=rarity-filter]').select_option('mythic');assert page.locator('.rpg-bag-grid .has-item').count()==0
   page.locator('[name=rarity-filter]').select_option('all')
   page.mouse.move(0,0);page.screenshot(path=str(out/f'inventory-{width}.png'),timeout=120000,animations='disabled')
-  for name,selector in [('pass','.vip-splash'),('base','.building-art'),('codex','.beast-portrait'),('classes','.class-banner')]:
+  for name,selector in [('vip','.vip-hero'),('pass','.horizontal-reward-track'),('base','.building-art'),('codex','.beast-portrait'),('classes','.class-banner')]:
    tab(name);assert page.locator(selector).count()>0
    page.screenshot(path=str(out/f'{name}-{width}.png'),timeout=120000,animations='disabled')
    if name=='pass':
@@ -61,7 +61,7 @@ with sync_playwright() as p:
   for button in page.locator('[data-do=teleport-record]').all():
    r=button.bounding_box();assert r['x']>=0 and r['x']+r['width']<=width,(width,r)
   page.screenshot(path=str(out/f'map-{width}.png'),timeout=120000,animations='disabled')
-  page.locator('[data-do=close]').click();page.locator('.journey-button').click();tab('settings')
+  page.locator('[data-do=close]').click();page.locator('[data-hud-menu]').click();page.locator('.journey-button').click();tab('settings')
   page.locator('[data-do=edit-hud]').click();assert page.locator('.hud-editor-toolbar').is_visible()
   for key in ['joystick','combat','movement','minimap','vitals','shortcuts','autofarm']:
    assert page.locator('[data-hud-edit-key='+key+']').count()==1
@@ -88,10 +88,10 @@ with sync_playwright() as p:
   page.locator('[data-hud-opacity]').evaluate("e=>{e.value='.55';e.dispatchEvent(new Event('input',{bubbles:true}));}")
   page.screenshot(path=str(out/f'hud-editor-{width}.png'),timeout=120000,animations='disabled')
   page.locator('[data-hud-save]').click();assert page.locator('.hud-editor-toolbar').count()==0
-  saved=page.evaluate("JSON.parse(localStorage.getItem('eterna-hud-layout-v3'))")
+  saved=page.evaluate("JSON.parse(localStorage.getItem('eterna-hud-layout-v4'))")
   assert saved['joystick']['scale']==1.25 and saved['joystick']['opacity']==.55
   old=page.locator('[data-hud-edit-key=joystick]').bounding_box()
-  page.reload(wait_until='networkidle');page.locator('[data-start]').click()
+  page.reload(wait_until='networkidle');page.locator('[data-splash-start]').click();page.locator('[data-start]').click()
   new=page.locator('[data-hud-edit-key=joystick]').bounding_box()
   assert abs(new['x']-old['x'])<2 and abs(new['y']-old['y'])<2,(old,new)
   assert page.locator('[data-hud-edit-key=joystick]').evaluate('(e)=>Number(getComputedStyle(e).opacity)')==.55
