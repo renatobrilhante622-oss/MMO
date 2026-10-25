@@ -77,6 +77,8 @@ export class OpenWorldGenerator {
   }
 
   private rawHeight(x: number, z: number): number {
+    // Hidden, planar Cannon support under authored indoor GLB floor tiles.
+    if(this.regionId==='dungeon')return 3.4;
     if(this.regionId!=='aurora'){
       // Separate terrain instance; every regional scene samples its own
       // immutable height field through the exact same Cannon triangle split.
@@ -130,6 +132,10 @@ export class OpenWorldGenerator {
     this.scene.add(this.root);
     if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
+    if(this.regionId==='dungeon'){
+      const physicsOnly=this.root.getObjectByName('Triangulated terrain');
+      if(physicsOnly)physicsOnly.visible=false;
+    }
     if(this.regionId==='aurora')this.createWater();
     // Authored CC0 GLBs replace procedural tree and regional building primitives.
     this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId);
