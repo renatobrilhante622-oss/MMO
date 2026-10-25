@@ -222,7 +222,10 @@ export class AnimatedGLB {
     if (!this.ready || this.disposed) return;
     const selected = this.findAction('attack');
     this.attackTime = selected ? Math.min(1.25, Math.max(0.18, selected.action.getClip().duration)) : .45;
-    this.play('attack');
+    if(selected && this.active===selected.action && this.activeKey==='attack'){
+      // A new accepted combo strike restarts its own keyframed attack.
+      selected.action.reset().play();
+    }else this.play('attack');
   }
 
   update(dt: number, speed: number, riding = false, locomotion?: string): void {
