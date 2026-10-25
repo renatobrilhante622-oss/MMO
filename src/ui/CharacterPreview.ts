@@ -21,6 +21,9 @@ export class CharacterPreview {
   private held=false;
   private dragX=0;
   private yaw=-.18;
+  private zoom=1;
+  private readonly touches=new Map<number,{x:number;y:number}>();
+  private pinchDistance=0;
   private host?:HTMLElement;
   private width=0;
   private height=0;
@@ -35,7 +38,24 @@ export class CharacterPreview {
     this.scene.add(new HemisphereLight(0xc5dbff,0x171d2c,1.7));
     const key=new SpotLight(0xffe5c3,42,20,Math.PI/4,.85,1.3);key.position.set(-3,5,5);key.target.position.set(0,.9,0);
     this.rim.position.set(3,4,-3);this.rim.target.position.set(0,1,0);this.scene.add(key,key.target,this.rim,this.rim.target,this.stage.root);
-    const c=this.renderer.domElement;c.addEventListener('pointerdown',e=>{this.held=true;this.dragX=e.clientX;c.setPointerCapture(e.pointerId);});c.addEventListener('pointermove',e=>{if(this.held){this.yaw+=(e.clientX-this.dragX)*.013;this.dragX=e.clientX;this.needsFit=true;this.draw(0);}});c.addEventListener('pointerup',()=>this.held=false);c.addEventListener('pointercancel',()=>this.held=false);
+    const c=this.renderer.domElement;c.style.touchAction='none';
+    c.addEventListener('pointerdown',e=>{
+      this.touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      this.held=true;this.dragX=e.clientX;c.setPointerCapture(e.pointerId);
+      if(this.touches.size===2){const [a,b]=[...this.touches.values()];this.pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
+    });
+    c.addEventListener('pointermove',e=>{
+      if(!this.touches.has(e.pointerId))return;
+      this.touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(this.touches.size===2){
+        const [a,b]=[...this.touches.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);
+        if(this.pinchDistance>10)this.zoom=Math.min(2.7,Math.max(.5,this.zoom*distance/this.pinchDistance));
+        this.pinchDistance=distance;this.needsFit=true;this.draw(0);
+      }else if(this.held){this.yaw+=(e.clientX-this.dragX)*.013;this.dragX=e.clientX;this.draw(0);}
+    });
+    const release=(e:PointerEvent)=>{this.touches.delete(e.pointerId);this.held=this.touches.size>0;this.pinchDistance=0;};
+    c.addEventListener('pointerup',release);c.addEventListener('pointercancel',release);
+    c.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.5,Math.min(2.7,this.zoom*(e.deltaY>0?.90:1.10)));this.needsFit=true;this.draw(0);},{passive:false});
   }
   mount(host:HTMLElement,id:ClassId,color:number,refine:number,cosmetic?:Cosmetic,weaponVisualId?:string):void {
     const key=id+':'+(cosmetic?.id??'hero');
@@ -56,7 +76,10 @@ export class CharacterPreview {
     const root=this.rig?.root??this.animal?.root;if(!root||!this.host)return;
     const width=Math.max(1,this.host.clientWidth),height=Math.max(1,this.host.clientHeight),revision=root.userData.characterRevision??0;
     if(width!==this.width||height!==this.height){this.width=width;this.height=height;this.renderer.setSize(width,height,false);this.needsFit=true;}
-    if(this.needsFit||revision!==this.revision){disableCharacterCulling(root);fitPreviewCamera(this.camera,root,width/height,1.2);this.revision=revision;this.needsFit=false;}
+    if(this.needsFit||revision!==this.revision){disableCharacterCulling(root);const framing=fitPreviewCamera(this.camera,root,width/height,1.2);
+      this.camera.position.sub(framing.target).multiplyScalar(1/this.zoom).add(framing.target);
+      this.camera.lookAt(framing.target);this.camera.updateMatrixWorld(true);
+      this.revision=revision;this.needsFit=false;}
     this.renderer.render(this.scene,this.camera);
   }
   private readonly animate=(now:number):void=>{this.frame=requestAnimationFrame(this.animate);if(this.last&&now-this.last<50)return;const dt=this.last?Math.min(.05,(now-this.last)/1000):1/30;this.last=now;this.draw(dt);};
