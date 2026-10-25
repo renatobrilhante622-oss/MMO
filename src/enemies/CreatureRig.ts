@@ -36,9 +36,9 @@ export class CreatureRig {
     this.scale = boss ? 2.3 : kind === 'golem' ? 1.45 : 1;
     this.root.name = `${kind}-articulated-rig`;
     this.root.add(this.spine);
-    if (typeof document !== 'undefined' && (kind === 'skeleton' || boss)) {
-      // Visible skeleton enemies/bosses are real rigged KayKit GLBs, not primitive meshes.
-      const model = kind === 'skeleton' && !boss ? 'KayKit_Skeleton_Minion' : 'KayKit_Skeleton_Warrior';
+    if (typeof document !== 'undefined' && (kind === 'skeleton' || kind === 'wraith' || boss)) {
+      // All migrated species are imported skinned GLBs: no procedural visual stand-ins.
+      const model = boss ? 'Quaternius_demon' : kind === 'wraith' ? 'Quaternius_ghost' : 'KayKit_Skeleton_Minion';
       this.imported = new AnimatedGLB(model, boss ? 4.0 : 1.95, () => {}, true);
       this.root.add(this.imported.root);
     } else {
