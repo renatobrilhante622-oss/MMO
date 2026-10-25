@@ -29,6 +29,19 @@ export const ITEM_CATALOG: readonly Item[] = Object.freeze(EQUIPMENT_SLOTS.flatM
   }))),
 );
 
+/** 45 equippable and forgeable authored-GLB weapon themes, awarded via boss loot. */
+export const WEAPON_PACK_ITEM_TEMPLATES:readonly Item[]=Object.freeze(WEAPON_PACKS.map(pack=>Object.freeze({
+  id:'catalog-'+pack.id,
+  visualId:pack.id,
+  name:pack.name[0],
+  slot:'weapon' as const,
+  rarity:pack.rarity,
+  level:[1,15,35,60,85][pack.tier],
+  requiredLevel:[1,15,35,60,85][pack.tier],
+  upgrade:0,attack:Math.round(12*Math.pow(1.65,pack.tier)),
+  defense:Math.round(2*Math.pow(1.4,pack.tier)),maxHp:0,
+  value:Math.round(150*Math.pow(2,pack.tier))
+})));
 /** Additional wearable slots coexist with the immutable original catalogue/save format. */
 export const COMPLETE_ITEM_CATALOG:readonly Item[]=Object.freeze([...ITEM_CATALOG,...(['gloves','belt'] as const).flatMap(slot=>RARITIES.flatMap((rarity,r)=>tiers.map(level=>Object.freeze({id:`catalog-${slot}-${rarity}-${level}`,name:`${slotNames[slot]} ${rarityNames[r]}`,slot,rarity,level,upgrade:0,attack:slot==='gloves'?Math.round(rarityPower[r]*(1+level*.16)*2):0,defense:Math.round(rarityPower[r]*(1+level*.16)*2),maxHp:Math.round(rarityPower[r]*(1+level*.16)*8),value:Math.round(12*rarityPower[r]*(1+level*.16)*(r+1))}))))]);
 
