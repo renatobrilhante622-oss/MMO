@@ -74,6 +74,7 @@ function readItem(value: unknown): Item | undefined {
     maxHp: numberIn(value.maxHp, 0, 1000000), value: numberIn(value.value, 1, 1000000),
   };
   if (typeof value.requiredLevel==='number')item.requiredLevel=numberIn(value.requiredLevel,1,100);
+  if(value.slot==='weapon'&&typeof value.visualId==='string'&&WEAPON_PACK_BY_ID.has(value.visualId))item.visualId=value.visualId;
   if (value.locked === true) item.locked = true;
   if (Array.isArray(value.sockets)) item.sockets = value.sockets.filter((gem): gem is 'ruby'|'sapphire'|'emerald'|'diamond' => ['ruby','sapphire','emerald','diamond'].includes(gem)).slice(0, [1,1,2,3,3,4][RARITIES.indexOf(item.rarity)]);
   if(item.sockets) item.gemLevels=item.sockets.map((_,i)=>Array.isArray(value.gemLevels)&&value.gemLevels[i]===2?2:1);
