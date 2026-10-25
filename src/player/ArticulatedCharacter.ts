@@ -382,7 +382,7 @@ export class ArticulatedCharacter {
 
   private replaceImportedModel(definition:ClassDefinition):void {
     const name=this.importedName(definition);
-    if(this.imported?.name===name)return;
+    if(this.imported?.name===name){this.imported.setAttackWeapon(definition.weapon);return;}
     this.clearGlbWeapons();
     this.imported?.dispose();
     const actor = new AnimatedGLB(name, 1.9, () => {
@@ -392,6 +392,7 @@ export class ArticulatedCharacter {
       this.styleSilhouette(this.definition);
     }, true);
     this.imported=actor;
+    actor.setAttackWeapon(definition.weapon);
     this.root.add(actor.root);
   }
 
