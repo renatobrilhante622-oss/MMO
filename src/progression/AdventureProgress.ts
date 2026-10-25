@@ -6,6 +6,7 @@ import { CLASS_IDS } from '../combat/ClassSystem';
 import { RARITIES, COMPLETE_ITEM_CATALOG, scaleWorldItem, type InventoryAndLoot } from '../rpg/InventoryAndLoot';
 import { REGIONS, type DungeonDefinition } from '../world/Regions';
 import {isKnownRegionalMaterial} from '../rpg/RegionalLoot';
+import {WEAPON_PACKS} from '../rpg/WeaponPacks';
 
 export type Attribute = 'power'|'vitality'|'guard'|'spirit'|'precision';
 export type Gem = 'ruby'|'sapphire'|'emerald'|'diamond';
@@ -47,6 +48,7 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'spiritstag',name:['Cervo Espiritual','Spirit Stag'],type:'mount',rarity:'rare',color:0x82f0d8},
   {id:'wyvern',name:['Dragão Wyvern','Wyvern Dragon'],type:'mount',rarity:'mythic',color:0xef7a46},
   ...(['common','uncommon','rare','epic','legendary','mythic'] as Rarity[]).map((rarity,i)=>({id:'wing-'+i,name:['Asas '+['Necróticas','Celestiais','Glaciais','de Magma','Solares','Astrais'][i],'Wings '+['Necrotic','Celestial','Glacial','Magma','Solar','Astral'][i]] as [string,string],type:'wing' as const,rarity,color:[0xa477dd,0xffe3ab,0x84ddff,0xff6733,0xffd367,0xce85ff][i]})),
+  ...WEAPON_PACKS.map(pack=>({id:pack.id,name:pack.name,type:'weapon' as const,rarity:pack.rarity,color:pack.color})),
 
 ];
 export const GACHA_ODDS=[.50,.29,.14,.055,.014,.001] as const;
