@@ -6,7 +6,7 @@
 
 **Runas/constelações:** quatro nós com pré-requisitos e pontos por nível e Boss. Efeitos aplicados a inimigos reais (dano residual de fogo por tempo, estouro de dash e lâminas extras), além de bônus na fórmula `refreshStats()`. As runas são persistidas.
 
-**Profissões:** nós 3D por região com GLBs Kenney CC0, aproximação, interação, canalização real de 2s e cooldown de respawn. Mineração, ervas e baús alimentam cinco receitas: dano +30%, XP +50%, velocidade +25%, pedras de refino e chaves. Recursos/temporizadores persistem. Os itens `refine`/`key` estão registrados no inventário de materiais **ainda sem vinculação automática à forja existente ou aos baús físicos**.
+**Profissões:** nós 3D por região com GLBs Kenney CC0, aproximação, interação, canalização real de 2s e cooldown de respawn. Minerais, ervas, chaves, elixires e cooldown dos nós sobrevivem à viagem entre os cinco mapas; nós esgotados desaparecem até reaparecerem. Mineração, ervas e baús alimentam cinco receitas: dano +30%, XP +50%, velocidade +25%, pedras de refino e chaves. Recursos/temporizadores persistem. Pedras de refino são aplicáveis à arma equipada a partir da aba Coleta, mediante o custo regular de refino; chaves permitem abrir os baús físicos após uma canalização de 2 segundos. A receita da chave utiliza apenas minério e ervas, sem depender de um baú inicialmente trancado.
 
 **Login, sessão e roleta:** calendário de sete dias, um resgate diário, quatro marcos de sessão ativa (5/15/30/60 min), uma roleta por dia; recompensas aplicam ouro, cristais, XP e Honra no modo local. Não contam tempo no fundo (nem simplesmente minimizar a aplicação).
 
@@ -26,3 +26,10 @@
 
 ## Execução
 CI: `npm test` e `npm run build` na branch. Somente após merge do PR #15 em `main` acionar o workflow de APK no GitHub Actions. Não compilar localmente via Gradle.
+
+## Correções após CI inicial
+
+- Eliminado deadlock de fabricação: a Chave Ancestral usa 4 minérios e 3 ervas, sem exigir baú aberto.
+- Corrigida persistência inter-regional: recursos e buffs, materiais fabricados, relógio de coleta e cooldowns de cada mapa são transportados ao ativar a nova região e salvos em `phase2.gathering`.
+- Vegetação/minerais/baús esgotados têm matrizes de instância ocultadas até o respawn, evitando visual de objeto disponível não coletável.
+- Testes de regressão adicionais verificam receitas e integração com `activateMap`.

@@ -947,10 +947,14 @@ export class Engine {
     for(const id of [...this.dropMeshes.keys()])this.removeDropMesh(id);
     this.questAutoMove=null;this.questAutoRoute=[];
     this.setWaypoint(null);
+    // Carry resources, elixirs, global gathering time and per-node exhaustion
+    // across ALL regional maps. The previous code silently deleted inventory.
+    const gatheringCarry=this.phase2Gathering.snapshot();
     this.phase2Gathering.dispose();
     this.terrain=this.mapInstances.activate(id);
     this.phase2Gathering=new GatheringSystem(this.scene,this.container,id,
       (x,z)=>this.terrain.heightAt(x,z),kind=>{if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud.notify('Coleta: '+kind+' +1','success');this.save();});
+    this.phase2Gathering.restore(gatheringCarry);
     this.phase2Weather.setRegion(id);
     this.enemies.resetForRegion(id);
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),

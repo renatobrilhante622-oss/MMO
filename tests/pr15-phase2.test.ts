@@ -8,6 +8,7 @@ import {SimulatedAuctionHouse} from '../src/rpg/SimulatedAuctionHouse';
 import {InventoryAndLoot} from '../src/rpg/InventoryAndLoot';
 import {EventBus} from '../src/core/GameTypes';
 import {WEATHER_REGIONS} from '../src/world/RegionalWeather';
+import {GATHER_RECIPES} from '../src/world/GatheringSystem';
 
 describe('PR15 — Phase 2 isolated local systems',()=>{
  it('offers three distinct challenger classes and seven competitive elos',()=>{
@@ -79,6 +80,25 @@ describe('PR15 — Phase 2 isolated local systems',()=>{
   expect(inv.items).toHaveLength(before);
   inv.gold=0;expect(market.buy(market.listings.find(x=>x.seller!=='Você'&&x.currency==='gold')!.id)).toBe(false);
   const other=new SimulatedAuctionHouse(inv);other.restore(market.snapshot());expect(other.listings.length).toBe(market.listings.length);
+ });
+ it('can craft a chest key without having to first open a locked chest',()=>{
+  const key=GATHER_RECIPES.find(r=>r.id==='key')!;
+  expect(key).toBeDefined();
+  expect(key.cost.ore).toBeGreaterThan(0);
+  expect(key.cost.herb).toBeGreaterThan(0);
+  expect(key.cost.chest).toBe(0);
+  const source=readFileSync('src/world/GatheringSystem.ts','utf8');
+  expect(source).toContain('this.showNode(node.id,false)');
+  expect(source).toContain('this.showNode(node.id,true)');
+ });
+ it('preserves mining inventory, buffs and exhaustion on region transitions and saves',()=>{
+  const engine=readFileSync('src/core/Engine.ts','utf8');
+  expect(engine).toContain('const gatheringCarry=this.phase2Gathering.snapshot()');
+  expect(engine).toContain('this.phase2Gathering.restore(gatheringCarry)');
+  const gathering=readFileSync('src/world/GatheringSystem.ts','utf8');
+  expect(gathering).toContain('elapsed:this.elapsed');
+  expect(gathering).toContain('this.elapsed=num(r.elapsed,1e9)');
+  expect(gathering).toContain('this.nodeInstances.clear()');
  });
  it('builds region-specific atmospheric particles across all five maps',()=>{
   expect(Object.keys(WEATHER_REGIONS)).toEqual(['aurora','crypt','highlands','rift','eclipse']);
