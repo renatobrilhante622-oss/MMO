@@ -28,7 +28,16 @@ jobs:
           git add -f public/models/creatures
           if ! git diff --cached --quiet; then
             git commit -m "chore(assets): ship authentic CC0 creature GLBs and source manifest"
-            git fetch origin feature/eterna-parte2-art-ui-20261025
-            git rebase origin/feature/eterna-parte2-art-ui-20261025
-            git push origin HEAD:feature/eterna-parte2-art-ui-20261025
+            for attempt in $(seq 1 18); do
+              git fetch origin feature/eterna-parte2-art-ui-20261025
+              git rebase origin/feature/eterna-parte2-art-ui-20261025
+              if git push origin HEAD:feature/eterna-parte2-art-ui-20261025; then
+                echo "Pinned creature GLBs committed safely"
+                exit 0
+              fi
+              echo "Branch advanced concurrently; retrying $attempt..."
+              sleep 2
+            done
+            echo "Could not push verified GLB payload after retries"
+            exit 1
           fi
