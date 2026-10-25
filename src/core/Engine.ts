@@ -83,6 +83,7 @@ export class Engine {
   readonly dungeonUI:DungeonUI;
   private dungeonInstance?:DungeonInstance;
   private dungeonReturnRegion='aurora';
+  private dungeonLoading=false;
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
   readonly regionTravel:RegionTravelUI;
@@ -417,7 +418,7 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.dungeonUI.blocking && !this.npcs.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.dungeonUI.blocking && !this.dungeonLoading && !this.npcs.blocking && !document.hidden;
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
     this.progress.tick(document.hidden?0:dt);
@@ -785,13 +786,31 @@ export class Engine {
       this.hero.mounted=false;
       this.companions.mount.visible=false;
       this.hero.teleportTo(portal.clone());
-      if(!this.dungeon.start(this.hero,definition,this.inventory.level)){
-        this.leaveDungeon();return false;
-      }
-      this.hero.teleportTo(new Vector3(0,this.terrain.heightAt(0,-30)+1.2,-30));
       this.questAutoMove=null;this.questAutoRoute=[];
       this.setWaypoint(null);
-      this.hud.notify('Instância de masmorra carregada • '+definition.name[0],'success');
+      // Keep control/combat locked until every offline GLB is loaded.
+      // A fast device resumes immediately; slower Android GPUs never show
+      // active enemy waves against temporarily invisible dungeon artwork.
+      const instance=this.dungeonInstance;
+      this.dungeonLoading=true;
+      this.dungeonUI.setLoading('⌛ Carregando masmorra: piso, paredes e cristais GLB…');
+      void instance.ready.then(()=>{
+        if(this.dungeonInstance!==instance||this.mapInstances.regionId!=='dungeon')return;
+        if(!this.hero.alive){this.leaveDungeon();return;}
+        this.dungeonLoading=false;
+        this.dungeonUI.setLoading(null);
+        this.hero.teleportTo(portal.clone());
+        if(!this.dungeon.start(this.hero,definition,this.inventory.level)){
+          this.leaveDungeon();return;
+        }
+        this.hero.teleportTo(new Vector3(0,this.terrain.heightAt(0,-30)+1.2,-30));
+        this.hud.notify('Instância carregada • '+definition.name[0],'success');
+      }).catch(error=>{
+        if(this.dungeonInstance!==instance)return;
+        console.error('Dungeon GLB loading failed:',error);
+        this.hud.notify('Falha nos arquivos GLB da masmorra. Retornando à vila.','warning');
+        this.leaveDungeon();
+      });
       return true;
     }catch(error){
       console.error('Failed to load dungeon instance:',error);
@@ -801,6 +820,8 @@ export class Engine {
   }
   private leaveDungeon():void{
     if(this.mapInstances.regionId!=='dungeon')return;
+    this.dungeonLoading=false;
+    this.dungeonUI.setLoading(null);
     this.dungeon.abandon();
     this.dungeon.clearInstanceRooms();
     this.dungeonInstance?.dispose();this.dungeonInstance=undefined;
