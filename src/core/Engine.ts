@@ -49,6 +49,7 @@ import { regionArrival, travelPermission } from '../world/RegionTravel';
 import { RegionTravelUI } from '../ui/RegionTravelUI';
 import { PortalChannelVFX } from '../world/PortalChannelVFX';
 import {QuestSystem,type QuestDefinition} from '../rpg/QuestSystem';
+import {regionalMaterialForKill} from '../rpg/RegionalLoot';
 import {NPCSystem} from '../world/NPCSystem';
 import {QuestTrackerHUD} from '../ui/QuestTrackerHUD';
 import { route, type MapPoint } from '../world/Navigation';
@@ -339,7 +340,9 @@ export class Engine {
       this.progress.earnKill(level,boss,slainRegion);if(boss)this.progress.profile.bossKills++;
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
-      const drop: LootDrop = { ...loot, position: position.clone() };
+      const exclusive=regionalMaterialForKill(slainRegion,kind,level,boss,loot.id);
+      const drop: LootDrop = {...loot,position:position.clone(),
+        ...(exclusive?{regionalMaterial:exclusive}:{})};
       this.drops.push(drop);
       this.createDropMesh(drop);
       if (drop.item?.rarity === 'mythic') this.combat.particles.celebration(position, true);
@@ -349,6 +352,11 @@ export class Engine {
       this.lootFeed.push(drop);
       this.sound.coin();
       this.inventory.addLoot(drop);
+      // Grant regional resources only when the real world drop reaches the pickup event.
+      if(this.drops.some(candidate=>candidate.id===drop.id)&&drop.regionalMaterial){
+        if(this.progress.collectRegionalMaterial(drop.regionalMaterial.id,drop.regionalMaterial.quantity))
+          this.hud.notify('✦ '+drop.regionalMaterial.name+' ×'+drop.regionalMaterial.quantity,'success');
+      }
       this.progress.dropHistory.push({name:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.name:'Ouro / Cristais',rarity:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.rarity:'common',time:Date.now(),gold:drop.gold,crystals:drop.crystals});if(this.progress.dropHistory.length>100)this.progress.dropHistory.shift();
       const index = this.drops.findIndex(candidate => candidate.id === drop.id);
       if (index >= 0) this.drops.splice(index, 1);
