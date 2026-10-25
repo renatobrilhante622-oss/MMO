@@ -414,7 +414,7 @@ describe('hero locomotion state machine', () => {
     advance(machine, 0.1);
     expect(machine.state).not.toBe('slide');
     expect(machine.tryDash()).toBe(false);
-    advance(machine, 0.6);
+    advance(machine, 2.6);
     expect(machine.tryDash()).toBe(true);
   });
 

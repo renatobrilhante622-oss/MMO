@@ -1,5 +1,10 @@
 import type { HeroState } from '../core/GameTypes';
 
+/** Shared physics/state tuning for a short, bounded roll. */
+export const DASH_DURATION = 0.22;
+export const DASH_COOLDOWN = 3;
+export const DASH_DISTANCE = 3.5;
+
 export interface HeroStateContext {
   grounded: boolean;
   moving: boolean;
@@ -26,7 +31,7 @@ export class HeroStateMachine {
   }
 
   get invulnerable(): boolean {
-    return this.state === 'slide' && this.stateTime < 0.3;
+    return this.state === 'slide' && this.stateTime < DASH_DURATION;
   }
 
   transition(next: HeroState): boolean {
@@ -53,16 +58,17 @@ export class HeroStateMachine {
   }
 
   tryDash(): boolean {
-    if (this.dashCooldown > 0 || ['dead', 'mounted', 'climb', 'slide'].includes(this.state)) return false;
-    this.dashCooldown = 0.9;
+    if (this.dashCooldown > 0 || ['dead', 'mounted', 'climb', 'slide', 'swim', 'dive'].includes(this.state)) return false;
+    this.dashCooldown = DASH_COOLDOWN;
     this.transition('slide');
     return true;
   }
 
   update(dt: number, context: HeroStateContext): HeroState {
-    const elapsed = Math.max(0, Math.min(dt, 0.1));
+    const elapsed = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
     this.stateTime += elapsed;
     this.dashCooldown = Math.max(0, this.dashCooldown - elapsed);
+    if (this.dashCooldown < 0.000001) this.dashCooldown = 0;
     if (context.dead || this.state === 'dead') {
       this.transition('dead');
       return this.state;
@@ -70,7 +76,7 @@ export class HeroStateMachine {
     this.grounded = context.grounded && context.verticalVelocity <= 0.8;
     this.coyoteTime = this.grounded ? 0.12 : Math.max(0, this.coyoteTime - elapsed);
     if (this.grounded) this.jumpCount = 0;
-    if (this.state === 'slide' && this.stateTime < 0.38) return this.state;
+    if (this.state === 'slide' && this.stateTime < DASH_DURATION) return this.state;
     if (context.inWater) {
       this.jumpCount = 0;
       this.transition(context.dive ? 'dive' : 'swim');
