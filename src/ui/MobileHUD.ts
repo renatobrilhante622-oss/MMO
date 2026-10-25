@@ -10,6 +10,7 @@ import './style.css';
 export interface HUDModel {
   hp: number; maxHp: number; mana: number; maxMana: number; xp: number; xpToNext: number;
   level: number; classId: ClassId; state: HeroState; gold: number; crystals: number;
+  regionName?:string;
   items: Item[]; equipment: Partial<Record<EquipmentSlot, string>>;
   buildings: Array<{ id: string; name: string; description: string; level: number; maxLevel: number; cost: { gold: number; crystals: number } }>;
   codex: Array<{ id: string; name: string; description: string; kills: number; required: number; bonus: string }>;
@@ -110,8 +111,8 @@ export class MobileHUD {
       <div class="look-zone" data-ref="lookZone" aria-label="Arraste para mover a câmera"></div>
       <div class="move-zone" data-ref="moveZone" aria-label="Joystick: arraste para caminhar"><div class="joystick" data-ref="joystick"><span></span><i data-ref="joystickThumb"></i></div><span class="move-hint">MOVER</span></div>
       <header class="hud-top"><div class="hero-card"><div class="hero-crest" data-ref="crest"><div data-ref="classIcon">${classIcon('berserker')}</div><span data-ref="level">1</span></div><div class="hero-vitals"><div class="hero-name"><span data-ref="className">Berserker</span><small data-ref="state">Na vila</small></div><div class="vital-bar hp" data-ref="hpTrack" aria-label="Vida"><b class="vital-residual" data-ref="hpResidual"></b><i data-ref="hpFill"></i><span data-ref="hpText"></span></div><div class="vital-bar mana" data-ref="manaTrack" aria-label="Mana"><b class="vital-residual" data-ref="manaResidual"></b><i data-ref="manaFill"></i><span data-ref="manaText"></span></div><div class="xp-bar"><i data-ref="xpFill"></i></div></div></div>
-      <div class="world-banner"><span class="overline">ETERNA</span><strong>Vale de Aster</strong><span data-ref="worldTime">AMANHECER</span></div>
-      <div class="map-card"><div class="map-heading"><span>VALE DE ASTER</span><span class="map-north">N</span></div><canvas data-ref="minimap" width="260" height="220" aria-label="Minimapa em tempo real"></canvas><div class="map-footer"><span data-ref="coordinates">0, 18</span><span data-ref="fps">60 FPS</span></div></div></header>
+      <div class="world-banner"><span class="overline">ETERNA</span><strong data-ref="regionBanner">Vale de Aster</strong><span data-ref="worldTime">AMANHECER</span></div>
+      <div class="map-card"><div class="map-heading"><span data-ref="regionMap">VALE DE ASTER</span><span class="map-north">N</span></div><canvas data-ref="minimap" width="260" height="220" aria-label="Minimapa em tempo real"></canvas><div class="map-footer"><span data-ref="coordinates">0, 18</span><span data-ref="fps">60 FPS</span></div></div></header>
       <section class="boss-hud" data-ref="bossPanel" hidden aria-label="Vida do chefe da masmorra"><div class="boss-title"><span class="boss-flourish" aria-hidden="true">◇</span><div><span class="boss-overline">GUARDIÃO ANCESTRAL</span><strong data-ref="bossName"></strong></div><span class="boss-flourish" aria-hidden="true">◇</span></div><div class="boss-health-track" data-ref="bossTrack" aria-label="Vida do chefe"><b class="vital-residual" data-ref="bossResidual"></b><i data-ref="bossFill"></i><div class="boss-segments" aria-hidden="true"></div></div><div class="boss-status"><span data-ref="bossPhase"></span><div class="boss-phase-marks" data-ref="bossPips" aria-hidden="true"><i></i><i></i><i></i></div><span data-ref="bossHealth"></span></div></section>
       <button class="sound-toggle" data-sound aria-label="Silenciar áudio" aria-pressed="false" title="Áudio procedural"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m4 9 4 0 5-4v14l-5-4H4V9Z"/><path class="sound-waves" d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-slash" d="m16 9 6 6m0-6-6 6"/></svg><span data-ref="soundLabel">SOM</span></button>
       <aside class="quest-card"><div class="quest-label"><span class="quest-diamond"></span> A JORNADA COMEÇA</div><strong data-ref="questTitle">Além dos portões</strong><p data-ref="questText">Explore o vale. Derrote criaturas e encontre o portal ao norte.</p><div class="quest-progress" data-ref="dungeonStatus"></div></aside>
@@ -407,6 +408,9 @@ export class MobileHUD {
     setText('gold', Math.floor(model.gold).toLocaleString('pt-BR'));
     setText('crystals', Math.floor(model.crystals).toLocaleString('pt-BR'));
     setText('fps', `${Math.round(model.fps)} FPS`);
+    const areaName=model.regionName?.trim()||'Vale de Aster';
+    setText('regionBanner', areaName);
+    setText('regionMap', areaName.toLocaleUpperCase(this.language==='pt'?'pt-BR':'en-US'));
     setText('coordinates', `${Math.round(model.player.x)}, ${Math.round(model.player.z)}`);
     const hour = ((model.timeOfDay % 1) + 1) % 1 * 24;
     setText('worldTime', hour < 6 ? 'SOB AS ESTRELAS' : hour < 10 ? 'AMANHECER' : hour < 17 ? 'LUZ DO DIA' : hour < 20 ? 'ENTARDECER' : 'SOB AS ESTRELAS');
