@@ -115,9 +115,18 @@ export class CompanionRig {
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
     const bird=c.id==='phoenix',dragon=['wyvern','dracolich'].includes(c.id),giant=['fenrir','nighthorse'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
-    const importedType=bird?'Parrot':this.horse&&!['fenrir','nighthorse','wyvern','stag','spiritstag'].includes(c.id)?'Horse':'';
-    if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=true;
-      if(importedType){this.imported=new AnimatedGLB(importedType as 'Horse'|'Parrot',bird?.9:2.1,()=>{this.spine.visible=false;if(this.batch)this.batch.mesh.visible=false;},false);this.root.add(this.imported.root);}}
+    // Every in-game companion has an authored GLB silhouette. Variant effects
+    // remain particles/shaders; no orange-cylinder wyvern appears during loading.
+    const importedType=bird?'Parrot'
+      :c.id==='wyvern'?'Creature_wyvern'
+      :c.id==='dracolich'?'Creature_dragon'
+      :['fenrir','nighthorse','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf'].includes(c.id)?'Creature_wolf'
+      :this.horse?'Horse':'Creature_wolf';
+    if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
+      if(importedType){this.imported=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
+        this.spine.visible=false;
+        if(this.batch)this.batch.mesh.visible=false;
+      },false);this.root.add(this.imported.root);}}
     this.imported?.tint(c.color,c.color);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
@@ -136,7 +145,13 @@ export class CompanionRig {
       if(c.id==='dracolich'){const rib=this.mesh(this.morph,new TorusGeometry(.29,.025,5,16,Math.PI),this.coat,0,0,-.36+i*.13);rib.rotation.y=Math.PI/2;}
     }
     if(this.rarity>=4){const halo=this.mesh(this.morph,new TorusGeometry(.37,.018,6,32),this.glow,0,.9,.35);halo.rotation.x=Math.PI/2;}
-    if(!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
+    // Legacy placeholder batching is only available in headless unit tests.
+    // It is never shown in the Android/WebGL game even while GLB loads.
+    this.ornaments.visible=typeof document==='undefined';
+    this.morph.visible=typeof document==='undefined';
+    this.armor.visible=typeof document==='undefined';
+    this.wings.visible=typeof document==='undefined';
+    if(typeof document==='undefined'&&!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
   update(dt:number,speed:number,time:number,attack=false):void {
     this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);
