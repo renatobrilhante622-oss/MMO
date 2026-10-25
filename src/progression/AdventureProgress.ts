@@ -49,6 +49,20 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'wyvern',name:['Dragão Wyvern','Wyvern Dragon'],type:'mount',rarity:'mythic',color:0xef7a46},
   ...(['common','uncommon','rare','epic','legendary','mythic'] as Rarity[]).map((rarity,i)=>({id:'wing-'+i,name:['Asas '+['Necróticas','Celestiais','Glaciais','de Magma','Solares','Astrais'][i],'Wings '+['Necrotic','Celestial','Glacial','Magma','Solar','Astral'][i]] as [string,string],type:'wing' as const,rarity,color:[0xa477dd,0xffe3ab,0x84ddff,0xff6733,0xffd367,0xce85ff][i]})),
   ...WEAPON_PACKS.map(pack=>({id:pack.id,name:pack.name,type:'weapon' as const,rarity:pack.rarity,color:pack.color})),
+  // Additional authored-GLB cosmetic loadouts; each reuses a known species
+  // silhouette when no distinct licensed source model exists.
+  {id:'verdant-warden',name:['Protetor Esmeralda','Emerald Protector'],type:'skin',rarity:'rare',color:0x45b88f},
+  {id:'cinder-knight',name:['Cavaleiro das Cinzas','Cinder Knight'],type:'skin',rarity:'epic',color:0xea643b},
+  {id:'astral-emperor',name:['Imperador Astral','Astral Emperor'],type:'skin',rarity:'legendary',color:0xa888ef},
+  {id:'celestial-king',name:['Soberano Celestial','Celestial King'],type:'skin',rarity:'mythic',color:0xf2dcb0},
+  {id:'emberfox',name:['Raposa de Brasas','Ember Fox'],type:'pet',rarity:'rare',color:0xfe8c43},
+  {id:'ashwolf',name:['Lobo das Cinzas','Ash Wolf'],type:'pet',rarity:'epic',color:0x9e777a},
+  {id:'stormhound',name:['Cão da Tempestade','Storm Hound'],type:'pet',rarity:'legendary',color:0x6faeff},
+  {id:'frostphoenix',name:['Fênix Glacial','Frost Phoenix'],type:'pet',rarity:'mythic',color:0x91eaff},
+  {id:'magmahorse',name:['Corcel de Magma','Magma Courser'],type:'mount',rarity:'epic',color:0xe96c34},
+  {id:'obsidianwolf',name:['Lobo Obsidiano','Obsidian Wolf'],type:'mount',rarity:'legendary',color:0x8b74a7},
+  {id:'ashdrake',name:['Dragão das Cinzas','Ash Drake'],type:'mount',rarity:'mythic',color:0xee945d},
+  {id:'lunarhorse',name:['Corcel Lunar','Moonlight Courser'],type:'mount',rarity:'legendary',color:0xa3b4ee},
 
 ];
 export const GACHA_ODDS=[.50,.29,.14,.055,.014,.001] as const;
