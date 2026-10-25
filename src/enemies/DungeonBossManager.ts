@@ -26,6 +26,8 @@ export class DungeonBossManager {
   private telegraphs: Telegraph[] = [];
   private arenaRing: Mesh;
   private elapsed = 0;
+  private externalArchitecture=false;
+  private roomAtWave?: (wave:number,waves:number)=>Vector3;
 
   constructor(private scene: Scene, private enemies: EnemyAI, private events: EventBus, private portalPosition: Vector3) {
     this.architecture=new DungeonArchitecture(scene,portalPosition,(x,z)=>enemies.terrainHeight(x,z));
@@ -33,6 +35,27 @@ export class DungeonBossManager {
     this.arenaRing.rotation.x = -Math.PI / 2;
     this.arenaRing.position.copy(portalPosition); this.arenaRing.position.y += .15;
     this.arenaRing.visible = false; scene.add(this.arenaRing);
+  }
+
+  setInstanceRooms(room:(wave:number,waves:number)=>Vector3):void{
+    this.roomAtWave=room;
+    this.externalArchitecture=true;
+    this.architecture.root.visible=false;
+  }
+  clearInstanceRooms():void{
+    this.roomAtWave=undefined;this.externalArchitecture=false;
+  }
+  setPortalPosition(position:Vector3):void{
+    this.portalPosition.copy(position);
+    this.arenaRing.position.copy(position);
+    this.arenaRing.position.y+=.15;
+    this.architecture.root.position.copy(position);
+  }
+  abandon():void {
+    this.active=false;this.completed=false;this.wave=0;
+    this.arenaRing.visible=false;this.clearTelegraphs();
+    for(const enemy of this.waveEnemies)if(enemy.alive){enemy.hp=0;enemy.deathTime=5;}
+    this.waveEnemies=[];
   }
 
   start(hero: Combatant, definition: DungeonDefinition = this.definition, playerLevel = 1): boolean {
@@ -49,7 +72,7 @@ export class DungeonBossManager {
 
   update(dt: number, hero: Combatant): void {
     this.elapsed += dt;
-    this.architecture.update(this.active,this.floor,this.elapsed);
+    if(!this.externalArchitecture)this.architecture.update(this.active,this.floor,this.elapsed);
     this.updateTelegraphs(dt, hero);
     if (!this.active) return;
     if (!hero.alive || hero.position.distanceTo(this.portalPosition) > 65) {
@@ -94,17 +117,18 @@ export class DungeonBossManager {
   private spawnWave(hero: Combatant): void {
     this.wave++; this.waveEnemies.length = 0; this.waveDelay = 3;
     if (this.wave === this.definition.waves + 1) {
-      const position = this.portalPosition.clone().add(new Vector3(0, 3, -8));
+      const position = (this.roomAtWave?.(this.wave,this.definition.waves)??this.portalPosition).clone().add(new Vector3(0,3,0));
       this.boss = this.enemies.spawn('boss', position, this.definition.level + 2 + (this.floor-1)*3, true);
       this.waveEnemies.push(this.boss); this.bossTimer = 2;
       this.events.emit('message', { text: 'O Guardião do Vazio despertou. Saia das áreas vermelhas!', tone: 'warning' });
       return;
     }
+    const roomCenter=this.roomAtWave?.(this.wave,this.definition.waves)??this.portalPosition;
     const kinds = this.wave === 1 ? ['slime', 'wolf'] : this.wave === 2 ? ['skeleton', 'wolf', 'wraith'] : ['golem', 'wraith', 'skeleton'];
     const count = Math.min(12, 3 + this.wave * 2);
     for (let i = 0; i < count; i++) {
       const angle = i * Math.PI * 2 / count + this.wave;
-      const point = this.portalPosition.clone().add(new Vector3(Math.cos(angle) * 13, 2, Math.sin(angle) * 13));
+      const point = roomCenter.clone().add(new Vector3(Math.cos(angle) * 9, 2, Math.sin(angle) * 7));
       if (point.distanceTo(hero.position) < 4) point.add(new Vector3(4, 0, -3));
       this.waveEnemies.push(this.enemies.spawn(kinds[i % kinds.length], point, this.definition.level + this.wave - 1 + (this.floor-1)*3));
     }
