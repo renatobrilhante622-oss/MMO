@@ -6,6 +6,7 @@ import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { createFootPivot, disableCharacterCulling } from '../player/PlayerRenderer';
 import type { ClassDefinition } from '../core/GameTypes';
+import {clearWeaponSlots} from '../player/ClassVisualIdentity';
 
 export type ModelName =
   | 'Soldier' | 'Horse' | 'Parrot'
@@ -53,6 +54,7 @@ export class AnimatedGLB {
   private accent = new Color(0x9c7dcc);
   private readonly preservedPalette: boolean;
   private attackWeapon:ClassDefinition['weapon']='sword';
+  private classPalette=new Color(0xffffff);
   private readonly hitColor = new Color(0xff6b6b);
 
   constructor(
@@ -84,6 +86,7 @@ export class AnimatedGLB {
     }
     if (this.disposed) return;
     const model = this.model = clone(gltf.scene);
+    if(name.startsWith('KayKit_'))clearWeaponSlots(model);
     const pivot = createFootPivot(model, this.height, name === 'Soldier' ? Math.PI : 0);
     model.traverse(object => {
       if (!(object instanceof Mesh)) return;
@@ -184,6 +187,9 @@ export class AnimatedGLB {
     return true;
   }
 
+  clearWeaponSlots():number{return this.model?clearWeaponSlots(this.model):0;}
+  setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
+
   tint(color: number, accent: number): void {
     this.baseColor.setHex(color);
     this.accent.setHex(accent);
@@ -191,7 +197,9 @@ export class AnimatedGLB {
       if (this.preservedPalette) {
         // Preserve original albedo and atlas 1:1, including during parent changes
         // to a saddle: tinting lit atlas texels can wash details out on Android.
-        material.color.copy(original);
+        material.color.copy(original).multiply(this.classPalette);
+        material.roughness=Math.max(.67,material.roughness);
+        material.metalness=Math.min(.22,material.metalness);
         if(material.map)material.map.needsUpdate=material.map.version===0;
       } else {
         material.color.copy(this.baseColor).lerp(this.accent, 0.18);
