@@ -17,7 +17,7 @@ describe('real CC0 environment and monster art',()=>{
     for(const asset of manifest.assets){
       expect(asset.license).toBe('CC0-1.0');
       expect(asset.gitBlob).toMatch(/^[0-9a-f]{40}$/);
-      expect(asset.source).toContain('/raw');
+      expect(asset.source).toContain('raw.githubusercontent.com');
       const bytes=readFileSync(resolve(process.cwd(),asset.file));
       expect(bytes.length).toBe(asset.bytes);
       if(asset.file.endsWith('.glb')){
