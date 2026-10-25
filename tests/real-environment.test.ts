@@ -4,6 +4,8 @@ import {resolve} from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {REGIONS} from '../src/world/Regions';
 import {EnvironmentGLB} from '../src/world/EnvironmentGLB';
+import {ArticulatedCharacter} from '../src/player/ArticulatedCharacter';
+import {CLASS_DEFINITIONS} from '../src/combat/ClassSystem';
 
 const root=resolve(process.cwd(),'public');
 const manifest=JSON.parse(readFileSync(resolve(root,'models/environment/manifest.json'),'utf8')) as
@@ -37,6 +39,21 @@ describe('real CC0 environment and monster art',()=>{
       expect(json.meshes?.length).toBeGreaterThan(0);
       expect(json.asset.version).toBe('2.0');
     }
+  });
+  it('actually changes the GLB body on rare, epic, legendary and mythic skins',()=>{
+    const rig=new ArticulatedCharacter(CLASS_DEFINITIONS.berserker);
+    expect(rig.root.getObjectByName('GLB KayKit_Barbarian')).toBeDefined();
+    for(const [id,name,rarity] of [
+      ['forest','KayKit_Rogue_Hooded',1],
+      ['frost','KayKit_Knight',2],
+      ['void','KayKit_Mage',3],
+      ['solar','KayKit_Barbarian',4],
+      ['eternal','KayKit_Rogue',5],
+    ] as const){
+      rig.skinAppearance(id,0xa2b3cc,rarity);
+      expect(rig.root.getObjectByName('GLB '+name),id).toBeDefined();
+    }
+    rig.dispose();
   });
   it('does not generate textures via Canvas or substitute primitive trees at runtime',async()=>{
     const source=await readFile(resolve('src/world/ProceduralTextures.ts'),'utf8');
