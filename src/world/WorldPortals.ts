@@ -105,6 +105,7 @@ export class WorldPortals {
     host.append(this.button);
   }
   update(dt:number,camera:PerspectiveCamera,hero:Vector3,active:boolean):void{
+    if(this.disposed)return;
     this.renderTime+=Math.max(0,Math.min(.05,dt));
     for(const portal of this.portals)portal.vortex.uniforms.uTime.value=this.renderTime;
     this.timer+=dt;
@@ -141,7 +142,7 @@ export class WorldPortals {
     }
   }
   interact():boolean{
-    if(!this.nearest)return false;
+    if(this.disposed||!this.nearest)return false;
     const permission=travelPermission(this.nearest.site.destId,this.state());
     if(permission.ok)this.onEnter(this.nearest.site.destId);
     else this.button.textContent=permission.reason==='level'
@@ -150,7 +151,7 @@ export class WorldPortals {
     return true;
   }
   dispose():void{
-    this.disposed=true;this.root.removeFromParent();
+    this.disposed=true;this.nearest=null;this.root.removeFromParent();
     for(const item of this.portals){
       item.label.remove();
       item.vortex.dispose();
