@@ -217,11 +217,15 @@ export class AnimatedGLB {
     this.play('attack');
   }
 
-  update(dt: number, speed: number, riding = false): void {
+  update(dt: number, speed: number, riding = false, locomotion?: string): void {
     if (!this.ready || !this.root.visible) return;
     const step = Math.min(.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
-    const target = riding ? 'mounted' : speed > .65 ? 'run' : speed > .05 ? 'walk' : 'idle';
-    if (this.attackTime > 0 && !riding) this.attackTime = Math.max(0, this.attackTime - step);
+    const target = locomotion === 'dead' ? 'dead'
+      : riding ? 'mounted'
+      : locomotion === 'slide' ? 'slide'
+      : locomotion === 'jump' || locomotion === 'doubleJump' || locomotion === 'fall' ? 'jump'
+      : speed > .65 ? 'run' : speed > .05 ? 'walk' : 'idle';
+    if (this.attackTime > 0 && !riding && target !== 'dead') this.attackTime = Math.max(0, this.attackTime - step);
     else this.attackTime = 0;
     const state = this.attackTime > 0 ? 'attack' : target;
     this.play(state);
