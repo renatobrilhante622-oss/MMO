@@ -243,9 +243,28 @@ export class AnimatedGLB {
       material.emissive.copy(originalEmissive);
       material.emissiveIntensity=originalEmissiveIntensity;
       if(hellhound){
-        // Magma glow comes from a shader, never a painted procedural texture.
+        // Animated, narrow emissive magma fissures; original wolf PBR
+        // normal/albedo remain untouched and no Canvas texture is generated.
+        material.color.multiplyScalar(.43);
         material.emissive.setHex(0xff3b07);
-        material.emissiveIntensity=.13;
+        material.emissiveIntensity=.26;
+        material.onBeforeCompile=shader=>{
+          shader.uniforms.creatureTime=this.creatureTime;
+          shader.vertexShader='varying vec3 vHellCoord;\n'+shader.vertexShader;
+          shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+            '#include <begin_vertex>\n vHellCoord=position.xyz;');
+          shader.fragmentShader='varying vec3 vHellCoord; uniform float creatureTime;\n'+shader.fragmentShader;
+          shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+             float fault = abs(sin(vHellCoord.y*17. + sin(vHellCoord.z*13.)*.9 + vHellCoord.x*7.));
+             float seam = pow(1.-fault,26.)*smoothstep(.08,.34,abs(vHellCoord.y));
+             outgoingLight += vec3(1.6,.22,.018)*seam*(.65+.35*sin(creatureTime*2.4));
+             #include <opaque_fragment>
+          `);
+        };
+        material.customProgramCacheKey=()=> 'eterna-hellhound-magma-v1';
+      }else if(this.name==='Creature_wolf'){
+        material.onBeforeCompile=()=>{};
+        material.customProgramCacheKey=()=> 'eterna-wolf-authored-pbr-v1';
       }
       material.needsUpdate=true;
     }
