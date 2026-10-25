@@ -66,6 +66,22 @@ export class DungeonInstance {
  private disposed=false;
  private readonly gateNodes:Group[]=[];
  private chest?:Group;
+ private readonly crystalStates=[-7,0,7].map(x=>({
+   position:new Vector3(x,3.4,-50),hp:100,model:undefined as Group|undefined,
+ }));
+ private strikeCooldown=0;
+ get crystalsRemaining():number{return this.crystalStates.filter(crystal=>crystal.hp>0).length;}
+ get crystalsDestroyed():number{return this.crystalStates.length-this.crystalsRemaining;}
+ /** Accepted strikes damage only active crystals at actual melee distance. */
+ strikeCrystal(hero:Vector3,damage=50):boolean{
+   if(this.strikeCooldown>0)return false;
+   const crystal=this.crystalStates.find(c=>c.hp>0&&Math.hypot(hero.x-c.position.x,hero.z-c.position.z)<3.1);
+   if(!crystal)return false;
+   crystal.hp=Math.max(0,crystal.hp-Math.max(0,Math.min(100,damage)));
+   this.strikeCooldown=.42;
+   if(crystal.hp<=0&&crystal.model)crystal.model.visible=false;
+   return true;
+ }
  readonly ready:Promise<void>;
  readonly startedAt=performance.now();
  private elapsed=0;
@@ -130,6 +146,24 @@ export class DungeonInstance {
    if(plan.name==='gate')this.gateNodes.push(group);
    if(plan.name==='chest'){this.chest=group;group.visible=false;}
   }
+  try{
+    const crystal=await load('crystal');
+    if(this.disposed)return;
+    const source=crystal.scene;
+    const box=new Box3().setFromObject(source);
+    for(const state of this.crystalStates){
+      const object=source.clone(true);
+      const actor=new Group();
+      actor.name='Breakable CC0 crystal';
+      actor.position.copy(state.position);
+      const h=Math.max(.001,box.max.y-box.min.y);
+      object.scale.setScalar(2.4/h);
+      object.position.set(-box.getCenter(new Vector3()).x*2.4/h,
+        -box.min.y*2.4/h,-box.getCenter(new Vector3()).z*2.4/h);
+      object.traverse(o=>{if(o instanceof Mesh){o.castShadow=false;o.receiveShadow=false;}});
+      actor.add(object);state.model=actor;this.root.add(actor);
+    }
+  }catch(error){console.warn('Missing destructible CC0 crystal art:',error);}
   for(const [x,z] of [[-12,-30],[12,-30],[-12,-50],[12,-50],[-12,-70],[12,-70]]){
     const torch=new PointLight(0xffa54d,16,15,2);
     torch.position.set(x,this.terrain.heightAt(x,z)+3,z);
@@ -138,6 +172,7 @@ export class DungeonInstance {
  }
  update(dt:number,wave:number,waves:number,completed:boolean):void{
   this.elapsed+=Math.max(0,dt);
+  this.strikeCooldown=Math.max(0,this.strikeCooldown-Math.max(0,dt));
   for(let i=0;i<this.gateNodes.length;i++){
     // The authored gate art vanishes when its corresponding room is cleared.
     this.gateNodes[i].visible=wave<=i+1&&!completed;
