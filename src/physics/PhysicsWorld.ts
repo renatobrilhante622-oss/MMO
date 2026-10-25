@@ -18,6 +18,7 @@ export class PhysicsWorld {
   private readonly groundMaterial = new CANNON.Material('terrain');
   private readonly characters = new Set<CANNON.Body>();
   private readonly terrainBodies = new Set<CANNON.Body>();
+  private readonly gates:CANNON.Body[]=[];
   private readonly rayResult = new CANNON.RaycastResult();
   private readonly start = new CANNON.Vec3();
   private readonly end = new CANNON.Vec3();
@@ -41,11 +42,13 @@ export class PhysicsWorld {
     const previous=this.terrain;
     for(const body of this.terrainBodies)this.world.removeBody(body);
     this.terrainBodies.clear();
+    this.gates.length=0;
     this.terrain=next;
     try {this.installStaticWorld();}
     catch(error){
       for(const body of this.terrainBodies)this.world.removeBody(body);
       this.terrainBodies.clear();
+      this.gates.length=0;
       this.terrain=previous;
       this.installStaticWorld();
       throw error;
@@ -66,7 +69,16 @@ export class PhysicsWorld {
       body.addShape(new CANNON.Box(new CANNON.Vec3(collider.size.x / 2, collider.size.y / 2, collider.size.z / 2)));
       body.position.set(collider.position.x, collider.position.y, collider.position.z);
       this.registerStatic(body);
+      if(collider.type==='gate')this.gates.push(body);
     }
+  }
+  /** Opening a gate removes both physical contacts and raycast obstruction. */
+  setDungeonGateOpen(index:number,open:boolean):void{
+    const body=this.gates[index];
+    if(!body)return;
+    body.collisionResponse=!open;
+    body.collisionFilterMask=open?0:2;
+    body.aabbNeedsUpdate=true;
   }
 
   private createHeightfield(): void {
@@ -193,5 +205,6 @@ export class PhysicsWorld {
     for (const body of [...this.world.bodies]) this.world.removeBody(body);
     this.characters.clear();
     this.terrainBodies.clear();
+    this.gates.length=0;
   }
 }
