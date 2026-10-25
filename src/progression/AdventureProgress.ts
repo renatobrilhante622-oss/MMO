@@ -131,9 +131,9 @@ export class AdventureProgress {
     const price=SLOT_COSTS[this.purchasedSlots];if(this.inventory.gold<price)return false;
     this.inventory.gold-=price;this.purchasedSlots++;return true;
   }
-  record(index:number,name:string,x:number,z:number,blocked:boolean):boolean {
+  record(index:number,name:string,x:number,z:number,blocked:boolean,regionId?:string):boolean {
     if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>140||Math.abs(z)>140)return false;
-    const region=REGIONS.reduce((best,r)=>Math.hypot(x-r.center.x,z-r.center.z)<Math.hypot(x-best.center.x,z-best.center.z)?r:best,REGIONS[0]);
+    const region=REGIONS.find(r=>r.id===regionId)??REGIONS.reduce((best,r)=>Math.hypot(x-r.center.x,z-r.center.z)<Math.hypot(x-best.center.x,z-best.center.z)?r:best,REGIONS[0]);
     this.bookmarks[index]={name:name.trim().slice(0,30)||region.name[this.language==='pt'?0:1],x,z,region:region.id};return true;
   }
   destination(index:number,blocked:boolean):Bookmark|null {
