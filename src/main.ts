@@ -14,6 +14,7 @@ import './ui/quest-npc.css';
 import './ui/audit-layout.css';
 import './ui/physical-portals.css';
 import './ui/forge-audit.css';
+import './ui/dungeon-audit.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
