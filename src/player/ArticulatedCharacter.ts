@@ -157,6 +157,7 @@ export class ArticulatedCharacter {
   readonly wings=new WingsSystem();
   private imported?:AnimatedGLB;
   private readonly glbWeapons:Object3D[]=[];
+  private readonly weaponPackMaterials=new Set<MeshStandardMaterial>();
   private glbWeaponGeneration=0;
   private importedArmor?:Mesh;
   private importedHelmet?:Mesh;
@@ -403,6 +404,8 @@ export class ArticulatedCharacter {
     this.glbWeaponGeneration++;
     for(const model of this.glbWeapons)model.removeFromParent();
     this.glbWeapons.length=0;
+    for(const material of this.weaponPackMaterials)material.dispose();
+    this.weaponPackMaterials.clear();
   }
 
   private attachImportedGear():void {
@@ -443,6 +446,7 @@ export class ArticulatedCharacter {
             const tinted=originals.map(m=>{
               if(!(m instanceof MeshStandardMaterial))return m;
               const mat=m.clone();
+              this.weaponPackMaterials.add(mat);
               mat.color.lerp(new Color(equipped.color),Math.min(.22,equipped.tier*.052));
               mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+equipped.tier*.08));
               mat.roughness=Math.max(.26,mat.roughness-equipped.tier*.065);
