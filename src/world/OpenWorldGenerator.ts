@@ -33,7 +33,7 @@ export class OpenWorldGenerator {
   private readonly life: WorldLife;
   private generated = false;
   private elapsed = 0;
-  private ground?:{grass:PBRTextureSet;dirt:PBRTextureSet;cobble:PBRTextureSet};
+  private ground?:{grass:PBRTextureSet;dirt:PBRTextureSet;cobble:PBRTextureSet;snow:PBRTextureSet;scorched:PBRTextureSet};
   private wind={value:0};
   private water?: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private portal?: THREE.Group;
@@ -104,7 +104,7 @@ export class OpenWorldGenerator {
     if (this.generated) return;
     this.generated = true;
     this.scene.add(this.root);
-    if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble')};
+    if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
     this.createWater();
     this.createVillage();
@@ -146,10 +146,10 @@ export class OpenWorldGenerator {
   private terrainMaterial(): THREE.MeshStandardMaterial {
     const material = this.material({ color: 0xffffff, roughness: .96 });
     if(this.ground){material.normalMap=this.ground.grass.normalMap;material.normalMap.repeat.set(80,80);material.normalScale.set(.3,.3);material.roughnessMap=this.ground.grass.roughnessMap;material.roughnessMap.repeat.set(80,80);}
-    material.name = 'Procedural grass, cliff rock, shore sand and village cobblestone';
+    material.name = 'Scanned CC0 PBR grass, soil, stone, snow and scorched ground';
     material.onBeforeCompile = shader => {
       shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
-      shader.uniforms.terrainStone={value:this.ground?.cobble.map};shader.uniforms.terrainDirt={value:this.ground?.dirt.map};shader.uniforms.terrainGrass={value:this.ground?.grass.map};shader.uniforms.terrainStoneNormal={value:this.ground?.cobble.normalMap};shader.uniforms.terrainStoneRough={value:this.ground?.cobble.roughnessMap};
+      shader.uniforms.terrainStone={value:this.ground?.cobble.map};shader.uniforms.terrainDirt={value:this.ground?.dirt.map};shader.uniforms.terrainGrass={value:this.ground?.grass.map};shader.uniforms.terrainSnow={value:this.ground?.snow.map};shader.uniforms.terrainScorched={value:this.ground?.scorched.map};shader.uniforms.terrainStoneNormal={value:this.ground?.cobble.normalMap};shader.uniforms.terrainStoneRough={value:this.ground?.cobble.roughnessMap};
       shader.vertexShader = shader.vertexShader.replace('#include <common>', `
         #include <common>
         varying vec3 vTerrainPosition;
@@ -179,7 +179,7 @@ export class OpenWorldGenerator {
         vec3 stoneN=texture2D(terrainStoneNormal,vTerrainPosition.xz*.22).xyz*2.-1.;stoneN.xy*=.75;
         normal=normalize(mix(normal,normalize(tbn*stoneN),cobbleNormalWeight));
       #endif`);};
-    material.customProgramCacheKey = () => 'eterna-procedural-terrain-pbr-v4';
+    material.customProgramCacheKey = () => 'eterna-real-scanned-pbr-v5';
     return material;
   }
 
