@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationClip, AnimationMixer, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
+  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
   Object3D, Vector3,
 } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -64,7 +64,7 @@ export class AnimatedGLB {
     private readonly castShadow = false,
   ) {
     this.root.name = 'GLB ' + name;
-    this.preservedPalette = name.startsWith('KayKit_');
+    this.preservedPalette = name.startsWith('KayKit_') || name.startsWith('Creature_') || name==='Horse' || name==='Parrot';
     // Browser-only I/O. Vitest/server-side execution never requests graphics.
     if (typeof document === 'undefined') return;
     void this.importModel(name);
@@ -187,6 +187,31 @@ export class AnimatedGLB {
     return true;
   }
 
+  /** Real post-normalization 3D dimensions: excludes hidden procedural art. */
+  getVisibleBounds():Box3|null{
+    if(!this.ready)return null;
+    this.root.updateWorldMatrix(true,true);
+    const bounds=new Box3().setFromObject(this.root);
+    return bounds.isEmpty()?null:bounds;
+  }
+  get animationCount():number{return this.clips.size;}
+  /** Palette safety: keep each author's diffuse + texture atlas distinct. */
+  setCompanionAppearance(color:number,hellhound=false):void{
+    const tint=new Color(color);
+    for(const {material,original,originalEmissive,originalEmissiveIntensity} of this.materials){
+      material.color.copy(original).lerp(tint,hellhound?.11:.045);
+      material.metalness=Math.min(.12,material.metalness);
+      material.roughness=Math.max(.72,material.roughness);
+      material.emissive.copy(originalEmissive);
+      material.emissiveIntensity=originalEmissiveIntensity;
+      if(hellhound){
+        // Magma glow comes from a shader, never a painted procedural texture.
+        material.emissive.setHex(0xff3b07);
+        material.emissiveIntensity=.13;
+      }
+      material.needsUpdate=true;
+    }
+  }
   clearWeaponSlots():number{return this.model?clearWeaponSlots(this.model):0;}
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
 
