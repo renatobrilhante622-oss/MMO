@@ -2,6 +2,7 @@ import { MathUtils, Scene, Vector3 } from 'three';
 import { EventBus, type Combatant, type LootDrop } from '../core/GameTypes';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { CompanionRig } from './CompanionRig';
+import {safePetOffset,separatePetFromMount} from './MountPlacement';
 import type { Cosmetic } from '../progression/AdventureProgress';
 import { HeroController } from '../player/HeroController';
 
