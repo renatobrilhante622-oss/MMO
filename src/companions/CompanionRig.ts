@@ -9,6 +9,8 @@ interface Leg { hip:Group; knee:Group; ankle:Group; rear:boolean; side:number; }
 /** Anatomical horse/wolf rig. Lower joints absorb each planted stance instead of rotating rigid poles. */
 export class CompanionRig {
   readonly root=new Group();
+  /** Stable socket for an independently animated rider. Coordinates follow the horse's scaled root. */
+  readonly saddle=new Group();
   private readonly spine=new Group();
   private readonly neck=new Group();
   private readonly head=new Group();
@@ -38,6 +40,7 @@ export class CompanionRig {
     const dark=this.material(0x252328,.9),light=this.material(0xd6cab0,.88),leather=this.material(0x363331,.76),metal=this.material(0xc7ab6e,.3,.7);
     this.glow=this.material(0xa9e8ff,.4);this.glow.emissive.setHex(0xa9e8ff);
     this.root.add(this.spine);this.spine.position.y=horse?1.23:.68;
+    if(horse){this.saddle.name='mountSaddleNode';this.saddle.position.set(0,1.6,-.08);this.root.add(this.saddle);}
     this.ellipsoid(this.spine,this.coat,[horse?.4:.25,horse?.5:.28,horse?.83:.53],[0,0,0]);
     this.ellipsoid(this.spine,this.coat,[horse?.43:.3,horse?.53:.34,horse?.39:.29],[0,0,horse?.44:.29]);
     this.ellipsoid(this.spine,this.coat,[horse?.43:.27,horse?.46:.29,horse?.38:.26],[0,0,horse?-.49:-.32]);
@@ -149,6 +152,7 @@ export class CompanionRig {
       leg.ankle.rotation.x=-leg.hip.rotation.x*.25-leg.knee.rotation.x*.4;
     }
     this.spine.position.y=(this.horse?1.23:.68)+Math.abs(Math.sin(phase))*this.stride*(gallop?.09:.035);
+    if(this.horse)this.saddle.position.y=1.6+(this.spine.position.y-1.23);
     this.spine.rotation.x=Math.sin(phase)*(gallop?.055:.018)*this.stride;
     this.neck.rotation.x=(this.horse?.3:.5)+Math.sin(phase+.3)*this.stride*.06;
     this.head.rotation.x=(this.horse?-.22:-.3)+Math.sin(time*1.1)*.025-(attack?.25:0);

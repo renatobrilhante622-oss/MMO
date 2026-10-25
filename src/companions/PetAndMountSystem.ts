@@ -19,8 +19,11 @@ export class PetAndMountSystem {
   private attackCooldown = 0;
   private lastMountPosition = new Vector3();
   private mountMoving = 0;
+  private readonly riderOriginalScale = new Vector3(1,1,1);
+  private readonly mountScale = new Vector3();
 
   constructor(private scene: Scene, private hero: HeroController, private physics: PhysicsWorld, private events: EventBus) {
+    this.riderOriginalScale.copy(hero.rig.root.scale);
     this.pet.position.copy(hero.position).add(new Vector3(-2, 0, 1));
     this.lastMountPosition.copy(hero.position);
     this.scene.add(this.pet, this.mount);
@@ -33,6 +36,26 @@ export class PetAndMountSystem {
     this.petRig.appearance(pet);this.mountRig.appearance(mount);
   }
 
+  /** Attach the rendered hero to the mount's saddle, while physics and camera remain world-space. */
+  private syncRider():void {
+    const rider=this.hero.rig.root;
+    if(this.hero.mounted&&this.hero.alive){
+      if(rider.parent!==this.mountRig.saddle)this.mountRig.saddle.add(rider);
+      // Rig pivot starts at the feet. Offset its hips onto the saddle.
+      rider.position.set(0,-.75,0);
+      this.mountRig.root.getWorldScale(this.mountScale);
+      rider.scale.set(
+        this.riderOriginalScale.x/Math.max(.001,this.mountScale.x),
+        this.riderOriginalScale.y/Math.max(.001,this.mountScale.y),
+        this.riderOriginalScale.z/Math.max(.001,this.mountScale.z),
+      );
+    }else if(rider.parent!==this.hero.model){
+      this.hero.model.add(rider);
+      rider.position.set(0,0,0);
+      rider.scale.copy(this.riderOriginalScale);
+    }
+  }
+
   toggleMount(): void {
     if (!this.hero.alive) return;
     if (!this.hero.mounted && ['climb', 'swim', 'dive', 'slide'].includes(this.hero.machine.state)) {
@@ -41,6 +64,10 @@ export class PetAndMountSystem {
     }
     this.hero.mounted = !this.hero.mounted;
     this.mount.visible = this.hero.mounted;
+    this.mount.position.copy(this.hero.position);
+    this.mount.position.y-=this.hero.radius;
+    this.mount.rotation.y=this.hero.model.rotation.y;
+    this.syncRider();
     this.events.emit('message', { text: this.hero.mounted ? 'Montaria invocada · velocidade aumentada' : 'Montaria dispensada', tone: 'info' });
   }
 
@@ -52,6 +79,7 @@ export class PetAndMountSystem {
       this.hero.mounted = false;
       this.mount.visible = false;
     }
+    this.syncRider();
     let target: Combatant | undefined;
     let nearest = 10;
     if (this.hero.alive) {
@@ -105,9 +133,15 @@ export class PetAndMountSystem {
       this.mount.position.y -= this.hero.radius;
       this.mount.rotation.y = this.hero.model.rotation.y;
       this.mountRig.update(dt, this.mountMoving, this.time);
+      this.syncRider();
     }
     this.lastMountPosition.copy(this.hero.position);
   }
 
-  dispose(): void { this.petRig.dispose();this.mountRig.dispose(); }
+  dispose(): void {
+    this.hero.mounted=false;
+    this.syncRider();
+    this.petRig.dispose();
+    this.mountRig.dispose();
+  }
 }

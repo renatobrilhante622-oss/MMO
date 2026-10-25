@@ -43,6 +43,25 @@ export class AnimatedGLB {
   tint(color:number,accent:number):void{this.baseColor.setHex(color);this.accent.setHex(accent);this.materials.forEach((m,i)=>{m.color.copy(i%2?this.accent:this.baseColor);});}
   play(state:string):void {const key=state==='run'?'run':state==='walk'?'walk':'idle';const action=this.actions.get(key)??this.actions.values().next().value;if(!action||action===this.active)return;action.reset().setEffectiveWeight(1).play();this.active?.crossFadeTo(action,.22,false);this.active=action;}
   attack():void{this.attackTime=.45;}
-  update(dt:number,speed:number):void{if(!this.ready||!this.root.visible)return;this.play(speed>.65?'run':speed>.05?'walk':'idle');if(this.active)this.active.timeScale=speed>.05?Math.min(1.8,.8+speed*.5):1;this.mixer?.update(Math.min(.05,dt));if(this.attackTime>0){this.attackTime=Math.max(0,this.attackTime-dt);if(this.arm)this.arm.rotation.x-=Math.sin(this.attackTime/.45*Math.PI)*1.4;}}
+  /** Apply the riding pose after AnimationMixer so walk/run clips never overwrite seated legs. */
+  update(dt:number,speed:number,riding=false):void{
+    if(!this.ready||!this.root.visible)return;
+    this.play(riding?'idle':speed>.65?'run':speed>.05?'walk':'idle');
+    if(this.active)this.active.timeScale=riding?1:speed>.05?Math.min(1.8,.8+speed*.5):1;
+    this.mixer?.update(Math.min(.05,Math.max(0,dt)));
+    if(riding&&this.model){
+      this.model.traverse(bone=>{
+        const name=bone.name.toLowerCase().replace(/[^a-z]/g,'');
+        if(name.endsWith('leftupleg')||name.endsWith('rightupleg'))bone.rotation.x=-.98;
+        else if(name.endsWith('leftleg')||name.endsWith('rightleg'))bone.rotation.x=1.38;
+        else if(name.endsWith('leftfoot')||name.endsWith('rightfoot'))bone.rotation.x=-.32;
+        else if(name.endsWith('spine')||name.endsWith('spine1'))bone.rotation.x=.08;
+      });
+    }
+    if(this.attackTime>0){
+      this.attackTime=Math.max(0,this.attackTime-dt);
+      if(this.arm)this.arm.rotation.x-=Math.sin(this.attackTime/.45*Math.PI)*1.4;
+    }
+  }
   dispose():void{this.disposed=true;this.mixer?.stopAllAction();if(this.model)this.mixer?.uncacheRoot(this.model);this.materials.forEach(m=>m.dispose());this.materials.length=0;this.root.removeFromParent();this.root.clear();}
 }

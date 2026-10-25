@@ -522,7 +522,7 @@ export class Engine {
       input.move={x:0,y:0};input.attack=false;input.skill=null;return;
     }
     if(p.waypoint){this.gpsTimer-=dt;if(this.gpsTimer<=0){this.gpsTimer=3;this.setWaypoint(p.waypoint);}}
-    const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},this.enemies.enemies.filter(e=>regionAt(e.position.x,e.position.z).id===region.id),this.drops,dt);
+    const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},this.enemies.enemies.filter(e=>e.alive&&e.hp>0&&!e.boss),this.drops,dt);
     if(decision.stop)p.autoFarm=false;
     if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active){this.autoTarget='';this.autoRoute=[];return;}
     if(decision.healthPotion)this.usePotion('health');
@@ -540,10 +540,9 @@ export class Engine {
       if(this.autoTimer<=0){this.autoTimer=1;this.autoRoute=route(this.terrain,hero.position,destination);}
       while(this.autoRoute.length&&Math.hypot(this.autoRoute[0].x-hero.position.x,this.autoRoute[0].z-hero.position.z)<1.4)this.autoRoute.shift();
       if(this.autoRoute.length)input.move=hero.inputToward(this.autoRoute[0]);
-      else if(distance<=4)input.move=hero.inputToward(destination);
-      else{this.farmController.avoidTarget(navigationKey);this.autoTarget='';}
+      else input.move=hero.inputToward(destination);
     }else if(target){
-      hero.facing.set(target.position.x-hero.position.x,0,target.position.z-hero.position.z).normalize();input.attack=true;
+      hero.aimAt(new Vector3(target.position.x,hero.position.y,target.position.z),0);hero.facing.set(target.position.x-hero.position.x,0,target.position.z-hero.position.z).normalize();input.attack=true;
       const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);
       if(skill>=0)input.skill=skill;
     }
@@ -666,7 +665,7 @@ export class Engine {
   private installShadows(): void {
     this.scene.traverse(object => {
       if (!(object instanceof Mesh)) return;
-      let parent=object.parent,hero=false;while(parent){if(parent===this.hero.model){hero=true;break;}parent=parent.parent;}
+      let parent=object.parent,hero=false;while(parent){if(parent===this.hero.model||parent===this.hero.rig.root){hero=true;break;}parent=parent.parent;}
       const building=object.name==='Batched village architecture'||object.userData.majorBuilding===true;
       object.castShadow=(hero&&!object.name.includes('alpha wing'))||building;
       if(!object.receiveShadow&&!object.castShadow)return;
