@@ -89,6 +89,14 @@
       "bytes": 29740,
       "license": "CC0-1.0",
       "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_crystal.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/tower-defense-kit/detail-crystal-large.glb",
+      "sourceBlobSha1": "33695154359ab122ea568d4a0a83d083ea197543",
+      "bytes": 56644,
+      "license": "CC0-1.0",
+      "author": "Kenney"
     }
   ]
 }
