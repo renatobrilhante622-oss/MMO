@@ -4,7 +4,7 @@ import {
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
-import {AnimatedGLB} from '../assets/AnimatedGLB';
+import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
 import {WingsSystem} from '../companions/WingsSystem';
 import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
@@ -152,7 +152,7 @@ export class ArticulatedCharacter {
   readonly accent: MeshStandardMaterial;
   readonly cape: CapeCloth;
   readonly wings=new WingsSystem();
-  private readonly imported?:AnimatedGLB;
+  private imported?:AnimatedGLB;
   private importedArmor?:Mesh;
   private importedHelmet?:Mesh;
   private importedShoulders:Mesh[]=[];
@@ -220,7 +220,9 @@ export class ArticulatedCharacter {
     this.casterRobe=new Mesh(robeGeometry,cloth);this.casterRobe.name='Tailored caster robe';this.casterRobe.castShadow=this.casterRobe.receiveShadow=true;this.pelvis.add(this.casterRobe);this.styleSilhouette(definition);
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
-    this.imported=new AnimatedGLB('Soldier',1.9,()=>{this.pelvis.visible=false;this.attachImportedGear();this.styleSilhouette(this.definition);},true);this.root.add(this.imported.root);
+    // Browser rendering uses real, animated KayKit GLBs rather than the test-only legacy mesh rig.
+    this.pelvis.visible = typeof document === 'undefined';
+    this.replaceImportedModel(definition);
   }
 
   private material(color: number, metalness: number, roughness: number): MeshStandardMaterial {
@@ -364,6 +366,31 @@ export class ArticulatedCharacter {
     return { upper, lower, end };
   }
 
+  private importedName(definition:ClassDefinition):ModelName {
+    switch(definition.id){
+      case 'berserker': return 'KayKit_Barbarian';
+      case 'paladin': case 'lanceman': return 'KayKit_Knight';
+      case 'assassin': return 'KayKit_Rogue';
+      case 'ranger': return 'KayKit_Rogue_Hooded';
+      case 'elementalist': case 'necromancer': case 'warlock': return 'KayKit_Mage';
+      case 'monk': return 'KayKit_Barbarian';
+    }
+  }
+
+  private replaceImportedModel(definition:ClassDefinition):void {
+    const name=this.importedName(definition);
+    if(this.imported?.name===name)return;
+    this.imported?.dispose();
+    const actor = new AnimatedGLB(name, 1.9, () => {
+      if (this.imported !== actor) return;
+      this.pelvis.visible = false;
+      this.attachImportedGear();
+      this.styleSilhouette(this.definition);
+    }, true);
+    this.imported=actor;
+    this.root.add(actor.root);
+  }
+
   private attachImportedGear():void {
     if(!this.imported?.ready)return;
     this.imported.attachAt('righthand',this.weapons.right);this.imported.attachAt('lefthand',this.weapons.left);
@@ -387,7 +414,8 @@ export class ArticulatedCharacter {
     if(id===this.skinKey)return;this.skinKey=id;
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
-    if(id==='traveler')return;
+    // Runtime cosmetic VFX stay shader/particle-based; no sculpted mesh horns or spheres.
+    if(typeof document!=='undefined'||id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
     for(const side of [-1,1])for(let i=0;i<Math.max(2,rarity+1);i++){
       const horn=new Mesh(new CapsuleGeometry(.035,.13+i*.025,4,10),mat);horn.frustumCulled=false;horn.position.set(side*(.29+i*.035),.1+i*.04,-.03);horn.rotation.z=-side*(.6+i*.18);this.skinGeometry.add(horn);
@@ -408,6 +436,7 @@ export class ArticulatedCharacter {
     this.weapons = new WeaponForge(definition);
     this.rightArm.end.add(this.weapons.right);
     this.leftArm.end.add(this.weapons.left);
+    this.replaceImportedModel(definition);
     this.styleSilhouette(definition);
     this.attachImportedGear();this.attackClock = 0;
   }
@@ -621,7 +650,8 @@ export class ArticulatedCharacter {
   }
 
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
-    dt = MathUtils.clamp(dt, 0, .05);this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted');
+    dt = MathUtils.clamp(dt, 0, .05);
+    this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted');
     const angularDelta = Math.atan2(Math.sin(heading - this.lastHeading), Math.cos(heading - this.lastHeading));
     this.lastHeading = heading;
     this.turning = MathUtils.damp(this.turning, angularDelta / Math.max(dt, .001), 5, dt);
