@@ -37,6 +37,8 @@ describe('PR10 cinematic, HUD isolation and nine exclusive classes',()=>{
    {model:'quiver',bone:'spine2',offset:[0,0,-.16]}
   ]);
   expect(CLASS_EQUIPMENT_MODELS.monk).toEqual([]);
+  expect(CLASS_EQUIPMENT_MODELS.elementalist.map(x=>x.model)).toEqual(['staff','spellbook_open']);
+  expect(CLASS_EQUIPMENT_MODELS.necromancer.map(x=>x.model)).toEqual(['staff','spellbook_closed']);
   expect(CLASS_EQUIPMENT_MODELS.lanceman[0].model).toBe('spear');
   expect(CLASS_EQUIPMENT_MODELS.paladin.map(g=>g.model)).toEqual(['sword_1handed','shield_round']);
   for(const [id,gear]of Object.entries(CLASS_EQUIPMENT_MODELS)){
