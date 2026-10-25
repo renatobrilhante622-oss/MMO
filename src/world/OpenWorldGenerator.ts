@@ -9,7 +9,7 @@ import { WorldLife } from './WorldLife';
 export interface WorldCollider {
   position: THREE.Vector3;
   size: THREE.Vector3;
-  type: 'solid' | 'climbable' | 'slide';
+  type: 'solid' | 'climbable' | 'slide' | 'gate';
 }
 
 export interface MapMarker { x: number; z: number; label: string; color: string }
