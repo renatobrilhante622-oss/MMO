@@ -570,8 +570,26 @@ export class Engine {
       case 'crystal-buy':ok=purchaseMerchant(p,'crystals');break;
       case 'ticket-buy':ok=purchaseMerchant(p,'tickets');break;
       case 'slot-buy':ok=p.buySlot();break;
-      case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked());break;
-      case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.startChannel(dest.x,dest.z);this.hub.close();ok=true;}break;}
+      case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked(),this.mapInstances.regionId);break;
+      case 'teleport':{
+        const destination=p.bookmarks[data.index];
+        const destRegion=REGIONS.find(r=>r.id===destination?.region)??REGIONS[0];
+        const gate=travelPermission(destRegion.id,{
+          level:this.inventory.level,unlocked:p.unlockedRegions,
+          adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+          inDungeon:this.dungeon.active,channeling:!!this.channel,
+        });
+        if(!gate.ok)break;
+        const dest=p.destination(data.index,this.travelBlocked());
+        if(dest){
+          // Older save slots used shared-world coordinates; migrate only for
+          // cross-map journeys, while newly recorded local points remain exact.
+          const x=dest.x,z=dest.z;
+          this.startChannel(x,z,destRegion.id);
+          this.hub.close();ok=true;
+        }
+        break;
+      }
       case 'vip':ok=p.buyVip();break;
       case 'pass-buy':ok=p.buyPass();break;
       case 'mission':if(data.key==='daily'||data.key==='weekly'||data.key==='forest')ok=p.claimMission(data.key);break;
