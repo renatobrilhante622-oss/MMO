@@ -49,7 +49,8 @@ export class EnvironmentGLB {
   private disposed=false;
   private readonly meshes:InstancedMesh[]=[];
   private readonly materials=new Set<MeshStandardMaterial>();
-  constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number){
+  constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number,
+    private readonly activeRegion?:string){
     this.root.name='CC0 authored environment — instanced GLB scenery';
     scene.add(this.root);
     if(typeof document!=='undefined')void this.build();
@@ -58,6 +59,7 @@ export class EnvironmentGLB {
     for(let index=0;index<ASSETS.length;index++){
       if(this.disposed)return;
       const entry=ASSETS[index];
+      if(this.activeRegion&&entry.region!==this.activeRegion)continue;
       let gltf:GLTF;
       try{gltf=await model(entry.file);}
       catch(error){console.warn('Unable to load authored environment:',entry.file,error);continue;}
@@ -67,7 +69,7 @@ export class EnvironmentGLB {
       if(bounds.isEmpty())continue;
       const center=bounds.getCenter(new Vector3());
       const scale=entry.height/Math.max(.001,bounds.max.y-bounds.min.y);
-      const [cx,cz]=CENTERS[entry.region];
+      const [cx,cz]=this.activeRegion?[0,18]:CENTERS[entry.region];
       const rng=random(13021+index*973);
       const transforms:Matrix4[]=[];
       for(let n=0;n<entry.count;n++){
