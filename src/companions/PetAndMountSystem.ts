@@ -120,11 +120,12 @@ export class PetAndMountSystem {
       }
     }
     if (lootTarget && (!target || nearest > 4)) targetPosition.copy(lootTarget.position);
+    const mountClearance=this.hero.mounted?Math.max(2.4,this.mountRig.safeFootprintRadius+.45):0;
     if(this.hero.mounted){
       const relative=targetPosition.clone().sub(this.hero.position).setY(0);
-      if(relative.lengthSq()<2.4*2.4){
+      if(relative.lengthSq()<mountClearance*mountClearance){
         if(relative.lengthSq()<.0001)relative.copy(follow).sub(this.hero.position).setY(0);
-        targetPosition.copy(this.hero.position).add(relative.setLength(2.4));
+        targetPosition.copy(this.hero.position).add(relative.setLength(mountClearance));
       }
     }
     const offset = targetPosition.sub(this.pet.position);
@@ -140,9 +141,9 @@ export class PetAndMountSystem {
     if (this.pet.position.distanceTo(this.hero.position) > 38)this.pet.position.copy(follow);
     if(this.hero.mounted){
       const relative=this.pet.position.clone().sub(this.hero.position).setY(0);
-      if(relative.lengthSq()<2.35*2.35){
+      if(relative.lengthSq()<(mountClearance-.05)*(mountClearance-.05)){
         if(relative.lengthSq()<.0001)relative.copy(follow).sub(this.hero.position).setY(0);
-        this.pet.position.copy(this.hero.position).add(relative.setLength(2.35));
+        this.pet.position.copy(this.hero.position).add(relative.setLength(mountClearance-.05));
       }
     }
     this.pet.position.y = Math.max(this.physics.terrainHeight(this.pet.position.x, this.pet.position.z), this.physics.waterLevel - 0.28);
