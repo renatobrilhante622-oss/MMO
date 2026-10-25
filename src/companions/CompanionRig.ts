@@ -128,13 +128,13 @@ export class CompanionRig {
     if(this.appearanceId===c.id)return;this.batch?.dispose();this.batch=undefined;this.appearanceId=c.id;this.rarity=RARITIES.indexOf(c.rarity);
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
-    const bird=c.id==='phoenix',dragon=['wyvern','dracolich'].includes(c.id),giant=['fenrir','nighthorse'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
+    const bird=['phoenix','frostphoenix'].includes(c.id),dragon=['wyvern','dracolich','ashdrake'].includes(c.id),giant=['fenrir','nighthorse','obsidianwolf'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
     // Every in-game companion has an authored GLB silhouette. Variant effects
     // remain particles/shaders; no orange-cylinder wyvern appears during loading.
     const importedType=bird?'Parrot'
-      :c.id==='wyvern'?'Creature_wyvern'
+      :['wyvern','ashdrake'].includes(c.id)?'Creature_wyvern'
       :c.id==='dracolich'?'Creature_dragon'
-      :['fenrir','nighthorse','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf'].includes(c.id)?'Creature_wolf'
+      :['fenrir','nighthorse','obsidianwolf','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf','emberfox','ashwolf','stormhound'].includes(c.id)?'Creature_wolf'
       :this.horse?'Creature_horse':'Creature_wolf';
     if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
       if(importedType){const asset=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
@@ -151,7 +151,7 @@ export class CompanionRig {
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
     (this.aura.material as MeshStandardMaterial).emissive.setHex(c.color);this.aura.visible=this.rarity>=2;
-    this.flight.configure(bird?'celestial':dragon?(c.id==='wyvern'?'magma':'necrotic'):null,Math.min(10,3+this.rarity));
+    this.flight.configure(bird?(c.id==='frostphoenix'?'glacial':'celestial'):dragon?(['wyvern','ashdrake'].includes(c.id)?'magma':'necrotic'):null,Math.min(10,3+this.rarity));
     if(typeof document==='undefined'){
     if(stag)for(const side of [-1,1]){this.between(this.ornaments,new Vector3(side*.13,.2,-.1),new Vector3(side*.43,.9,-.25),.025,this.glow);for(let i=0;i<4;i++)this.between(this.ornaments,new Vector3(side*(.21+i*.08),.4+i*.17,-.16),new Vector3(side*(.37+i*.09),.58+i*.17,.02),.015,this.glow);}
     if(bird){const beak=this.mesh(this.ornaments,new ConeGeometry(.1,.35,8),this.glow,0,-.06,.42);beak.rotation.x=Math.PI/2;for(let i=0;i<5;i++){const feather=this.mesh(this.morph,new CapsuleGeometry(.045,.7,4,8),this.glow,(i-2)*.1,-.05,-.6);feather.rotation.x=-.6;feather.rotation.z=(i-2)*.2;}}
