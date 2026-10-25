@@ -55,6 +55,10 @@ export function dungeonColliders(height:(x:number,z:number)=>number):WorldCollid
  for(const z of [-86,-17]){
   result.push({position:new Vector3(0,height(0,z)+3,z),size:new Vector3(38,6,2),type:'solid'});
  }
+ for(const z of [-43,-62]){
+   result.push({position:new Vector3(0,height(0,z)+2.6,z),
+     size:new Vector3(35,5.2,1.6),type:'gate'});
+ }
  return result;
 }
 /** A bespoke, fully owned indoor scene graph using only source-authored GLB props. */
@@ -65,6 +69,9 @@ export class DungeonInstance {
  private readonly lights:PointLight[]=[];
  private disposed=false;
  private readonly gateNodes:Group[]=[];
+ private readonly gateBatches:InstancedMesh[]=[];
+ private readonly originalGateMatrices=new Map<InstancedMesh,Matrix4[]>();
+ private lastGateState='';
  private chest?:Group;
  private readonly crystalStates=[-7,0,7].map(x=>({
    position:new Vector3(x,3.4,-50),hp:100,model:undefined as Group|undefined,
@@ -141,6 +148,10 @@ export class DungeonInstance {
     batch.instanceMatrix.needsUpdate=true;
     batch.computeBoundingSphere();
     group.add(batch);this.visualMeshes.push(batch);
+    if(plan.name==='gate'){
+      this.gateBatches.push(batch);
+      this.originalGateMatrices.set(batch,placements.map(matrix=>matrix.clone().multiply(object.matrixWorld)));
+    }
    });
    this.root.add(group);
    if(plan.name==='gate')this.gateNodes.push(group);
@@ -173,9 +184,17 @@ export class DungeonInstance {
  update(dt:number,wave:number,waves:number,completed:boolean):void{
   this.elapsed+=Math.max(0,dt);
   this.strikeCooldown=Math.max(0,this.strikeCooldown-Math.max(0,dt));
-  for(let i=0;i<this.gateNodes.length;i++){
-    // The authored gate art vanishes when its corresponding room is cleared.
-    this.gateNodes[i].visible=wave<=i+1&&!completed;
+  const state=(wave>Math.ceil(waves/2)||completed?'1':'0')+
+    (wave>waves&&this.crystalsRemaining===0||completed?'1':'0');
+  if(state!==this.lastGateState){
+    this.lastGateState=state;
+    for(const batch of this.gateBatches){
+      const originals=this.originalGateMatrices.get(batch)!;
+      for(let i=0;i<Math.min(2,batch.count);i++){
+        batch.setMatrixAt(i,state[i]==='1'?new Matrix4().makeScale(0,0,0):originals[i]);
+      }
+      batch.instanceMatrix.needsUpdate=true;batch.computeBoundingSphere();
+    }
   }
   if(this.chest)this.chest.visible=completed;
   for(let i=0;i<this.lights.length;i++){
