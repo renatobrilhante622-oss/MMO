@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: android-latest-apk
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,6 +39,7 @@ jobs:
           rm -rf dist android/app/src/main/assets/public android/app/build
           rm -f public/*.apk releases/*.apk *.apk
           npm install --legacy-peer-deps
+          npm test
           npm run build
           if [ ! -d "android" ]; then
             npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev --legacy-peer-deps
@@ -63,5 +71,24 @@ jobs:
       - name: Upload APK Ready to Download
         uses: actions/upload-artifact@v4
         with:
-          name: EternalHero-MMO-vNovo-APK
+          name: ETERNA-Android-Debug-APK
           path: apk-output/EternalHero-MMO-vNovo.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish latest-apk Release (one-click Android download)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          cp apk-output/EternalHero-MMO-vNovo.apk apk-output/ETERNA-Android-latest.apk
+          git tag --force latest-apk "${GITHUB_SHA}"
+          git push origin refs/tags/latest-apk --force
+          if gh release view latest-apk >/dev/null 2>&1; then
+            gh release edit latest-apk --title "ETERNA • APK Android atualizado" --notes "Build automático da main. Commit: ${GITHUB_SHA}. APK DEBUG de testes; não é a versão assinada para lojas."
+          else
+            gh release create latest-apk --title "ETERNA • APK Android atualizado" --notes "Build automático da main. Commit: ${GITHUB_SHA}. APK DEBUG de testes; não é a versão assinada para lojas." --prerelease
+          fi
+          gh release upload latest-apk apk-output/ETERNA-Android-latest.apk --clobber
