@@ -50,7 +50,10 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   }
   const gltf=await promise;
   const model=clone(gltf.scene);
-  model.name='KayKit weapon '+name;
+  model.name='Author-authored CC0 weapon '+name;
+  // Mini Forest bow is modeled at 0.48m. Scale it to a readable 1.56m
+  // ranger longbow before applying inverse scaling for the hand bone.
+  if(name==='longbow')model.scale.multiplyScalar(3.25);
   model.traverse(object=>{
     if(object instanceof Mesh){
       object.frustumCulled=false;
