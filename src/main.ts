@@ -12,6 +12,7 @@ import './ui/intro.css';
 import './ui/region-travel.css';
 import './ui/quest-npc.css';
 import './ui/part2-forge-collection.css';
+import './ui/part2-hud-npc.css';
 import './ui/physical-portals.css';
 import './ui/dungeon-audit.css';
 
