@@ -2,7 +2,7 @@ import { Group, MathUtils, PerspectiveCamera, Scene, Vector3 } from 'three';
 import type { Body } from 'cannon-es';
 import { EventBus, type CharacterStats, type ClassDefinition, type Combatant, type HeroInput } from '../core/GameTypes';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
-import { HeroStateMachine } from './HeroStateMachine';
+import { DASH_DISTANCE, DASH_DURATION, HeroStateMachine } from './HeroStateMachine';
 import { ArticulatedCharacter } from './ArticulatedCharacter';
 
 export class HeroController implements Combatant {
@@ -34,6 +34,10 @@ export class HeroController implements Combatant {
   private moveDirection = new Vector3();
   private impulse = new Vector3();
   private dashDirection = new Vector3(0, 0, -1);
+  private dashElapsed = 0;
+  private dashActive = false;
+  private dashWasPressed = false;
+  private resetVelocityAfterDash = false;
   private surface: ReturnType<PhysicsWorld['surfaceAt']>;
   private disposers: Array<() => void> = [];
 
@@ -117,6 +121,7 @@ export class HeroController implements Combatant {
       this.body.velocity.y += knockback.y;
     }
     if (!this.alive) {
+      this.cancelDash();
       this.machine.transition('dead');
       this.mounted = false;
       this.events.emit('message', { text: 'Você caiu. Renasça na vila para continuar a jornada.', tone: 'warning' });
@@ -125,6 +130,8 @@ export class HeroController implements Combatant {
   }
 
   respawn(point: Vector3): void {
+    this.cancelDash();
+    this.dashWasPressed = false;
     const center = point.clone();
     center.y = Math.max(center.y, this.physics.terrainHeight(point.x, point.z) + this.radius + 0.2);
     this.body.position.set(center.x, center.y, center.z);
@@ -147,6 +154,7 @@ export class HeroController implements Combatant {
   }
   teleportTo(point:Vector3):void {
     if(!this.alive)return;
+    this.cancelDash();
     this.body.position.set(point.x,point.y,point.z);this.body.previousPosition.copy(this.body.position);this.body.interpolatedPosition.copy(this.body.position);this.body.velocity.setZero();this.body.angularVelocity.setZero();this.position.copy(point);this.body.aabbNeedsUpdate=true;this.body.wakeUp();this.mounted=false;this.cameraInitialized=false;
   }
   setAppearance(color:number,refine:number,weaponColor=color,rarity:string='common'):void {
@@ -156,12 +164,25 @@ export class HeroController implements Combatant {
 
   aimAt(point:Vector3,lunge:number):void {
     this.aimPoint.copy(point);this.aimTime=.4;
-    if(lunge>0&&lunge<2&&this.machine.state!=='swim'&&this.machine.state!=='climb'){
+    if(lunge>0&&lunge<2&&!this.dashActive&&this.machine.state!=='swim'&&this.machine.state!=='dive'&&this.machine.state!=='climb'){
       const d=point.clone().sub(this.position).setY(0).normalize();this.impulse.addScaledVector(d,Math.min(3,lunge*2));
     }
   }
+  /** Clear dash velocity when interrupted by teleport, death or mounting. */
+  private cancelDash(): void {
+    const active = this.dashActive || this.machine.state === 'slide';
+    this.dashActive = false;
+    this.dashElapsed = 0;
+    this.resetVelocityAfterDash = false;
+    if (active) {
+      this.body.velocity.x = 0;
+      this.body.velocity.z = 0;
+      if (this.machine.state === 'slide') this.machine.transition('idle');
+    }
+  }
+
   update(dt: number, input: HeroInput): void {
-    dt = Math.max(0, Math.min(dt, 0.05));
+    dt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
     this.time += dt;
     this.hurtTime = Math.max(0, this.hurtTime - dt);
     this.position.set(this.body.position.x, this.body.position.y, this.body.position.z);
@@ -191,8 +212,16 @@ export class HeroController implements Combatant {
         this.body.velocity.y = this.machine.jumpCount === 2 ? 7.8 : 8.4;
         if (this.surface.canClimb) this.impulse.addScaledVector(this.surface.wallNormal, 4.5);
       }
-      if (input.dash && this.machine.tryDash()) {
-        this.dashDirection.copy(movementLength > 0.08 ? this.moveDirection : this.facing).normalize();
+      const dashPressed = input.dash && !this.dashWasPressed;
+      this.dashWasPressed = input.dash;
+      if (dashPressed && !this.dashActive && !this.surface.inWater && this.machine.tryDash()) {
+        this.dashDirection.copy(movementLength > 0.08 ? this.moveDirection : this.facing).setY(0);
+        if (this.dashDirection.lengthSq() < 0.0001) this.dashDirection.copy(forward);
+        this.dashDirection.normalize();
+        this.dashElapsed = 0;
+        this.dashActive = true;
+        this.impulse.x = 0;
+        this.impulse.z = 0;
       }
       let speed = this.stats.speed * (this.mounted ? 1.85+this.mountSpeedBoost : 1);
       if (this.machine.state === 'swim' || this.machine.state === 'dive') {
@@ -206,18 +235,47 @@ export class HeroController implements Combatant {
         this.body.velocity.x = -this.surface.wallNormal.x * 1.2;
         this.body.velocity.z = -this.surface.wallNormal.z * 1.2;
       }
-      if (this.machine.state === 'slide') {
-        speed *= this.surface.onSlide ? 3.8 : 3.1;
-        this.moveDirection.copy(this.dashDirection);
+      if (this.dashActive && (this.mounted || this.surface.inWater || this.machine.state === 'climb')) {
+        this.cancelDash();
       }
-      if (this.machine.state !== 'climb') {
-        const blend = 1 - Math.exp(-dt * (this.surface.grounded ? 18 : 7));
-        this.body.velocity.x = MathUtils.lerp(this.body.velocity.x, this.moveDirection.x * speed + this.impulse.x, blend);
-        this.body.velocity.z = MathUtils.lerp(this.body.velocity.z, this.moveDirection.z * speed + this.impulse.z, blend);
+      const dashStep = this.dashActive ? Math.min(dt, Math.max(0, DASH_DURATION - this.dashElapsed)) : 0;
+      if (dashStep > 0 && dt > 0) {
+        const before = this.dashElapsed / DASH_DURATION;
+        const after = (this.dashElapsed + dashStep) / DASH_DURATION;
+        const smooth = (t: number) => t * t * (3 - 2 * t);
+        const metres = DASH_DISTANCE * (smooth(after) - smooth(before));
+        const ordinaryFraction = 1 - dashStep / dt;
+        this.body.velocity.x = this.dashDirection.x * metres / dt + this.moveDirection.x * speed * ordinaryFraction;
+        this.body.velocity.z = this.dashDirection.z * metres / dt + this.moveDirection.z * speed * ordinaryFraction;
+        this.dashElapsed += dashStep;
+        this.impulse.x = 0;
+        this.impulse.z = 0;
+        if (this.dashElapsed >= DASH_DURATION - 0.000001) {
+          this.dashActive = false;
+          this.resetVelocityAfterDash = true;
+          if (this.machine.state === 'slide') {
+            this.machine.transition(this.surface.grounded ? (movementLength > 0.08 ? 'run' : 'idle') : 'fall');
+          }
+        }
+      } else if (this.machine.state !== 'climb') {
+        const desiredX = this.moveDirection.x * speed + this.impulse.x;
+        const desiredZ = this.moveDirection.z * speed + this.impulse.z;
+        if (this.resetVelocityAfterDash) {
+          this.body.velocity.x = desiredX;
+          this.body.velocity.z = desiredZ;
+          this.resetVelocityAfterDash = false;
+        } else {
+          const blend = 1 - Math.exp(-dt * (this.surface.grounded ? 18 : 7));
+          this.body.velocity.x = MathUtils.lerp(this.body.velocity.x, desiredX, blend);
+          this.body.velocity.z = MathUtils.lerp(this.body.velocity.z, desiredZ, blend);
+        }
       }
       this.impulse.multiplyScalar(Math.exp(-dt * 5));
-      if (movementLength > 0.08 || this.machine.state === 'slide') this.facing.lerp(this.moveDirection.clone().normalize(), 1 - Math.exp(-dt * 16)).normalize();
+      if (this.dashActive || dashStep > 0) this.facing.lerp(this.dashDirection, 1 - Math.exp(-dt * 16)).normalize();
+      else if (movementLength > 0.08) this.facing.lerp(this.moveDirection.clone().normalize(), 1 - Math.exp(-dt * 16)).normalize();
     } else {
+      this.dashWasPressed = input.dash;
+      this.cancelDash();
       this.body.velocity.x *= Math.exp(-dt * 8);
       this.body.velocity.z *= Math.exp(-dt * 8);
     }
