@@ -7,6 +7,8 @@ import {WEAPON_PACKS,WEAPON_PACK_RARITIES,weaponPackForClass} from '../src/rpg/W
 import {COSMETICS} from '../src/progression/AdventureProgress';
 import {CLASS_IDS} from '../src/combat/ClassSystem';
 import {CLASS_EQUIPMENT_MODELS} from '../src/assets/WeaponGLB';
+import {InventoryAndLoot,WEAPON_PACK_ITEM_TEMPLATES} from '../src/rpg/InventoryAndLoot';
+import {EventBus} from '../src/core/GameTypes';
 
 describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapons',()=>{
  it('uses loaded GLB Box3 at exactly 78% to place the real saddle, not the old fixed height',()=>{
@@ -84,6 +86,43 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
      expect(bytes.readUInt32LE(8)).toBe(bytes.length);
      const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString('utf8'));
      expect(gltf.meshes.length).toBeGreaterThan(0);
+   }
+ });
+ it('makes themed weapon packs real loot with upgradable stats and validated persistence',()=>{
+   expect(WEAPON_PACK_ITEM_TEMPLATES).toHaveLength(45);
+   const inv=new InventoryAndLoot(new EventBus(),1234);
+   let found=0;
+   for(let i=0;i<1000;i++){
+     const drop=inv.generateLoot('boss',100,true);
+     if(drop.item?.visualId){
+       found++;
+       expect(WEAPON_PACK_ITEM_TEMPLATES.some(item=>item.visualId===drop.item!.visualId)).toBe(true);
+       if(found===1){
+         inv.addLoot({...drop,position:new Vector3()});
+         const owned=inv.items.find(item=>item.visualId===drop.item!.visualId);
+         expect(owned).toBeDefined();
+         if(owned){
+           inv.gold=100000;inv.crystals=100000;
+           const old=owned.attack;
+           expect(inv.upgrade(owned.id)).toBe(true);
+           expect(owned.attack).toBeGreaterThan(old);
+           const saved=inv.snapshot();
+           const restored=new InventoryAndLoot(new EventBus(),1234);
+           restored.restore(saved);
+           expect(restored.items.find(item=>item.id===owned.id)?.visualId).toBe(owned.visualId);
+         }
+       }
+     }
+   }
+   expect(found).toBeGreaterThan(4);
+ });
+ it('adds real cosmetic skins, pets and mount silhouettes to the Collection',()=>{
+   for(const id of ['verdant-warden','cinder-knight','astral-emperor','celestial-king',
+     'emberfox','ashwolf','stormhound','frostphoenix',
+     'magmahorse','obsidianwolf','ashdrake','lunarhorse']){
+      const cosmetic=COSMETICS.find(item=>item.id===id);
+      expect(cosmetic,id).toBeDefined();
+      expect(cosmetic?.rarity).toBeDefined();
    }
  });
  it('wires class weapons and skins to both actual hero and Collection 3D preview',()=>{
