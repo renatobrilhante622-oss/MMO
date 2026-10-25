@@ -117,6 +117,7 @@ export class Engine {
   private appearanceKey = '';
 
   readonly drops: LootDrop[] = [];
+  private readonly collectedRegionalLootIds=new Set<string>();
   readonly sound = new SoundEngine();
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
@@ -377,7 +378,10 @@ export class Engine {
       this.sound.coin();
       this.inventory.addLoot(drop);
       // Grant regional resources only when the real world drop reaches the pickup event.
-      if(this.drops.some(candidate=>candidate.id===drop.id)&&drop.regionalMaterial){
+      if(drop.regionalMaterial&&!this.collectedRegionalLootIds.has(drop.id)){
+        this.collectedRegionalLootIds.add(drop.id);
+        if(this.collectedRegionalLootIds.size>4096)
+          this.collectedRegionalLootIds.delete(this.collectedRegionalLootIds.values().next().value!);
         if(this.progress.collectRegionalMaterial(drop.regionalMaterial.id,drop.regionalMaterial.quantity))
           this.hud.notify('✦ '+drop.regionalMaterial.name+' ×'+drop.regionalMaterial.quantity,'success');
       }
