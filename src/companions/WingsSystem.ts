@@ -20,10 +20,12 @@ export class WingsSystem {
     material.onBeforeCompile=shader=>{shader.uniforms.wingTime=this.time;shader.vertexShader='uniform float wingTime;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
       transformed.z+=sin(wingTime*2.6+position.x*3.8+position.y*2.)*abs(position.x)*.065;`);};material.customProgramCacheKey=()=> 'alpha-wing-wind-v1';
     const geometry=this.geometry=new PlaneGeometry(1,1,10+level*2,6+level),pos=geometry.attributes.position;
-    const span=.65+level*.07;
+    const span=Math.min(.94,.58+level*.035);
     for(let i=0;i<pos.count;i++){const u=pos.getX(i)+.5,v=pos.getY(i)+.5;pos.setXYZ(i,u*span*1.8,(v-.4)*span*1.7+Math.sin(u*Math.PI)*.12,-Math.sin(u*Math.PI)*.24);}geometry.computeVertexNormals();geometry.computeBoundingSphere();
-    for(const side of [-1,1]){const pivot=new Group();pivot.userData.side=side;pivot.scale.x=side;pivot.position.x=side*.08;const mesh=new Mesh(geometry,material);mesh.name='Curved '+style+' alpha wing';mesh.frustumCulled=false;mesh.castShadow=false;mesh.receiveShadow=false;pivot.add(mesh);this.assembly.add(pivot);}
+    for(const side of [-1,1]){const pivot=new Group();pivot.userData.side=side;pivot.scale.x=side;pivot.position.x=side*.06;const mesh=new Mesh(geometry,material);mesh.name='Curved '+style+' alpha wing';mesh.frustumCulled=false;mesh.castShadow=false;mesh.receiveShadow=false;pivot.add(mesh);this.assembly.add(pivot);}
     this.aura.configure(Math.min(5,2+Math.floor(level/3)),color);
+    this.aura.position.set(0,.05,-.18);
+    this.aura.scale.setScalar(.52);
   }
   update(dt:number,time:number,moving:number):void {if(!this.root.visible)return;this.time.value=time;for(const p of this.assembly.children){const side=p.userData.side as number;p.rotation.y=MathUtils.damp(p.rotation.y,side*(.2+Math.sin(time*(1.8+moving*.3))*.12),7,dt);p.rotation.z=side*Math.sin(time*2)*.035;}this.aura.update(time);}
   private clear():void{this.geometry?.dispose();this.material?.dispose();this.texture?.dispose();this.geometry=undefined;this.material=undefined;this.texture=undefined;this.assembly.clear();}
