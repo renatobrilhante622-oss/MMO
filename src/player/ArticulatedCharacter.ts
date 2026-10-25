@@ -1,10 +1,11 @@
 import {
   BufferGeometry, CapsuleGeometry, ConeGeometry, DoubleSide,
-  Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, PlaneGeometry, SphereGeometry, Vector2,
+  Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, SphereGeometry, Vector2,
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
 import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
+import { CLASS_EQUIPMENT_MODELS, loadWeaponModel } from '../assets/WeaponGLB';
 import {WingsSystem} from '../companions/WingsSystem';
 import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
@@ -153,6 +154,8 @@ export class ArticulatedCharacter {
   readonly cape: CapeCloth;
   readonly wings=new WingsSystem();
   private imported?:AnimatedGLB;
+  private readonly glbWeapons:Object3D[]=[];
+  private glbWeaponGeneration=0;
   private importedArmor?:Mesh;
   private importedHelmet?:Mesh;
   private importedShoulders:Mesh[]=[];
@@ -380,6 +383,7 @@ export class ArticulatedCharacter {
   private replaceImportedModel(definition:ClassDefinition):void {
     const name=this.importedName(definition);
     if(this.imported?.name===name)return;
+    this.clearGlbWeapons();
     this.imported?.dispose();
     const actor = new AnimatedGLB(name, 1.9, () => {
       if (this.imported !== actor) return;
@@ -391,22 +395,43 @@ export class ArticulatedCharacter {
     this.root.add(actor.root);
   }
 
-  private attachImportedGear():void {
-    if(!this.imported?.ready)return;
-    this.imported.attachAt('righthand',this.weapons.right);this.imported.attachAt('lefthand',this.weapons.left);
-    this.imported.attachAt('head',this.hood,new Vector3(0,.06,0));
-    this.importedHelmet??=this.head.getObjectByName('Metal helmet') as Mesh|undefined;
-    this.importedArmor??=this.torso.getObjectByName('Organic fitted cuirass') as Mesh|undefined;
-    if(this.importedHelmet)this.imported.attachAt('head',this.importedHelmet,new Vector3(0,.08,0));
-    if(this.importedArmor)this.imported.attachAt('spine2',this.importedArmor,new Vector3(0,-.04,0));
-    if(!this.importedShoulders.length)for(const arm of [this.leftArm,this.rightArm]){const plate=arm.upper.children.find(o=>o instanceof Mesh&&o.material===this.armor&&o.geometry.type==='SphereGeometry') as Mesh|undefined;if(plate)this.importedShoulders.push(plate);}
-    this.importedShoulders.forEach((plate,i)=>this.imported!.attachAt(i?'rightarm':'leftarm',plate));
-    this.root.add(this.wings.root,this.casterRobe,this.cape.mesh,this.casterOrbs,this.skinGeometry);
-    this.wings.root.position.set(0,1.3,-.16);this.casterRobe.position.y=.83;this.cape.mesh.position.set(0,1.5,-.2);this.casterOrbs.position.y=.8;this.skinGeometry.position.y=1.3;
+  private clearGlbWeapons():void {
+    this.glbWeaponGeneration++;
+    for(const model of this.glbWeapons)model.removeFromParent();
+    this.glbWeapons.length=0;
   }
+
+  private attachImportedGear():void {
+    const actor=this.imported;
+    if(!actor?.ready)return;
+    if(typeof document==='undefined')return;
+    // Browser gameplay never renders generated helmet, cuirass or weapon primitives.
+    this.pelvis.visible=false;
+    this.weapons.right.visible=false;
+    this.weapons.left.visible=false;
+    this.root.add(this.wings.root,this.skinAura);
+    this.wings.root.position.set(0,1.3,-.16);
+    this.skinAura.position.y=1.3;
+    this.clearGlbWeapons();
+    const version=this.glbWeaponGeneration;
+    for(const gear of CLASS_EQUIPMENT_MODELS[this.definition.id]){
+      void loadWeaponModel(gear.model).then(model=>{
+        if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
+        const offset=gear.offset??[0,0,0];
+        if(actor.attachAt(gear.bone,model,new Vector3(...offset)))this.glbWeapons.push(model);
+        else console.warn('KayKit skeleton missing attachment socket:',gear.bone,actor.name);
+      }).catch(error=>console.warn('Cannot load KayKit weapon:',gear.model,error));
+    }
+  }
+
   private styleSilhouette(definition:ClassDefinition):void {
     const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.importedHelmet??this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
+    if(typeof document!=='undefined'){
+      this.casterRobe.visible=false;
+      this.hood.visible=false;
+      this.skinGeometry.visible=false;
+    }
     this.imported?.tint(caster?0x353242:0x3c4c5a,definition.color);this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
   }
@@ -676,12 +701,13 @@ export class ArticulatedCharacter {
     this.armor.emissiveIntensity = hurt > 0 ? .5 + Math.sin(time * 60) * .2 : 0;
     this.torso.scale.set(1+Math.sin(time*2.2)*.008,1+Math.sin(time*2.2)*.012,1+Math.sin(time*2.2)*.018);this.casterOrbs.rotation.y=time*.7;
     this.cape.update(dt, time, movement, this.turning, state === 'swim' || state === 'dive');
-    this.weapons.update(dt, time, progress);
+    if(typeof document==='undefined')this.weapons.update(dt, time, progress);
     this.wings.update(dt,time,movement);this.skinAura.update(time);this.skinGeometry.rotation.y=Math.sin(time*.6)*.025;
   }
 
   dispose(): void {
-    if(this.imported?.ready){this.root.add(this.hood,...this.importedShoulders);if(this.importedArmor)this.root.add(this.importedArmor);if(this.importedHelmet)this.root.add(this.importedHelmet);}this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
+    this.clearGlbWeapons();
+    this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
     this.weapons.dispose();
     const geometries = new Set<BufferGeometry>();
     this.root.traverse(object => {
