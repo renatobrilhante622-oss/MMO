@@ -48,6 +48,8 @@ export interface Item {
 
 export interface LootDrop {
   id: string; position: Vector3; gold: number; crystals: number; xp: number; item?: Item;
+  /** Exclusive regional crafting material awarded on legitimate collection. */
+  regionalMaterial?:{id:string;name:string;region:string;quantity:number};
 }
 
 export interface GameEvents {
