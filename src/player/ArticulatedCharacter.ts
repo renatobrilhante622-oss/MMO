@@ -408,8 +408,14 @@ export class ArticulatedCharacter {
     this.pelvis.visible=false;
     this.weapons.right.visible=false;
     this.weapons.left.visible=false;
-    this.root.add(this.wings.root,this.skinAura);
-    this.wings.root.position.set(0,1.3,-.16);
+    this.root.add(this.skinAura);
+    // On the actual animated KayKit chest bone: follows shoulders while
+    // standing, attacking AND sitting on an independent mount saddle.
+    if(!actor.attachAt('spine2',this.wings.root,new Vector3(0,.025,-.20))){
+      // Safety for malformed GLB: back of actor, still no mount parenting.
+      this.root.add(this.wings.root);
+      this.wings.root.position.set(0,1.13,-.19);
+    }
     this.skinAura.position.y=1.3;
     actor.clearWeaponSlots();
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
