@@ -1,68 +1,39 @@
 #!/usr/bin/env node
+/** Reproducible, species-correct, CC0 imports. Immutable publisher CDN URLs. */
 import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-// Every source is an independently modeled CC0 3D asset: no model synthesis.
-const species=['wyvern','horse','wolf','slime','golem','hellhound','dragon'];
-const folder=resolve('public/models/creatures');
-await mkdir(folder,{recursive:true});
-const entries=[];
-function entriesOf(data){
- if(Array.isArray(data))return data;
- for(const key of ['assets','results','items','data','models','hits']){
-  if(Array.isArray(data?.[key]))return data[key];
-  if(Array.isArray(data?.[key]?.assets))return data[key].assets;
-  if(Array.isArray(data?.[key]?.items))return data[key].items;
- }
- return [];
+const SOURCES=[
+ {id:'wyvern',assetId:36715,slug:'dragons-and-wyverns-wyvern-wings-spread-a6d1b274',title:'Wyvern With Wings Spread',expectedAnimated:false},
+ {id:'horse',assetId:129,slug:'frontier-saddle-horse',title:'Frontier saddle horse',expectedAnimated:false},
+ {id:'wolf',assetId:32709,slug:'fps-survival-forest-outpost-creature-wolf-4be4d311',title:'Timber Wolf, Jointed',expectedAnimated:true},
+ {id:'slime',assetId:305,slug:'ember-quest-moss-slime',title:'Ember Quest moss slime',expectedAnimated:false},
+ {id:'golem',assetId:106,slug:'runestone-conservatory-stone-garden-golem',title:'Runestone Stone Garden Golem',expectedAnimated:false},
+ {id:'dragon',assetId:36695,slug:'dragons-and-wyverns-western-dragon-wings-spread-8d633362',title:'Western Dragon With Wings Spread',expectedAnimated:false},
+];
+const root=resolve('public/models/creatures');
+await mkdir(root,{recursive:true});
+const assets=[];
+for(const source of SOURCES){
+ const url='https://cdn.3dassets.dev/assets/'+source.assetId+'/v1/model.glb';
+ const response=await fetch(url,{signal:AbortSignal.timeout(90000)});
+ if(!response.ok)throw Error('Unable to retrieve '+source.id+': '+response.status);
+ const bytes=Buffer.from(await response.arrayBuffer());
+ if(bytes.length<512||bytes.length>12*1024*1024||bytes.toString('ascii',0,4)!=='glTF'
+    ||bytes.readUInt32LE(4)!==2||bytes.readUInt32LE(8)!==bytes.length)throw Error('Invalid glTF '+source.id);
+ const len=bytes.readUInt32LE(12);if(len>bytes.length-20)throw Error('Invalid GLB JSON length');
+ const parsed=JSON.parse(bytes.subarray(20,20+len).toString('utf8'));
+ if(!parsed.meshes?.length||parsed.buffers?.some(b=>b.uri)||parsed.images?.some(i=>i.uri))throw Error('Non-selfcontained GLB '+source.id);
+ if(source.expectedAnimated&&!parsed.animations?.length)throw Error('Animation missing: '+source.id);
+ const filename='Creature_'+source.id+'.glb';
+ await writeFile(resolve(root,filename),bytes);
+ assets.push({id:source.id,file:'models/creatures/'+filename,
+  source:'https://3dassets.dev/assets/'+source.slug,cdnUrl:url,
+  title:source.title,license:'CC0-1.0',sha256:createHash('sha256').update(bytes).digest('hex'),
+  size:bytes.length,meshCount:parsed.meshes.length,animationCount:parsed.animations?.length??0,
+  animated:!!parsed.animations?.length});
+ process.stdout.write('VERIFIED '+source.id+': '+bytes.length+' bytes, '+(parsed.animations?.length??0)+' clips\n');
 }
-async function json(url){
- const response=await fetch(url,{signal:AbortSignal.timeout(40000)});
- if(!response.ok)throw Error('HTTP '+response.status+' for '+url);
- return response.json();
-}
-for(const name of species){
- let candidates=[];
- for(const term of (name==='hellhound'?['hellhound','hell hound']:[name])){
-  try{
-   const data=await json('https://3dassets.dev/api/v1/assets?q='+encodeURIComponent(term)+'&limit=30');
-   const items=entriesOf(data);
-   console.log('RESULTS',term,items.length,JSON.stringify(items.slice(0,1)).slice(0,700));
-   candidates=candidates.concat(items);
-  }catch(error){console.warn('Search failed',term,String(error));}
- }
- const best=candidates.map(asset=>{
-  const title=String(asset.title??asset.name??asset.slug??'').toLowerCase();
-  const text=title+' '+String(asset.summary??asset.description??'').toLowerCase();
-  const valid=text.includes(name)||(name==='hellhound'&&text.includes('hell hound'));
-  const unwanted=/statue|toy|logo|icon|trophy|chess|skull/.test(title);
-  return {asset,score:(valid?30:0)+(title===name?40:0)+(title.startsWith(name+' ')?15:0)-(unwanted?90:0)};
- }).sort((a,b)=>b.score-a.score)[0];
- if(!best||best.score<1){console.warn('NO VALID SPECIES ASSET',name);continue;}
- const slug=String(best.asset.slug??best.asset.id??'');
- if(!slug){console.warn('NO SLUG',name);continue;}
- let detail=best.asset;
- try{const data=await json('https://3dassets.dev/api/v1/assets/'+encodeURIComponent(slug));detail=data.asset??data.data??data;}catch(error){console.warn('detail failed',slug,String(error));}
- const url=detail.cdnUrl??detail.downloadUrl??detail.glbUrl??best.asset.cdnUrl;
- if(typeof url!=='string'||(!url.startsWith('https://cdn.3dassets.dev/')&&!url.startsWith('https://3dassets.dev/'))){
-  console.warn('REJECT URL',name,url);continue;
- }
- let bytes;
- try{const response=await fetch(url,{signal:AbortSignal.timeout(120000)});if(!response.ok)throw Error(String(response.status));bytes=Buffer.from(await response.arrayBuffer());}catch(error){console.warn('DOWNLOAD FAILED',name,String(error));continue;}
- if(bytes.length<512||bytes.length>12*1024*1024||bytes.toString('ascii',0,4)!=='glTF'||bytes.readUInt32LE(4)!==2||bytes.readUInt32LE(8)!==bytes.length){console.warn('INVALID GLB',name,bytes.length);continue;}
- const size=bytes.readUInt32LE(12);
- if(size>bytes.length-20)continue;
- const gltf=JSON.parse(bytes.subarray(20,20+size).toString('utf8'));
- if(!Array.isArray(gltf.meshes)||!gltf.meshes.length||gltf.buffers?.some(x=>x.uri)||gltf.images?.some(x=>x.uri))continue;
- const file='Creature_'+name+'.glb';
- await writeFile(resolve(folder,file),bytes);
- const asset={id:name,file:'models/creatures/'+file,title:detail.title??best.asset.title??name,slug,
-  source:'https://3dassets.dev/assets/'+slug,cdnUrl:url,
-  license:'CC0-1.0',sha256:createHash('sha256').update(bytes).digest('hex'),
-  size:bytes.length,meshCount:gltf.meshes.length,animationCount:gltf.animations?.length??0};
- entries.push(asset);
- console.log('IMPORTED',name,asset.title,asset.size,'animations',asset.animationCount);
-}
-const missing=species.filter(x=>!entries.some(y=>y.id===x));
-await writeFile(resolve(folder,'manifest.json'),JSON.stringify({license:'CC0-1.0',source:'https://3dassets.dev/',assets:entries,missing},null,2)+'\n');
-console.log('IMPORTED',entries.length,'MISSING',missing.join(', '));
+await writeFile(resolve(root,'manifest.json'),JSON.stringify({license:'CC0-1.0',
+  source:'https://3dassets.dev/',assets,
+  pending:['hellhound'],note:'Standalone Hellhound animation/model unavailable in the verified CC0 source; use authentic animated wolf mesh with fire VFX until a distinct Hellhound asset is approved.'},null,2)+'\n');
