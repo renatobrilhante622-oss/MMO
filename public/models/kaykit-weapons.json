@@ -100,6 +100,26 @@
       "sourceBinGitSha1": "492d79a4b86352d1e7c81cfed4ac3a02ae48565b",
       "license": "CC0-1.0",
       "author": "Kay Lousberg"
+    },
+    {
+      "name": "spellbook_open",
+      "file": "models/KayKit_Weapon_spellbook_open.glb",
+      "bytes": 32844,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/spellbook_open.gltf",
+      "sourceGltfGitSha1": "2a35e30896d0ef68a4fac4d7e939ec3bb8c2acff",
+      "sourceBinGitSha1": "78ac7238dc8c4462d1c1c89cb30c50ec99465c3d",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "spellbook_closed",
+      "file": "models/KayKit_Weapon_spellbook_closed.glb",
+      "bytes": 32240,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/spellbook_closed.gltf",
+      "sourceGltfGitSha1": "eba2a0592cc6b74863e94bd1e1677cc8090456fd",
+      "sourceBinGitSha1": "0c1f5a090ba35454d813bd57848a9908c9343f6f",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
     }
   ]
 }
