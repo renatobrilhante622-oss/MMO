@@ -1,0 +1,70 @@
+/* Mobile Part 2: authoritative layout areas avoid overlapping health, mana, gold and loot. */
+.eterna-hud .quest-card{display:none!important}
+.eterna-quest-tracker{
+ position:fixed;z-index:45;left:max(10px,env(safe-area-inset-left));
+ top:calc(max(10px,env(safe-area-inset-top)) + 97px);
+ display:flex;flex-direction:column;gap:0;box-sizing:border-box;
+ width:clamp(152px,23vw,217px);max-width:min(38vw,217px);
+ max-height:113px;overflow:hidden;padding:7px 9px;
+ background:linear-gradient(140deg,#182739e8,#0a121ecc);
+ border:1px solid #d6bc875c;border-radius:8px;
+ box-shadow:0 5px 18px #0006;pointer-events:auto
+}
+.eterna-quest-tracker[hidden],.quest-tracker-body[hidden]{display:none!important}
+.quest-tracker-heading{display:flex;align-items:center;gap:5px;min-height:21px}
+.quest-tracker-marker{flex:none;color:#f0cd7c}
+.quest-tracker-title{flex:1;display:-webkit-box;-webkit-line-clamp:1;
+ -webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;
+ font:700 11px/1.25 Georgia,serif;color:#f4dea9}
+.quest-tracker-collapse{border:0;background:transparent;color:#f4d68e;min-width:27px;min-height:27px;flex:none}
+.quest-tracker-body{display:grid;gap:5px;min-height:0}
+.quest-tracker-text{display:block;white-space:nowrap;text-overflow:ellipsis;
+ overflow:hidden;font:10px/1.35 system-ui;color:#c6d2de}
+.quest-tracker-bar{height:4px;overflow:hidden;border-radius:2px;background:#233d4b}
+.quest-tracker-bar i{display:block;height:100%;background:linear-gradient(90deg,#7bbc95,#ecc978)}
+.quest-tracker-action{font:700 9px system-ui;min-height:27px;padding:4px;background:#264058;color:#f3dbab;border:1px solid #c9ac7559;border-radius:5px}
+.quest-tracker-action.can-claim{background:#8c6a30;color:#fff4cd}
+.eterna-quest-tracker.is-collapsed{max-height:40px;padding:5px 9px}
+.journey-widgets.drop-toast-widget{
+ position:fixed;z-index:43;left:max(10px,env(safe-area-inset-left))!important;
+ top:calc(max(10px,env(safe-area-inset-top)) + 218px)!important;
+ width:clamp(140px,20vw,193px)!important;max-width:36vw;
+ max-height:135px;overflow:hidden;pointer-events:auto
+}
+.drop-toast-widget .drop-toast-list{max-height:109px;overflow:hidden}
+.eterna-hud .resource-bar{z-index:48;pointer-events:none}
+.eterna-npc-portrait{width:84px;height:84px;flex:0 0 84px;
+ background:radial-gradient(circle at 35% 18%,#8c789b50,#152236);
+ border:1px solid #ecc77d;border-radius:10px;box-shadow:0 0 13px #d0a86452;
+ display:grid;place-items:center;overflow:hidden}
+.eterna-npc-portrait svg{width:100%;height:100%;display:block}
+.eterna-npc-quest-rewards,.npc-quest-reward{width:100%;flex:1 1 100%;
+ padding:11px;border:1px solid #d4b77d66;border-radius:8px;
+ background:linear-gradient(100deg,#25354a,#162333);box-sizing:border-box}
+.npc-quest-reward>strong{display:block;font:700 11px/1.3 Georgia,serif;color:#f2d29e;margin-bottom:8px}
+.npc-quest-reward-tokens{display:flex;flex-wrap:wrap;gap:6px}
+.npc-quest-reward-token{display:flex;align-items:center;gap:5px;border:1px solid #9d89645c;
+ padding:5px 8px;border-radius:6px;background:#101c2c}
+.npc-quest-reward-token b{font:14px system-ui}.npc-quest-reward-token small{color:#f1e4c7;font:10px system-ui}
+.eterna-npc-label{background:transparent!important;border:0!important;
+ box-shadow:none!important;padding:0!important;color:#ffdf91!important;
+ filter:drop-shadow(0 2px 4px #000a) drop-shadow(0 0 4px #eeb963a9);
+ animation:npcFloat 2.3s ease-in-out infinite}
+@keyframes npcFloat{50%{translate:0 -5px}}
+@media(max-width:640px){
+ .eterna-quest-tracker{top:calc(max(7px,env(safe-area-inset-top)) + 91px);
+ width:min(164px,43vw);max-width:43vw;padding:6px;max-height:103px}
+ .quest-tracker-title{font-size:10px}.quest-tracker-text{font-size:9px}
+ .journey-widgets.drop-toast-widget{
+  top:calc(max(7px,env(safe-area-inset-top)) + 202px)!important;
+  width:147px!important;max-width:39vw}
+ .eterna-npc-portrait{width:65px;height:65px;flex-basis:65px}
+}
+@media(max-height:480px) and (min-width:641px){
+ .eterna-quest-tracker{top:calc(max(6px,env(safe-area-inset-top)) + 70px);
+ width:145px;max-width:29vw;max-height:91px}
+ .journey-widgets.drop-toast-widget{
+ top:calc(max(6px,env(safe-area-inset-top)) + 169px)!important;
+ width:137px!important;max-width:29vw}
+}
+@media(prefers-reduced-motion:reduce){.eterna-npc-label{animation:none}}
