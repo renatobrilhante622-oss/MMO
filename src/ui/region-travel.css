@@ -1,0 +1,20 @@
+.region-travel-trigger{position:fixed;z-index:52;right:max(14px,env(safe-area-inset-right));bottom:max(155px,env(safe-area-inset-bottom));padding:7px 12px;border:1px solid #c7ac6c88;border-radius:8px;background:#101f30d9;color:#e9d9ae;font:700 11px system-ui;letter-spacing:.08em;pointer-events:auto}
+.region-travel-overlay[hidden]{display:none!important}
+.region-travel-overlay{position:fixed;inset:0;z-index:502;display:grid;place-items:center;padding:14px;background:#040a12e8;backdrop-filter:blur(12px);pointer-events:auto}
+.region-travel-dialog{width:min(1100px,100%);max-height:92dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;border:1px solid #c8ac754e;border-radius:14px;background:linear-gradient(145deg,#1e3044,#0b1421);box-shadow:0 20px 85px #000b;color:#e9ebf0}
+.region-travel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 22px;border-bottom:1px solid #cfb87945}
+.region-travel-header h2{margin:0;color:#f4dfa9;font:700 clamp(18px,3vw,26px) Georgia,serif;letter-spacing:.14em}
+.region-travel-header button{background:#172331;color:#eae1ce;border:1px solid #ffffff44;border-radius:6px;min-width:38px;min-height:38px}
+.region-travel-intro{margin:12px 20px;color:#b6c6d0;font:12px system-ui}
+.region-travel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px;padding:12px 20px 20px}
+.region-travel-card{display:flex;flex-direction:column;min-width:0;gap:9px;padding:10px;border-radius:9px;border:1px solid color-mix(in srgb,var(--region-color) 50%,#24364a);background:#101d2e}
+.region-travel-card.locked{filter:saturate(.65);opacity:.8}
+.region-travel-banner{min-height:105px;padding:12px;border-radius:6px;background:radial-gradient(at top right,color-mix(in srgb,var(--region-color) 48%,#19263c),#141d29);border-left:3px solid var(--region-color)}
+.region-travel-banner span{color:#fff1c4;font:10px system-ui}
+.region-travel-banner h3{color:white;font:700 17px Georgia,serif;margin:9px 0 0}
+.region-travel-card p{font:11px/1.5 system-ui;margin:0;color:#c8d4df}
+.region-travel-card .region-travel-loot{color:#e9d3a1;flex:1}
+.region-travel-card button{padding:11px 8px;border:1px solid #f2d38a8a;border-radius:6px;background:#835c29;color:#fff7e1;font:700 11px system-ui}
+.region-travel-card button:disabled{background:#1f2c39;color:#8fa0ad;border-color:#526272}
+@media(max-width:540px){.region-travel-trigger{right:11px;bottom:150px;font-size:9px;padding:7px}.region-travel-grid{grid-template-columns:1fr 1fr;gap:8px;padding:8px}.region-travel-card{padding:6px}.region-travel-banner{min-height:86px;padding:8px}.region-travel-banner h3{font-size:13px}.region-travel-card p{font-size:9px}.region-travel-header{padding:12px}.region-travel-intro{margin:10px;font-size:11px}}
+@media(max-width:360px){.region-travel-grid{grid-template-columns:1fr}}
