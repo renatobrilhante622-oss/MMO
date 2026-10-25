@@ -128,7 +128,12 @@ export class InventoryAndLoot {
       : roll < 0.004 ? 5 : roll < 0.022 ? 4 : roll < 0.085 ? 3 : roll < 0.26 ? 2 : roll < 0.58 ? 1 : 0;
     const slot = ALL_EQUIPMENT_SLOTS[Math.floor(this.random() * ALL_EQUIPMENT_SLOTS.length)];
     const itemLevel = [...tiers].reverse().find(tier => tier <= safeLevel) ?? 1;
-    const template = COMPLETE_ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
+    const realPackDrops=slot==='weapon'&&boss
+      ?WEAPON_PACK_ITEM_TEMPLATES.filter(item=>item.rarity===RARITIES[rarityIndex]&&item.requiredLevel!<=safeLevel)
+      :[];
+    const selectedPack=realPackDrops.length&&roll<.55
+      ?realPackDrops[Math.floor(this.random()*realPackDrops.length)]:undefined;
+    const template = selectedPack??COMPLETE_ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
     const id = `drop-${++this.sequence}-${Math.floor(this.random() * 0xffffff).toString(36)}`;
     return {
       id,
