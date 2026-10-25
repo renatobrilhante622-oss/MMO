@@ -1,0 +1,33 @@
+name: Import CC0 Environment Assets
+on:
+  push:
+    branches: [feature/eterna-cc0-environment-assets-20261025]
+    paths: ['scripts/import-real-environment.mjs','.github/workflows/import-real-environment.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/eterna-cc0-environment-assets-20261025
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated image conversion dependency
+        run: npm install --no-save --ignore-scripts=false sharp
+      - name: Download and verify original GLB/PBR assets and encode authentic photos as WebP
+        run: node scripts/import-real-environment.mjs
+      - name: Commit imported offline assets on branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/models/environment/ public/textures/real-pbr/
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(assets): bundle CC0 scene GLBs and real PBR materials"
+            git push origin HEAD:feature/eterna-cc0-environment-assets-20261025
+          fi
