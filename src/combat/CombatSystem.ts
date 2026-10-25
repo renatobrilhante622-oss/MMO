@@ -33,7 +33,7 @@ export class CombatSystem {
     this.combo = this.comboWindow > 0 ? (this.combo % 3) + 1 : 1;
     this.comboWindow = 1.5;
     this.attackCooldown = 1 / Math.max(.1, stats.attackSpeed);
-    const lock=this.nearest(source,targets,stats.range+1.2);
+    const lock=this.nearest(source,targets,stats.range+1.8);
     const direction = lock?this.horizontalDirection(lock.position.clone().sub(source.position)):this.horizontalDirection(facing);
     if(lock)(source as Combatant & {aimAt?:(point:Vector3,lunge:number)=>void}).aimAt?.(lock.position,stats.range>8?0:Math.max(0,source.position.distanceTo(lock.position)-stats.range+.4));
     const multiplier = this.combo === 3 ? 1.65 : 1 + (this.combo - 1) * .15;
@@ -60,9 +60,13 @@ export class CombatSystem {
     }
     this.cooldowns[index] = skill.cooldown;
     this.cooldownMax[index] = skill.cooldown;
-    const direction = this.horizontalDirection(facing);
+    // Auto-aim applies to offensive skills as well as the basic attack.
+    const lock = skill.shape === 'circle' && skill.heal
+      ? undefined : this.nearest(source,targets,Math.max(skill.range,skill.radius)+1.2);
+    const direction = this.horizontalDirection(lock ? lock.position.clone().sub(source.position) : facing);
+    if (lock)(source as Combatant & {aimAt?:(point:Vector3,lunge:number)=>void}).aimAt?.(lock.position,0);
     if (skill.heal) source.heal(source.maxHp * skill.heal);
-    if (skill.shape === 'projectile') this.shoot(source, targets, stats, direction, skill.range, skill.radius, skill.multiplier, skill.color);
+    if (skill.shape === 'projectile') this.shoot(source, targets, stats, direction, skill.range, skill.radius, skill.multiplier, skill.color,lock);
     else if (skill.shape === 'cone') {
       this.cone(source, targets, stats, direction, skill.range, Math.cos(Math.min(1.45, Math.atan2(skill.radius, skill.range) + .4)), skill.multiplier, skill.color);
       this.pulse(source.position.clone().addScaledVector(direction, skill.range * .35), skill.range * .55, skill.color, .4);
@@ -125,6 +129,8 @@ export class CombatSystem {
 
   private shoot(source: Combatant, targets: Combatant[], stats: CharacterStats, direction: Vector3, range: number, radius: number, multiplier: number, color: number,locked?:Combatant): void {
     if (this.projectiles.length >= 36) this.removeProjectile(this.projectiles.shift()!);
+    // Even free-fired projectiles track a living opponent while one is available.
+    locked ??= this.nearest(source,targets,range + 1.2);
     const group = new Group();
     const orb = new Mesh(this.projectileGeometry, this.material(color));
     orb.scale.setScalar(Math.max(.6, radius * .55));
