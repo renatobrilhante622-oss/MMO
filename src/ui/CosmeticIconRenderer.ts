@@ -40,9 +40,16 @@ export function cosmeticIcon(c:Cosmetic,label=c.name[0]):string {
 }
 
 export function illustratedWings(rarity:Rarity='epic',label='Asas',id='wing-3'):string {
-  const style=Number(id.split('-')[1])||0;
-  const feather=Array.from({length:6},(_,i)=>`<path d="M30 43Q${8-i} ${40-i*4} ${8+i*3} ${8+i*4}Q${12+i*2} ${38+i} 29 48" fill="url(#${style===0||style===3?'steel':'jewel'})" stroke="#e7dfed" stroke-width=".6"/>`).join('');
-  const body=`<g>${feather}</g><g transform="translate(64 0) scale(-1 1)">${feather}</g><path d="m32 30 5 12-5 16-5-16Z" fill="url(#gold)"/><circle cx="32" cy="41" r="3" fill="url(#jewel)"/>`;
+  // Six original vector silhouettes — not one reused wing recolored by rarity.
+  const forms:Record<string,string>={
+   'wing-0':`<path d="M31 50 17 16 6 8l6 20L4 39l23 5Z M33 50l14-34L58 8l-6 20 8 11-23 5Z" fill="#5c5367" stroke="#d0c5e4" stroke-width="2"/><path d="m30 45-13-9-5-16m17 20-13-8m18 8 13-9 5-12m-16 27 14-11" stroke="#eee7fb" fill="none" stroke-width="4"/><path d="M29 19 20 11 9 6m26 13 9-8 12-5" stroke="#a678e2" fill="none" stroke-width="2"/><circle cx="32" cy="48" r="5" fill="#ab7af6"/>`,
+   'wing-1':`<path d="M31 45Q13 35 8 5q19 4 23 22Q16 18 5 14q0 21 26 34M33 45Q51 35 56 5 37 9 33 27q15-9 26-13 0 21-26 34" fill="#fff1c5" stroke="#dbb770" stroke-width="1.6"/><path d="M30 45Q13 33 12 10m18 30-18-18m22 23Q51 33 52 10m-18 30 18-18" stroke="#c89c5a" fill="none"/><circle cx="32" cy="44" r="5" fill="url(#gold)"/>`,
+   'wing-2':`<path d="M30 47 4 37 12 24 6 13 20 18 22 5 32 26 42 5 44 18 58 13 52 24 60 37 34 47Z" fill="#8ce6f2" stroke="#e2ffff" stroke-width="1.3"/><path d="m32 27-11-9-10 19 18 8m3-18 11-9 11 19-18 8M11 37l16-3M53 37l-16-3" fill="none" stroke="#238ac5" stroke-width="2"/><path d="M32 21 25 44 32 58l7-14Z" fill="url(#jewel)" stroke="#e6ffff"/>`,
+   'wing-3':`<path d="M28 49 8 57l4-17L2 33l17-10L15 6l17 17 17-17-4 17 17 10-10 7 4 17-20-8Z" fill="#4e1823" stroke="#ff9f54" stroke-width="2"/><path d="m28 45-11-13 2-20m17 33 11-13-2-20" fill="none" stroke="#ff7133" stroke-width="4"/><path d="M10 51q4-20 9-12 3-14 8-5l5 16 5-16q5-9 8 5 5-8 9 12Z" fill="#ff992d" opacity=".73"/><path d="M30 20h4l7 22-9 14-9-14Z" fill="#f9c45d"/>`,
+   'wing-4':`<circle cx="32" cy="29" r="18" fill="none" stroke="#ffdc80" stroke-width="2" stroke-dasharray="4 3"/><path d="M30 47Q13 28 6 10q19 1 24 18Q11 21 3 31q15 10 27 18M34 47Q51 28 58 10 39 11 34 28q19-7 27 3-15 10-27 18" fill="url(#gold)" stroke="#fff2bb" stroke-width="2"/><path d="M32 15 37 27 50 30 37 35 32 48 27 35 14 30 27 27Z" fill="#fff1a5" stroke="#f4b650"/>`,
+   'wing-5':`<path d="M30 51Q8 30 8 9q16 14 20 19L15 4l18 18L49 4 36 28Q40 23 56 9q0 21-22 42Z" fill="#4e317f" stroke="#d6b2ff" stroke-width="2"/><path d="M9 9 27 40 8 30M55 9 37 40 56 30M32 22 23 43l9 15 9-15Z" fill="none" stroke="#c38aff" stroke-width="2"/><circle cx="32" cy="27" r="6" fill="#eabfff"/><circle cx="12" cy="11" r="2" fill="#fff"/><circle cx="54" cy="13" r="2" fill="#fff"/><path d="M32 7v7m0 35v8M9 25l6 2m34 0 6-2" stroke="#fff4ff" stroke-width="1.6"/>`
+  };
+  const body=forms[id]??forms['wing-3'];
   return itemIcon('skin',rarity,label,undefined,body).replace('item-illustration','item-illustration wing-illustration');
 }
 
