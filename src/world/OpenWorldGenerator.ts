@@ -45,7 +45,8 @@ export class OpenWorldGenerator {
   private readonly materials = new Set<THREE.Material>();
   private readonly textures = new Set<THREE.Texture>();
 
-  constructor(private readonly scene: THREE.Scene, private readonly seed = 61857) {
+  constructor(private readonly scene: THREE.Scene, private readonly seed = 61857,
+    readonly regionId = 'aurora') {
     this.randomState = seed >>> 0;
     this.life = new WorldLife((x, z) => this.heightAt(x, z));
     this.grid = new Float32Array((SEGMENTS + 1) * (SEGMENTS + 1));
@@ -56,7 +57,7 @@ export class OpenWorldGenerator {
     }
     this.spawnPoint.y = this.heightAt(this.spawnPoint.x, this.spawnPoint.z) + 1.1;
     this.portalPosition.y = this.heightAt(0, -70);
-    this.root.name = 'Aetherfall open world';
+    this.root.name = 'ETERNA map instance: '+this.regionId;
   }
 
   private random(): number {
@@ -76,6 +77,27 @@ export class OpenWorldGenerator {
   }
 
   private rawHeight(x: number, z: number): number {
+    if(this.regionId!=='aurora'){
+      // Separate terrain instance; every regional scene samples its own
+      // immutable height field through the exact same Cannon triangle split.
+      const params:Record<string,{base:number;ridge:number;frequency:number}>={
+        crypt:{base:3.6,ridge:3.7,frequency:.026},
+        highlands:{base:8.2,ridge:12,frequency:.022},
+        rift:{base:6.1,ridge:8.5,frequency:.037},
+        eclipse:{base:9,ridge:13,frequency:.018}
+      };
+      const p=params[this.regionId]??params.crypt;
+      const seedOffset={crypt:115,highlands:361,rift:597,eclipse:827}[this.regionId]??115;
+      let h=p.base+this.noise(x*p.frequency+seedOffset,z*p.frequency)*p.ridge
+        +(this.noise(x*.081+seedOffset,z*.081)-.5)*2.2;
+      // Fixed safe village and portal landings, with native slope continuity.
+      const camp=Math.hypot(x,z-18);
+      h=lerp(h,p.base+2.2,1-smooth(THREE.MathUtils.clamp((camp-12)/18,0,1)));
+      const gate=Math.hypot(x,z+70);
+      h=lerp(h,p.base+1.5,1-smooth(THREE.MathUtils.clamp((gate-9)/12,0,1)));
+      h+=Math.pow(THREE.MathUtils.clamp((Math.max(Math.abs(x),Math.abs(z))-125)/35,0,1),2)*22;
+      return h;
+    }
     let h = 2.5 + this.noise(x * .016, z * .016) * 12
       + (this.noise(x * .052, z * .052) - .5) * 5
       + (this.noise(x * .12, z * .12) - .5) * 1.5;
@@ -108,10 +130,10 @@ export class OpenWorldGenerator {
     this.scene.add(this.root);
     if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
-    this.createWater();
+    if(this.regionId==='aurora')this.createWater();
     // Authored CC0 GLBs replace procedural tree and regional building primitives.
-    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z));
-    for(const site of WORLD_SITES)this.markers.push({x:site.x,z:site.z,label:site.name,color:site.type==='cemetery'?'#b58ccc':'#c8b78e'});
+    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId);
+    if(this.regionId==='aurora')for(const site of WORLD_SITES)this.markers.push({x:site.x,z:site.z,label:site.name,color:site.type==='cemetery'?'#b58ccc':'#c8b78e'});
     this.createPortal();
     this.root.add(this.life.root);
     // Interactive KayKit NPCs replace geometric village mannequins.
