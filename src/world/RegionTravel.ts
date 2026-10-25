@@ -29,7 +29,7 @@ export function travelPermission(id:string,state:RegionTravelState):RegionTravel
   if(state.channeling)return {ok:false,reason:'busy'};
   if(state.inCombat)return {ok:false,reason:'combat'};
   if(!state.adminOverride&&state.level<region.minLevel)return {ok:false,reason:'level'};
-  // Region access depends on actual character level. Story unlocks remain quest rewards\n  // but cannot deadlock high-level restored/admin-progressed characters.\n  // When revisiting, combat and dungeon safety checks above still apply.\n  if(!state.adminOverride&&region.id!=='aurora'&&state.level<region.minLevel&& !state.unlocked.includes(region.id))return {ok:false,reason:'locked'};
+  // Character level is the access gate; story unlocks never deadlock a restored level-100 save.
   return {ok:true,region};
 }
 /** Every region has a deterministic safe spawn inside the existing navigation bounds. */
