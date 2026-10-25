@@ -22,6 +22,8 @@ export class DungeonUI {
  private difficulty:DungeonDifficulty='normal';
  private openFlag=false;
  private seconds=0;
+ private paintClock=0;
+ private paintKey='';
  constructor(private readonly host:HTMLElement,private readonly level:()=>number,
    private readonly onEnter:(id:string,difficulty:DungeonDifficulty)=>boolean,
    private readonly onExit:()=>void){
@@ -90,10 +92,14 @@ export class DungeonUI {
    panel.append(gallery,details);this.body.append(panel);
  }
  update(dt:number,active:boolean,completed:boolean,wave:number,waves:number,status:string):void{
-   if(!active&&!completed){this.status.hidden=true;this.seconds=0;return;}
+   if(!active&&!completed){this.status.hidden=true;this.seconds=0;this.paintKey='';return;}
    if(active)this.seconds+=Math.max(0,dt);
    this.status.hidden=false;
    const room=completed?3:wave>waves?3:wave>Math.ceil(waves/2)?2:1;
+   const key=String(room)+'/'+String(completed)+'/'+status;
+   this.paintClock+=Math.max(0,dt);
+   if(this.paintClock<.25&&this.paintKey===key)return;
+   this.paintClock=0;this.paintKey=key;
    const names=['','Sala 1/3: Elimine os Guardiões',
      'Sala 2/3: Destrua os Cristais','Sala 3/3: CHEFE DA MASMORRA'];
    this.status.replaceChildren();
