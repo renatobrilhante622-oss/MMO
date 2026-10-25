@@ -48,6 +48,7 @@ import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
 import { route, type MapPoint } from '../world/Navigation';
 import { Line, LineBasicMaterial } from 'three';
 import { MobileHUD } from '../ui/MobileHUD';
+import { LootToastFeed } from '../ui/LootToastFeed';
 
 const SAVE_KEY = 'eterna-ninefold-save-v1';
 const UP = new Vector3(0, 1, 0);
@@ -68,6 +69,7 @@ export class Engine {
   readonly dungeon: DungeonBossManager;
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
+  readonly lootFeed: LootToastFeed;
   readonly progress: AdventureProgress;
   readonly hub: AdventureHub;
   readonly hudEditor:HudEditor;
@@ -220,6 +222,7 @@ export class Engine {
       onSoundChange: enabled => this.sound.setEnabled(enabled),
       onResetSave: () => { localStorage.removeItem(SAVE_KEY); location.reload(); },
     });
+    this.lootFeed = new LootToastFeed(this.container);
     this.hub = new AdventureHub(this.container,this);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
@@ -303,6 +306,7 @@ export class Engine {
       this.statClock = 1;
     }));
     this.disposers.push(this.events.on('loot', drop => {
+      this.lootFeed.push(drop);
       this.sound.coin();
       this.inventory.addLoot(drop);
       this.progress.dropHistory.push({name:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.name:'Ouro / Cristais',rarity:drop.item&&this.inventory.items.some(i=>i.id===drop.item!.id)?drop.item.rarity:'common',time:Date.now(),gold:drop.gold,crystals:drop.crystals});if(this.progress.dropHistory.length>100)this.progress.dropHistory.shift();
@@ -789,6 +793,7 @@ export class Engine {
     this.save();
     this.disposers.splice(0).forEach(dispose => dispose());
     this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
+    this.lootFeed.dispose();
     this.hud.dispose();
     this.sound.dispose();
     this.companions.dispose?.();
