@@ -56,6 +56,10 @@ export class AnimatedGLB {
   private attackWeapon:ClassDefinition['weapon']='sword';
   private classPalette=new Color(0xffffff);
   private readonly hitColor = new Color(0xff6b6b);
+  private readonly proceduralTime={value:0};
+  private readonly proceduralSpeed={value:0};
+  private hipNode?:Object3D;
+  private hasAuthoredClips=false;
 
   constructor(
     readonly name: ModelName,
@@ -86,6 +90,11 @@ export class AnimatedGLB {
     }
     if (this.disposed) return;
     const model = this.model = clone(gltf.scene);
+    model.traverse(node=>{
+      const normalized=normalize(node.name);
+      if(!this.hipNode&&['hips','hip','pelvis'].includes(normalized))this.hipNode=node;
+    });
+    this.hasAuthoredClips=gltf.animations.length>0;
     if(name.startsWith('KayKit_'))clearWeaponSlots(model);
     const pivot = createFootPivot(model, this.height, name === 'Soldier' ? Math.PI : 0);
     model.traverse(object => {
@@ -101,6 +110,38 @@ export class AnimatedGLB {
       object.material = Array.isArray(object.material)
         ? object.material.map(material => isolated(material as MeshStandardMaterial))
         : isolated(object.material as MeshStandardMaterial);
+      if(!this.hasAuthoredClips&&this.name.startsWith('Creature_')){
+        // GPU sub-part deformation for author-provided STATIC CC0 meshes.
+        // It is not skeletal animation. No CPU geometry is recreated per frame.
+        const bounds=object.geometry.boundingBox??(
+          object.geometry.computeBoundingBox(),object.geometry.boundingBox);
+        const low=bounds?.min.y??0,high=bounds?.max.y??1;
+        const centerX=bounds?.getCenter(new Vector3()).x??0;
+        const span=Math.max(.01,high-low);
+        const isDragon=this.name==='Creature_wyvern'||this.name==='Creature_dragon';
+        const mats=Array.isArray(object.material)?object.material:[object.material];
+        for(const mat of mats){
+          if(!(mat instanceof MeshStandardMaterial))continue;
+          const prev=mat.onBeforeCompile.bind(mat);
+          mat.onBeforeCompile=(shader,renderer)=>{
+            prev(shader,renderer);
+            shader.uniforms.eternaCreatureTime=this.proceduralTime;
+            shader.uniforms.eternaCreatureSpeed=this.proceduralSpeed;
+            shader.vertexShader='uniform float eternaCreatureTime; uniform float eternaCreatureSpeed;\n'+shader.vertexShader;
+            shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+             `#include <begin_vertex>
+                float creaturePart=clamp((position.y-${low.toFixed(6)})/${span.toFixed(6)},0.0,1.0);
+                float gallop=sin(eternaCreatureTime*8.0+step(${centerX.toFixed(6)},position.x)*3.14159+step(0.0,position.z)*1.5708);
+                transformed.z+=eternaCreatureSpeed*pow(1.0-creaturePart,2.0)*gallop*0.085;
+                transformed.y+=sin(eternaCreatureTime*1.8)*0.012*creaturePart;
+                ${isDragon?
+                  'transformed.y+=sin(eternaCreatureTime*3.2)*abs(position.x-'+centerX.toFixed(6)+')*step(.43,creaturePart)*.065;'
+                  :''}`);
+          };
+          mat.customProgramCacheKey=()=> 'eterna-authored-glb-motion-v2-'+this.name;
+          mat.needsUpdate=true;
+        }
+      }
     });
     this.root.add(pivot);
     this.mixer = new AnimationMixer(model);
@@ -202,7 +243,11 @@ export class AnimatedGLB {
         material.metalness=Math.min(.22,material.metalness);
         if(material.map)material.map.needsUpdate=material.map.version===0;
       } else {
-        material.color.copy(this.baseColor).lerp(this.accent, 0.18);
+        // Imported creature albedo must retain native multi-material coat
+        // details. Flat tinting made the real wolf uniformly light blue.
+        material.color.copy(original).lerp(this.accent,0.085);
+        material.roughness=Math.max(.72,material.roughness);
+        material.metalness=Math.min(.18,material.metalness);
       }
     }
   }
@@ -230,6 +275,16 @@ export class AnimatedGLB {
     this.activeKey = state;
   }
 
+  /** Height from feet to the animated hips. Called after mounted pose is evaluated. */
+  seatedHipHeight():number{
+    if(!this.ready||!this.hipNode)return .88;
+    this.root.updateMatrixWorld(true);
+    const p=this.hipNode.getWorldPosition(new Vector3());
+    const y=this.root.worldToLocal(p).y;
+    return Number.isFinite(y)?Math.min(1.45,Math.max(.48,y)):.88;
+  }
+  /** Actual loaded GLB presentation, excluding external saddle/rider/effects. */
+  get visualRoot():Object3D|undefined{return this.ready?this.root:undefined;}
   setAttackWeapon(weapon:ClassDefinition['weapon']):void {this.attackWeapon=weapon;}
 
   attack(): void {
@@ -245,6 +300,8 @@ export class AnimatedGLB {
   update(dt: number, speed: number, riding = false, locomotion?: string): void {
     if (!this.ready || !this.root.visible) return;
     const step = Math.min(.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
+    this.proceduralTime.value+=step;
+    this.proceduralSpeed.value=Math.min(1,Math.max(0,speed));
     const target = locomotion === 'dead' ? 'dead'
       : riding ? 'mounted'
       : locomotion === 'slide' ? 'slide'
