@@ -7,6 +7,7 @@ import type { ClassDefinition, HeroState } from '../core/GameTypes';
 import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
 import { CLASS_EQUIPMENT_MODELS, loadWeaponModel } from '../assets/WeaponGLB';
 import {CLASS_IDENTITIES} from './ClassVisualIdentity';
+import {weaponPackForClass} from '../rpg/WeaponPacks';
 import {WingsSystem} from '../companions/WingsSystem';
 import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
@@ -164,6 +165,9 @@ export class ArticulatedCharacter {
   private readonly skinGeometry=new Group();
   private readonly skinAura=new RarityAura(.6);
   private skinKey='';
+  private weaponPackId='ironweapon';
+  private skinTone=0xffffff;
+  private skinTier=0;
   weapons: WeaponForge;
   private readonly materials = new Set<MeshStandardMaterial>();
   private readonly skin: MeshStandardMaterial;
@@ -385,6 +389,7 @@ export class ArticulatedCharacter {
       if (this.imported !== actor) return;
       this.pelvis.visible = false;
       actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
+      actor.setCosmeticPalette(this.skinTone,this.skinTier);
       actor.clearWeaponSlots();
       this.attachImportedGear();
       this.styleSilhouette(this.definition);
@@ -422,12 +427,32 @@ export class ArticulatedCharacter {
     this.skinAura.position.y=1.3;
     actor.clearWeaponSlots();
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
+    actor.setCosmeticPalette(this.skinTone,this.skinTier);
     this.clearGlbWeapons();
     const version=this.glbWeaponGeneration;
-    for(const gear of CLASS_EQUIPMENT_MODELS[this.definition.id]){
+    const equipped=weaponPackForClass(this.weaponPackId,this.definition.id);
+    for(const gear of equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
       void loadWeaponModel(gear.model).then(model=>{
         if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
         const offset=gear.offset??[0,0,0];
+        if(equipped){
+          model.scale.multiplyScalar(1+equipped.tier*.035);
+          model.traverse(object=>{
+            if(!(object instanceof Mesh))return;
+            const originals=Array.isArray(object.material)?object.material:[object.material];
+            const tinted=originals.map(m=>{
+              if(!(m instanceof MeshStandardMaterial))return m;
+              const mat=m.clone();
+              mat.color.lerp(new Color(equipped.color),Math.min(.22,equipped.tier*.052));
+              mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+equipped.tier*.08));
+              mat.roughness=Math.max(.26,mat.roughness-equipped.tier*.065);
+              mat.emissive.setHex(equipped.color);
+              mat.emissiveIntensity=equipped.tier*.13;
+              return mat;
+            });
+            object.material=Array.isArray(object.material)?tinted:tinted[0];
+          });
+        }
         if(actor.attachAt(gear.bone,model,new Vector3(...offset)))this.glbWeapons.push(model);
         else console.warn('KayKit skeleton missing attachment socket:',gear.bone,actor.name);
       }).catch(error=>console.warn('Cannot load KayKit weapon:',gear.model,error));
@@ -446,8 +471,17 @@ export class ArticulatedCharacter {
     this.imported?.tint(caster?0x353242:0x3c4c5a,definition.color);this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
   }
+  weaponPackAppearance(id:string):void{
+    if(id===this.weaponPackId)return;
+    this.weaponPackId=id;
+    if(this.imported?.ready)this.attachImportedGear();
+  }
   skinAppearance(id:string,color:number,rarity:number):void {
-    if(id===this.skinKey)return;this.skinKey=id;
+    if(id===this.skinKey)return;
+    this.skinKey=id;
+    this.skinTone=color;
+    this.skinTier=Math.max(0,Math.min(5,rarity));
+    this.imported?.setCosmeticPalette(color,this.skinTier);
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
     this.replaceImportedModel(this.definition);
