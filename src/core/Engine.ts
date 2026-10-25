@@ -61,6 +61,15 @@ import { route, type MapPoint } from '../world/Navigation';
 import { Line, LineBasicMaterial } from 'three';
 import { MobileHUD } from '../ui/MobileHUD';
 import { LootToastFeed } from '../ui/LootToastFeed';
+import {ArenaSystem,ARENA_TITLE_DEFINITIONS} from '../combat/ArenaSystem';
+import {TalentTreeSystem} from '../rpg/TalentTreeSystem';
+import {RuneCombatEffects} from '../rpg/RuneCombatEffects';
+import {DailyRewardSystem} from '../rpg/DailyRewardSystem';
+import {SimulatedAuctionHouse} from '../rpg/SimulatedAuctionHouse';
+import {GatheringSystem} from '../world/GatheringSystem';
+import {RegionalWeather} from '../world/RegionalWeather';
+import {HeroTitle3D} from '../player/HeroTitle3D';
+import {Phase2UI} from '../ui/Phase2UI';
 
 const SAVE_KEY = 'eterna-ninefold-save-v1';
 const UP = new Vector3(0, 1, 0);
@@ -99,6 +108,17 @@ export class Engine {
   private questAutoRoute:MapPoint[]=[];
   readonly lootFeed: LootToastFeed;
   readonly progress: AdventureProgress;
+  readonly phase2Arena=new ArenaSystem();
+  readonly phase2Runes=new TalentTreeSystem();
+  readonly phase2Rewards=new DailyRewardSystem();
+  readonly phase2Market:SimulatedAuctionHouse;
+  phase2Gathering:GatheringSystem;
+  readonly phase2Title=new HeroTitle3D();
+  readonly phase2Weather:RegionalWeather;
+  readonly phase2Combat:RuneCombatEffects;
+  readonly phase2UI:Phase2UI;
+  private phase2GatheringSave:unknown;
+  private phase2DashHeld=false;
   readonly hub: AdventureHub;
   readonly hudEditor:HudEditor;
   readonly admin:AdminPanel;
@@ -197,16 +217,24 @@ export class Engine {
     this.mapInstances=new MapInstanceManager(this.scene,this.physics,this.terrain);
     this.inventory = new InventoryAndLoot(this.events, 407);
     this.progress = new AdventureProgress(this.inventory);
+    this.phase2Market=new SimulatedAuctionHouse(this.inventory);
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
     if(this.restoredRegionId!=='aurora'){
       this.terrain=this.mapInstances.activate(this.restoredRegionId);
     }
+    this.phase2Gathering=new GatheringSystem(this.scene,this.container,this.mapInstances.regionId,
+      (x,z)=>this.terrain.heightAt(x,z),kind=>{if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud?.notify('Coleta: '+kind+' +1','success');this.save();});
+    this.phase2Gathering.restore(this.phase2GatheringSave);
+    this.phase2Weather=new RegionalWeather(this.scene);
+    this.phase2Weather.setRegion(this.mapInstances.regionId);
     this.quests=new QuestSystem(this.inventory,this.progress);
     this.quests.restore(this.deferredQuestSave);
     if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
     this.hero = new HeroController(this.scene, this.camera, this.physics, this.events, CLASS_DEFINITIONS[this.classId]);
+    this.hero.model.add(this.phase2Title.root);
+    this.phase2Combat=new RuneCombatEffects(this.scene,this.phase2Runes);
     configureCharacterCamera(this.camera);disableCharacterCulling(this.hero.model);
     this.hero.respawn(this.terrain.spawnPoint);
     this.hero.update(1 / 60, emptyInput());
@@ -262,6 +290,12 @@ export class Engine {
     });
     this.lootFeed = new LootToastFeed(this.container);
     this.hub = new AdventureHub(this.container,this);
+    this.phase2UI=new Phase2UI(this.container,this);
+    const phase2Shortcut=document.createElement('button');
+    phase2Shortcut.className='pr15-shortcut';phase2Shortcut.textContent='⚔ FASE 2';
+    phase2Shortcut.setAttribute('aria-label','Arena local, runas, recompensas e mercado');
+    phase2Shortcut.onclick=()=>this.phase2UI.open('arena');
+    this.hud.registerShortcut(phase2Shortcut);this.disposers.push(()=>phase2Shortcut.remove());
     this.questTracker=new QuestTrackerHUD(this.container,this.quests,{
       navigate:quest=>this.navigateQuest(quest),
       claim:id=>this.claimQuest(id),
@@ -300,12 +334,13 @@ export class Engine {
     this.hudEditor=new HudEditor(this.container,()=>this.progress.language,()=>{this.hud.resetInput();this.autoButton.hidden=!this.progress.vip;});
     this.admin=new AdminPanel(this.container,()=>({gold:this.inventory.gold,crystals:this.inventory.crystals,diamonds:this.progress.vipDiamonds,tickets:this.progress.tickets,materials:this.progress.materials,level:this.inventory.level,god:this.hero.godMode,noCooldown:this.combat.noCooldown,oneHit:this.combat.oneHitKill}),(action,value)=>this.adminAction(action,value));
     this.gacha=new GachaCutscene(this.container,(count,banner)=>{const rewards=summon(this.progress,count,banner);if(rewards){this.sound.levelUp();this.save();}return rewards;},count=>canSummon(this.progress,count),()=>this.hub.refresh());
-    this.journal=new PlayerJournal(this.container,this.progress,()=>({level:this.inventory.level,name:this.hub.online.view?.self.name??'Aventureiro',clan:this.hub.online.view?.clan?.name??'',attack:this.hero.stats.attack,defense:this.hero.stats.defense,hp:this.hero.maxHp}),()=>{this.refreshStats();this.save();},()=>this.hub.open('clan'));
+    this.journal=new PlayerJournal(this.container,this.progress,()=>({level:this.inventory.level,name:this.hub.online.view?.self.name??'Aventureiro',clan:this.hub.online.view?.clan?.name??'',attack:this.hero.stats.attack,defense:this.hero.stats.defense,hp:this.hero.maxHp}),()=>{this.refreshStats();this.save();},()=>this.hub.open('clan'),()=>this.classId);
     const clan=document.createElement('button');clan.className='clan-shortcut';clan.innerHTML='<span aria-hidden="true">⚑</span><span>Clã</span>';clan.title='Clã / Clan';clan.onclick=()=>this.hub.open('clan');this.hud.registerShortcut(clan);this.disposers.push(()=>clan.remove());
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
     this.applyPreferences();
+    this.phase2Changed();
     if(this.progress.waypoint)this.setWaypoint(this.progress.waypoint);
     this.bindEvents();
     this.setQuality(matchMedia('(pointer:coarse)').matches ? 'low' : 'high');
@@ -389,9 +424,11 @@ export class Engine {
       const slainRegion=this.mapInstances.regionId;
       this.quests.onKill(kind,slainRegion,boss);
       this.questTracker.refresh();
-      this.progress.earnKill(level,boss,slainRegion);if(boss)this.progress.profile.bossKills++;
+      this.progress.earnKill(level,boss,slainRegion);
+      if(boss){this.progress.profile.bossKills++;this.phase2Runes.onBoss();}
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
+      loot.xp=Math.round(loot.xp*this.phase2Gathering.multiplier('xp'));
       const exclusive=regionalMaterialForKill(slainRegion,kind,level,boss,loot.id);
       const drop: LootDrop = {...loot,position:position.clone(),
         ...(exclusive?{regionalMaterial:exclusive}:{})};
@@ -444,10 +481,16 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.dungeonUI.blocking && !this.dungeonLoading && !this.npcs.blocking && !document.hidden;
+    const active = this.playing && !this.phase2UI.blocking && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.dungeonUI.blocking && !this.dungeonLoading && !this.npcs.blocking && !document.hidden;
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
     this.progress.tick(document.hidden?0:dt);
+    this.phase2Rewards.tick(dt,active);
+    if(this.phase2UI.isArenaOpen)this.phase2Arena.tick(dt);
+    if(active)this.phase2Market.tick(dt);
+    this.phase2Gathering.update(dt,this.hero.position,active&&!this.dungeon.active);
+    this.phase2Gathering.tickBuffs(active?dt:0);
+    this.phase2Weather.update(dt,this.hero.position);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
     this.npcs.update(dt,this.camera,this.hero.position,active);
@@ -489,15 +532,20 @@ export class Engine {
       }
       if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
       const targets = this.enemies.enemies.filter(enemy => enemy.alive);
+      if(input.dash&&!this.phase2DashHeld&&this.hero.alive)this.phase2Combat.onDash(this.hero.position,targets,this.hero.stats.attack);
+      this.phase2DashHeld=input.dash;
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
+        this.phase2Combat.onAttack(targets,this.hero.position,this.hero.stats.attack);
         this.sound.attack(this.classId, this.combat.combo);
       }
       if (input.skill !== null && this.hero.alive && this.combat.cast(input.skill, this.classId, this.hero, targets, {...this.hero.stats,attack:this.hero.stats.attack*(1+epigraphEffects(this.classId,this.progress.talents[this.classId]).spellPower)}, this.hero.facing)) {
         this.sound.spell(this.classId, input.skill);
+        this.phase2Combat.onSkill(this.hero.position,CLASS_DEFINITIONS[this.classId].skills[input.skill]?.damageType??'physical');
         this.combat.cooldowns[input.skill]*=cooldownMultiplier(this.progress.talents[this.classId]?.spirit??0);
         this.combat.cooldownMax[input.skill]=this.combat.cooldowns[input.skill];
       }
       this.combat.update(dt,this.camera.position);
+      this.phase2Combat.update(dt,targets,this.hero.stats.attack);
 
       this.hero.mana = Math.min(this.hero.stats.maxMana, this.hero.mana + dt * 3.5);
       if (this.hero.alive && this.hero.position.distanceTo(this.terrain.spawnPoint) < 24) this.hero.heal(dt * 1.8);
@@ -527,7 +575,7 @@ export class Engine {
       boss: active && !!boss,
     });
     // Opaque menus and the summon canvas do not need a second live 3D scene underneath.
-    if(this.playing&&(this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking)){this.updateHUD();return;}
+    if(this.playing&&(this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking)){this.updateHUD();return;}
     this.shadowInstallTimer+=dt;if(this.shadowInstallTimer>2){disableCharacterCulling(this.hero.model);this.installShadows();this.shadowInstallTimer=0;}
     if(matchMedia('(pointer:coarse)').matches&&active){const ratio=this.frameBudget.update(rawDt,this.renderer.getPixelRatio());if(ratio!==this.renderer.getPixelRatio()){this.renderer.setPixelRatio(ratio);this.composer.setPixelRatio(ratio);this.resize();}}
     this.shadowTimer+=dt;if(this.shadowTimer>=1/30){this.renderer.shadowMap.needsUpdate=true;this.shadowTimer=0;}
@@ -899,7 +947,15 @@ export class Engine {
     for(const id of [...this.dropMeshes.keys()])this.removeDropMesh(id);
     this.questAutoMove=null;this.questAutoRoute=[];
     this.setWaypoint(null);
+    // Carry resources, elixirs, global gathering time and per-node exhaustion
+    // across ALL regional maps. The previous code silently deleted inventory.
+    const gatheringCarry=this.phase2Gathering.snapshot();
+    this.phase2Gathering.dispose();
     this.terrain=this.mapInstances.activate(id);
+    this.phase2Gathering=new GatheringSystem(this.scene,this.container,id,
+      (x,z)=>this.terrain.heightAt(x,z),kind=>{if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud.notify('Coleta: '+kind+' +1','success');this.save();});
+    this.phase2Gathering.restore(gatheringCarry);
+    this.phase2Weather.setRegion(id);
     this.enemies.resetForRegion(id);
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
       this.quests,{
@@ -979,16 +1035,24 @@ export class Engine {
     const talents=this.progress.bonuses(this.classId);
     const evo=this.progress.evolution.buffs(this.progress.equipped.pet,this.progress.equipped.mount);this.hero.mountSpeedBoost=evo.speed;
     const effects=epigraphEffects(this.classId,this.progress.talents[this.classId]);
+    const rank=this.phase2Arena.titleBonuses(),runic=this.phase2Runes.bonuses();
     this.hero.combatModifiers=effects;
     if(this.companions)this.companions.powerMultiplier=1+effects.companionPower;
     this.hero.setStats({ ...base,
-      maxMana:base.maxMana+talents.maxMana+evo.maxMana+(equipment.maxMana??0),critChance:Math.min(.6,base.critChance+talents.critChance+evo.crit+(equipment.critChance??0)),
-      attack: base.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack,
+      maxMana:base.maxMana+talents.maxMana+evo.maxMana+(equipment.maxMana??0),
+      speed:base.speed*(1+rank.speed)*this.phase2Gathering.multiplier('speed'),
+      critChance:Math.min(.6,base.critChance+talents.critChance+evo.crit+(equipment.critChance??0)+rank.crit),
+      attack: (base.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack)*(1+rank.attack+runic.attack)*this.phase2Gathering.multiplier('damage'),
       defense: base.defense + talents.defense + evo.defense + equipment.defense + buildings.defense + codex.defense,
-      maxHp: base.maxHp + talents.maxHp + evo.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp,
+      maxHp: (base.maxHp + talents.maxHp + evo.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp)*(1+rank.hp+runic.hp),
     });
   }
 
+  phase2Changed():void{
+    this.refreshStats();this.updateHUD();
+    this.phase2Title.set(ARENA_TITLE_DEFINITIONS.find(t=>t.id===this.phase2Arena.equippedTitle)?.name??'');
+    this.save();
+  }
   private changeClass(id: ClassId): void {
     if (!(id in CLASS_DEFINITIONS) || id === this.classId) return;
     const hpRatio = this.hero.hp / this.hero.maxHp;
@@ -1175,7 +1239,9 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, regionId:this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, regionId:this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot(),
+        phase2:{arena:this.phase2Arena.snapshot(),runes:this.phase2Runes.snapshot(),rewards:this.phase2Rewards.snapshot(),
+          market:this.phase2Market.snapshot(),gathering:this.phase2Gathering.snapshot()} }));
     } catch {
       if (!this.saveErrorReported && this.hud) { this.hud.notify('Armazenamento local indisponível. Esta sessão continua sem salvar.', 'warning'); this.saveErrorReported = true; }
     }
@@ -1194,6 +1260,12 @@ export class Engine {
       this.base.restore(save.base);
       this.codex.restore(save.codex);
       this.deferredQuestSave=save.quests;
+      if(save.phase2&&typeof save.phase2==='object'){
+        const r=save.phase2 as Record<string,unknown>;
+        this.phase2Arena.restore(r.arena);this.phase2Runes.restore(r.runes,this.inventory.level);
+        this.phase2Rewards.restore(r.rewards);this.phase2Market.restore(r.market);
+        this.phase2GatheringSave=r.gathering;
+      }
       if(typeof save.regionId==='string'&&REGIONS.some(r=>r.id===save.regionId))this.restoredRegionId=save.regionId;
     } catch { /* Invalid or unavailable browser storage starts a fresh, playable session. */ }
   }
@@ -1204,6 +1276,8 @@ export class Engine {
   }
 
   dispose(): void {
+    this.phase2UI.dispose();this.phase2Gathering.dispose();this.phase2Weather.dispose();
+    this.phase2Title.dispose();this.phase2Combat.dispose();
     this.running = false;
     cancelAnimationFrame(this.frameId);
     this.save();

@@ -8,7 +8,7 @@ export type WeaponModelId =
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
   | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
   | 'spellbook_open' | 'spellbook_closed'
-  | 'dungeon_sword' | 'prototype_sword' | 'dungeon_shield_round' | 'dungeon_shield_rectangle'
+  | 'gladiator-blade' | 'dungeon_sword' | 'prototype_sword' | 'dungeon_shield_round' | 'dungeon_shield_rectangle'
   | `armory-${ClassId}-${0 | 1 | 2 | 3 | 4}`
   | `paladin-shield-${0 | 1 | 2 | 3 | 4}`;
 
@@ -44,7 +44,7 @@ const models = new Map<WeaponModelId, Promise<GLTF>>();
 export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
-    const url=import.meta.env.BASE_URL+((name.startsWith('armory-') || name.startsWith('paladin-shield-'))
+    const url=import.meta.env.BASE_URL+((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
       ?'models/weapons/'+name+'.glb'
       :name==='spear'
       ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
@@ -63,11 +63,11 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   // ranger longbow before applying inverse scaling for the hand bone.
   if(name==='longbow')model.scale.multiplyScalar(3.25);
   // Scale author-created GLBs to a stable silhouette without generating geometry.
-  if(name.startsWith('armory-') || name.startsWith('paladin-shield-')){
+  if(name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade'){
     const bounds=new Box3().setFromObject(model);
     if(!bounds.isEmpty()){
       const size=bounds.getSize(new Vector3());
-      const type=name.startsWith('paladin-shield-')?'shield':name.split('-')[1];
+      const type=name==='gladiator-blade'?'paladin':name.startsWith('paladin-shield-')?'shield':name.split('-')[1];
       const target=type==='shield'?.84:type==='assassin'?.72:type==='ranger'?1.5:type==='lanceman'?1.9
         :type==='monk'?.92:type==='necromancer'?1.35:1.45;
       const longest=Math.max(size.x,size.y,size.z);

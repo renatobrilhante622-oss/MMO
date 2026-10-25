@@ -1,0 +1,40 @@
+/* PR15 — dedicated local campaign systems. Existing online arena/market unchanged. */
+.pr15-overlay{position:fixed;inset:0;z-index:700;background:#060c17ed;backdrop-filter:blur(14px);pointer-events:auto;color:#ebecf4;font-family:system-ui,sans-serif;display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+.pr15-overlay[hidden]{display:none!important}
+.pr15-shell{display:flex;flex-direction:column;width:min(1100px,100%);max-height:95dvh;min-height:0;border:1px solid #c2a67180;border-radius:17px;background:linear-gradient(140deg,#17283b,#101525 66%,#241d36);box-shadow:0 20px 85px #000d;overflow:hidden}
+.pr15-shell>header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #ae92534a;color:#ecd396;letter-spacing:.13em}
+.pr15-overlay button{appearance:none;border:1px solid #a88f6d99;color:#f6e8c7;border-radius:10px;background:linear-gradient(140deg,#63523c,#28334c);min-height:40px;padding:8px 12px;font:700 12px system-ui;cursor:pointer;touch-action:manipulation}
+.pr15-overlay button:disabled{opacity:.4;cursor:not-allowed}.pr15-overlay button:focus-visible{outline:2px solid #9de3ff}
+.pr15-tabs{display:flex;gap:8px;overflow-x:auto;flex-shrink:0;padding:10px 16px;border-bottom:1px solid #826f5847}
+.pr15-tabs button{white-space:nowrap;flex:1;min-width:80px}.pr15-tabs button.selected{background:linear-gradient(115deg,#826537,#4e366d);border-color:#e8c174}
+.pr15-content{overflow:auto;overscroll-behavior:contain;padding:18px 22px;flex:1;min-height:0}
+.pr15-content h2{color:#ffe4a9;font:26px Georgia,serif;margin:5px 0 12px}.pr15-content h3{font:17px Georgia,serif;color:#e9d7ad}
+.pr15-content p,.pr15-content small{color:#b7c7dc;line-height:1.45}
+.pr15-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.pr15-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:13px 0 22px}
+.pr15-card{background:linear-gradient(145deg,#273246,#161c2c);border:1px solid #c7ac724a;border-radius:13px;padding:14px;min-width:0;box-shadow:inset 0 1px #ffffff12}
+.pr15-card h3{margin:0 0 6px}.pr15-card p{margin:8px 0;font-size:12px}.pr15-card button{margin-top:7px;width:100%}
+.pr15-card.active{border-color:#e9c976;box-shadow:0 0 18px #e3bb5955}
+.pr15-duel{margin-top:12px;padding:12px;border-radius:14px;border:1px solid #ad8c715e;background:#0b1422}
+.pr15-arena-3d,.pr15-arena-canvas{display:block;width:100%;height:clamp(190px,33vh,330px);border-radius:12px;background:radial-gradient(ellipse at 50% 30%,#32465a,#121521)}
+.pr15-fighter-bars{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0;font-size:11px;font-weight:700;color:#e8d5b0}
+.pr15-fighter-bars progress{display:block;width:100%;height:10px;accent-color:#d69b55}
+.pr15-skillrow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.pr15-skillrow button{min-height:42px;font-size:10px;flex:1 1 80px}
+.pr15-combat-log{max-height:85px;overflow:auto;display:flex;gap:6px;flex-direction:column;font-size:11px;color:#b8c9db;padding-left:22px}
+.pr15-constellation{position:relative;min-height:460px;border:1px solid #9c87d36e;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#3b275b,#0c1331 60%,#090d1b);background-image:radial-gradient(#dbd6ffb0 1px,transparent 2px),radial-gradient(ellipse at 50% 45%,#3b275b,#0c1331 60%,#090d1b);background-size:36px 39px,auto}
+.pr15-star{position:absolute;left:clamp(0px,var(--x),calc(100% - 172px));top:clamp(0px,var(--y),calc(100% - 132px));width:175px;padding:10px;border:1px solid #ac91d4;border-radius:13px;background:#121b38e8;box-shadow:0 0 24px #6340a25e}
+.pr15-star.active{border-color:#ffdf8e;box-shadow:0 0 28px #ffd46b88}.pr15-star h3{font-size:13px;margin:0}.pr15-star small{font-size:10px;display:block}.pr15-star p{margin:4px}.pr15-star button{min-height:32px;width:100%;padding:4px}
+.pr15-market-bar{display:flex;flex-wrap:wrap;gap:12px;padding:12px;background:#111b2d;border-radius:12px}.pr15-market-bar label{display:flex;align-items:center;gap:8px}.pr15-market-bar input,.pr15-market-bar select{color:#f6e8c7;background:#283a4d;border:1px solid #7b8a98;padding:8px;max-width:135px;border-radius:8px}
+.pr15-status{font-size:12px;min-height:16px}
+.pr15-shortcut{color:#f0d4a0!important}
+.gather-context{position:fixed;left:50%;bottom:max(190px,calc(env(safe-area-inset-bottom) + 165px));transform:translateX(-50%);z-index:43;display:flex;flex-direction:column;min-width:min(300px,72vw);padding:9px 12px;gap:5px;pointer-events:auto;border:1px solid #baaa7f;border-radius:12px;background:#102433ed;color:#d3e8e1;text-align:center}
+.gather-context[hidden]{display:none!important}
+.gather-context button{background:#355b47;color:#f4f6cd;border:1px solid #bbcb8d;border-radius:10px;min-height:43px;font-weight:bold}
+.gather-context progress{width:100%;height:6px;accent-color:#b9ea89}.gather-context small{font-size:10px}
+@media(max-width:580px){.pr15-shell{max-height:98dvh}.pr15-content{padding:12px}.pr15-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.pr15-card{padding:9px}.pr15-tabs{gap:5px;padding:5px}.pr15-tabs button{min-width:76px;font-size:10px;padding:6px}.pr15-arena-3d{height:210px}.pr15-constellation{min-height:530px}.pr15-star{width:145px}.pr15-star h3{font-size:12px}}
+@media(max-height:500px){.gather-context{bottom:85px}.pr15-content h2{font-size:19px}}
+
+/* Profile shares the same touch-rotate/pinch-zoom character renderer as Collection and Inventory. */
+.pr15-profile-preview{position:relative;width:100%;height:clamp(210px,33vh,340px);min-height:210px;overflow:hidden;border-radius:14px;border:1px solid #b5a27c66;background:radial-gradient(ellipse at 50% 65%,#31334f,#0d1528 75%)}
+.pr15-profile-preview .paperdoll-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.pr15-profile-hint{display:block;color:#bdc8db;font-size:11px;line-height:1.5;margin:4px 0 12px;text-align:center}

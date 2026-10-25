@@ -443,7 +443,11 @@ export class ArticulatedCharacter {
     this.clearGlbWeapons();
     const version=this.glbWeaponGeneration;
     const equipped=weaponPackForClass(this.weaponPackId,this.definition.id);
-    for(const gear of equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
+    const gladiatorGear=this.weaponPackId==='gladiator-blade'
+      ? [{model:'gladiator-blade' as const,bone:'righthand' as const},
+         ...CLASS_EQUIPMENT_MODELS[this.definition.id].filter(g=>g.bone!=='righthand')]
+      :null;
+    for(const gear of gladiatorGear??equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
       void loadWeaponModel(gear.model).then(model=>{
         if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
         const offset=gear.offset??[0,0,0];
