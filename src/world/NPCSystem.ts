@@ -2,6 +2,7 @@ import {PerspectiveCamera,Scene,Vector3} from 'three';
 import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
 import {REGIONS} from './Regions';
 import type {QuestSystem} from '../rpg/QuestSystem';
+import {avatarSvg} from '../ui/AvatarRenderer';
 
 export type NPCRole='quest'|'merchant'|'smith'|'teleport';
 export interface NPCDefinition {id:string;name:string;role:NPCRole;x:number;z:number;model:ModelName;region:string;icon:string;}
@@ -116,7 +117,16 @@ export class NPCSystem {
     window.className='eterna-npc-window';
     const title=document.createElement('header');
     const portrait=document.createElement('span');portrait.className='eterna-npc-portrait';
-    portrait.textContent=npc.definition.icon;
+    const portraitId=({
+      'guide-aurora':'paladin','guide-crypt':'lich','guide-highlands':'archmage',
+      'guide-rift':'berserker','guide-eclipse':'assassin',
+      'blacksmith-aster':'berserker','teleporter-aster':'archmage',
+      'merchant-aurora':'ranger','merchant-crypt':'assassin',
+      'merchant-highlands':'archmage','merchant-rift':'paladin',
+      'merchant-eclipse':'lich'
+    } as Record<string,string>)[npc.definition.id]??'ranger';
+    portrait.innerHTML=avatarSvg(portraitId);
+    portrait.setAttribute('aria-label','Retrato ilustrado: '+npc.definition.name);
     const name=document.createElement('div');
     const heading=document.createElement('h2');heading.textContent=npc.definition.name;
     const job=document.createElement('small');job.textContent=npc.definition.role.toUpperCase();
@@ -132,6 +142,20 @@ export class NPCSystem {
       button.onclick=fn;actions.append(button);
     };
     for(const quest of this.quests.all().filter(q=>q.npcId===npc.definition.id)){
+      const rewards=document.createElement('div');
+      rewards.className='eterna-npc-quest-rewards';
+      const headingReward=document.createElement('strong');
+      headingReward.textContent=(pt?'RECOMPENSAS • ':'REWARDS • ')+quest.title;
+      const detailReward=document.createElement('small');
+      const r=quest.reward;
+      detailReward.textContent=[
+        '✦ '+r.xp+' XP','🟡 '+r.gold+' '+(pt?'Ouro':'Gold'),
+        ...(r.crystals?['💎 '+r.crystals+' '+(pt?'Cristais':'Crystals')]:[]),
+        ...(r.tickets?['🎟 '+r.tickets+' Tickets']:[]),
+        ...(r.itemRarity?['⚔ '+r.itemRarity.toLocaleUpperCase()]:[])
+      ].join('   ·   ');
+      rewards.append(headingReward,detailReward);
+      actions.append(rewards);
       const progress=this.quests.progressOf(quest);
       if(progress.claimed)continue;
       if(progress.ready)action('🎁 '+(pt?'Resgatar: ':'Claim: ')+quest.title,()=>{this.callbacks.onQuestClaimed(quest.id);this.renderDialogue();});
