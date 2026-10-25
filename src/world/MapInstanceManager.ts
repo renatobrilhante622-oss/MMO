@@ -2,6 +2,7 @@ import type {Scene} from 'three';
 import type {PhysicsWorld} from '../physics/PhysicsWorld';
 import {OpenWorldGenerator} from './OpenWorldGenerator';
 import {REGIONS} from './Regions';
+import {dungeonColliders} from './DungeonInstance';
 
 /**
  * One physical world instance at a time. A region owns its own triangulated
@@ -22,12 +23,13 @@ export class MapInstanceManager {
   get revision():number{return this.generation;}
   activate(id:string):OpenWorldGenerator{
     const idx=REGIONS.findIndex(r=>r.id===id);
-    if(idx<0)throw new Error('Unknown map: '+id);
+    if(idx<0&&id!=='dungeon')throw new Error('Unknown map: '+id);
     if(id===this.currentId)return this.world;
-    const next=new OpenWorldGenerator(this.scene,713+idx*1009,id);
+    const next=new OpenWorldGenerator(this.scene,id==='dungeon'?91631:713+idx*1009,id);
     let installed=false;
     try{
       next.generate();
+      if(id==='dungeon')next.colliders.push(...dungeonColliders((x,z)=>next.heightAt(x,z)));
       this.physics.switchTerrain(next);
       installed=true;
     }catch(error){
