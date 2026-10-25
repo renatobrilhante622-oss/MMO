@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationMixer, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
+  AnimationAction, AnimationClip, AnimationMixer, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
   Object3D, Vector3,
 } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -37,6 +37,7 @@ export class AnimatedGLB {
 
   private mixer?: AnimationMixer;
   private readonly actions = new Map<string, AnimationAction>();
+  private readonly clips = new Map<string, AnimationClip>();
   private active?: AnimationAction;
   private activeKey = '';
   private materials: Array<{ material: MeshStandardMaterial; original: Color; originalEmissive: Color; originalEmissiveIntensity: number }> = [];
@@ -46,6 +47,7 @@ export class AnimatedGLB {
   private baseColor = new Color(0x617080);
   private accent = new Color(0x9c7dcc);
   private readonly preservedPalette: boolean;
+  private readonly hitColor = new Color(0xff6b6b);
 
   constructor(
     readonly name: ModelName,
@@ -93,7 +95,8 @@ export class AnimatedGLB {
     });
     this.root.add(pivot);
     this.mixer = new AnimationMixer(model);
-    for (const clip of gltf.animations) this.actions.set(clip.name.toLowerCase(), this.mixer.clipAction(clip));
+    // 75+ clips per character: create mixer actions lazily to avoid O(actors * clips) cost.
+    for (const clip of gltf.animations) this.clips.set(clip.name.toLowerCase(), clip);
     this.ready = true;
     this.tint(this.baseColor.getHex(), this.accent.getHex());
     this.play('idle');
@@ -124,11 +127,21 @@ export class AnimatedGLB {
             : ['1h_melee_attack_slice_horizontal', '1h_melee_attack_chop', 'unarmed_melee_attack_punch_a'],
     };
     for (const candidate of candidates[state] ?? [state]) {
-      const action = this.actions.get(candidate);
-      if (action) return { action, key: candidate };
+      const clip=this.clips.get(candidate);
+      if(!clip)continue;
+      let action=this.actions.get(candidate);
+      if(!action && this.mixer){
+        action=this.mixer.clipAction(clip);
+        this.actions.set(candidate,action);
+      }
+      if(action)return {action,key:candidate};
     }
-    const fallback = this.actions.get('idle') ?? this.actions.values().next().value;
-    return fallback ? { action: fallback, key: 'fallback' } : undefined;
+    const fallbackClip=this.clips.get('idle')??this.clips.values().next().value;
+    if(!fallbackClip||!this.mixer)return undefined;
+    const key=fallbackClip.name.toLowerCase();
+    let action=this.actions.get(key);
+    if(!action){action=this.mixer.clipAction(fallbackClip);this.actions.set(key,action);}
+    return {action,key};
   }
 
   attachAt(name: string, object: Object3D, offset = new Vector3()): boolean {
@@ -177,9 +190,8 @@ export class AnimatedGLB {
   /** Real GLB materials flash in sync with authoritative enemy HP loss. */
   setHitFlash(strength: number): void {
     const flash = Math.min(1, Math.max(0, Number.isFinite(strength) ? strength : 0));
-    const hit = new Color(0xff6b6b);
     for (const entry of this.materials) {
-      entry.material.emissive.copy(entry.originalEmissive).lerp(hit, flash);
+      entry.material.emissive.copy(entry.originalEmissive).lerp(this.hitColor, flash);
       entry.material.emissiveIntensity = flash > 0 ? Math.max(1, entry.originalEmissiveIntensity) : entry.originalEmissiveIntensity;
     }
   }
@@ -224,6 +236,7 @@ export class AnimatedGLB {
     this.materials.forEach(({ material }) => material.dispose());
     this.materials.length = 0;
     this.actions.clear();
+    this.clips.clear();
     this.root.removeFromParent();
     this.root.clear();
   }
