@@ -867,6 +867,7 @@ export class Engine {
     this.hud.update({
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
+      regionName:regionAt(this.hero.position.x,this.hero.position.z).name[this.progress.language==='pt'?0:1],
       classId: this.classId, state: this.hero.machine.state,
       gold: this.inventory.gold, crystals: this.inventory.crystals, items: this.inventory.items, equipment: this.inventory.equipment,
       buildings: this.base.buildings.map(building => ({ ...building, cost: this.base.cost(building.id) })),
