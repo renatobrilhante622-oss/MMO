@@ -1,4 +1,6 @@
 import {DUNGEONS} from '../world/Regions';
+import {dungeonArtwork} from './CardArtwork';
+import {menuIcon} from './MenuIcons';
 export type DungeonDifficulty='normal'|'elite'|'nightmare'|'abyssal';
 export interface DungeonTier {id:DungeonDifficulty;minLevel:number;label:string;rarity:string;}
 export const DUNGEON_TIERS:readonly DungeonTier[]=[
@@ -34,7 +36,7 @@ export class DungeonUI {
    private readonly onEnter:(id:string,difficulty:DungeonDifficulty)=>boolean,
    private readonly onExit:()=>void){
    this.trigger.type='button';this.trigger.className='eterna-dungeon-trigger';
-   this.trigger.textContent='⚔ MASMORRAS';
+   this.trigger.innerHTML=menuIcon('dungeons')+'<span>MASMORRAS</span>';
    this.trigger.onclick=()=>this.open();
    this.backdrop.className='eterna-dungeon-overlay';this.backdrop.hidden=true;
    this.backdrop.setAttribute('role','presentation');
@@ -55,7 +57,7 @@ export class DungeonUI {
    const header=document.createElement('header');
    const title=document.createElement('div');
    title.innerHTML='<small>ETERNA • INSTÂNCIAS PVE</small><h2>MASMORRAS & GUARDIÕES</h2>';
-   const close=document.createElement('button');close.type='button';close.textContent='✕';
+   const close=document.createElement('button');close.type='button';close.innerHTML=menuIcon('close');
    close.setAttribute('aria-label','Fechar seleção');close.onclick=()=>this.close();
    header.append(title,close);this.body.append(header);
    const panel=document.createElement('div');panel.className='dungeon-selection';
@@ -63,7 +65,8 @@ export class DungeonUI {
    for(const item of DUNGEON_SHOWCASE){
      const card=document.createElement('button');card.type='button';
      card.className='dungeon-cover'+(this.selected===item.id?' selected':'');
-     const image=import.meta.env.BASE_URL+'textures/real-pbr/'+item.texture+'_1K-JPG_Color.webp';
+     const image=dungeonArtwork(item.id);
+     card.dataset.landscape=item.id;
      card.style.backgroundImage='linear-gradient(#0a14272a,#0a1427dd),url("'+image+'")';
      const name=document.createElement('strong');name.textContent=item.name;
      const subtitle=document.createElement('small');subtitle.textContent=item.subtitle;

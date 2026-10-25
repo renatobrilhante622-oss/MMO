@@ -1,0 +1,230 @@
+{
+  "license": "CC0-1.0",
+  "description": "Static environment artwork rendered from the bundled source-authored Kenney GLB meshes and ambientCG photographic ground textures. No AI images or synthesized placeholder models.",
+  "renderMethod": {
+    "renderer": "Three.js ACESFilmicToneMapping with PCFSoftShadowMap",
+    "script": "scripts/render-landscape-art.ts",
+    "automation": "scripts/render-landscape-art.py",
+    "resolution": [
+      1280,
+      640
+    ],
+    "modifications": "Scene placement, camera, lighting and planar floor UVs; screenshot encoded as WebP quality91. Original model geometry shapes are preserved."
+  },
+  "sources": [
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-oak.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-oak.glb",
+      "sha256": "d7fd8773674928c50c11b66d12c636d49bdcc15a8b1c7fbb98e6f63a3439a3f3",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-cone.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-cone.glb",
+      "sha256": "90be4d214ee2cbf79d317677cb87fc11dac9873b73e446b75e8c12825a374272",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-default-dark.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-default-dark.glb",
+      "sha256": "f2dc452b8fa98e68e3f892526b7d3f5e8d27d6acf4dd3c6f4b3795d64b879cce",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_rock-largea.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/rock-largea.glb",
+      "sha256": "6dd15390fd96501dcd1454765a17ba61dbbd8d47705dfe5149c8dd92b353ce25",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_cliff-rock.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/cliff-rock.glb",
+      "sha256": "64b555b394b4312938ccd389862d5c01beb3fc417100aa41bb1e5e96a9889de0",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_graveyard-kit_gravestone-cross-large.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/gravestone-cross-large.glb",
+      "sha256": "fe6a0f52cf44a2180ae2ea3c5daa7eb9027c3d86ec1fc3fa7975b599f5df839d",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_graveyard-kit_altar-stone.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/altar-stone.glb",
+      "sha256": "fa84fe7317826b8fc281d2f63c7a5600c8219dc7638db6f3e0cd594e0da22414",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_castle-kit_tower-square.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/castle-kit/tower-square.glb",
+      "sha256": "f2242fe7ec92673137e37ee7fb8fd797c9a9133ed07052d3e1fd7c7afdf8c3a9",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/textures/real-pbr/Grass004_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Grass004_1K-JPG_Color.jpg",
+      "sha256": "e511c76aea89763ed6ea4d41adee8abad9add153cfa746c8ad876e9a02ec536f",
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground071_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground071_1K-JPG_Color.jpg",
+      "sha256": "f3e1eba0097ee9053132f32940078487a79016ed3a3fa2079ba258c2f4ec3315",
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/PavingStones046_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/PavingStones046_1K-JPG_Color.jpg",
+      "sha256": "7a49d437f5b7876bef48e99b2409e9fb7988975b57e8a78f22a4da724e3941bc",
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Snow010A_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Snow010A_1K-JPG_Color.jpg",
+      "sha256": "5882a8bc7ab08e644d99f9e74c042a8e1fde84989f4c7bb519d916321d408ee6",
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground093C_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground093C_1K-JPG_Color.jpg",
+      "sha256": "3cf981f7ef95e159ef16397642c41d60fce73ec8c8f17fb48406d09038d94b64",
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_floor.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/floor.glb",
+      "sha256": "0e6035d17cd146bdddfc8fc0a96bb5f300f3c0cebec1b1cdace95d331b3e84bc",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_wall-opening.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/wall-opening.glb",
+      "sha256": "c29ebbc75c5a334ef4706893bd3e831ee03d3078e299ddec95a3817d5cdd7a01",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_gate.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/gate.glb",
+      "sha256": "90b6a46fa52f0b9720ff3c8a402ab23b047bff835c67548aa0118c71d0b5217e",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_column.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/column.glb",
+      "sha256": "f08459ee6979a23394a2f74f6eeec2d5aabf0ce27443c1323703a48274c0adf8",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_stairs.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/stairs.glb",
+      "sha256": "0f68d5432084ae6484327cfdeae16662e71ec3abb9bc8bb4a27f15021fd189de",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_fire-basket.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/fire-basket.glb",
+      "sha256": "72f59cd36a2c00caaea63a974030f6f8e5b7ec07971fe0dea487a64a3584ae00",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/dungeon/Kenney_Dungeon_crystal.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/tower-defense-kit/detail-crystal-large.glb",
+      "sha256": "494ca8814457819d48963a7aaa0859ce87c289b886e52ec89b77e34217474fa4",
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    }
+  ],
+  "renders": [
+    {
+      "file": "aurora.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "a2008b9eb2d68bf3ad351ec0f51862274e6b31794c5880f27b53ad69fced53de",
+      "bytes": 75008,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "crypt.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "26e20600cab2c68acf1063272c198f48a33f2b9bddfacd9459570b6faaf96212",
+      "bytes": 44672,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "dungeon-crypt.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "a5139b901c3c51450abdff08fa744e5f5615742f3c21671fce421f32b903459e",
+      "bytes": 46280,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "dungeon-eclipse.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "691fd018583291f586a8f33b257d2ca0b72927a4e45d08e4ca6ed0b029793170",
+      "bytes": 66864,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "dungeon-highlands.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "6e5e82966ed40ba8623ad07a6f5fa2be03301d27aabf266ee46038030f45df94",
+      "bytes": 31366,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "dungeon-rift.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "5eee71c090da5005b86adcd79e01be35088541f5cb1d4ea4a961e280f8113ed1",
+      "bytes": 32354,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "eclipse.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "4679bf60e67fbc739c167f8c5b2c17f3b983f3b8415502705243b5ad3c2f1ed1",
+      "bytes": 64504,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "highlands.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "64faadb2b93baf247bcddfa0c068e74f76c3053b9b4a98e832bd514e85e41f46",
+      "bytes": 29318,
+      "license": "CC0-1.0"
+    },
+    {
+      "file": "rift.webp",
+      "width": 1280,
+      "height": 640,
+      "sha256": "20295311d3bf1257801191356e978b3451721b238451653c29e010db2eaa3531",
+      "bytes": 29650,
+      "license": "CC0-1.0"
+    }
+  ]
+}

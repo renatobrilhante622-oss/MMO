@@ -5,6 +5,8 @@ import { translateText } from './I18n';
 import type { Language } from '../progression/AdventureProgress';
 import { VitalMeter } from './VitalMeter';
 import { itemIcon } from './ItemIconRenderer';
+import {menuIcon,type MenuIconName} from './MenuIcons';
+import {fitHudDrawer} from './HudLayout';
 import './style.css';
 
 export interface HUDModel {
@@ -47,21 +49,7 @@ const slotNames: Record<EquipmentSlot, string> = { weapon: 'Arma', helmet: 'Elmo
 const stateNames: Record<HeroState, string> = { idle: 'Na vila', run: 'Explorando', jump: 'No ar', doubleJump: 'Salto duplo', fall: 'No ar', climb: 'Escalando', swim: 'Nadando', dive: 'Mergulhando', slide: 'Esquiva', mounted: 'Montado', dead: 'Retornando à vila' };
 const esc = (s: string): string => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const clamp = (n: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, n));
-const icon = (name: string): string => {
-  const paths: Record<string, string> = {
-    sword: '<path d="m5 19 3-3m-3-3 6 6M8 16 18 6l1-3-3 1L6 14"/>',
-    jump: '<path d="M7 13 12 5l5 8M12 5v14M5 19h14"/>',
-    dash: '<path d="m13 4-7 9h6l-1 7 7-10h-6l1-6ZM3 7h4M2 17h4"/>',
-    mount: '<path d="M5 19v-7l4-3 3 3h6l2-7-5-2-3 5M6 13h12v6M5 19H3m15 0h3M15 4l1-2"/>',
-    bag: '<path d="M3 10V7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v13H3V10Zm0 0h18M8 4v16m8-16v16M10 9h4v5h-4Z"/>',
-    classes: '<path d="m12 2 8 4v7l-8 9-8-9V6l8-4ZM8 9l4 4 4-4M12 13v6"/>',
-    base: '<path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7M3 21h18"/>',
-    codex: '<path d="M12 5C8 2 4 3 2 4v15c4-1 6-1 10 1 4-2 6-2 10-1V4c-3-1-7-2-10 1ZM12 5v15M5 7l4 1M15 8l4-1"/>',
-    interact: '<path d="M8 4h8v16H8M4 12h11m-4-4 4 4-4 4"/>',
-    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.5 1-1.5 1.5-1.5 3M12 17h.01"/>',
-  };
-  return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${paths[name] ?? paths.sword}</svg>`;
-};
+const icon=(name:string):string=>menuIcon(({sword:'attack',bag:'inventory',help:'settings'} as Record<string,MenuIconName>)[name]??name);
 
 export class MobileHUD {
   private readonly root: HTMLDivElement;
@@ -118,11 +106,11 @@ export class MobileHUD {
       <aside class="quest-card"><div class="quest-label"><span class="quest-diamond"></span> A JORNADA COMEÇA</div><strong data-ref="questTitle">Além dos portões</strong><p data-ref="questText">Explore o vale. Derrote criaturas e encontre o portal ao norte.</p><div class="quest-progress" data-ref="dungeonStatus"></div></aside>
       <div class="resource-bar"><span class="gold-dot"></span><span data-ref="gold">0</span><span class="crystal-dot"></span><span data-ref="crystals">0</span><span class="save-indicator" title="Progresso salvo automaticamente neste dispositivo">AUTO SAVE</span></div>
       <nav class="menu-dock" aria-label="Menus do aventureiro">
-        <button class="hud-vip-shortcut" data-drawer-action="vip" title="VIP" aria-label="VIP"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m4 10 7 7 5-12 5 12 7-7-4 17H8Z" fill="#d8b968" stroke="#ffebac"/><path d="M9 23h14" stroke="#735020" stroke-width="2"/><circle cx="16" cy="21" r="2.5" fill="#b87cff"/></svg><span>VIP</span></button>
-        <button class="hud-pass-shortcut" data-drawer-action="pass" title="Passe de Batalha / Battle Pass" aria-label="Passe de Batalha / Battle Pass"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4h17v22H8L5 23V7Z" fill="#dbc392" stroke="#ffe7ac"/><path d="M9 4v19l-4 1m4-14h12m-12 4h12m-12 4h7" fill="none" stroke="#77562d"/><path d="m23 15 2 4 4 1-3 3 1 5-4-2-4 2 1-5-3-3 4-1Z" fill="#9473c5" stroke="#ddc3ff"/></svg><span data-hud-pt="Passe" data-hud-en="Pass">Passe</span></button>
-        <button class="hud-menu-toggle" data-drawer-toggle data-hud-menu aria-controls="adventurer-drawer" aria-expanded="false" aria-label="Abrir menu do aventureiro" title="Menu"><svg viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h18M5 14h18M5 21h18"/><circle cx="9" cy="7" r="2" fill="#13212e"/><circle cx="19" cy="14" r="2" fill="#13212e"/><circle cx="11" cy="21" r="2" fill="#13212e"/></svg><span>Menu</span></button>
+        <button class="hud-vip-shortcut" data-drawer-action="vip" title="VIP" aria-label="VIP">${menuIcon('vip')}<span>VIP</span></button>
+        <button class="hud-pass-shortcut" data-drawer-action="pass" title="Passe de Batalha / Battle Pass" aria-label="Passe de Batalha / Battle Pass">${menuIcon('pass')}<span data-hud-pt="Passe" data-hud-en="Pass">Passe</span></button>
+        <button class="hud-menu-toggle" data-drawer-toggle data-hud-menu aria-controls="adventurer-drawer" aria-expanded="false" aria-label="Abrir menu do aventureiro" title="Menu">${menuIcon('menu')}<span>Menu</span></button>
         <section class="hud-drawer" id="adventurer-drawer" aria-label="Atalhos do aventureiro" hidden>
-          <header><span data-hud-pt="SEU AVENTUREIRO" data-hud-en="YOUR ADVENTURER">SEU AVENTUREIRO</span><button data-drawer-close aria-label="Fechar menu / Close menu">×</button></header>
+          <header><span data-hud-pt="SEU AVENTUREIRO" data-hud-en="YOUR ADVENTURER">SEU AVENTUREIRO</span><button data-drawer-close aria-label="Fechar menu / Close menu">${menuIcon('close')}</button></header>
           <div class="hud-drawer-primary">
             <button data-panel="inventory">${itemIcon('chest','legendary')}<span data-hud-pt="Bolsa / Inventário" data-hud-en="Bag / Inventory">Bolsa / Inventário</span><kbd>I</kbd></button>
             <button data-drawer-action="forge">${itemIcon('axe','legendary')}<span data-hud-pt="Ferreiro / Forja & Sockets" data-hud-en="Blacksmith / Forge & Sockets">Ferreiro / Forja & Sockets</span></button>
@@ -141,7 +129,7 @@ export class MobileHUD {
       <div class="combat-controls"><div class="skills-row">${[0, 1, 2, 3].map(i => `<button class="skill-button" data-skill="${i}" data-ref="skill${i}" aria-label="Habilidade ${i + 1}"><span class="skill-glyph" data-ref="skillIcon${i}">${skillIcon(CLASS_DEFINITIONS.berserker.skills[i].id)}</span><span class="cooldown-number" data-ref="cooldown${i}"></span><small data-ref="skillName${i}"></small><kbd>${i + 1}</kbd></button>`).join('')}</div><div class="movement-actions"><button class="action-button mount-action" data-action="mount" data-ref="mountButton" aria-label="Invocar montaria (M)">${icon('mount')}<small>Montaria</small><kbd>M</kbd></button><button class="action-button" data-action="dash" aria-label="Deslizar (Shift)">${icon('dash')}<small>Esquiva</small><kbd>⇧</kbd></button><button class="action-button" data-action="jump" aria-label="Pular / duplo pulo (Espaço)">${icon('jump')}<small>Pular</small><kbd>␣</kbd></button><button class="attack-button" data-action="attack" aria-label="Atacar (J)">${icon('sword')}<small>ATACAR</small><kbd>J</kbd></button></div></div>
       <div class="combo-label" data-ref="combo"></div><div class="screen-vignette" data-ref="vignette"></div>
       <div class="damage-layer" data-ref="damageLayer" aria-hidden="true"></div><div class="toast-stack" data-ref="toasts" role="status" aria-live="polite"></div>
-      <div class="modal-backdrop" data-ref="modal" hidden><section class="game-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="overline" data-ref="modalSubtitle">SEU AVENTUREIRO</span><h1 id="modal-title" data-ref="modalTitle"></h1></div><button class="close-button" data-close aria-label="Fechar janela">×</button></header><div class="modal-body" data-ref="modalBody"></div></section></div>
+      <div class="modal-backdrop" data-ref="modal" hidden><section class="game-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="overline" data-ref="modalSubtitle">SEU AVENTUREIRO</span><h1 id="modal-title" data-ref="modalTitle"></h1></div><button class="close-button" data-close aria-label="Fechar janela">${menuIcon('close')}</button></header><div class="modal-body" data-ref="modalBody"></div></section></div>
       <section class="start-screen" data-ref="startScreen"><div class="start-topline"><span class="brand-mark">E<span>✦</span></span><span>UM NOVO MUNDO PARA EXPLORAR</span></div><div class="start-content"><div class="start-eyebrow"><span></span> A SAGA DOS NOVE <span></span></div><h1>ETERNA</h1><div class="start-subtitle">N I N E F O L D</div><p>Uma terra ancestral. Nove caminhos.<br>Uma lenda que só você pode escrever.</p><button class="start-button" data-start>INICIAR JORNADA <span>→</span></button><div class="start-details"><span>9 CLASSES</span><i></i><span>MUNDO ABERTO</span><i></i><span>PROGRESSO LOCAL</span></div></div><div class="start-bottom"><div class="quality-choice"><label for="start-quality">QUALIDADE</label><select id="start-quality" data-quality><option value="high">Alta · efeitos completos</option><option value="low">Leve · recomendado para celular</option></select></div><p><span class="desktop-copy">WASD para explorar · Arraste para olhar · J para atacar</span><span class="touch-copy">Joystick para explorar · Arraste à direita para olhar</span><br>Jogo individual • Sem conta • Salvamento neste dispositivo<br><span class="touch-copy">No celular, gire a tela para ampliar sua visão.</span></p><button data-panel="help">CONTROLES ${icon('help')}</button></div></section>`;
     const movement=this.root.querySelector<HTMLElement>('.movement-actions')!;
     const attack=movement.querySelector<HTMLElement>('.attack-button')!;
@@ -514,6 +502,11 @@ export class MobileHUD {
   /** Extension shortcuts remain inside the drawer and keep their own action handlers. */
   registerShortcut(button:HTMLButtonElement):void {
     button.type='button';
+    // Extension actions keep their listeners; presentation does not depend on emoji fonts.
+    const emblem:MenuIconName=button.classList.contains('pr15-shortcut')?'arena':button.classList.contains('clan-shortcut')?'clan':button.classList.contains('region-travel-trigger')?'teleports':button.classList.contains('eterna-dungeon-trigger')?'dungeons':'quest';
+    const label=button.querySelector<HTMLElement>('span:not([aria-hidden])');
+    if(label){button.querySelector('[aria-hidden]')?.remove();button.insertAdjacentHTML('afterbegin',menuIcon(emblem));}
+    else if(!button.querySelector('svg')){const text=button.textContent?.replace(/^[^\p{L}\p{N}]+/u,'')??'';button.innerHTML=menuIcon(emblem);const caption=document.createElement('span');caption.textContent=text;button.append(caption);}
     this.root.querySelector('.hud-drawer-primary')!.append(button);
   }
 
@@ -524,12 +517,12 @@ export class MobileHUD {
     this.root.classList.toggle('drawer-open',open);
     if(open){
       drawer.style.translate='none';
-      const dock=this.root.querySelector<HTMLElement>('.menu-dock')!,scale=dock.getBoundingClientRect().width/Math.max(1,dock.offsetWidth);
-      drawer.style.maxHeight=`${Math.max(100,(innerHeight-24)/scale)}px`;
-      const rect=drawer.getBoundingClientRect();
-      const dx=Math.max(8-rect.left,Math.min(0,innerWidth-8-rect.right));
-      const dy=Math.max(8-rect.top,Math.min(0,innerHeight-8-rect.bottom));
-      drawer.style.translate=`${dx/scale}px ${dy/scale}px`;
+      const dock=this.root.querySelector<HTMLElement>('.menu-dock')!,anchor=dock.getBoundingClientRect(),scale=anchor.width/Math.max(1,dock.offsetWidth);
+      drawer.style.maxWidth=`${Math.max(1,(innerWidth-16)/scale)}px`;
+      drawer.style.maxHeight=`${Math.max(1,(innerHeight-16)/scale)}px`;
+      const placement=fitHudDrawer(anchor,drawer.offsetWidth*scale,drawer.offsetHeight*scale,innerWidth,innerHeight);
+      drawer.style.maxHeight=`${placement.maxHeight/scale}px`;
+      drawer.style.right='auto';drawer.style.left=`${(placement.x-anchor.left)/scale}px`;drawer.style.top=`${(placement.y-anchor.top)/scale}px`;
     }
   }
 

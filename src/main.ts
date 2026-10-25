@@ -18,6 +18,9 @@ import './ui/dungeon-audit.css';
 import './ui/pr10-cinematic-hud.css';
 import './ui/pr13-visual.css';
 import './ui/pr15-systems.css';
+import './ui/pr16-design.css';
+import './ui/pr16-banners.css';
+import './ui/pr16-arena.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');

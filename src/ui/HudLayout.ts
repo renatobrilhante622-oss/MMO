@@ -2,6 +2,14 @@ export const HUD_KEYS=['joystick','combat','movement','minimap','vitals','shortc
 export type HudKey=typeof HUD_KEYS[number];
 export interface HudPlacement {x:number;y:number;scale:number;opacity:number;}
 export type HudLayout=Partial<Record<HudKey,HudPlacement>>;
+/** Scroll on the roomier side of the anchor while leaving the menu toggle accessible. */
+export function fitHudDrawer(anchor:{top:number;bottom:number;right:number},width:number,height:number,viewportWidth:number,viewportHeight:number):{x:number;y:number;maxHeight:number} {
+  const margin=8,gap=6;
+  const below=Math.max(0,viewportHeight-margin-anchor.bottom-gap),above=Math.max(0,anchor.top-margin-gap);
+  const openBelow=below>=above;
+  const maxHeight=Math.max(1,openBelow?below:above),fittedHeight=Math.min(height,maxHeight);
+  return {x:Math.max(margin,Math.min(anchor.right-width,viewportWidth-margin-width)),y:openBelow?anchor.bottom+gap:anchor.top-gap-fittedHeight,maxHeight};
+}
 export const HUD_STORAGE_KEY='eterna-hud-layout-v4';
 const finite=(v:unknown,fallback:number)=>typeof v==='number'&&Number.isFinite(v)?v:fallback;
 export function readHudLayout(value:unknown):HudLayout {
