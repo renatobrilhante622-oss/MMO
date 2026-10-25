@@ -5,6 +5,7 @@ import type { ClassId, Rarity } from '../core/GameTypes';
 import { CLASS_IDS } from '../combat/ClassSystem';
 import { RARITIES, COMPLETE_ITEM_CATALOG, scaleWorldItem, type InventoryAndLoot } from '../rpg/InventoryAndLoot';
 import { REGIONS, type DungeonDefinition } from '../world/Regions';
+import {isKnownRegionalMaterial} from '../rpg/RegionalLoot';
 
 export type Attribute = 'power'|'vitality'|'guard'|'spirit'|'precision';
 export type Gem = 'ruby'|'sapphire'|'emerald'|'diamond';
@@ -67,6 +68,7 @@ export class AdventureProgress {
   greaterGems:Record<Gem,number>={ruby:0,sapphire:0,emerald:0,diamond:0};
   hudOpacity=1;
   materials=0;
+  regionalMaterials:Record<string,number>={};
   potions={health:3,mana:3};
   owned=['traveler','wolf','horse','ironweapon'];
   equipped={skin:'traveler',pet:'wolf',mount:'horse',weapon:'ironweapon',wing:'wing-0'};
@@ -205,6 +207,11 @@ export class AdventureProgress {
     this.missionClaims.push(id+':'+this.missionKey(id==='weekly'?'week':'day'));this.missionClaims=this.missionClaims.slice(-30);
     this.passXp+=id==='daily'?60:id==='forest'?180:200;this.inventory.gold+=id==='daily'?120:id==='forest'?350:600;return true;
   }
+  collectRegionalMaterial(id:string,quantity:number):boolean{
+    if(!isKnownRegionalMaterial(id)||!Number.isFinite(quantity)||!Number.isInteger(quantity)||quantity<1||quantity>100)return false;
+    this.regionalMaterials[id]=Math.min(999999,(this.regionalMaterials[id]??0)+quantity);
+    return true;
+  }
   earnKill(level:number,boss:boolean,region?:string):void {
     if(region==='lake'){const forest='forest:'+this.missionKey('day');this.missions[forest]=(this.missions[forest]??0)+1;}
     const key='kill:'+this.missionKey('day');this.missions[key]=(this.missions[key]??0)+1;
@@ -263,6 +270,8 @@ export class AdventureProgress {
     if(object(raw.greaterGems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.greaterGems[key]=integer(raw.greaterGems[key],0,99999);
     this.hudOpacity=typeof raw.hudOpacity==='number'?Math.max(.3,Math.min(1,raw.hudOpacity)):1;
     this.vipDiamonds=integer(raw.vipDiamonds,0,999999);this.materials=integer(raw.materials,0,999999);this.shards=integer(raw.shards,0,999999);
+    if(object(raw.regionalMaterials))for(const [id,n] of Object.entries(raw.regionalMaterials))
+      if(isKnownRegionalMaterial(id))this.regionalMaterials[id]=integer(n,0,999999);
     if(object(raw.potions))for(const key of ['health','mana'] as const)this.potions[key]=integer(raw.potions[key],0,99);
     this.owned=[...new Set([...this.owned,...Array.isArray(raw.owned)?raw.owned.filter((id):id is string=>typeof id==='string'&&COSMETICS.some(c=>c.id===id)):[]])];
     if(object(raw.equipped))for(const type of ['skin','pet','mount','weapon','wing'] as const){const id=raw.equipped[type];if(typeof id==='string'&&this.owned.includes(id)&&COSMETICS.some(c=>c.id===id&&c.type===type))this.equipped[type]=id;}
