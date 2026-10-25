@@ -93,7 +93,7 @@ describe('official CC0 GLB asset integrity',()=>{
     const characters=JSON.parse(readFileSync(resolve(assetDir,'kaykit-manifest.json'),'utf8')) as {assets:Array<{license:string;upstreamGitBlobSha1:string}>};
     const weapons=JSON.parse(readFileSync(resolve(assetDir,'kaykit-weapons.json'),'utf8')) as {assets:Array<{license:string;sourceGltfGitSha1:string}>};
     expect(characters.assets).toHaveLength(7);
-    expect(weapons.assets).toHaveLength(10);
+    expect(weapons.assets).toHaveLength(12);
     for(const asset of characters.assets) {
       expect(asset.license).toBe('CC0-1.0');
       expect(asset.upstreamGitBlobSha1).toMatch(/^[a-f0-9]{40}$/);
