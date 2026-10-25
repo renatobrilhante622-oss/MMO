@@ -676,7 +676,8 @@ export class ArticulatedCharacter {
 
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
     dt = MathUtils.clamp(dt, 0, .05);
-    this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted');
+    this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted',state);
+    this.imported?.setHitFlash(hurt>0?Math.min(1,hurt*4):0);
     const angularDelta = Math.atan2(Math.sin(heading - this.lastHeading), Math.cos(heading - this.lastHeading));
     this.lastHeading = heading;
     this.turning = MathUtils.damp(this.turning, angularDelta / Math.max(dt, .001), 5, dt);
