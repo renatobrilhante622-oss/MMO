@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationClip, AnimationMixer, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
+  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
   Object3D, Vector3,
 } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -50,11 +50,17 @@ export class AnimatedGLB {
   private disposed = false;
   private attackTime = 0;
   private model?: Object3D;
+  private readonly creaturePhase={value:0};
+  private readonly creatureStride={value:0};
+  private readonly creatureTime={value:0};
+  private readonly staticCreature:boolean;
   private baseColor = new Color(0x617080);
   private accent = new Color(0x9c7dcc);
   private readonly preservedPalette: boolean;
   private attackWeapon:ClassDefinition['weapon']='sword';
   private classPalette=new Color(0xffffff);
+  private cosmeticTint=new Color(0xffffff);
+  private cosmeticStrength=0;
   private readonly hitColor = new Color(0xff6b6b);
 
   constructor(
@@ -64,7 +70,8 @@ export class AnimatedGLB {
     private readonly castShadow = false,
   ) {
     this.root.name = 'GLB ' + name;
-    this.preservedPalette = name.startsWith('KayKit_');
+    this.preservedPalette = name.startsWith('KayKit_') || name.startsWith('Creature_') || name==='Horse' || name==='Parrot';
+    this.staticCreature=name.startsWith('Creature_')&&name!=='Creature_wolf';
     // Browser-only I/O. Vitest/server-side execution never requests graphics.
     if (typeof document === 'undefined') return;
     void this.importModel(name);
@@ -96,6 +103,37 @@ export class AnimatedGLB {
       const isolated = (source: MeshStandardMaterial): MeshStandardMaterial => {
         const material = source.clone();
         this.materials.push({ material, original: source.color.clone(), originalEmissive: source.emissive.clone(), originalEmissiveIntensity: source.emissiveIntensity });
+        if(this.staticCreature && gltf.animations.length===0 && object.geometry?.attributes.position){
+          // Non-skinned GLBs have no bones. A vertex shader gives a small,
+          // reversible breathing / hoof / membrane deformation in local space.
+          // This must not be mistaken for a sourced skeletal gallop animation.
+          object.geometry.computeBoundingBox();
+          const bounds=object.geometry.boundingBox;
+          if(bounds){
+            const extent=bounds.getSize(new Vector3());
+            const wing=name==='Creature_wyvern'||name==='Creature_dragon';
+            const px=bounds.getCenter(new Vector3());
+            const pY=bounds.min.y;
+            material.onBeforeCompile=(shader)=>{
+              shader.uniforms.creaturePhase=this.creaturePhase;
+              shader.uniforms.creatureStride=this.creatureStride;
+              shader.uniforms.creatureTime=this.creatureTime;
+              shader.vertexShader='uniform float creaturePhase, creatureStride, creatureTime;\n'+shader.vertexShader;
+              shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+                `#include <begin_vertex>
+                  float bodyH=clamp((position.y-${pY.toFixed(6)})/${Math.max(.0001,extent.y).toFixed(6)},0.,1.);
+                  float sideX=(position.x-${px.x.toFixed(6)})/${Math.max(.0001,extent.x).toFixed(6)};
+                  float breath=sin(creatureTime*2.2)*.006;
+                  transformed.y+=breath*${Math.max(.001,extent.y).toFixed(6)}*bodyH;
+                  ${wing? `float membrane=smoothstep(.15,.42,abs(sideX))*smoothstep(.35,.7,bodyH);
+                     transformed.y+=sin(creatureTime*2.6+abs(sideX)*3.2)*membrane*.052*${Math.max(.001,extent.y).toFixed(6)};`:
+                     `float paws=(1.-smoothstep(.18,.37,bodyH))*creatureStride;
+                      transformed.z+=sin(creaturePhase*2.0+sign(sideX)*1.57)*paws*.032*${Math.max(.001,extent.z).toFixed(6)};`}
+                `);
+            };
+            material.customProgramCacheKey=()=>wing?'eterna-dragon-membrane-v1':'eterna-ungaited-quadruped-v1';
+          }
+        }
         return material;
       };
       object.material = Array.isArray(object.material)
@@ -187,8 +225,57 @@ export class AnimatedGLB {
     return true;
   }
 
+  /** Real post-normalization 3D dimensions: excludes hidden procedural art. */
+  getVisibleBounds():Box3|null{
+    if(!this.ready)return null;
+    this.root.updateWorldMatrix(true,true);
+    const bounds=new Box3().setFromObject(this.root);
+    return bounds.isEmpty()?null:bounds;
+  }
+  get animationCount():number{return this.clips.size;}
+  /** Palette safety: keep each author's diffuse + texture atlas distinct. */
+  setCompanionAppearance(color:number,hellhound=false):void{
+    const tint=new Color(color);
+    for(const {material,original,originalEmissive,originalEmissiveIntensity} of this.materials){
+      material.color.copy(original).lerp(tint,hellhound?.11:.045);
+      material.metalness=Math.min(.12,material.metalness);
+      material.roughness=Math.max(.72,material.roughness);
+      material.emissive.copy(originalEmissive);
+      material.emissiveIntensity=originalEmissiveIntensity;
+      if(hellhound){
+        // Animated, narrow emissive magma fissures; original wolf PBR
+        // normal/albedo remain untouched and no Canvas texture is generated.
+        material.color.multiplyScalar(.43);
+        material.emissive.setHex(0xff3b07);
+        material.emissiveIntensity=.26;
+        material.onBeforeCompile=shader=>{
+          shader.uniforms.creatureTime=this.creatureTime;
+          shader.vertexShader='varying vec3 vHellCoord;\n'+shader.vertexShader;
+          shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+            '#include <begin_vertex>\n vHellCoord=position.xyz;');
+          shader.fragmentShader='varying vec3 vHellCoord; uniform float creatureTime;\n'+shader.fragmentShader;
+          shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+             float fault = abs(sin(vHellCoord.y*17. + sin(vHellCoord.z*13.)*.9 + vHellCoord.x*7.));
+             float seam = pow(1.-fault,26.)*smoothstep(.08,.34,abs(vHellCoord.y));
+             outgoingLight += vec3(1.6,.22,.018)*seam*(.65+.35*sin(creatureTime*2.4));
+             #include <opaque_fragment>
+          `);
+        };
+        material.customProgramCacheKey=()=> 'eterna-hellhound-magma-v1';
+      }else if(this.name==='Creature_wolf'){
+        material.onBeforeCompile=()=>{};
+        material.customProgramCacheKey=()=> 'eterna-wolf-authored-pbr-v1';
+      }
+      material.needsUpdate=true;
+    }
+  }
   clearWeaponSlots():number{return this.model?clearWeaponSlots(this.model):0;}
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
+  setCosmeticPalette(color:number,rarity:number):void{
+    this.cosmeticTint.setHex(color);
+    this.cosmeticStrength=Math.min(.28,Math.max(0,rarity)*.052);
+    this.tint(this.baseColor.getHex(),this.accent.getHex());
+  }
 
   tint(color: number, accent: number): void {
     this.baseColor.setHex(color);
@@ -198,6 +285,8 @@ export class AnimatedGLB {
         // Preserve original albedo and atlas 1:1, including during parent changes
         // to a saddle: tinting lit atlas texels can wash details out on Android.
         material.color.copy(original).multiply(this.classPalette);
+        if(this.name.startsWith('KayKit_')&&this.cosmeticStrength>0)
+          material.color.lerp(original.clone().multiply(this.cosmeticTint),this.cosmeticStrength);
         material.roughness=Math.max(.67,material.roughness);
         material.metalness=Math.min(.22,material.metalness);
         if(material.map)material.map.needsUpdate=material.map.version===0;
@@ -245,6 +334,9 @@ export class AnimatedGLB {
   update(dt: number, speed: number, riding = false, locomotion?: string): void {
     if (!this.ready || !this.root.visible) return;
     const step = Math.min(.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
+    this.creatureTime.value+=step;
+    this.creatureStride.value=Math.min(1,Math.max(0,speed));
+    this.creaturePhase.value+=step*(2.5+speed*8);
     const target = locomotion === 'dead' ? 'dead'
       : riding ? 'mounted'
       : locomotion === 'slide' ? 'slide'

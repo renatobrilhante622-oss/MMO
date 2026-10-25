@@ -1,4 +1,16 @@
 import { MathUtils, Scene, Vector3 } from 'three';
+
+/** Relative to the mount: pet walks 1.8 m laterally, 1.2 m behind. */
+export function petFollowPosition(position:Vector3,facing:Vector3,mounted:boolean):Vector3 {
+  const forward=facing.clone().setY(0);
+  if(forward.lengthSq()<1e-6)forward.set(0,0,1);
+  forward.normalize();
+  const lateral=new Vector3(forward.z,0,-forward.x);
+  const offset=lateral.multiplyScalar(1.8).addScaledVector(forward,-1.2);
+  // Keep claws outside the entire mounted animal body, not under its feet.
+  if(mounted&&offset.length()<2.4)offset.setLength(2.4);
+  return position.clone().add(offset);
+}
 import { EventBus, type Combatant, type LootDrop } from '../core/GameTypes';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { CompanionRig } from './CompanionRig';
@@ -24,7 +36,7 @@ export class PetAndMountSystem {
 
   constructor(private scene: Scene, private hero: HeroController, private physics: PhysicsWorld, private events: EventBus) {
     this.riderOriginalScale.copy(hero.rig.root.scale);
-    this.pet.position.copy(hero.position).add(new Vector3(-2, 0, 1));
+    this.pet.position.copy(petFollowPosition(hero.position,hero.facing,false));
     this.lastMountPosition.copy(hero.position);
     this.scene.add(this.pet, this.mount);
     this.mount.visible = false;
@@ -45,7 +57,9 @@ export class PetAndMountSystem {
       // physics; never rewrite imported GLB materials on parent transitions.
       // KayKit's seated animation keeps the torso upright while the feet
       // remain below the saddle surface.
-      rider.position.set(0,-.88,.02);
+      // KayKit seated animation positions the hips about 0.88 m above its feet.
+      // The model's hips now coincide with the true 78%-height saddle anchor.
+      rider.position.set(0,-.88,0);
       rider.rotation.set(0,0,0);
       this.mountRig.root.getWorldScale(this.mountScale);
       rider.scale.set(
@@ -94,7 +108,8 @@ export class PetAndMountSystem {
         if (distance < nearest) { nearest = distance; target = enemy; }
       }
     }
-    const targetPosition = target ? target.position.clone() : this.hero.position.clone().add(new Vector3(-this.hero.facing.z * 1.8, 0, this.hero.facing.x * 1.8)).addScaledVector(this.hero.facing, -1.9);
+    const follow=petFollowPosition(this.hero.position,this.hero.facing,this.hero.mounted);
+    const targetPosition = target ? target.position.clone() : follow;
     let lootTarget: LootDrop | undefined;
     let lootDistance = 7;
     for (const drop of drops) {
@@ -105,6 +120,14 @@ export class PetAndMountSystem {
       }
     }
     if (lootTarget && (!target || nearest > 4)) targetPosition.copy(lootTarget.position);
+    const mountClearance=this.hero.mounted?Math.max(2.4,this.mountRig.safeFootprintRadius+.45):0;
+    if(this.hero.mounted){
+      const relative=targetPosition.clone().sub(this.hero.position).setY(0);
+      if(relative.lengthSq()<mountClearance*mountClearance){
+        if(relative.lengthSq()<.0001)relative.copy(follow).sub(this.hero.position).setY(0);
+        targetPosition.copy(this.hero.position).add(relative.setLength(mountClearance));
+      }
+    }
     const offset = targetPosition.sub(this.pet.position);
     offset.y = 0;
     const distance = offset.length();
@@ -115,7 +138,14 @@ export class PetAndMountSystem {
       const facing = Math.atan2(offset.x, offset.z);
       this.pet.rotation.y += Math.atan2(Math.sin(facing - this.pet.rotation.y), Math.cos(facing - this.pet.rotation.y)) * (1 - Math.exp(-dt * 12));
     }
-    if (this.pet.position.distanceTo(this.hero.position) > 38) this.pet.position.copy(this.hero.position).add(new Vector3(-2, 0, 1));
+    if (this.pet.position.distanceTo(this.hero.position) > 38)this.pet.position.copy(follow);
+    if(this.hero.mounted){
+      const relative=this.pet.position.clone().sub(this.hero.position).setY(0);
+      if(relative.lengthSq()<(mountClearance-.05)*(mountClearance-.05)){
+        if(relative.lengthSq()<.0001)relative.copy(follow).sub(this.hero.position).setY(0);
+        this.pet.position.copy(this.hero.position).add(relative.setLength(mountClearance-.05));
+      }
+    }
     this.pet.position.y = Math.max(this.physics.terrainHeight(this.pet.position.x, this.pet.position.z), this.physics.waterLevel - 0.28);
     this.petRig.update(dt, distance > .65 ? speed : 0, this.time, !!target && nearest < 2);
     if (target && nearest < target.radius + 1.15 && this.attackCooldown === 0 && this.hero.alive) {

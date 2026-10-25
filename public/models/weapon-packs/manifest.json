@@ -1,0 +1,41 @@
+{
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "id": "dungeon_sword",
+      "file": "models/weapon-packs/Kenney_dungeon_sword.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/weapon-sword.glb",
+      "license": "CC0-1.0",
+      "hash": "93f72f18bf647a2c92a482240bd3701c091e22be",
+      "bytes": 20156,
+      "meshes": 1
+    },
+    {
+      "id": "prototype_sword",
+      "file": "models/weapon-packs/Kenney_prototype_sword.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/prototype-kit/weapon-sword.glb",
+      "license": "CC0-1.0",
+      "hash": "c5553e10cc8b71a3956372b8affa3d56fa875557",
+      "bytes": 15068,
+      "meshes": 1
+    },
+    {
+      "id": "dungeon_shield_round",
+      "file": "models/weapon-packs/Kenney_dungeon_shield_round.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/shield-round.glb",
+      "license": "CC0-1.0",
+      "hash": "b1eb147391c252f31a852220ca81d384075a8a91",
+      "bytes": 26380,
+      "meshes": 1
+    },
+    {
+      "id": "dungeon_shield_rectangle",
+      "file": "models/weapon-packs/Kenney_dungeon_shield_rectangle.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/shield-rectangle.glb",
+      "license": "CC0-1.0",
+      "hash": "08629ec5ca39eb0115b99005624500006574642a",
+      "bytes": 24068,
+      "meshes": 1
+    }
+  ]
+}

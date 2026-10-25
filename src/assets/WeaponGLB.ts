@@ -7,7 +7,8 @@ export type WeaponModelId =
   | 'axe_1handed' | 'axe_2handed' | 'crossbow_2handed'
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
   | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
-  | 'spellbook_open' | 'spellbook_closed';
+  | 'spellbook_open' | 'spellbook_closed'
+  | 'dungeon_sword' | 'prototype_sword' | 'dungeon_shield_round' | 'dungeon_shield_rectangle';
 
 export interface EquipmentVisual {
   model: WeaponModelId;
@@ -44,6 +45,8 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
     const url=import.meta.env.BASE_URL+(name==='spear'
       ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
       :name==='longbow'?'models/equipment/CC0_longbow.glb'
+      :name.startsWith('dungeon_')||name.startsWith('prototype_')
+       ?'models/weapon-packs/Kenney_'+name+'.glb'
       :'models/KayKit_Weapon_'+name+'.glb');
     promise=loader.loadAsync(url);
     models.set(name,promise);

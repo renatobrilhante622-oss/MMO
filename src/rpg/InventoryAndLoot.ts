@@ -1,5 +1,6 @@
 import {upgradeItem as applyUpgrade} from './InventorySystem';
 import { EventBus, type EquipmentSlot, type Item, type LootDrop, type Rarity } from '../core/GameTypes';
+import {WEAPON_PACKS,WEAPON_PACK_BY_ID} from './WeaponPacks';
 
 export const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
 export const EQUIPMENT_SLOTS: readonly EquipmentSlot[] = ['weapon', 'helmet', 'armor', 'boots', 'ring', 'amulet'];
@@ -29,8 +30,21 @@ export const ITEM_CATALOG: readonly Item[] = Object.freeze(EQUIPMENT_SLOTS.flatM
   }))),
 );
 
+/** 45 equippable and forgeable authored-GLB weapon themes, awarded via boss loot. */
+export const WEAPON_PACK_ITEM_TEMPLATES:readonly Item[]=Object.freeze(WEAPON_PACKS.map(pack=>Object.freeze({
+  id:'catalog-'+pack.id,
+  visualId:pack.id,
+  name:pack.name[0],
+  slot:'weapon' as const,
+  rarity:pack.rarity,
+  level:[1,15,35,60,85][pack.tier],
+  requiredLevel:[1,15,35,60,85][pack.tier],
+  upgrade:0,attack:Math.round(12*Math.pow(1.65,pack.tier)),
+  defense:Math.round(2*Math.pow(1.4,pack.tier)),maxHp:0,
+  value:Math.round(150*Math.pow(2,pack.tier))
+})));
 /** Additional wearable slots coexist with the immutable original catalogue/save format. */
-export const COMPLETE_ITEM_CATALOG:readonly Item[]=Object.freeze([...ITEM_CATALOG,...(['gloves','belt'] as const).flatMap(slot=>RARITIES.flatMap((rarity,r)=>tiers.map(level=>Object.freeze({id:`catalog-${slot}-${rarity}-${level}`,name:`${slotNames[slot]} ${rarityNames[r]}`,slot,rarity,level,upgrade:0,attack:slot==='gloves'?Math.round(rarityPower[r]*(1+level*.16)*2):0,defense:Math.round(rarityPower[r]*(1+level*.16)*2),maxHp:Math.round(rarityPower[r]*(1+level*.16)*8),value:Math.round(12*rarityPower[r]*(1+level*.16)*(r+1))}))))]);
+export const COMPLETE_ITEM_CATALOG:readonly Item[]=Object.freeze([...ITEM_CATALOG,...WEAPON_PACK_ITEM_TEMPLATES,...(['gloves','belt'] as const).flatMap(slot=>RARITIES.flatMap((rarity,r)=>tiers.map(level=>Object.freeze({id:`catalog-${slot}-${rarity}-${level}`,name:`${slotNames[slot]} ${rarityNames[r]}`,slot,rarity,level,upgrade:0,attack:slot==='gloves'?Math.round(rarityPower[r]*(1+level*.16)*2):0,defense:Math.round(rarityPower[r]*(1+level*.16)*2),maxHp:Math.round(rarityPower[r]*(1+level*.16)*8),value:Math.round(12*rarityPower[r]*(1+level*.16)*(r+1))}))))]);
 
 export interface StatBonuses { attack: number; defense: number; maxHp: number; maxMana?: number; critChance?: number }
 export interface InventorySnapshot {
@@ -61,6 +75,7 @@ function readItem(value: unknown): Item | undefined {
     maxHp: numberIn(value.maxHp, 0, 1000000), value: numberIn(value.value, 1, 1000000),
   };
   if (typeof value.requiredLevel==='number')item.requiredLevel=numberIn(value.requiredLevel,1,100);
+  if(value.slot==='weapon'&&typeof value.visualId==='string'&&WEAPON_PACK_BY_ID.has(value.visualId))item.visualId=value.visualId;
   if (value.locked === true) item.locked = true;
   if (Array.isArray(value.sockets)) item.sockets = value.sockets.filter((gem): gem is 'ruby'|'sapphire'|'emerald'|'diamond' => ['ruby','sapphire','emerald','diamond'].includes(gem)).slice(0, [1,1,2,3,3,4][RARITIES.indexOf(item.rarity)]);
   if(item.sockets) item.gemLevels=item.sockets.map((_,i)=>Array.isArray(value.gemLevels)&&value.gemLevels[i]===2?2:1);
@@ -114,7 +129,12 @@ export class InventoryAndLoot {
       : roll < 0.004 ? 5 : roll < 0.022 ? 4 : roll < 0.085 ? 3 : roll < 0.26 ? 2 : roll < 0.58 ? 1 : 0;
     const slot = ALL_EQUIPMENT_SLOTS[Math.floor(this.random() * ALL_EQUIPMENT_SLOTS.length)];
     const itemLevel = [...tiers].reverse().find(tier => tier <= safeLevel) ?? 1;
-    const template = COMPLETE_ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
+    const realPackDrops=slot==='weapon'&&boss
+      ?WEAPON_PACK_ITEM_TEMPLATES.filter(item=>item.rarity===RARITIES[rarityIndex]&&item.requiredLevel! <= safeLevel)
+      :[];
+    const selectedPack=realPackDrops.length&&roll<.55
+      ?realPackDrops[Math.floor(this.random()*realPackDrops.length)]:undefined;
+    const template = selectedPack??COMPLETE_ITEM_CATALOG.find(item => item.slot === slot && item.rarity === RARITIES[rarityIndex] && item.level === itemLevel)!;
     const id = `drop-${++this.sequence}-${Math.floor(this.random() * 0xffffff).toString(36)}`;
     return {
       id,
