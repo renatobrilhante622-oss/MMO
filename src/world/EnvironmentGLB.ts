@@ -101,7 +101,7 @@ export class EnvironmentGLB {
             material.metalness=0;
             material.roughness=.85;
             // Keep original GLB atlas RGB instead of painting trunks green.
-            material.color.copy(source.color);
+            material.color.setRGB(Math.max(.68,source.color.r),Math.max(.75,source.color.g),Math.max(.58,source.color.b));
             material.emissive.setRGB(.085,.19,.09);
             material.emissiveIntensity=.75;
             material.depthWrite=true;
