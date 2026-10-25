@@ -1,6 +1,5 @@
-import type {ClassId} from '../core/GameTypes';
-import type {Rarity} from './InventoryAndLoot';
-import type {WeaponModelId,WeaponAttachment} from '../assets/WeaponGLB';
+import type {ClassId,Rarity} from '../core/GameTypes';
+import type {WeaponModelId,EquipmentVisual} from '../assets/WeaponGLB';
 
 export const WEAPON_PACK_RARITIES=['common','rare','epic','legendary','mythic'] as const satisfies readonly Rarity[];
 const layouts:Record<ClassId,{names:readonly string[];models:readonly WeaponModelId[];offhand?:WeaponModelId}>={
@@ -25,7 +24,7 @@ const layouts:Record<ClassId,{names:readonly string[];models:readonly WeaponMode
 };
 export interface WeaponPack {
   id:string;classId:ClassId;tier:number;name:[string,string];
-  rarity:Rarity;color:number;weapons:readonly WeaponAttachment[];
+  rarity:Rarity;color:number;weapons:readonly EquipmentVisual[];
 }
 /** 45 deterministic gameplay cosmetics, all backed by locally bundled authored GLBs.
  * A "tier" changes material/effects: it does NOT claim 45 separately sculpted meshes. */
@@ -34,11 +33,11 @@ export const WEAPON_PACKS:readonly WeaponPack[]=Object.freeze(
   const group=layouts[classId];
   return group.names.map((name,tier)=>{
    const main=group.models[tier];
-   const weapons:WeaponAttachment[]=classId==='ranger'
+   const weapons:EquipmentVisual[]=classId==='ranger'
     ?[{model:main,bone:'lefthand'},{model:'quiver',bone:'spine2',offset:[0,0,-.17]}]
     :classId==='assassin'
      ?[{model:'dagger',bone:'righthand'},{model:'dagger',bone:'lefthand'}]
-    :[{model:main,bone:'righthand'},...(group.offhand?[{model:group.offhand,bone:'lefthand'} as WeaponAttachment]:[])];
+    :[{model:main,bone:'righthand'},...(group.offhand?[{model:group.offhand,bone:'lefthand'} as EquipmentVisual]:[])];
    return Object.freeze({
     id:'armory-'+classId+'-'+tier,classId,tier,
     name:[name,name] as [string,string],
