@@ -1,4 +1,4 @@
-export type ScreenPhase='splash'|'loading'|'menu'|'class-selection'|'modal'|'playing';
+export type ScreenPhase='cinematic'|'splash'|'loading'|'menu'|'class-selection'|'modal'|'playing';
 /** Explicit entry states override saved HUD positions and inline display styles. */
 export function setScreenPhase(container:HTMLElement,phase:ScreenPhase):void {
   container.dataset.screen=phase;
