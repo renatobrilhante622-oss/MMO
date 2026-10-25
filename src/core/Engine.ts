@@ -700,10 +700,13 @@ export class Engine {
     const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;hero.rig.skinAppearance(skin.id,skin.color,RARITIES.indexOf(skin.rarity));hero.rig.wings.configure(p.evolution.wings,p.evolution.wings?p.evolution.wingLevels[p.evolution.wings]:1);
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);this.companions.setEvolution(p.evolution.level(pet.id),p.evolution.level(mount.id));
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
-    const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
+    const key=skin.id+p.equipped.weapon+(weapon?.visualId??'')+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
     if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0,COSMETICS.find(c=>c.id===p.equipped.weapon)!.color,weapon?.rarity??'common');}
     hero.rig.weapons.skin(p.equipped.weapon);
-    hero.rig.weaponPackAppearance(p.equipped.weapon);
+    // An explicit collection skin takes priority; otherwise use the
+    // newly looted and equipped forgeable GLB item's visualId.
+    const packId=p.equipped.weapon!=='ironweapon'?p.equipped.weapon:(weapon?.visualId??'ironweapon');
+    hero.rig.weaponPackAppearance(packId);
     if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;
     if(this.channel){
