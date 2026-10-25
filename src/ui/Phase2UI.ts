@@ -6,7 +6,7 @@ import {GATHER_RECIPES} from '../world/GatheringSystem';
 import {DAILY_REWARDS,ONLINE_MILESTONES} from '../rpg/DailyRewardSystem';
 import {ArenaUI} from './ArenaUI';
 type Tab='arena'|'runes'|'professions'|'rewards'|'market'|'titles';
-const esc=(x:unknown)=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'":'&#39;'}[c]??c));
+const esc=(x:unknown)=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]??c));
 /** Independent local Phase 2 dashboard. Existing server-backed arena and market remain unchanged. */
 export class Phase2UI{
  readonly root=document.createElement('section');
