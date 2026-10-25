@@ -11,6 +11,7 @@ import './ui/vip.css';
 import './ui/intro.css';
 import './ui/region-travel.css';
 import './ui/quest-npc.css';
+import './ui/audit-layout.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
