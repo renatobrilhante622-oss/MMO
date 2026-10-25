@@ -5,6 +5,7 @@ import type { ClassId, Rarity } from '../core/GameTypes';
 import { CLASS_IDS } from '../combat/ClassSystem';
 import { RARITIES, COMPLETE_ITEM_CATALOG, scaleWorldItem, type InventoryAndLoot } from '../rpg/InventoryAndLoot';
 import { REGIONS, type DungeonDefinition } from '../world/Regions';
+import {isKnownRegionalMaterial} from '../rpg/RegionalLoot';
 
 export type Attribute = 'power'|'vitality'|'guard'|'spirit'|'precision';
 export type Gem = 'ruby'|'sapphire'|'emerald'|'diamond';
@@ -67,6 +68,7 @@ export class AdventureProgress {
   greaterGems:Record<Gem,number>={ruby:0,sapphire:0,emerald:0,diamond:0};
   hudOpacity=1;
   materials=0;
+  regionalMaterials:Record<string,number>={};
   potions={health:3,mana:3};
   owned=['traveler','wolf','horse','ironweapon'];
   equipped={skin:'traveler',pet:'wolf',mount:'horse',weapon:'ironweapon',wing:'wing-0'};
@@ -89,6 +91,8 @@ export class AdventureProgress {
   controlsScale=1;
   waypoint:{x:number;z:number}|null=null;
   discovered=['aurora'];
+  /** Region travel is story-gated independently from physical discovery. */
+  unlockedRegions:string[]=['aurora'];
   dungeonClears:Record<string,number>={};
   selectedDungeon='roots';
   dungeonDifficulty='normal';
@@ -203,6 +207,11 @@ export class AdventureProgress {
     this.missionClaims.push(id+':'+this.missionKey(id==='weekly'?'week':'day'));this.missionClaims=this.missionClaims.slice(-30);
     this.passXp+=id==='daily'?60:id==='forest'?180:200;this.inventory.gold+=id==='daily'?120:id==='forest'?350:600;return true;
   }
+  collectRegionalMaterial(id:string,quantity:number):boolean{
+    if(!isKnownRegionalMaterial(id)||!Number.isFinite(quantity)||!Number.isInteger(quantity)||quantity<1||quantity>100)return false;
+    this.regionalMaterials[id]=Math.min(999999,(this.regionalMaterials[id]??0)+quantity);
+    return true;
+  }
   earnKill(level:number,boss:boolean,region?:string):void {
     if(region==='lake'){const forest='forest:'+this.missionKey('day');this.missions[forest]=(this.missions[forest]??0)+1;}
     const key='kill:'+this.missionKey('day');this.missions[key]=(this.missions[key]??0)+1;
@@ -261,6 +270,8 @@ export class AdventureProgress {
     if(object(raw.greaterGems))for(const key of ['ruby','sapphire','emerald','diamond'] as Gem[])this.greaterGems[key]=integer(raw.greaterGems[key],0,99999);
     this.hudOpacity=typeof raw.hudOpacity==='number'?Math.max(.3,Math.min(1,raw.hudOpacity)):1;
     this.vipDiamonds=integer(raw.vipDiamonds,0,999999);this.materials=integer(raw.materials,0,999999);this.shards=integer(raw.shards,0,999999);
+    if(object(raw.regionalMaterials))for(const [id,n] of Object.entries(raw.regionalMaterials))
+      if(isKnownRegionalMaterial(id))this.regionalMaterials[id]=integer(n,0,999999);
     if(object(raw.potions))for(const key of ['health','mana'] as const)this.potions[key]=integer(raw.potions[key],0,99);
     this.owned=[...new Set([...this.owned,...Array.isArray(raw.owned)?raw.owned.filter((id):id is string=>typeof id==='string'&&COSMETICS.some(c=>c.id===id)):[]])];
     if(object(raw.equipped))for(const type of ['skin','pet','mount','weapon','wing'] as const){const id=raw.equipped[type];if(typeof id==='string'&&this.owned.includes(id)&&COSMETICS.some(c=>c.id===id&&c.type===type))this.equipped[type]=id;}
@@ -271,6 +282,7 @@ export class AdventureProgress {
     if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=140&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=140)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora'};}
     if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=140&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=140)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
     if(Array.isArray(raw.discovered))this.discovered=[...new Set(['aurora',...raw.discovered.filter((id):id is string=>REGIONS.some(r=>r.id===id))])];
+    if(Array.isArray(raw.unlockedRegions))this.unlockedRegions=[...new Set(['aurora',...raw.unlockedRegions.filter((id):id is string=>typeof id==='string'&&REGIONS.some(r=>r.id===id))])];
     if(object(raw.dungeonClears))for(const [key,n] of Object.entries(raw.dungeonClears))this.dungeonClears[key]=integer(n,0,1e6);
     if(['normal','elite','nightmare','abyssal'].includes(String(raw.dungeonDifficulty)))this.dungeonDifficulty=String(raw.dungeonDifficulty);
     if(typeof raw.selectedDungeon==='string')this.selectedDungeon=raw.selectedDungeon;

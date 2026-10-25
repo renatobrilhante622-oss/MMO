@@ -14,6 +14,7 @@ export function describeLoot(drop: LootDrop):LootToastEntry|null {
   if(Number.isFinite(drop.xp)&&drop.xp>0)detail.push('+'+Math.floor(drop.xp)+' XP');
   if(Number.isFinite(drop.gold)&&drop.gold>0)detail.push('+'+Math.floor(drop.gold)+' Ouro');
   if(Number.isFinite(drop.crystals)&&drop.crystals>0)detail.push('+'+Math.floor(drop.crystals)+' Cristais');
+  if(drop.regionalMaterial&&drop.regionalMaterial.quantity>0)detail.push('✦ '+drop.regionalMaterial.name+' ×'+drop.regionalMaterial.quantity);
   if(!detail.length&&!drop.item)return null;
   if(drop.item)return {
     title:drop.item.name,detail:detail.join(' · ')||'Equipamento obtido',
