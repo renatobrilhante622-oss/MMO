@@ -1,0 +1,107 @@
+import {
+  Box3,Group,InstancedMesh,Matrix4,Mesh,Quaternion,Scene,Vector3
+} from 'three';
+import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+export type SceneAsset='tree-oak'|'tree-cone'|'tree-default-dark'|'tree-detailed'
+ |'rock-largea'|'rock-talla'|'cliff-rock'
+ |'gravestone-broken'|'gravestone-cross-large'|'altar-stone'
+ |'tower-square'|'wall-doorway'|'rocks-large';
+interface AssetEntry{file:string;region:'aurora'|'crypt'|'highlands'|'rift'|'eclipse';count:number;height:number;}
+const ASSETS:readonly AssetEntry[]=[
+  {file:'Kenney_nature-kit_tree-oak.glb',region:'aurora',count:32,height:7.5},
+  {file:'Kenney_nature-kit_tree-detailed.glb',region:'aurora',count:17,height:6.5},
+  {file:'Kenney_nature-kit_rock-largea.glb',region:'aurora',count:13,height:1.6},
+  {file:'Kenney_nature-kit_tree-default-dark.glb',region:'crypt',count:16,height:6},
+  {file:'Kenney_graveyard-kit_gravestone-broken.glb',region:'crypt',count:24,height:1.8},
+  {file:'Kenney_graveyard-kit_gravestone-cross-large.glb',region:'crypt',count:13,height:2.1},
+  {file:'Kenney_graveyard-kit_altar-stone.glb',region:'crypt',count:1,height:3.3},
+  {file:'Kenney_nature-kit_tree-cone.glb',region:'highlands',count:25,height:7},
+  {file:'Kenney_nature-kit_rock-talla.glb',region:'highlands',count:17,height:3},
+  {file:'Kenney_nature-kit_cliff-rock.glb',region:'rift',count:20,height:3.5},
+  {file:'Kenney_castle-kit_rocks-large.glb',region:'rift',count:15,height:2.8},
+  {file:'Kenney_castle-kit_wall-doorway.glb',region:'rift',count:3,height:5},
+  {file:'Kenney_castle-kit_tower-square.glb',region:'eclipse',count:5,height:9},
+  {file:'Kenney_castle-kit_rocks-large.glb',region:'eclipse',count:20,height:3},
+];
+const CENTERS:{[K in AssetEntry['region']]:[number,number]}={
+  aurora:[0,18],crypt:[-65,-40],highlands:[95,-83],rift:[0,-85],eclipse:[-92,97]
+};
+const loader=new GLTFLoader();
+const cache=new Map<string,Promise<GLTF>>();
+function model(file:string):Promise<GLTF>{
+  let task=cache.get(file);
+  if(!task){
+    const url=import.meta.env.BASE_URL+'models/environment/'+file;
+    task=loader.loadAsync(url);
+    cache.set(file,task);
+    void task.catch(()=>cache.delete(file));
+  }
+  return task;
+}
+function random(seed:number):()=>number{
+  let value=seed>>>0;
+  return ()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};
+}
+/** Geometry/material data is authored in GLB files; only placement matrices are computed. */
+export class EnvironmentGLB {
+  readonly root=new Group();
+  private disposed=false;
+  private readonly meshes:InstancedMesh[]=[];
+  constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number){
+    this.root.name='CC0 authored environment — instanced GLB scenery';
+    scene.add(this.root);
+    if(typeof document!=='undefined')void this.build();
+  }
+  private async build():Promise<void>{
+    for(let index=0;index<ASSETS.length;index++){
+      if(this.disposed)return;
+      const entry=ASSETS[index];
+      let gltf:GLTF;
+      try{gltf=await model(entry.file);}
+      catch(error){console.warn('Unable to load authored environment:',entry.file,error);continue;}
+      if(this.disposed)return;
+      const scene=gltf.scene;scene.updateMatrixWorld(true);
+      const bounds=new Box3().setFromObject(scene);
+      if(bounds.isEmpty())continue;
+      const center=bounds.getCenter(new Vector3());
+      const scale=entry.height/Math.max(.001,bounds.max.y-bounds.min.y);
+      const [cx,cz]=CENTERS[entry.region];
+      const rng=random(13021+index*973);
+      const transforms:Matrix4[]=[];
+      for(let n=0;n<entry.count;n++){
+        const angle=rng()*Math.PI*2;
+        const radius=entry.count<5?13+n*3:14+Math.sqrt(rng())*28;
+        const x=Math.max(-133,Math.min(133,cx+Math.cos(angle)*radius));
+        const z=Math.max(-133,Math.min(133,cz+Math.sin(angle)*radius));
+        if(entry.region==='aurora'&&Math.hypot(x,z-18)<24)continue;
+        const y=this.heightAt(x,z);
+        const spin=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),rng()*Math.PI*2);
+        const objectScale=scale*(.8+rng()*.38);
+        const transform=new Matrix4().compose(new Vector3(x,y,z),spin,new Vector3(objectScale,objectScale,objectScale));
+        const origin=new Matrix4().makeTranslation(-center.x,-bounds.min.y,-center.z);
+        transforms.push(transform.multiply(origin));
+      }
+      scene.traverse(object=>{
+        if(!(object instanceof Mesh)||transforms.length===0)return;
+        const instanced=new InstancedMesh(object.geometry,object.material,transforms.length);
+        instanced.name='Instanced '+entry.file+'/'+object.name;
+        instanced.castShadow=true;
+        instanced.receiveShadow=true;
+        for(let i=0;i<transforms.length;i++){
+          instanced.setMatrixAt(i,transforms[i].clone().multiply(object.matrixWorld));
+        }
+        instanced.instanceMatrix.needsUpdate=true;
+        instanced.computeBoundingSphere();
+        this.root.add(instanced);
+        this.meshes.push(instanced);
+      });
+    }
+  }
+  dispose():void{
+    this.disposed=true;
+    for(const mesh of this.meshes)mesh.removeFromParent();
+    this.meshes.length=0;
+    this.root.removeFromParent();
+  }
+}

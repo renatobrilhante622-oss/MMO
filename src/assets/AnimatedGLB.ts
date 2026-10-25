@@ -11,14 +11,16 @@ export type ModelName =
   | 'Soldier' | 'Horse' | 'Parrot'
   | 'KayKit_Barbarian' | 'KayKit_Knight' | 'KayKit_Mage'
   | 'KayKit_Rogue' | 'KayKit_Rogue_Hooded'
-  | 'KayKit_Skeleton_Minion' | 'KayKit_Skeleton_Warrior';
+  | 'KayKit_Skeleton_Minion' | 'KayKit_Skeleton_Warrior'
+  | 'Quaternius_ghost' | 'Quaternius_demon' | 'Quaternius_bat';
 
 const loader = new GLTFLoader();
 const cache = new Map<string, Promise<GLTF>>();
 const normalize = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export function loadModel(name: ModelName): Promise<GLTF> {
-  const url = import.meta.env.BASE_URL + 'models/' + name + '.glb';
+  const folder=name.startsWith('Quaternius_')?'models/environment/':'models/';
+  const url = import.meta.env.BASE_URL + folder + name + '.glb';
   let request = cache.get(url);
   if (!request) {
     request = loader.loadAsync(url);

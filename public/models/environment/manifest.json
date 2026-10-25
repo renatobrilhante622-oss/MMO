@@ -1,0 +1,303 @@
+{
+  "license": "CC0-1.0",
+  "verifiedFromPinnedGitCommits": true,
+  "assets": [
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-oak.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-oak.glb",
+      "gitBlob": "b136723ada4b5574b71f727120ab21fa579bf2fb",
+      "originalBytes": 14644,
+      "bytes": 14644,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-cone.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-cone.glb",
+      "gitBlob": "f11a595ec899b05733bcc439d0495e74b864c9b2",
+      "originalBytes": 10924,
+      "bytes": 10924,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-default-dark.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-default-dark.glb",
+      "gitBlob": "f1a564f450742b04b4316d711e9183fbbf0d8281",
+      "originalBytes": 9436,
+      "bytes": 9436,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_tree-detailed.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/tree-detailed.glb",
+      "gitBlob": "8d59ea41e280a5ea9234ec1e503fb871c55021de",
+      "originalBytes": 31412,
+      "bytes": 31412,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_rock-largea.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/rock-largea.glb",
+      "gitBlob": "40e1365a43b706bd78c2658b48b189c9a35f8923",
+      "originalBytes": 7552,
+      "bytes": 7552,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_rock-talla.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/rock-talla.glb",
+      "gitBlob": "31d1fb480f2bd18b47e7d6b8e2308d4b7301da4a",
+      "originalBytes": 12072,
+      "bytes": 12072,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_nature-kit_cliff-rock.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/cliff-rock.glb",
+      "gitBlob": "8f459cb36a34408717b0f94d2decd0c19769cc8d",
+      "originalBytes": 3556,
+      "bytes": 3556,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_graveyard-kit_gravestone-broken.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/gravestone-broken.glb",
+      "gitBlob": "60506cbb28e51c58f365ff892c983eae730f254c",
+      "originalBytes": 23912,
+      "bytes": 23912,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_graveyard-kit_gravestone-cross-large.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/gravestone-cross-large.glb",
+      "gitBlob": "e7c15fc59d3430cef3d9bda6f07d3c09bf85cb29",
+      "originalBytes": 29204,
+      "bytes": 29204,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_graveyard-kit_altar-stone.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/altar-stone.glb",
+      "gitBlob": "515adee803cb835346d32e06455795216d7a51bf",
+      "originalBytes": 28152,
+      "bytes": 28152,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_castle-kit_tower-square.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/castle-kit/tower-square.glb",
+      "gitBlob": "9a1107d39ad3a0ec2a5c49df97f4f92e873bf36f",
+      "originalBytes": 24116,
+      "bytes": 24116,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_castle-kit_wall-doorway.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/castle-kit/wall-doorway.glb",
+      "gitBlob": "06ac4e9e45dd632cc3fdcdda44f6bc107bbdee82",
+      "originalBytes": 45112,
+      "bytes": 45112,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_castle-kit_rocks-large.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/castle-kit/rocks-large.glb",
+      "gitBlob": "c55e671c6c82f75d49eb7c2488bb23c514fbdee2",
+      "originalBytes": 23764,
+      "bytes": 23764,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_mini-dungeon_character-orc.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/character-orc.glb",
+      "gitBlob": "3fa9bef5969c24027e36bc50f50ca1cbce89a5cb",
+      "originalBytes": 208204,
+      "bytes": 208204,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Kenney_mini-dungeon_weapon-spear.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/weapon-spear.glb",
+      "gitBlob": "83d5f145ad75cf29cee81f22452679b7b749f37c",
+      "originalBytes": 18020,
+      "bytes": 18020,
+      "license": "CC0-1.0",
+      "credit": "Kenney"
+    },
+    {
+      "file": "public/models/environment/Quaternius_ghost.glb",
+      "source": "https://raw.githubusercontent.com/ilrein/warptracker/71bbfbdfacd118196994b26da68eec1876d55c6b/public/models/ghost.glb",
+      "gitBlob": "64a689730f9520be17e2628fa861ed9b1930054c",
+      "originalBytes": 288500,
+      "bytes": 288500,
+      "license": "CC0-1.0",
+      "credit": "Quaternius"
+    },
+    {
+      "file": "public/models/environment/Quaternius_demon.glb",
+      "source": "https://raw.githubusercontent.com/ilrein/warptracker/71bbfbdfacd118196994b26da68eec1876d55c6b/public/models/demon.glb",
+      "gitBlob": "683dd91197bf5f4322a101b5853f2949bf3981a5",
+      "originalBytes": 554308,
+      "bytes": 554308,
+      "license": "CC0-1.0",
+      "credit": "Quaternius"
+    },
+    {
+      "file": "public/models/environment/Quaternius_bat.glb",
+      "source": "https://raw.githubusercontent.com/ilrein/warptracker/71bbfbdfacd118196994b26da68eec1876d55c6b/public/models/bat.glb",
+      "gitBlob": "4cf3acdee5d240549049623d663bfbf01f0f407d",
+      "originalBytes": 244064,
+      "bytes": 244064,
+      "license": "CC0-1.0",
+      "credit": "Quaternius"
+    },
+    {
+      "file": "public/textures/real-pbr/Grass004_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Grass004_1K-JPG_Color.jpg",
+      "gitBlob": "5c67d6e5193c2596a3cd70c633e86ccfe072eb5e",
+      "originalBytes": 1985561,
+      "bytes": 208390,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Grass004_1K-JPG_NormalGL.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Grass004_1K-JPG_NormalGL.jpg",
+      "gitBlob": "ba329e472a4f7defbfde9be33768466a9e3f42f5",
+      "originalBytes": 2339612,
+      "bytes": 223916,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Grass004_1K-JPG_Roughness.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Grass004_1K-JPG_Roughness.jpg",
+      "gitBlob": "2eeb2dcefd2dbd57f64bed2e5bc01f02a9eb07ec",
+      "originalBytes": 851664,
+      "bytes": 200910,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground071_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground071_1K-JPG_Color.jpg",
+      "gitBlob": "3a05e03698f9f5f4bb211afc4d96e1698aa641bd",
+      "originalBytes": 1809189,
+      "bytes": 198022,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground071_1K-JPG_NormalGL.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground071_1K-JPG_NormalGL.jpg",
+      "gitBlob": "17a95ee0e8b5fbb1dbed5eea384c98db1dc39154",
+      "originalBytes": 1992995,
+      "bytes": 126672,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground071_1K-JPG_Roughness.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground071_1K-JPG_Roughness.jpg",
+      "gitBlob": "6ca89d172c716e0f96a5a5b79cdc391e25d8148e",
+      "originalBytes": 648538,
+      "bytes": 73720,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/PavingStones046_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/PavingStones046_1K-JPG_Color.jpg",
+      "gitBlob": "bf429daa499a7d524afe1aaa971c48f6963eb384",
+      "originalBytes": 1083584,
+      "bytes": 74044,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/PavingStones046_1K-JPG_NormalGL.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/PavingStones046_1K-JPG_NormalGL.jpg",
+      "gitBlob": "cb12cf9cecc814b90908b8aec09ad36dc4b09dbb",
+      "originalBytes": 2176030,
+      "bytes": 160594,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/PavingStones046_1K-JPG_Roughness.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/PavingStones046_1K-JPG_Roughness.jpg",
+      "gitBlob": "f8dedb2f7b6d925e7cbe799c775c8321b0baeb31",
+      "originalBytes": 636185,
+      "bytes": 76972,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Snow010A_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Snow010A_1K-JPG_Color.jpg",
+      "gitBlob": "a22748d398af046e77b847896fbb8b65de05494c",
+      "originalBytes": 878073,
+      "bytes": 5954,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Snow010A_1K-JPG_NormalGL.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Snow010A_1K-JPG_NormalGL.jpg",
+      "gitBlob": "f7e2cc57aeac2262c19e4236ef43cd666ec1dd60",
+      "originalBytes": 1465548,
+      "bytes": 47626,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Snow010A_1K-JPG_Roughness.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Snow010A_1K-JPG_Roughness.jpg",
+      "gitBlob": "d2a9b3f23b2e66f7e315d702092846d08d761d86",
+      "originalBytes": 773806,
+      "bytes": 153758,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground093C_1K-JPG_Color.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground093C_1K-JPG_Color.jpg",
+      "gitBlob": "f0d05cbbfd7d371e5ae672dbca6d698c0fabc4b9",
+      "originalBytes": 563256,
+      "bytes": 8336,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground093C_1K-JPG_NormalGL.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground093C_1K-JPG_NormalGL.jpg",
+      "gitBlob": "f78a8bb2c62a1b2ef74c0cc327f0c5a4ae5c7a5e",
+      "originalBytes": 1058031,
+      "bytes": 25782,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    },
+    {
+      "file": "public/textures/real-pbr/Ground093C_1K-JPG_Roughness.webp",
+      "source": "https://raw.githubusercontent.com/Kevin-Liu-01/Claude-of-Tanks/5010f765228751958410ee9bd20bd5e2edea6d4e/public/textures/terrain/Ground093C_1K-JPG_Roughness.jpg",
+      "gitBlob": "814b4d9091bbe791d3d282f8f1d0e6804a0c1ab1",
+      "originalBytes": 593683,
+      "bytes": 38608,
+      "license": "CC0-1.0",
+      "credit": "ambientCG"
+    }
+  ]
+}

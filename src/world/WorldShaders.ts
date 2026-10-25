@@ -26,62 +26,37 @@ float fbm(vec2 p) {
 
 /** Material-space procedural albedos, blended by slope, elevation and village distance. */
 export const TERRAIN_GLSL = /* glsl */ `
-${WORLD_NOISE_GLSL}
 varying vec3 vTerrainPosition;
 varying vec3 vTerrainNormal;
 uniform float terrainWaterLevel;
 uniform sampler2D terrainStone,terrainDirt,terrainGrass,terrainStoneNormal,terrainStoneRough;
-vec3 grassAlbedo(vec2 p) {
-  float patches = fbm(p * .31);
-  float grain = valueNoise(p * 34.0);
-  float blades = pow(valueNoise(p * vec2(63.0, 13.0)), 3.0);
-  vec3 c = mix(vec3(.075, .13, .035), vec3(.24, .31, .095), patches);
-  c += (grain - .5) * .055 + blades * vec3(.045, .065, .012);
-  return c;
-}
-vec3 stoneAlbedo(vec2 p) {
-  vec2 warp=vec2(valueNoise(p*.3),valueNoise(p*.3+11.))*.07;
-  return texture2D(terrainStone,p*.22+warp).rgb;
+uniform sampler2D terrainSnow,terrainScorched;
 
-}
-vec3 sandAlbedo(vec2 p) {
-  float ripple = sin(p.y * 7.0 + fbm(p * .8) * 4.0) * .018;
-  float granules = valueNoise(p * 70.0) * .06;
-  return vec3(.42, .34, .21) + ripple + granules;
-}
-vec3 rockAlbedo(vec3 p, vec3 n) {
-  vec3 weights = pow(abs(n), vec3(4.0));
-  weights /= max(dot(weights, vec3(1.0)), .001);
-  float noise = fbm(p.yz * 1.6) * weights.x
-    + fbm(p.xz * 1.6) * weights.y + fbm(p.xy * 1.6) * weights.z;
-  float strata = sin(p.y * 5.0 + noise * 6.0) * .035;
-  return mix(vec3(.12,.145,.14), vec3(.34,.36,.33), noise) + strata;
-}
-vec3 terrainAlbedo(vec3 p, vec3 n) {
-  vec2 uv = p.xz;
-  float macro = fbm(uv * .17);
-  float slope = 1.0 - abs(n.y);
-  float rock = smoothstep(.13, .42, slope + macro * .07);
-  rock = max(rock, smoothstep(22.0, 32.0, p.y));
-  float sand = 1.0 - smoothstep(terrainWaterLevel + .4, terrainWaterLevel + 2.2, p.y + macro * .35);
-  float village = 1.0 - smoothstep(16.0, 23.0, length(uv - vec2(0,18)));
-  float lane = abs(p.x - sin((18.0 - p.z) * .075) * 2.3);
-  float road = (1.0 - smoothstep(1.75, 2.65, lane + (macro - .5) * .7))
-    * smoothstep(-76.0, -70.0, p.z) * (1.0 - smoothstep(18.0,25.0,p.z));
-  float cobble = village;
-  vec3 grassDetail=texture2D(terrainGrass,uv*.24).rgb;
-  vec3 c = mix(mix(grassAlbedo(uv),grassDetail,.65), rockAlbedo(p,n), rock);
-  c = mix(c, sandAlbedo(uv), sand * (1.0-rock));
-  c = mix(c, stoneAlbedo(uv), cobble);
-  float desert=1.0-smoothstep(25.0,65.0,length(p.xz-vec2(-58.0,-35.0)));
-  float frost=1.0-smoothstep(30.0,75.0,length(p.xz-vec2(95.0,-83.0)));
-  float corrupted=1.0-smoothstep(25.0,55.0,length(p.xz-vec2(0.0,-75.0)));
-  c=mix(c,sandAlbedo(uv)*1.3,desert*(1.0-cobble));
-  c=mix(c,vec3(.67,.76,.80)+fbm(uv*2.0)*.12,frost*(1.0-rock*.65));
-  c=mix(c,c*vec3(.68,.52,.81),corrupted);
-  // Damp shores darken continuously, including the shallow lake bed.
-  float damp = 1.0 - smoothstep(terrainWaterLevel-.25, terrainWaterLevel+.7,p.y);
-  return c * mix(1.0, .55, damp);
+/** Biome transitions blend real authored albedo scans, not procedural paint. */
+vec3 terrainAlbedo(vec3 p,vec3 n){
+  vec2 uv=p.xz*.22;
+  vec3 grass=texture2D(terrainGrass,uv).rgb;
+  vec3 dirt=texture2D(terrainDirt,uv).rgb;
+  vec3 stone=texture2D(terrainStone,uv).rgb;
+  vec3 snow=texture2D(terrainSnow,uv).rgb;
+  vec3 scorched=texture2D(terrainScorched,uv).rgb;
+  float slope=1.-abs(normalize(n).y);
+  float cliffs=smoothstep(.16,.48,slope);
+  cliffs=max(cliffs,smoothstep(21.,34.,p.y));
+  float shoreline=1.-smoothstep(terrainWaterLevel+.4,terrainWaterLevel+2.4,p.y);
+  float village=1.-smoothstep(16.,23.,length(p.xz-vec2(0.,18.)));
+  float crypt=1.-smoothstep(24.,66.,length(p.xz-vec2(-65.,-40.)));
+  float frozen=1.-smoothstep(28.,74.,length(p.xz-vec2(95.,-83.)));
+  float volcanic=1.-smoothstep(28.,64.,length(p.xz-vec2(0.,-85.)));
+  float abyssal=1.-smoothstep(26.,68.,length(p.xz-vec2(-92.,97.)));
+  vec3 color=mix(grass,stone,cliffs);
+  color=mix(color,dirt,shoreline*(1.-cliffs));
+  color=mix(color,stone,village);
+  color=mix(color,mix(dirt,stone,.45),crypt*.75);
+  color=mix(color,snow,frozen*(1.-cliffs*.55));
+  color=mix(color,scorched,volcanic*.9);
+  color=mix(color,mix(stone,scorched,.48),abyssal*.85);
+  return color;
 }
 `;
 
