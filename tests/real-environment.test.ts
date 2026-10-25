@@ -40,18 +40,17 @@ describe('real CC0 environment and monster art',()=>{
       expect(json.asset.version).toBe('2.0');
     }
   });
-  it('actually changes the GLB body on rare, epic, legendary and mythic skins',()=>{
+  it('preserves the selected class mesh across every rarity and applies cosmetic VFX',()=>{
     const rig=new ArticulatedCharacter(CLASS_DEFINITIONS.berserker);
-    expect(rig.root.getObjectByName('GLB KayKit_Barbarian')).toBeDefined();
-    for(const [id,name,rarity] of [
-      ['forest','KayKit_Rogue_Hooded',1],
-      ['frost','KayKit_Knight',2],
-      ['void','KayKit_Mage',3],
-      ['solar','KayKit_Barbarian',4],
-      ['eternal','KayKit_Rogue',5],
+    const classModel='GLB KayKit_Barbarian';
+    expect(rig.root.getObjectByName(classModel)).toBeDefined();
+    for(const [id,rarity] of [
+      ['forest',1],['frost',2],['void',3],['solar',4],['eternal',5]
     ] as const){
       rig.skinAppearance(id,0xa2b3cc,rarity);
-      expect(rig.root.getObjectByName('GLB '+name),id).toBeDefined();
+      expect(rig.root.getObjectByName(classModel),id).toBeDefined();
+      expect(rig.root.getObjectByName('GLB KayKit_Rogue_Hooded'),id).toBeUndefined();
+      expect(rig.cape.mesh.scale.x).toBeGreaterThan(1);
     }
     rig.dispose();
   });

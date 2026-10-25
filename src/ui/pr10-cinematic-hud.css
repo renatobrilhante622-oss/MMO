@@ -1,0 +1,75 @@
+/* PR10: one opening sequence, one title, one authoritative gameplay gate. */
+#app[data-screen="cinematic"]>.eterna-hud,
+#app[data-screen="cinematic"]>:not(.game-canvas):not(.eterna-cinematic),
+#app[data-screen="cinematic"] .quest-card,
+#app[data-screen="cinematic"] .eterna-npc-label,
+#app[data-screen="cinematic"] .physical-portal-plaque{display:none!important;pointer-events:none!important}
+#app.entry-isolated>.eterna-npc-label,
+#app.entry-isolated>.physical-portal-plaque,
+#app.entry-isolated>.physical-portal-enter,
+#app.entry-isolated>.eterna-dungeon-trigger,
+#app.entry-isolated>.region-travel-trigger,
+#app.entry-isolated>.eterna-quest-tracker,
+#app.entry-isolated>.journey-widgets,
+#app.entry-isolated>.npc-interact-button,
+#app.entry-isolated>.eterna-npc-interact,
+#app.entry-isolated>.autofarm-button,
+#app.entry-isolated>.gps-status,
+#app.entry-isolated>.eterna-dungeon-status,
+#app.entry-isolated>.hud-editor-overlay{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#app.entry-isolated .eterna-hud>:not(.start-screen):not(.modal-backdrop){display:none!important}
+#app[data-screen="menu"] .eterna-hud>.modal-backdrop[hidden]{display:none!important}
+#app[data-screen="menu"] .eterna-hud .start-screen{display:flex!important;visibility:visible!important}
+#app[data-screen="playing"] .eterna-hud .start-screen[hidden]{display:none!important}
+.apk-download{display:none!important}
+.eterna-cinematic{position:fixed;inset:0;z-index:1900;background:linear-gradient(180deg,#05071122,#03050a00 30%,#05071124);
+ color:#f6e3bb;pointer-events:none;overflow:hidden}
+.cinema-letterbox{position:absolute;left:0;right:0;height:clamp(36px,10vh,115px);background:#050609;z-index:1}
+.cinema-letterbox-top{top:0;box-shadow:0 6px 20px #0009}
+.cinema-letterbox-bottom{bottom:0;box-shadow:0 -6px 20px #0009}
+.cinema-chapter{position:absolute;top:calc(clamp(36px,10vh,115px) + 23px);left:50%;transform:translateX(-50%);
+ white-space:nowrap;text-align:center;font:600 10px/1.5 system-ui;letter-spacing:.26em;text-shadow:0 2px 5px #000;opacity:.86}
+.cinema-caption{position:absolute;left:8%;right:8%;bottom:calc(clamp(36px,10vh,115px) + 21px);max-width:830px;
+ margin:auto;text-align:center;font:500 clamp(16px,2.4vw,27px)/1.4 Georgia,serif;
+ letter-spacing:.06em;color:#fbe5b1;text-shadow:0 3px 10px #000,0 0 12px #000;transition:opacity .13s ease}
+.cinema-skip{position:absolute;right:max(17px,env(safe-area-inset-right));top:calc(clamp(36px,10vh,115px) + 12px);
+ border:1px solid #e1c79180;border-radius:6px;padding:8px 12px;min-height:36px;background:#071222df;
+ color:#f8e7c4;font:700 11px system-ui;z-index:3;pointer-events:auto;cursor:pointer}
+.cinema-embers{position:absolute;inset:0;pointer-events:none}
+.cinema-embers i{position:absolute;left:var(--x);bottom:13%;width:3px;height:3px;border-radius:50%;
+ background:#fbe1a7;box-shadow:0 0 12px #ffd589;animation:cinemaMotes var(--speed) linear var(--delay) infinite}
+@keyframes cinemaMotes{0%{transform:translateY(0);opacity:0}30%{opacity:.9}100%{transform:translateY(-66vh);opacity:0}}
+.eterna-start-error{position:fixed;inset:0;display:grid;place-items:center;background:#081020;color:#f4dcb1;text-align:center;padding:30px}
+.eterna-quest-tracker{max-height:none!important;min-height:104px;overflow:visible!important}
+.eterna-quest-tracker.is-collapsed{min-height:0!important;max-height:42px!important}
+.eterna-quest-tracker .quest-tracker-body{height:auto;overflow:visible}
+.eterna-quest-tracker .quest-tracker-text{white-space:normal!important;max-height:none!important;overflow:visible!important;
+ display:block!important;line-height:1.35!important;overflow-wrap:anywhere}
+.journey-widgets.drop-toast-widget{top:calc(max(10px,env(safe-area-inset-top)) + 268px)!important}
+.physical-portal-plaque{min-width:0!important;max-width:168px!important;padding:5px 8px!important;gap:2px!important;
+ border-radius:5px;box-shadow:0 3px 10px #0009!important}
+.physical-portal-plaque strong{font-size:10px!important;line-height:1.25}
+.physical-portal-plaque small{font-size:9px!important}
+/* Portals / dungeons are drawer commands, never positioned over skill buttons. */
+.eterna-hud .hud-drawer-primary>.region-travel-trigger,
+.eterna-hud .hud-drawer-primary>.eterna-dungeon-trigger{
+ all:unset;display:flex!important;position:relative!important;transform:none!important;inset:auto!important;
+ box-sizing:border-box;width:100%!important;min-height:47px!important;padding:10px 12px!important;
+ font:700 12px/1.3 system-ui;color:#f3e4bf;cursor:pointer;border:1px solid #99866b52!important;
+ border-radius:7px!important;background:linear-gradient(135deg,#1f344a,#15253a)!important}
+.eterna-hud .hud-drawer[hidden]{display:none!important}
+@media(max-width:640px){
+ .cinema-chapter{font-size:8px;letter-spacing:.15em;max-width:68vw;white-space:normal}
+ .cinema-skip{right:8px;padding:6px 8px;font-size:9px}
+ .cinema-caption{font-size:15px}
+ .physical-portal-plaque{max-width:110px!important;padding:3px 5px!important}
+ .physical-portal-plaque strong{font-size:9px!important}
+ .physical-portal-plaque small{font-size:8px!important}
+ .eterna-quest-tracker{max-width:44vw;min-height:115px}
+ .journey-widgets.drop-toast-widget{top:calc(max(7px,env(safe-area-inset-top)) + 259px)!important}
+}
+@media(max-height:480px) and (min-width:650px){
+ .eterna-quest-tracker{max-height:112px;overflow:auto!important;min-height:0}
+ .journey-widgets.drop-toast-widget{top:calc(max(6px,env(safe-area-inset-top)) + 186px)!important}
+}
+@media(prefers-reduced-motion:reduce){.cinema-embers i{animation:none}}

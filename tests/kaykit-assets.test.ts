@@ -72,11 +72,18 @@ describe('official CC0 GLB asset integrity',()=>{
     expect(Object.keys(CLASS_EQUIPMENT_MODELS).sort()).toEqual([...CLASS_IDS].sort());
     for(const loadout of Object.values(CLASS_EQUIPMENT_MODELS)){
       for(const equipment of loadout){
-        const glb=parse('KayKit_Weapon_'+equipment.model+'.glb');
+        const special=equipment.model==='longbow'?'equipment/CC0_longbow.glb'
+          :equipment.model==='spear'?'environment/Kenney_mini-dungeon_weapon-spear.glb'
+          :'KayKit_Weapon_'+equipment.model+'.glb';
+        const glb=parse(special);
         expect(glb.meshes.length).toBeGreaterThan(0);
         for(const image of glb.images??[]){
-          expect(image.bufferView).toBeTypeOf('number');
-          expect(image.uri).toBeUndefined();
+          if(equipment.model==='longbow'){
+            expect(typeof image.uri==='string'||typeof image.bufferView==='number').toBe(true);
+          }else{
+            expect(image.bufferView).toBeTypeOf('number');
+            expect(image.uri).toBeUndefined();
+          }
         }
       }
     }
@@ -86,7 +93,7 @@ describe('official CC0 GLB asset integrity',()=>{
     const characters=JSON.parse(readFileSync(resolve(assetDir,'kaykit-manifest.json'),'utf8')) as {assets:Array<{license:string;upstreamGitBlobSha1:string}>};
     const weapons=JSON.parse(readFileSync(resolve(assetDir,'kaykit-weapons.json'),'utf8')) as {assets:Array<{license:string;sourceGltfGitSha1:string}>};
     expect(characters.assets).toHaveLength(7);
-    expect(weapons.assets).toHaveLength(10);
+    expect(weapons.assets).toHaveLength(12);
     for(const asset of characters.assets) {
       expect(asset.license).toBe('CC0-1.0');
       expect(asset.upstreamGitBlobSha1).toMatch(/^[a-f0-9]{40}$/);

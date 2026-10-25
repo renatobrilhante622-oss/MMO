@@ -40,6 +40,7 @@ import { EPIGRAPHS, cooldownMultiplier, epigraphEffects } from '../rpg/ClassEpig
 import { AdventureProgress, type Attribute, type Gem } from '../progression/AdventureProgress';
 import { COSMETICS } from '../progression/AdventureProgress';
 import {setScreenPhase} from '../ui/MainMenu';
+import {AnimatedGLB} from '../assets/AnimatedGLB';
 import {configureCharacterCamera,disableCharacterCulling} from '../player/PlayerRenderer';
 import { HudEditor } from '../ui/HudEditor';
 import { AdventureHub } from '../ui/AdventureHub';
@@ -136,6 +137,8 @@ export class Engine {
   private shadowTimer=0;
   private shadowInstallTimer=0;
   private playing = false;
+  private openingProgress:number|null=null;
+  private openingDragon?:AnimatedGLB;
   private running = false;
   private frameId = 0;
   private lastTime = 0;
@@ -288,6 +291,9 @@ export class Engine {
     this.dungeonUI=new DungeonUI(this.container,()=>this.inventory.level,
       (id,difficulty)=>this.launchDungeon(id,difficulty),
       ()=>this.leaveDungeon());
+    // Real navigation remains in the top-right expandable menu, never above skills.
+    this.hud.registerShortcut(this.regionTravel.trigger);
+    this.hud.registerShortcut(this.dungeonUI.trigger);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
@@ -330,6 +336,26 @@ export class Engine {
       () => this.renderer.domElement.removeEventListener('webglcontextlost', lost),
       () => this.renderer.domElement.removeEventListener('webglcontextrestored', restored),
     );
+  }
+
+  /** The noninteractive cinema uses real, already-loaded world geometry.
+   * Game simulation remains gated until the Start Journey gesture. */
+  setOpeningProgress(progress:number|null):void{
+    this.openingProgress=progress===null?null:Math.max(0,Math.min(1,progress));
+    if(progress!==null&&!this.openingDragon){
+      this.openingDragon=new AnimatedGLB('Creature_dragon',5.8,()=>{},false);
+      this.openingDragon.root.position.copy(this.terrain.portalPosition);
+      this.openingDragon.root.position.y=this.terrain.heightAt(
+        this.terrain.portalPosition.x,this.terrain.portalPosition.z)+3.2;
+      this.openingDragon.root.rotation.y=.8;
+      this.scene.add(this.openingDragon.root);
+    }
+    if(progress===null){
+      this.openingDragon?.dispose();
+      this.openingDragon?.root.removeFromParent();
+      this.openingDragon=undefined;
+      this.hero.update(1/60,emptyInput());
+    }
   }
 
   start(): void {
@@ -510,6 +536,25 @@ export class Engine {
     this.sky.position.copy(this.camera.position);
     this.stars.position.copy(this.camera.position);
     this.atmosphere.uniforms.time.value = this.elapsed;
+    if(this.openingProgress!==null){
+      const t=this.openingProgress;
+      const ease=(u:number)=>u*u*(3-2*u);
+      const sample=(a:Vector3,b:Vector3,u:number)=>a.clone().lerp(b,ease(u));
+      const base=this.terrain.spawnPoint;
+      const gate=this.terrain.portalPosition;
+      const paths=[
+        new Vector3(base.x+17,this.terrain.heightAt(base.x+17,base.z+15)+13,base.z+15),
+        new Vector3(base.x-14,this.terrain.heightAt(base.x-14,base.z-25)+9,base.z-25),
+        new Vector3(gate.x+13,this.terrain.heightAt(gate.x+13,gate.z+8)+7,gate.z+8),
+        new Vector3(base.x+3,this.terrain.heightAt(base.x+3,base.z+10)+5,base.z+10),
+      ];
+      const segment=Math.min(2,Math.floor(t*3));
+      const u=t*3-segment;
+      this.camera.position.copy(sample(paths[segment],paths[segment+1],u));
+      const look=segment===2?this.hero.position:this.terrain.portalPosition;
+      this.camera.lookAt(new Vector3(look.x,look.y+2,look.z));
+      this.openingDragon?.root.rotation.set(0,.8+Math.sin(t*4)*.2,0);
+    }
     this.csm.update();
     this.uiClock += dt;
     if (this.uiClock >= 0.1) { this.updateHUD(); this.uiClock = 0; }

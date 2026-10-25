@@ -94,10 +94,23 @@ export class EnvironmentGLB {
         const visual=sources.map(source=>{
           if(!(source instanceof MeshStandardMaterial))return source;
           const material=source.clone();
+          const vegetation=entry.file.includes('tree-')||entry.file.includes('bush');
           material.side=DoubleSide;
-          material.roughness=Math.max(.62,material.roughness);
-          material.emissive.setRGB(.12,.12,.12);
-          material.emissiveIntensity=.45;
+          if(vegetation){
+            // Real PBR foliage is never metallic, even on low-end Android GPUs.
+            material.metalness=0;
+            material.roughness=.85;
+            // Keep original GLB atlas RGB instead of painting trunks green.
+            material.color.setRGB(Math.max(.68,source.color.r),Math.max(.75,source.color.g),Math.max(.58,source.color.b));
+            material.emissive.setRGB(.085,.19,.09);
+            material.emissiveIntensity=.75;
+            material.depthWrite=true;
+          }else{
+            material.metalness=Math.min(.12,material.metalness);
+            material.roughness=Math.max(.78,material.roughness);
+            material.emissive.setRGB(.10,.11,.10);
+            material.emissiveIntensity=.38;
+          }
           this.materials.add(material);
           return material;
         });

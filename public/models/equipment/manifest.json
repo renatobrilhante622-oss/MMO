@@ -1,0 +1,18 @@
+{
+  "license": "CC0-1.0",
+  "author": "Kenney",
+  "pack": "Mini Forest",
+  "source": "https://flockbay.com/assets/weapon-bow/",
+  "files": [
+    {
+      "name": "CC0_longbow.glb",
+      "size": 8508,
+      "sha256": "093e834c1edf85b4e2d2ee18490e21230088ba98022dad18a799b66ee8bea689"
+    },
+    {
+      "name": "Textures/colormap.png",
+      "size": 10659,
+      "sha256": "319f1087d8ed50a8794f9a8179f64671d5595f2365fdf3e47ec2d4eb74dba20f"
+    }
+  ]
+}

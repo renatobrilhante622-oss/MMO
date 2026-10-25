@@ -6,11 +6,12 @@ import type { ClassId } from '../core/GameTypes';
 export type WeaponModelId =
   | 'axe_1handed' | 'axe_2handed' | 'crossbow_2handed'
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
-  | 'sword_1handed' | 'sword_2handed' | 'wand';
+  | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
+  | 'spellbook_open' | 'spellbook_closed';
 
 export interface EquipmentVisual {
   model: WeaponModelId;
-  bone: 'righthand' | 'lefthand';
+  bone: 'righthand' | 'lefthand' | 'spine2' | 'head';
   /** Offset is expressed in full-size character space. */
   offset?: readonly [number, number, number];
 }
@@ -26,12 +27,12 @@ export const CLASS_EQUIPMENT_MODELS: Record<ClassId, readonly EquipmentVisual[]>
     {model:'dagger',bone:'righthand'},
     {model:'dagger',bone:'lefthand'},
   ],
-  ranger: [{model:'crossbow_2handed',bone:'righthand'}],
-  elementalist: [{model:'staff',bone:'righthand'}],
-  necromancer: [{model:'staff',bone:'righthand'}],
+  ranger: [{model:'longbow',bone:'lefthand'}, {model:'quiver',bone:'spine2',offset:[0,0,-.16]}],
+  elementalist: [{model:'staff',bone:'righthand'}, {model:'spellbook_open',bone:'lefthand'}],
+  necromancer: [{model:'staff',bone:'righthand'}, {model:'spellbook_closed',bone:'lefthand'}],
   monk: [],
-  lanceman: [{model:'sword_2handed',bone:'righthand'}],
-  warlock: [{model:'wand',bone:'righthand'}],
+  lanceman: [{model:'spear',bone:'righthand'}],
+  warlock: [{model:'wand',bone:'righthand'}, {model:'staff',bone:'lefthand'}],
 };
 
 const loader = new GLTFLoader();
@@ -40,14 +41,20 @@ const models = new Map<WeaponModelId, Promise<GLTF>>();
 export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
-    const url=import.meta.env.BASE_URL+'models/KayKit_Weapon_'+name+'.glb';
+    const url=import.meta.env.BASE_URL+(name==='spear'
+      ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
+      :name==='longbow'?'models/equipment/CC0_longbow.glb'
+      :'models/KayKit_Weapon_'+name+'.glb');
     promise=loader.loadAsync(url);
     models.set(name,promise);
     void promise.catch(()=>models.delete(name));
   }
   const gltf=await promise;
   const model=clone(gltf.scene);
-  model.name='KayKit weapon '+name;
+  model.name='Author-authored CC0 weapon '+name;
+  // Mini Forest bow is modeled at 0.48m. Scale it to a readable 1.56m
+  // ranger longbow before applying inverse scaling for the hand bone.
+  if(name==='longbow')model.scale.multiplyScalar(3.25);
   model.traverse(object=>{
     if(object instanceof Mesh){
       object.frustumCulled=false;

@@ -6,6 +6,7 @@ import {
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
 import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
 import { CLASS_EQUIPMENT_MODELS, loadWeaponModel } from '../assets/WeaponGLB';
+import {CLASS_IDENTITIES} from './ClassVisualIdentity';
 import {WingsSystem} from '../companions/WingsSystem';
 import {RarityAura} from '../companions/RarityAura';
 import { WeaponForge } from './WeaponForge';
@@ -370,34 +371,21 @@ export class ArticulatedCharacter {
   }
 
   private importedName(definition:ClassDefinition):ModelName {
-    // Skin tiers now change the actual authored 3D silhouette, never add mesh
-    // horns, spheres, wireframes or generated armor as an imitation.
-    const realBody:Record<string,ModelName>={
-      forest:'KayKit_Rogue_Hooded',
-      frost:'KayKit_Knight',
-      void:'KayKit_Mage',
-      solar:'KayKit_Barbarian',
-      eternal:'KayKit_Rogue'
-    };
-    if(realBody[this.skinKey])return realBody[this.skinKey];
-    switch(definition.id){
-      case 'berserker': return 'KayKit_Barbarian';
-      case 'paladin': case 'lanceman': return 'KayKit_Knight';
-      case 'assassin': return 'KayKit_Rogue';
-      case 'ranger': return 'KayKit_Rogue_Hooded';
-      case 'elementalist': case 'necromancer': case 'warlock': return 'KayKit_Mage';
-      case 'monk': return 'KayKit_Barbarian';
-    }
+    // Cosmetic skins may recolor GLB materials/VFX but must not change the
+    // underlying class mesh: an Assassin must never become Ranger_Hooded.
+    return CLASS_IDENTITIES[definition.id].model;
   }
 
   private replaceImportedModel(definition:ClassDefinition):void {
     const name=this.importedName(definition);
-    if(this.imported?.name===name){this.imported.setAttackWeapon(definition.weapon);return;}
+    if(this.imported?.name===name){this.imported.setAttackWeapon(definition.weapon);this.imported.setClassPalette(CLASS_IDENTITIES[definition.id].tint);this.attachImportedGear();return;}
     this.clearGlbWeapons();
     this.imported?.dispose();
     const actor = new AnimatedGLB(name, 1.9, () => {
       if (this.imported !== actor) return;
       this.pelvis.visible = false;
+      actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
+      actor.clearWeaponSlots();
       this.attachImportedGear();
       this.styleSilhouette(this.definition);
     }, true);
@@ -423,6 +411,8 @@ export class ArticulatedCharacter {
     this.root.add(this.wings.root,this.skinAura);
     this.wings.root.position.set(0,1.3,-.16);
     this.skinAura.position.y=1.3;
+    actor.clearWeaponSlots();
+    actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
     this.clearGlbWeapons();
     const version=this.glbWeaponGeneration;
     for(const gear of CLASS_EQUIPMENT_MODELS[this.definition.id]){
@@ -443,6 +433,7 @@ export class ArticulatedCharacter {
       this.hood.visible=false;
       this.skinGeometry.visible=false;
     }
+    this.imported?.setClassPalette(CLASS_IDENTITIES[definition.id].tint);
     this.imported?.tint(caster?0x353242:0x3c4c5a,definition.color);this.armor.color.setHex(caster?0x353242:0x3c4c5a);this.armor.metalness=caster?.22:.75;
     for(const child of this.head.children)if(child instanceof Mesh&&child.material===this.gold)child.visible=!caster;
   }
