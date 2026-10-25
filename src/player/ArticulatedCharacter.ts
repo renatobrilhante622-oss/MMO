@@ -370,6 +370,16 @@ export class ArticulatedCharacter {
   }
 
   private importedName(definition:ClassDefinition):ModelName {
+    // Skin tiers now change the actual authored 3D silhouette, never add mesh
+    // horns, spheres, wireframes or generated armor as an imitation.
+    const realBody:Record<string,ModelName>={
+      forest:'KayKit_Rogue_Hooded',
+      frost:'KayKit_Knight',
+      void:'KayKit_Mage',
+      solar:'KayKit_Barbarian',
+      eternal:'KayKit_Rogue'
+    };
+    if(realBody[this.skinKey])return realBody[this.skinKey];
     switch(definition.id){
       case 'berserker': return 'KayKit_Barbarian';
       case 'paladin': case 'lanceman': return 'KayKit_Knight';
@@ -440,6 +450,7 @@ export class ArticulatedCharacter {
     if(id===this.skinKey)return;this.skinKey=id;
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
+    this.replaceImportedModel(this.definition);
     // Runtime cosmetic VFX stay shader/particle-based; no sculpted mesh horns or spheres.
     if(typeof document!=='undefined'||id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
