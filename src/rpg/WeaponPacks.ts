@@ -26,17 +26,17 @@ export interface WeaponPack {
   id:string;classId:ClassId;tier:number;name:[string,string];
   rarity:Rarity;color:number;weapons:readonly EquipmentVisual[];
 }
-/** 45 deterministic gameplay cosmetics, all backed by locally bundled authored GLBs.
- * A "tier" changes material/effects: it does NOT claim 45 separately sculpted meshes. */
+/** 45 deterministic gameplay cosmetics, each using a separate bundled CC0 GLB.
+ * Rarity shaders and particles remain independent of the weapon geometry. */
 export const WEAPON_PACKS:readonly WeaponPack[]=Object.freeze(
  (Object.keys(layouts) as ClassId[]).flatMap(classId=>{
   const group=layouts[classId];
   return group.names.map((name,tier)=>{
-   const main=group.models[tier];
+   const main=`armory-${classId}-${tier}` as WeaponModelId;
    const weapons:EquipmentVisual[]=classId==='ranger'
     ?[{model:main,bone:'lefthand'},{model:'quiver',bone:'spine2',offset:[0,0,-.17]}]
     :classId==='assassin'
-     ?[{model:'dagger',bone:'righthand'},{model:'dagger',bone:'lefthand'}]
+     ?[{model:main,bone:'righthand'},{model:main,bone:'lefthand'}]
     :[{model:main,bone:'righthand'},...(group.offhand?[{model:group.offhand,bone:'lefthand'} as EquipmentVisual]:[])];
    return Object.freeze({
     id:'armory-'+classId+'-'+tier,classId,tier,

@@ -1,0 +1,58 @@
+{
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "id": "Creature_wolf",
+      "hash": "2408c887ec97ecfae368ceb8a5ee1f7f9cfaf236",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/Wolf.glb",
+      "file": "models/creatures/Creature_wolf.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_wyvern",
+      "hash": "114c2311759fd037d01ffd74c1ca4a1199f874eb",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/DragonEvolved.glb",
+      "file": "models/creatures/Creature_wyvern.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Flying_Idle",
+        "Fast_Flying",
+        "Punch",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_dragon",
+      "hash": "e65d61b76981f55dbe68bb82191a8178301d3df8",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/Dragon.glb",
+      "file": "models/creatures/Creature_dragon.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Flying_Idle",
+        "Fast_Flying",
+        "Punch",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_slime",
+      "hash": "490bde7bad82d0f8a764ba9596fbfda57705c474",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/PinkSlime.glb",
+      "file": "models/creatures/Creature_slime.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Bite_Front",
+        "Death"
+      ]
+    }
+  ]
+}
