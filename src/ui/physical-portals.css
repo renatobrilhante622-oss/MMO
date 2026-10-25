@@ -1,0 +1,35 @@
+
+.physical-portal-plaque{
+ position:fixed;transform:translate(-50%,-100%);z-index:45;
+ display:flex;flex-direction:column;align-items:center;gap:3px;
+ min-width:128px;max-width:220px;padding:8px 12px;
+ border:1px solid #c7a96bbb;border-radius:7px;
+ background:linear-gradient(135deg,#14233bee,#090e20e8);
+ color:#f4ddb0;pointer-events:none;
+ text-align:center;box-shadow:0 5px 19px #0008,0 0 14px #8d73d043;
+}
+.physical-portal-plaque[hidden],.physical-portal-enter[hidden]{display:none!important}
+.physical-portal-plaque strong{font:700 12px/1.3 Georgia,serif;text-shadow:0 2px 3px #000;white-space:normal;}
+.physical-portal-plaque small{font:700 10px/1.4 system-ui;color:#a5e4b2;}
+.physical-portal-plaque.blocked{border-color:#9e5158af}
+.physical-portal-plaque.blocked small{color:#f3a0a0}
+.physical-portal-enter{
+ position:fixed;left:50%;bottom:max(156px,env(safe-area-inset-bottom));
+ transform:translateX(-50%);z-index:73;
+ min-width:162px;max-width:min(360px,80vw);min-height:42px;
+ padding:11px 15px;color:#fff1d3;
+ font:700 12px/1.35 system-ui;white-space:normal;
+ border:1px solid #bfa36d;border-radius:9px;
+ background:linear-gradient(125deg,#263756ee,#132134ef);
+ box-shadow:0 4px 18px #0009;pointer-events:auto;
+}
+@media(max-width:540px){
+ .physical-portal-plaque{min-width:85px;max-width:135px;padding:5px 7px}
+ .physical-portal-plaque strong{font-size:9px}
+ .physical-portal-plaque small{font-size:8px}
+ .physical-portal-enter{bottom:max(132px,env(safe-area-inset-bottom));font-size:10px;min-height:36px}
+}
+@media(max-height:480px) and (min-width:650px){.physical-portal-enter{bottom:81px}}
+
+/* Part 1: floating NPC insignias never cover character faces with dark boxes. */
+.eterna-npc-label{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;filter:drop-shadow(0 2px 4px #000c) drop-shadow(0 0 5px #ffc971);font-size:24px!important;}

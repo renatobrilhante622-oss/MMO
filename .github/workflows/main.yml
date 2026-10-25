@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: android-latest-apk
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,6 +39,7 @@ jobs:
           rm -rf dist android/app/src/main/assets/public android/app/build
           rm -f public/*.apk releases/*.apk *.apk
           npm install --legacy-peer-deps
+          npm test
           npm run build
           if [ ! -d "android" ]; then
             npm install @capacitor/core @capacitor/cli @capacitor/android --save-dev --legacy-peer-deps
@@ -63,5 +71,29 @@ jobs:
       - name: Upload APK Ready to Download
         uses: actions/upload-artifact@v4
         with:
-          name: EternalHero-MMO-vNovo-APK
+          name: ETERNA-Android-Debug-APK
           path: apk-output/EternalHero-MMO-vNovo.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Move the stable latest-apk tag to the tested commit
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          cp apk-output/EternalHero-MMO-vNovo.apk apk-output/ETERNA-Android-latest.apk
+          git tag --force latest-apk "${GITHUB_SHA}"
+          git push origin refs/tags/latest-apk --force
+
+      - name: Publish Android APK to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-apk
+          name: ETERNA • APK Android atualizado
+          body: |
+            APK de testes (DEBUG), atualizado automaticamente após validação e build da main.
+            Commit: ${{ github.sha }}
+          files: apk-output/ETERNA-Android-latest.apk
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          make_latest: true

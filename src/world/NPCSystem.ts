@@ -37,10 +37,14 @@ export class NPCSystem {
     private readonly ground:(x:number,z:number)=>number,
     private readonly quests:QuestSystem,
     private readonly callbacks:NPCCallbacks,
-    private readonly lang:()=> 'pt'|'en'){
+    private readonly lang:()=> 'pt'|'en',private readonly activeRegion?:string){
     for(const def of NPCS){
+      if(this.activeRegion&&def.region!==this.activeRegion)continue;
+      const home=REGIONS.find(region=>region.id===def.region)!;
+      const x=this.activeRegion?def.x-home.center.x:def.x;
+      const z=this.activeRegion?def.z-home.center.z+18:def.z;
       const model=new AnimatedGLB(def.model,1.9,()=>{},true);
-      const position=new Vector3(def.x,this.ground(def.x,def.z)+.15,def.z);
+      const position=new Vector3(x,this.ground(x,z)+.15,z);
       model.root.position.copy(position);
       model.root.rotation.y=Math.PI*.2;
       this.scene.add(model.root);

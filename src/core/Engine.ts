@@ -48,6 +48,10 @@ import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
 import { regionArrival, travelPermission } from '../world/RegionTravel';
 import { RegionTravelUI } from '../ui/RegionTravelUI';
 import { PortalChannelVFX } from '../world/PortalChannelVFX';
+import {MapInstanceManager} from '../world/MapInstanceManager';
+import {WorldPortals} from '../world/WorldPortals';
+import {DungeonInstance} from '../world/DungeonInstance';
+import {DungeonUI,type DungeonDifficulty,DUNGEON_TIERS} from '../ui/DungeonUI';
 import {QuestSystem,type QuestDefinition} from '../rpg/QuestSystem';
 import {regionalMaterialForKill} from '../rpg/RegionalLoot';
 import {NPCSystem} from '../world/NPCSystem';
@@ -65,7 +69,9 @@ export class Engine {
   readonly camera = new PerspectiveCamera(58, 1, 0.1, 1000);
   readonly renderer: WebGLRenderer;
   readonly events = new EventBus();
-  readonly terrain: OpenWorldGenerator;
+  terrain: OpenWorldGenerator;
+  readonly mapInstances:MapInstanceManager;
+  private restoredRegionId='aurora';
   readonly physics: PhysicsWorld;
   readonly hero: HeroController;
   readonly combat: CombatSystem;
@@ -74,12 +80,17 @@ export class Engine {
   readonly codex: CodexSystem;
   readonly enemies: EnemyAI;
   readonly dungeon: DungeonBossManager;
+  readonly dungeonUI:DungeonUI;
+  private dungeonInstance?:DungeonInstance;
+  private dungeonReturnRegion='aurora';
+  private dungeonLoading=false;
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
   readonly regionTravel:RegionTravelUI;
   readonly portalVfx=new PortalChannelVFX();
   readonly quests:QuestSystem;
-  readonly npcs:NPCSystem;
+  npcs:NPCSystem;
+  portals:WorldPortals;
   readonly questTracker:QuestTrackerHUD;
   private deferredQuestSave:unknown;
   private questAutoMove:MapPoint|null=null;
@@ -107,6 +118,7 @@ export class Engine {
   private appearanceKey = '';
 
   readonly drops: LootDrop[] = [];
+  private readonly collectedRegionalLootIds=new Set<string>();
   readonly sound = new SoundEngine();
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
@@ -179,11 +191,15 @@ export class Engine {
     this.terrain = new OpenWorldGenerator(this.scene, 713);
     this.terrain.generate();
     this.physics = new PhysicsWorld(this.terrain);
+    this.mapInstances=new MapInstanceManager(this.scene,this.physics,this.terrain);
     this.inventory = new InventoryAndLoot(this.events, 407);
     this.progress = new AdventureProgress(this.inventory);
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
+    if(this.restoredRegionId!=='aurora'){
+      this.terrain=this.mapInstances.activate(this.restoredRegionId);
+    }
     this.quests=new QuestSystem(this.inventory,this.progress);
     this.quests.restore(this.deferredQuestSave);
     if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
@@ -194,6 +210,7 @@ export class Engine {
     this.refreshStats();
     this.combat = new CombatSystem(this.scene, this.events);
     this.enemies = new EnemyAI(this.scene, this.physics, this.events);
+    this.enemies.resetForRegion(this.mapInstances.regionId);
     this.dungeon = new DungeonBossManager(this.scene, this.enemies, this.events, this.terrain.portalPosition);
     this.companions = new PetAndMountSystem(this.scene, this.hero, this.physics, this.events);
     this.csm = new CSM({
@@ -253,7 +270,7 @@ export class Engine {
         onTeleport:()=>this.regionTravel.open(),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
         onQuestClaimed:id=>this.claimQuest(id),
-      },()=>this.progress.language);
+      },()=>this.progress.language,this.mapInstances.regionId);
     this.scene.add(this.portalVfx.root);
     this.regionTravel=new RegionTravelUI(this.container,()=>({
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -262,6 +279,15 @@ export class Engine {
       inDungeon:this.dungeon.active,
       channeling:!!this.channel
     }),id=>this.startRegionTravel(id),()=>this.progress.language);
+    this.portals=new WorldPortals(this.scene,this.container,this.mapInstances.regionId,
+      (x,z)=>this.terrain.heightAt(x,z),
+      ()=>({level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+        adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+        inDungeon:this.dungeon.active,channeling:!!this.channel}),
+      id=>this.startRegionTravel(id),()=>this.progress.language);
+    this.dungeonUI=new DungeonUI(this.container,()=>this.inventory.level,
+      (id,difficulty)=>this.launchDungeon(id,difficulty),
+      ()=>this.leaveDungeon());
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
@@ -334,7 +360,7 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
-      const slainRegion=regionAt(position.x,position.z).id;
+      const slainRegion=this.mapInstances.regionId;
       this.quests.onKill(kind,slainRegion,boss);
       this.questTracker.refresh();
       this.progress.earnKill(level,boss,slainRegion);if(boss)this.progress.profile.bossKills++;
@@ -353,7 +379,10 @@ export class Engine {
       this.sound.coin();
       this.inventory.addLoot(drop);
       // Grant regional resources only when the real world drop reaches the pickup event.
-      if(this.drops.some(candidate=>candidate.id===drop.id)&&drop.regionalMaterial){
+      if(drop.regionalMaterial&&!this.collectedRegionalLootIds.has(drop.id)){
+        this.collectedRegionalLootIds.add(drop.id);
+        if(this.collectedRegionalLootIds.size>4096)
+          this.collectedRegionalLootIds.delete(this.collectedRegionalLootIds.values().next().value!);
         if(this.progress.collectRegionalMaterial(drop.regionalMaterial.id,drop.regionalMaterial.quantity))
           this.hud.notify('✦ '+drop.regionalMaterial.name+' ×'+drop.regionalMaterial.quantity,'success');
       }
@@ -389,13 +418,14 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.npcs.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.dungeonUI.blocking && !this.dungeonLoading && !this.npcs.blocking && !document.hidden;
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
     this.progress.tick(document.hidden?0:dt);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
     this.npcs.update(dt,this.camera,this.hero.position,active);
+    this.portals.update(dt,this.camera,this.hero.position,active);
     this.quests.refreshDaily();
     this.quests.updateMilestones(
       this.inventory.level,
@@ -413,7 +443,24 @@ export class Engine {
       this.enemies.update(simDt, this.hero,this.camera.position);
       this.companions.update(simDt, this.enemies.enemies, this.drops);
       const clears=this.dungeon.clears;
+      // Interaction with real crystal props shares the hero's melee input.
+      if(this.dungeonInstance&&this.dungeon.active
+         &&this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)
+         &&this.dungeon.wave<=this.dungeon.definition.waves
+         &&(input.attack||input.interact)
+         &&this.dungeonInstance.strikeCrystal(this.hero.position,this.hero.stats.attack)){
+        this.sound.impact(true);
+        this.combat.particles.burst(this.hero.position,0x9c8ffd,12);
+        this.hud.notify('Cristal danificado · '+this.dungeonInstance.crystalsRemaining+' restantes','info');
+      }
       this.dungeon.update(simDt, this.hero);
+      this.dungeonInstance?.update(simDt,this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.completed);
+      if(this.dungeonInstance){
+        const firstClear=this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)||this.dungeon.completed;
+        const secondClear=(this.dungeon.wave>this.dungeon.definition.waves&&this.dungeonInstance.crystalsRemaining===0)||this.dungeon.completed;
+        this.physics.setDungeonGateOpen(0,firstClear);
+        this.physics.setDungeonGateOpen(1,secondClear);
+      }
       if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
       const targets = this.enemies.enemies.filter(enemy => enemy.alive);
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
@@ -437,6 +484,11 @@ export class Engine {
       if (this.saveClock >= 15) { this.save(); this.saveClock = 0; }
     }
     if(this.playing&&!document.hidden&&!this.hudEditor.active)this.base.update(dt);
+    this.dungeonUI.update(dt,!!this.dungeonInstance&&this.dungeon.active,
+      !!this.dungeonInstance&&this.dungeon.completed,
+      this.dungeon.wave,this.dungeon.definition.waves,
+      this.dungeonInstance&&this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)&&this.dungeon.wave<=this.dungeon.definition.waves?
+      this.dungeon.status+' • '+this.dungeonInstance.crystalsRemaining+'/3 cristais':this.dungeon.status);
     const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
     const bossPhase = boss ? (boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3) : 0;
     if (bossPhase > 0 && this.previousBossPhase > 0 && bossPhase !== this.previousBossPhase) this.sound.bossRoar();
@@ -468,7 +520,7 @@ export class Engine {
       (Math.sin(this.elapsed * 83 + 0.8) + Math.sin(this.elapsed * 137) * 0.3) * trauma * 0.35,
       0,
     );
-    const targetFov = this.hero.machine.state === 'slide' ? 66 : active && this.hero.machine.state === 'run' ? 61 : 58;
+    const targetFov = this.channel ? 48 : this.hero.machine.state === 'slide' ? 66 : active && this.hero.machine.state === 'run' ? 61 : 58;
     const fov = this.camera.fov + (targetFov - this.camera.fov) * (1 - Math.exp(-dt * 5));
     if (Math.abs(fov - this.camera.fov) > 0.001) {
       this.camera.fov = fov;
@@ -541,8 +593,28 @@ export class Engine {
       case 'crystal-buy':ok=purchaseMerchant(p,'crystals');break;
       case 'ticket-buy':ok=purchaseMerchant(p,'tickets');break;
       case 'slot-buy':ok=p.buySlot();break;
-      case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked());break;
-      case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.startChannel(dest.x,dest.z);this.hub.close();ok=true;}break;}
+      case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked(),this.mapInstances.regionId);break;
+      case 'teleport':{
+        const destination=p.bookmarks[data.index];
+        const destRegion=REGIONS.find(r=>r.id===destination?.region)??REGIONS[0];
+        const gate=travelPermission(destRegion.id,{
+          level:this.inventory.level,unlocked:p.unlockedRegions,
+          adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+          inDungeon:this.dungeon.active,channeling:!!this.channel,
+        });
+        if(!gate.ok)break;
+        const dest=p.destination(data.index,this.travelBlocked());
+        if(dest){
+          // Legacy slots recorded absolute coordinates in the old shared
+          // terrain. Only those entries require conversion to local map space.
+          const x=dest.localMap?dest.x:destRegion.id==='aurora'?dest.x:dest.x-destRegion.center.x;
+          const z=dest.localMap?dest.z:destRegion.id==='aurora'?dest.z:dest.z-destRegion.center.z+18;
+          if(!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>140||Math.abs(z)>140)break;
+          this.startChannel(x,z,destRegion.id);
+          this.hub.close();ok=true;
+        }
+        break;
+      }
       case 'vip':ok=p.buyVip();break;
       case 'pass-buy':ok=p.buyPass();break;
       case 'mission':if(data.key==='daily'||data.key==='weekly'||data.key==='forest')ok=p.claimMission(data.key);break;
@@ -556,7 +628,15 @@ export class Engine {
       case 'gps-region':case 'gps-boss':{const r=REGIONS.find(r=>r.id===data.id);if(r){this.setWaypoint(action==='gps-boss'?r.boss:r.center);ok=true;}break;}
       case 'difficulty':if(['normal','elite','nightmare','abyssal'].includes(data.key)&&!this.dungeon.active){p.dungeonDifficulty=data.key;ok=true;}break;
       case 'dungeon-select':case 'dungeon-start':{
-        const base=DUNGEONS.find(d=>d.id===data.id),d=base?dungeonVariant(base,p.dungeonDifficulty):undefined;if(d&&inv.level>=d.level&&!this.dungeon.active){p.selectedDungeon=d.id;ok=action==='dungeon-select'||this.dungeon.start(this.hero,d,inv.level);if(ok&&action==='dungeon-start')this.hub.close();}break;
+        const base=DUNGEONS.find(d=>d.id===data.id);
+        if(base&&!this.dungeon.active){
+          const variant=dungeonVariant(base,p.dungeonDifficulty);
+          p.selectedDungeon=base.id;
+          ok=action==='dungeon-select'?
+            this.inventory.level>=variant.level:
+            this.launchDungeon(base.id,p.dungeonDifficulty as DungeonDifficulty);
+          if(ok&&action==='dungeon-start')this.hub.close();
+        }break;
       }
     }
     this.save();
@@ -570,8 +650,8 @@ export class Engine {
   private updateJourney(dt:number,active:boolean,input:ReturnType<typeof emptyInput>):void {
     const p=this.progress,hero=this.hero;
     this.autoButton.hidden=!p.vip&&!this.hudEditor.active;this.autoButton.classList.toggle('active',p.autoFarm);
-    const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
-    this.quests.onVisit(region.id);
+    const region=REGIONS.find(r=>r.id===this.mapInstances.regionId)??REGIONS[0];if(this.mapInstances.regionId!=='dungeon'&&!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
+    if(this.mapInstances.regionId!=='dungeon')this.quests.onVisit(region.id);
     const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;hero.rig.skinAppearance(skin.id,skin.color,RARITIES.indexOf(skin.rarity));hero.rig.wings.configure(p.evolution.wings,p.evolution.wings?p.evolution.wingLevels[p.evolution.wings]:1);
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);this.companions.setEvolution(p.evolution.level(pet.id),p.evolution.level(mount.id));
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
@@ -589,7 +669,10 @@ export class Engine {
         this.portalVfx.update(dt,this.channel.remaining);
         if(this.channel.remaining<=0){
           const dest=this.channel;
-          hero.teleportTo(new Vector3(dest.x,this.terrain.heightAt(dest.x,dest.z)+1.1,dest.z));
+          if(dest.regionId&&dest.regionId!==this.mapInstances.regionId){
+            this.activateMap(dest.regionId);
+            hero.teleportTo(this.terrain.spawnPoint.clone().add(new Vector3(0,.2,0)));
+          }else hero.teleportTo(new Vector3(dest.x,this.terrain.heightAt(dest.x,dest.z)+1.1,dest.z));
           if(dest.regionId&&!p.discovered.includes(dest.regionId))p.discovered.push(dest.regionId);
           this.channel=null;this.portalVfx.stop();
           this.combat.particles.celebration(hero.position);this.save();
@@ -616,7 +699,7 @@ export class Engine {
     }
     const farmCandidates=this.enemies.enemies.filter(e=>e.alive&&e.hp>0&&!e.boss);
     const objective=this.quests.active();
-    const priority=objective?.goal==='kill'?farmCandidates.filter(e=>e.kind===objective.target&&regionAt(e.position.x,e.position.z).id===objective.region):[];
+    const priority=objective?.goal==='kill'?farmCandidates.filter(e=>e.kind===objective.target&&this.mapInstances.regionId===objective.region):[];
     const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},(priority.length?priority:farmCandidates),this.drops,dt);
     if(decision.stop)p.autoFarm=false;
     if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active){this.autoTarget='';this.autoRoute=[];return;}
@@ -663,7 +746,7 @@ export class Engine {
       if(npc)destination={x:npc.x,z:npc.z};
     }else if(quest.goal==='boss')destination={...region.boss};
     else if(quest.goal==='kill'){
-      const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target&&regionAt(e.position.x,e.position.z).id===quest.region)
+      const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target&&this.mapInstances.regionId===quest.region)
         .sort((a,b)=>a.position.distanceToSquared(this.hero.position)-b.position.distanceToSquared(this.hero.position))[0];
       if(target)destination={x:target.position.x,z:target.position.z};
     }
@@ -686,6 +769,110 @@ export class Engine {
     this.portalVfx.start(this.hero.position.clone().add(new Vector3(0,-this.hero.radius,.0)));
     this.combat.particles.celebration(this.hero.position);
   }
+  /** Enter an independent indoor world with its own terrain, collision and GLB props. */
+  private launchDungeon(id:string,difficulty:DungeonDifficulty):boolean{
+    if(this.dungeon.active||this.dungeonInstance||!this.hero.alive||this.recentCombat>0)return false;
+    const tier=DUNGEON_TIERS.find(t=>t.id===difficulty);
+    const base=DUNGEONS.find(d=>d.id===id);
+    if(!tier||!base||this.inventory.level<tier.minLevel)return false;
+    const definition=dungeonVariant(base,difficulty);
+    if(this.inventory.level<definition.level)return false;
+    this.dungeonReturnRegion=this.mapInstances.regionId;
+    try{
+      this.npcs.dispose();this.portals.dispose();this.enemies.dispose();
+      this.enemies.setDungeonMode(true);
+      this.drops.splice(0);
+      for(const key of [...this.dropMeshes.keys()])this.removeDropMesh(key);
+      this.terrain=this.mapInstances.activate('dungeon');
+      this.dungeonInstance=new DungeonInstance(this.scene,this.terrain);
+      const portal=new Vector3(0,this.terrain.heightAt(0,-70)+1.2,-70);
+      this.dungeon.setPortalPosition(portal);
+      this.dungeon.setInstanceRooms((wave,waves)=>this.dungeonInstance!.roomPoint(wave,waves));
+      this.dungeon.setRoomGate((wave,waves)=>wave<waves||!this.dungeonInstance||this.dungeonInstance.crystalsRemaining===0);
+      this.hero.mounted=false;
+      this.companions.mount.visible=false;
+      this.hero.teleportTo(portal.clone());
+      this.questAutoMove=null;this.questAutoRoute=[];
+      this.setWaypoint(null);
+      // Keep control/combat locked until every offline GLB is loaded.
+      // A fast device resumes immediately; slower Android GPUs never show
+      // active enemy waves against temporarily invisible dungeon artwork.
+      const instance=this.dungeonInstance;
+      this.dungeonLoading=true;
+      this.dungeonUI.setLoading('⌛ Carregando masmorra: piso, paredes e cristais GLB…');
+      void instance.ready.then(()=>{
+        if(this.dungeonInstance!==instance||this.mapInstances.regionId!=='dungeon')return;
+        if(!this.hero.alive){this.leaveDungeon();return;}
+        this.dungeonLoading=false;
+        this.dungeonUI.setLoading(null);
+        this.hero.teleportTo(portal.clone());
+        if(!this.dungeon.start(this.hero,definition,this.inventory.level)){
+          this.leaveDungeon();return;
+        }
+        this.hero.teleportTo(new Vector3(0,this.terrain.heightAt(0,-30)+1.2,-30));
+        this.hud.notify('Instância carregada • '+definition.name[0],'success');
+      }).catch(error=>{
+        if(this.dungeonInstance!==instance)return;
+        console.error('Dungeon GLB loading failed:',error);
+        this.hud.notify('Falha nos arquivos GLB da masmorra. Retornando à vila.','warning');
+        this.leaveDungeon();
+      });
+      return true;
+    }catch(error){
+      console.error('Failed to load dungeon instance:',error);
+      this.leaveDungeon();
+      return false;
+    }
+  }
+  private leaveDungeon():void{
+    if(this.mapInstances.regionId!=='dungeon')return;
+    this.dungeonLoading=false;
+    this.dungeonUI.setLoading(null);
+    this.dungeon.abandon();
+    this.dungeon.clearInstanceRooms();
+    this.dungeonInstance?.dispose();this.dungeonInstance=undefined;
+    this.enemies.setDungeonMode(false);
+    this.activateMap(this.dungeonReturnRegion);
+    this.dungeon.setPortalPosition(this.terrain.portalPosition);
+    this.hero.teleportTo(this.terrain.spawnPoint.clone().add(new Vector3(0,.3,0)));
+    this.dungeon.completed=false;
+    this.hud.notify('Retorno seguro à vila.','success');
+    this.save();
+  }
+
+  /** Replaces the entire terrain scene graph and static physics, then regional actors. */
+  private activateMap(id:string):void{
+    if(id===this.mapInstances.regionId)return;
+    this.npcs.dispose();
+    this.portals.dispose();
+    this.enemies.dispose();
+    this.drops.splice(0);
+    for(const id of [...this.dropMeshes.keys()])this.removeDropMesh(id);
+    this.questAutoMove=null;this.questAutoRoute=[];
+    this.setWaypoint(null);
+    this.terrain=this.mapInstances.activate(id);
+    this.enemies.resetForRegion(id);
+    this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
+      this.quests,{
+        onForge:()=>this.hub.openForge(),
+        onShop:()=>this.hub.open('shop'),
+        onTeleport:()=>this.regionTravel.open(),
+        onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
+        onQuestClaimed:questId=>this.claimQuest(questId),
+      },()=>this.progress.language,id);
+    this.portals=new WorldPortals(this.scene,this.container,id,
+      (x,z)=>this.terrain.heightAt(x,z),
+      ()=>({level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+        adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+        inDungeon:this.dungeon.active,channeling:!!this.channel}),
+      destinationId=>this.startRegionTravel(destinationId),
+      ()=>this.progress.language);
+    this.hero.mounted=false;
+    this.companions.mount.visible=false;
+    const region=REGIONS.find(item=>item.id===id)!;
+    this.hud.notify('Região carregada: '+region.name[0],'success');
+  }
+
   private startRegionTravel(id:string):void{
     const permission=travelPermission(id,{
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -701,10 +888,12 @@ export class Engine {
   }
 
   private interact(): void {
+    if(this.mapInstances.regionId==='dungeon')return;
+    if(this.portals.interact())return;
     if(this.npcs.interact(this.hero.position))return;
     const delta = this.hero.position.clone().sub(this.terrain.portalPosition); delta.y = 0;
     if (delta.length() < 12) {
-      this.dungeon.start(this.hero,dungeonVariant(DUNGEONS.find(d=>d.id===this.progress.selectedDungeon)??DUNGEONS[0],this.progress.dungeonDifficulty),this.inventory.level);
+      this.dungeonUI.open();
     } else if (this.hero.position.distanceTo(this.terrain.spawnPoint) < 28) {
       this.hud.openPanel('inventory');
       this.hud.notify('Forja da vila: equipe, venda ou aprimore seu equipamento.', 'info');
@@ -850,14 +1039,37 @@ export class Engine {
     const twilight = Math.max(0, 1 - Math.abs(sun.y) * 3);
     const top = new Color('#09152c').lerp(new Color('#477f9d'), daylight);
     const horizon = new Color('#192f49').lerp(new Color('#b4d1c6'), daylight).lerp(new Color('#e9b69b'), twilight * 0.32);
+    const biome=({
+      aurora:{zenith:'#648fa2',horizon:'#9baea0',ground:'#545d3b'},
+      crypt:{zenith:'#4b4b65',horizon:'#827c90',ground:'#64546a'},
+      highlands:{zenith:'#92c4d8',horizon:'#c2dce5',ground:'#92a8b5'},
+      rift:{zenith:'#934b50',horizon:'#b67d69',ground:'#74544a'},
+      eclipse:{zenith:'#3c3564',horizon:'#75609b',ground:'#554d71'}
+    } as Record<string,{zenith:string;horizon:string;ground:string}>)[this.mapInstances.regionId];
+    if(biome){
+      top.lerp(new Color(biome.zenith),.44);
+      horizon.lerp(new Color(biome.horizon),.4);
+      this.hemisphere.color.set(biome.horizon);
+      this.hemisphere.groundColor.set(biome.ground);
+    }
+    this.sky.visible=this.mapInstances.regionId!=='dungeon';
+    this.stars.visible=this.mapInstances.regionId!=='dungeon';
+    if(this.mapInstances.regionId==='dungeon'){
+      top.set('#090d18');
+      horizon.set('#1e2635');
+      this.hemisphere.color.set('#8d879d');
+      this.hemisphere.groundColor.set('#332a33');
+    }
     this.sky.update(this.elapsed, sun, top, horizon);
     this.csm.lightDirection.copy(sun).negate();
     if (this.csm.lightDirection.y > -0.15) this.csm.lightDirection.y = -0.15;
     this.csm.lights.forEach(light => { light.intensity = 0.24 + daylight * 2.5; light.color.set(daylight > 0.2 ? '#fff0d6' : '#8facd8'); });
-    this.hemisphere.intensity = 0.65 + daylight * 1.5;
+    this.hemisphere.intensity = 1.25 + daylight * 1.15;
+    this.scene.environmentIntensity=.64+daylight*.12;
     const fogColor = horizon.clone().multiplyScalar(0.72);
     (this.scene.fog as FogExp2).color.copy(fogColor);
     this.atmosphere.uniforms.fogColor.value.copy(fogColor);
+    (this.scene.fog as FogExp2).density=this.mapInstances.regionId==='dungeon'?.026:.0038;
     this.atmosphere.uniforms.sunDirection.value.copy(sun);
     (this.stars.material as PointsMaterial).opacity = Math.max(0, 0.8 - daylight * 2);
   }
@@ -867,6 +1079,7 @@ export class Engine {
     this.hud.update({
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
+      regionName:this.mapInstances.regionId==='dungeon'?'MASMORRA — '+this.dungeon.definition.name[0]:REGIONS.find(region=>region.id===this.mapInstances.regionId)!.name[this.progress.language==='pt'?0:1],
       classId: this.classId, state: this.hero.machine.state,
       gold: this.inventory.gold, crystals: this.inventory.crystals, items: this.inventory.items, equipment: this.inventory.equipment,
       buildings: this.base.buildings.map(building => ({ ...building, cost: this.base.cost(building.id) })),
@@ -910,7 +1123,7 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, regionId:this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
     } catch {
       if (!this.saveErrorReported && this.hud) { this.hud.notify('Armazenamento local indisponível. Esta sessão continua sem salvar.', 'warning'); this.saveErrorReported = true; }
     }
@@ -929,6 +1142,7 @@ export class Engine {
       this.base.restore(save.base);
       this.codex.restore(save.codex);
       this.deferredQuestSave=save.quests;
+      if(typeof save.regionId==='string'&&REGIONS.some(r=>r.id===save.regionId))this.restoredRegionId=save.regionId;
     } catch { /* Invalid or unavailable browser storage starts a fresh, playable session. */ }
   }
 
@@ -945,7 +1159,8 @@ export class Engine {
     this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.lootFeed.dispose();
     this.hud.dispose();
-    this.questTracker.dispose();this.npcs.dispose();
+    this.questTracker.dispose();this.npcs.dispose();this.portals.dispose();
+    this.dungeonUI.dispose();this.dungeonInstance?.dispose();
     this.regionTravel.dispose();this.portalVfx.dispose();
     this.sound.dispose();
     this.companions.dispose?.();

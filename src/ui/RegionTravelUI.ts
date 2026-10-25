@@ -1,6 +1,18 @@
 import { REGIONS } from '../world/Regions';
 import { REGION_REWARDS, travelPermission, type RegionTravelState } from '../world/RegionTravel';
 
+const PT_MONSTERS:Record<string,string>={
+  slime:'Slime Verde',wolf:'Lobo Cinzento',
+  skeleton:'Esqueleto Guerreiro',wraith:'Espectro Sombrio',
+  golem:'Golem de Gelo',boss:'Chefe Ancestral'
+};
+const BANNERS:Record<string,string>={
+  aurora:'Grass004',crypt:'PavingStones046',highlands:'Snow010A',
+  rift:'Ground093C',eclipse:'Ground071'
+};
+export function translatedMonster(kind:string,language:'pt'|'en'):string {
+  return language==='pt'?(PT_MONSTERS[kind]??kind):kind[0].toUpperCase()+kind.slice(1);
+}
 export class RegionTravelUI {
   readonly root=document.createElement('section');
   readonly trigger=document.createElement('button');
@@ -60,17 +72,26 @@ export class RegionTravelUI {
       card.className='region-travel-card'+(permission.ok?'':' locked');
       card.style.setProperty('--region-color',region.color);
       const banner=document.createElement('div');banner.className='region-travel-banner';
+      // Photography-derived CC0 PBR imagery replaces the previously empty gradients.
+      const image=import.meta.env.BASE_URL+'textures/real-pbr/'+BANNERS[region.id]+'_1K-JPG_Color.webp';
+      banner.style.backgroundImage='linear-gradient(0deg,#071220ee,#07122016),url("'+image+'")';
+      banner.style.backgroundSize='cover';banner.style.backgroundPosition='center';
       const label=document.createElement('span');label.textContent='LV. '+region.minLevel+'–'+region.maxLevel;
       const name=document.createElement('h3');name.textContent=region.name[lang];
       banner.append(label,name);
       const monsters=document.createElement('p');
-      monsters.textContent=(lang===0?'CRIATURAS: ':'CREATURES: ')+region.kinds.join(' · ');
+      monsters.textContent=(lang===0?'CRIATURAS: ':'CREATURES: ')+region.kinds.map(kind=>translatedMonster(kind,lang===0?'pt':'en')).join(' · ');
       const drops=document.createElement('p');drops.className='region-travel-loot';
-      drops.textContent='✦ '+REGION_REWARDS[region.id].exclusive.join(' · ');
+      drops.textContent='✦ '+REGION_REWARDS[region.id].exclusive.join('   ✦  ');
       const action=document.createElement('button');
       action.type='button';
       action.disabled=!permission.ok;
-      action.textContent=permission.ok?(lang===0?'CANALIZAR TELEPORTE':'CHANNEL TELEPORT'):permission.reason==='level'?'REQUER LV. '+region.minLevel:permission.reason==='locked'?(lang===0?'CONCLUA A HISTÓRIA':'COMPLETE STORY'):(lang===0?'INDISPONÍVEL':'UNAVAILABLE');
+      action.textContent=permission.ok?(lang===0?'🌀 ENTRAR NESTE MUNDO':'🌀 ENTER THIS WORLD'):
+        permission.reason==='level'?'🔒 REQUER LV. '+region.minLevel:
+        permission.reason==='combat'?(lang===0?'AGUARDE SAIR DE COMBATE':'LEAVE COMBAT'):
+        permission.reason==='dungeon'?(lang===0?'SAIA DA MASMORRA':'EXIT DUNGEON'):
+        permission.reason==='busy'?(lang===0?'TELEPORTE EM CURSO':'TELEPORT IN PROGRESS'):
+        lang===0?'DESTINO BLOQUEADO':'DESTINATION LOCKED';
       action.onclick=()=>{if(travelPermission(region.id,this.state()).ok){this.close();this.travel(region.id);}};
       card.append(banner,monsters,drops,action);cards.append(card);
     }

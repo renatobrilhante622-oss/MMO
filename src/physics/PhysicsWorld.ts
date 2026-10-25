@@ -17,11 +17,13 @@ export class PhysicsWorld {
   private readonly characterMaterial = new CANNON.Material('character');
   private readonly groundMaterial = new CANNON.Material('terrain');
   private readonly characters = new Set<CANNON.Body>();
+  private readonly terrainBodies = new Set<CANNON.Body>();
+  private readonly gates:CANNON.Body[]=[];
   private readonly rayResult = new CANNON.RaycastResult();
   private readonly start = new CANNON.Vec3();
   private readonly end = new CANNON.Vec3();
 
-  constructor(private readonly terrain: OpenWorldGenerator) {
+  constructor(private terrain: OpenWorldGenerator) {
     terrain.generate();
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
     (this.world.solver as CANNON.GSSolver).iterations = 8;
@@ -30,15 +32,53 @@ export class PhysicsWorld {
     this.world.addContactMaterial(new CANNON.ContactMaterial(this.characterMaterial, this.groundMaterial, {
       friction: .02, restitution: 0, contactEquationStiffness: 1e8, contactEquationRelaxation: 4,
     }));
+    this.installStaticWorld();
+  }
+
+  /** Atomically switch world colliders while preserving all live actor bodies. */
+  switchTerrain(next:OpenWorldGenerator):void{
+    if(this.terrain===next)return;
+    next.generate();
+    const previous=this.terrain;
+    for(const body of this.terrainBodies)this.world.removeBody(body);
+    this.terrainBodies.clear();
+    this.gates.length=0;
+    this.terrain=next;
+    try {this.installStaticWorld();}
+    catch(error){
+      for(const body of this.terrainBodies)this.world.removeBody(body);
+      this.terrainBodies.clear();
+      this.gates.length=0;
+      this.terrain=previous;
+      this.installStaticWorld();
+      throw error;
+    }
+  }
+
+  private registerStatic(body:CANNON.Body):void{
+    this.world.addBody(body);
+    this.terrainBodies.add(body);
+  }
+
+  private installStaticWorld():void{
     this.createHeightfield();
-    for (const collider of terrain.colliders) {
+    for (const collider of this.terrain.colliders) {
       // Slide regions mark the underlying heightfield; they are not floating solid plates.
       if (collider.type === 'slide') continue;
       const body = new CANNON.Body({ mass: 0, material: this.groundMaterial, collisionFilterGroup: 1, collisionFilterMask: 2 });
       body.addShape(new CANNON.Box(new CANNON.Vec3(collider.size.x / 2, collider.size.y / 2, collider.size.z / 2)));
       body.position.set(collider.position.x, collider.position.y, collider.position.z);
-      this.world.addBody(body);
+      this.registerStatic(body);
+      if(collider.type==='gate')this.gates.push(body);
     }
+  }
+  /** Opening a gate removes both physical contacts and raycast obstruction. */
+  setDungeonGateOpen(index:number,open:boolean):void{
+    const body=this.gates[index];
+    if(!body)return;
+    body.collisionResponse=!open;
+    body.collisionFilterMask=open?0:2;
+    body.aabbNeedsUpdate=true;
   }
 
   private createHeightfield(): void {
@@ -53,7 +93,7 @@ export class PhysicsWorld {
     body.addShape(shape);
     body.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
     body.position.set(-size / 2, 0, size / 2);
-    this.world.addBody(body);
+    this.registerStatic(body);
     // The outer mountain is backed by physical boundary walls for high-speed mounts.
     const edge = size / 2 - 1;
     for (const axis of ['x', 'z'] as const) {
@@ -61,7 +101,7 @@ export class PhysicsWorld {
         const wall = new CANNON.Body({ mass: 0, material: this.groundMaterial, collisionFilterGroup: 1, collisionFilterMask: 2 });
         wall.addShape(new CANNON.Box(axis === 'x' ? new CANNON.Vec3(1, 60, edge) : new CANNON.Vec3(edge, 60, 1)));
         wall.position.set(axis === 'x' ? sign * edge : 0, 20, axis === 'z' ? sign * edge : 0);
-        this.world.addBody(wall);
+        this.registerStatic(wall);
       }
     }
   }
@@ -164,5 +204,7 @@ export class PhysicsWorld {
   dispose(): void {
     for (const body of [...this.world.bodies]) this.world.removeBody(body);
     this.characters.clear();
+    this.terrainBodies.clear();
+    this.gates.length=0;
   }
 }
