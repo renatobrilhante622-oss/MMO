@@ -45,6 +45,9 @@ import { HudEditor } from '../ui/HudEditor';
 import { AdventureHub } from '../ui/AdventureHub';
 import { GameI18n, translateText } from '../ui/I18n';
 import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
+import { regionArrival, travelPermission } from '../world/RegionTravel';
+import { RegionTravelUI } from '../ui/RegionTravelUI';
+import { PortalChannelVFX } from '../world/PortalChannelVFX';
 import { route, type MapPoint } from '../world/Navigation';
 import { Line, LineBasicMaterial } from 'three';
 import { MobileHUD } from '../ui/MobileHUD';
@@ -69,6 +72,8 @@ export class Engine {
   readonly dungeon: DungeonBossManager;
   readonly companions: PetAndMountSystem;
   readonly hud: MobileHUD;
+  readonly regionTravel:RegionTravelUI;
+  readonly portalVfx=new PortalChannelVFX();
   readonly lootFeed: LootToastFeed;
   readonly progress: AdventureProgress;
   readonly hub: AdventureHub;
@@ -81,7 +86,7 @@ export class Engine {
   private readonly gpsLine = new Line(new BufferGeometry(),new LineBasicMaterial({color:0x7aedd3,transparent:true,opacity:.75,depthTest:true}));
   private readonly gpsLabel = document.createElement('div');
   private readonly autoButton = document.createElement('button');
-  private channel: {remaining:number;x:number;z:number;start:Vector3;hp:number}|null = null;
+  private channel: {remaining:number;x:number;z:number;start:Vector3;hp:number;regionId?:string}|null = null;
   private autoRoute: MapPoint[] = [];
   private autoTimer = 0;
   private gpsTimer = 0;
@@ -224,6 +229,14 @@ export class Engine {
     });
     this.lootFeed = new LootToastFeed(this.container);
     this.hub = new AdventureHub(this.container,this);
+    this.scene.add(this.portalVfx.root);
+    this.regionTravel=new RegionTravelUI(this.container,()=>({
+      level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+      adminOverride:this.hero.godMode,
+      inCombat:this.recentCombat>0,
+      inDungeon:this.dungeon.active,
+      channeling:!!this.channel
+    }),id=>this.startRegionTravel(id),()=>this.progress.language);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
@@ -339,8 +352,9 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !document.hidden;
     if(!active)this.hud.resetInput();
+    if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
     this.progress.tick(document.hidden?0:dt);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
@@ -483,7 +497,7 @@ export class Engine {
       case 'ticket-buy':ok=purchaseMerchant(p,'tickets');break;
       case 'slot-buy':ok=p.buySlot();break;
       case 'teleport-record':ok=p.record(data.index,data.name,this.hero.position.x,this.hero.position.z,this.travelBlocked());break;
-      case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.channel={remaining:2,x:dest.x,z:dest.z,start:this.hero.position.clone(),hp:this.hero.hp};this.combat.particles.celebration(this.hero.position);this.hub.close();ok=true;}break;}
+      case 'teleport':{const dest=p.destination(data.index,this.travelBlocked());if(dest){this.startChannel(dest.x,dest.z);this.hub.close();ok=true;}break;}
       case 'vip':ok=p.buyVip();break;
       case 'pass-buy':ok=p.buyPass();break;
       case 'mission':if(data.key==='daily'||data.key==='weekly'||data.key==='forest')ok=p.claimMission(data.key);break;
@@ -521,8 +535,20 @@ export class Engine {
     if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;
     if(this.channel){
-      if(Math.hypot(input.move.x,input.move.y)>.1||this.channel.start.distanceTo(hero.position)>1||hero.hp<this.channel.hp||!hero.alive){this.channel=null;this.hud.notify(p.language==='pt'?'Conjuração interrompida.':'Channel interrupted.');}
-      else{this.channel.remaining-=dt;if(this.channel.remaining<=0){hero.teleportTo(new Vector3(this.channel.x,this.terrain.heightAt(this.channel.x,this.channel.z)+1,this.channel.z));this.channel=null;this.combat.particles.celebration(hero.position);this.save();}}
+      if(Math.hypot(input.move.x,input.move.y)>.1||this.channel.start.distanceTo(hero.position)>1||hero.hp<this.channel.hp||!hero.alive){
+        this.channel=null;this.portalVfx.stop();
+        this.hud.notify(p.language==='pt'?'Conjuração interrompida.':'Channel interrupted.');
+      }else{
+        this.channel.remaining-=dt;
+        this.portalVfx.update(dt,this.channel.remaining);
+        if(this.channel.remaining<=0){
+          const dest=this.channel;
+          hero.teleportTo(new Vector3(dest.x,this.terrain.heightAt(dest.x,dest.z)+1.1,dest.z));
+          if(dest.regionId&&!p.discovered.includes(dest.regionId))p.discovered.push(dest.regionId);
+          this.channel=null;this.portalVfx.stop();
+          this.combat.particles.celebration(hero.position);this.save();
+        }
+      }
       input.move={x:0,y:0};input.attack=false;input.skill=null;return;
     }
     if(p.waypoint){this.gpsTimer-=dt;if(this.gpsTimer<=0){this.gpsTimer=3;this.setWaypoint(p.waypoint);}}
@@ -550,6 +576,29 @@ export class Engine {
       const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);
       if(skill>=0)input.skill=skill;
     }
+  }
+
+  /** Shared channeling for bookmarks and story-gated map portals. */
+  private startChannel(x:number,z:number,regionId?:string):void{
+    if(!this.hero.alive||this.dungeon.active||this.channel)return;
+    this.farmController.reset();this.progress.autoFarm=false;
+    this.hero.mounted=false;
+    this.channel={remaining:2.5,x,z,start:this.hero.position.clone(),hp:this.hero.hp,regionId};
+    this.portalVfx.start(this.hero.position.clone().add(new Vector3(0,-this.hero.radius,.0)));
+    this.combat.particles.celebration(this.hero.position);
+  }
+  private startRegionTravel(id:string):void{
+    const permission=travelPermission(id,{
+      level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+      adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+      inDungeon:this.dungeon.active,channeling:!!this.channel,
+    });
+    const arrival=regionArrival(id);
+    if(!permission.ok||!arrival){
+      this.hud.notify('Destino bloqueado: nível, história ou combate.','warning');return;
+    }
+    this.startChannel(arrival.x,arrival.z,id);
+    this.hud.notify('Canalizando portal místico por 2,5 segundos…','info');
   }
 
   private interact(): void {
@@ -795,6 +844,7 @@ export class Engine {
     this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.lootFeed.dispose();
     this.hud.dispose();
+    this.regionTravel.dispose();this.portalVfx.dispose();
     this.sound.dispose();
     this.companions.dispose?.();
     this.dungeon.dispose(); this.enemies.dispose(); this.hero.dispose(); this.combat.dispose();
