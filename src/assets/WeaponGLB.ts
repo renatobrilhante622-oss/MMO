@@ -6,7 +6,8 @@ import type { ClassId } from '../core/GameTypes';
 export type WeaponModelId =
   | 'axe_1handed' | 'axe_2handed' | 'crossbow_2handed'
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
-  | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow';
+  | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
+  | 'spellbook_open' | 'spellbook_closed';
 
 export interface EquipmentVisual {
   model: WeaponModelId;
@@ -27,8 +28,8 @@ export const CLASS_EQUIPMENT_MODELS: Record<ClassId, readonly EquipmentVisual[]>
     {model:'dagger',bone:'lefthand'},
   ],
   ranger: [{model:'longbow',bone:'lefthand'}, {model:'quiver',bone:'spine2',offset:[0,0,-.16]}],
-  elementalist: [{model:'staff',bone:'righthand'}, {model:'wand',bone:'lefthand'}],
-  necromancer: [{model:'staff',bone:'righthand'}],
+  elementalist: [{model:'staff',bone:'righthand'}, {model:'spellbook_open',bone:'lefthand'}],
+  necromancer: [{model:'staff',bone:'righthand'}, {model:'spellbook_closed',bone:'lefthand'}],
   monk: [],
   lanceman: [{model:'spear',bone:'righthand'}],
   warlock: [{model:'wand',bone:'righthand'}, {model:'staff',bone:'lefthand'}],
