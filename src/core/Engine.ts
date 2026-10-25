@@ -542,7 +542,7 @@ export class Engine {
       if(this.autoRoute.length)input.move=hero.inputToward(this.autoRoute[0]);
       else input.move=hero.inputToward(destination);
     }else if(target){
-      hero.aimAt(target.position,0);hero.facing.set(target.position.x-hero.position.x,0,target.position.z-hero.position.z).normalize();input.attack=true;
+      hero.aimAt(new Vector3(target.position.x,hero.position.y,target.position.z),0);hero.facing.set(target.position.x-hero.position.x,0,target.position.z-hero.position.z).normalize();input.attack=true;
       const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);
       if(skill>=0)input.skill=skill;
     }
