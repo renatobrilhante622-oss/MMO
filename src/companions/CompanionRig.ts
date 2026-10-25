@@ -35,6 +35,8 @@ export class CompanionRig {
   private readonly armor=new Group();
   private readonly particles:RarityAura;
   private saddleRestY=1.6;
+  private footprintRadius=1.65;
+  get safeFootprintRadius():number{return this.footprintRadius;}
   private readonly ownOrigin=new Vector3();
   private readonly bodyBoundsCenter=new Vector3();
   private visualPhase=0;
@@ -185,7 +187,10 @@ export class CompanionRig {
     if(!Number.isFinite(height)||height<=.1)return;
     // Input contract: 78% of authored mount height above the feet;
     // no arbitrary horizontal offsets behind the mount's belly.
-    this.saddleRestY=bounds.min.y-origin.y+height*.78;
+    const worldScale=this.root.getWorldScale(new Vector3());
+    this.saddleRestY=(bounds.min.y-origin.y+height*.78)/Math.max(.001,Math.abs(worldScale.y));
+    const dimensions=bounds.getSize(new Vector3());
+    this.footprintRadius=Math.min(4.2,Math.max(1.65,Math.max(dimensions.x,dimensions.z)*.5+.35));
     this.saddle.position.set(0,this.saddleRestY,0);
     this.root.userData.realMountHeight=height;
     this.root.userData.saddleMeasured=true;
