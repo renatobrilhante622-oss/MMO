@@ -371,16 +371,8 @@ export class ArticulatedCharacter {
   }
 
   private importedName(definition:ClassDefinition):ModelName {
-    // Skin tiers now change the actual authored 3D silhouette, never add mesh
-    // horns, spheres, wireframes or generated armor as an imitation.
-    const realBody:Record<string,ModelName>={
-      forest:'KayKit_Rogue_Hooded',
-      frost:'KayKit_Knight',
-      void:'KayKit_Mage',
-      solar:'KayKit_Barbarian',
-      eternal:'KayKit_Rogue'
-    };
-    if(realBody[this.skinKey])return realBody[this.skinKey];
+    // Cosmetic skins may recolor GLB materials/VFX but must not change the
+    // underlying class mesh: an Assassin must never become Ranger_Hooded.
     return CLASS_IDENTITIES[definition.id].model;
   }
 
