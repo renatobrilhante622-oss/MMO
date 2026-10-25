@@ -582,9 +582,11 @@ export class Engine {
         if(!gate.ok)break;
         const dest=p.destination(data.index,this.travelBlocked());
         if(dest){
-          // Older save slots used shared-world coordinates; migrate only for
-          // cross-map journeys, while newly recorded local points remain exact.
-          const x=dest.x,z=dest.z;
+          // Legacy slots recorded absolute coordinates in the old shared
+          // terrain. Only those entries require conversion to local map space.
+          const x=dest.localMap?dest.x:destRegion.id==='aurora'?dest.x:dest.x-destRegion.center.x;
+          const z=dest.localMap?dest.z:destRegion.id==='aurora'?dest.z:dest.z-destRegion.center.z+18;
+          if(!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>140||Math.abs(z)>140)break;
           this.startChannel(x,z,destRegion.id);
           this.hub.close();ok=true;
         }
