@@ -10,7 +10,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/axe/axe.glb",
       "license": "CC0-1.0",
       "hash": "5c7aec6a8f03f9d8c527ded5e31784c1fdf3e89f",
-      "shapeOrigin": "axe.glb"
+      "shapeOrigin": "axe.glb",
+      "meshFamily": "greataxe-greatsword"
     },
     {
       "id": "armory-berserker-1",
@@ -20,7 +21,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/axe_double/axe_double.glb",
       "license": "CC0-1.0",
       "hash": "6486f3a3d7067d1a8f7f2513c2807c8685d6cc29",
-      "shapeOrigin": "axe_double.glb"
+      "shapeOrigin": "axe_double.glb",
+      "meshFamily": "greataxe-greatsword"
     },
     {
       "id": "armory-berserker-2",
@@ -30,7 +32,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/axe_double_golden/axe_double_golden.glb",
       "license": "CC0-1.0",
       "hash": "a8788acdead0aa3688dd42dfc0b016f868d4be92",
-      "shapeOrigin": "axe_double_golden.glb"
+      "shapeOrigin": "axe_double_golden.glb",
+      "meshFamily": "greataxe-greatsword"
     },
     {
       "id": "armory-berserker-3",
@@ -40,7 +43,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/sword_big/sword_big.glb",
       "license": "CC0-1.0",
       "hash": "7ff2fce336faea3d6dfbaebcc3e72842113fd36c",
-      "shapeOrigin": "sword_big.glb"
+      "shapeOrigin": "sword_big.glb",
+      "meshFamily": "greataxe-greatsword"
     },
     {
       "id": "armory-berserker-4",
@@ -50,7 +54,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/claymore/claymore.glb",
       "license": "CC0-1.0",
       "hash": "1448b775010ed84c4effa816c3f948b531e7fd42",
-      "shapeOrigin": "claymore.glb"
+      "shapeOrigin": "claymore.glb",
+      "meshFamily": "greataxe-greatsword"
     },
     {
       "id": "armory-paladin-0",
@@ -60,7 +65,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/sword/sword.glb",
       "license": "CC0-1.0",
       "hash": "6ca0fab5be9cc22c157c94248c11ef8ca804bcc8",
-      "shapeOrigin": "sword.glb"
+      "shapeOrigin": "sword.glb",
+      "meshFamily": "one-hand-sword"
     },
     {
       "id": "armory-paladin-1",
@@ -70,7 +76,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/sword_2/sword_2.glb",
       "license": "CC0-1.0",
       "hash": "194a3016191af0d0c048735614171fa5a6a28758",
-      "shapeOrigin": "sword_2.glb"
+      "shapeOrigin": "sword_2.glb",
+      "meshFamily": "one-hand-sword"
     },
     {
       "id": "armory-paladin-2",
@@ -80,7 +87,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/sword_golden/sword_golden.glb",
       "license": "CC0-1.0",
       "hash": "7596a2d75c180498bd001e35b7d58c43ff8fccd7",
-      "shapeOrigin": "sword_golden.glb"
+      "shapeOrigin": "sword_golden.glb",
+      "meshFamily": "one-hand-sword"
     },
     {
       "id": "armory-paladin-3",
@@ -90,7 +98,8 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/weapon-packs/Kenney_dungeon_sword.glb",
       "license": "CC0-1.0",
       "hash": "93f72f18bf647a2c92a482240bd3701c091e22be",
-      "shapeOrigin": "Kenney_dungeon_sword.glb"
+      "shapeOrigin": "Kenney_dungeon_sword.glb",
+      "meshFamily": "one-hand-sword"
     },
     {
       "id": "armory-paladin-4",
@@ -100,7 +109,8 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/weapon-packs/Kenney_prototype_sword.glb",
       "license": "CC0-1.0",
       "hash": "c5553e10cc8b71a3956372b8affa3d56fa875557",
-      "shapeOrigin": "Kenney_prototype_sword.glb"
+      "shapeOrigin": "Kenney_prototype_sword.glb",
+      "meshFamily": "one-hand-sword"
     },
     {
       "id": "armory-assassin-0",
@@ -110,7 +120,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/dagger/dagger.glb",
       "license": "CC0-1.0",
       "hash": "d2dc5ab9ebb92a17fbd03d08d934c230f89914b7",
-      "shapeOrigin": "dagger.glb"
+      "shapeOrigin": "dagger.glb",
+      "meshFamily": "dagger"
     },
     {
       "id": "armory-assassin-1",
@@ -120,7 +131,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/dagger_2/dagger_2.glb",
       "license": "CC0-1.0",
       "hash": "0e8315db629b38d002a370631d56850c03901514",
-      "shapeOrigin": "dagger_2.glb"
+      "shapeOrigin": "dagger_2.glb",
+      "meshFamily": "dagger"
     },
     {
       "id": "armory-assassin-2",
@@ -130,27 +142,40 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_dagger.glb",
       "license": "CC0-1.0",
       "hash": "abce15db27a1ba6f23fe1ee01f694a61135d4ffc",
-      "shapeOrigin": "KayKit_Weapon_dagger.glb"
+      "shapeOrigin": "KayKit_Weapon_dagger.glb",
+      "meshFamily": "dagger"
     },
     {
       "id": "armory-assassin-3",
       "file": "models/weapons/armory-assassin-3.glb",
       "classId": "assassin",
       "tier": 3,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_sword_1handed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/dagger/dagger.glb",
       "license": "CC0-1.0",
-      "hash": "30bb247b87f5a1da81e860214ed23e2de86ff298",
-      "shapeOrigin": "KayKit_Weapon_sword_1handed.glb"
+      "hash": "381437c0e9bcef60bfdf38544a20f98270967bbc",
+      "shapeOrigin": "dagger.glb",
+      "meshFamily": "dagger",
+      "derivative": {
+        "basedOn": "armory-assassin-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "dagger"
+      }
     },
     {
       "id": "armory-assassin-4",
       "file": "models/weapons/armory-assassin-4.glb",
       "classId": "assassin",
       "tier": 4,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_sword_2handed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/dagger_2/dagger_2.glb",
       "license": "CC0-1.0",
-      "hash": "66230b7757f095bd2c5a74e1393518771653a87a",
-      "shapeOrigin": "KayKit_Weapon_sword_2handed.glb"
+      "hash": "742e509436fd705d57764d3715489e2b80bd7ab9",
+      "shapeOrigin": "dagger_2.glb",
+      "meshFamily": "dagger",
+      "derivative": {
+        "basedOn": "armory-assassin-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "dagger"
+      }
     },
     {
       "id": "armory-ranger-0",
@@ -160,7 +185,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/bow_wooden/bow_wooden.glb",
       "license": "CC0-1.0",
       "hash": "6934a3fb43cc798b7642c801e898a83ab272433a",
-      "shapeOrigin": "bow_wooden.glb"
+      "shapeOrigin": "bow_wooden.glb",
+      "meshFamily": "bow"
     },
     {
       "id": "armory-ranger-1",
@@ -170,7 +196,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/bow_wooden2/bow_wooden2.glb",
       "license": "CC0-1.0",
       "hash": "7e7226a4f1a429760c924d4b617dfae1f5bf717e",
-      "shapeOrigin": "bow_wooden2.glb"
+      "shapeOrigin": "bow_wooden2.glb",
+      "meshFamily": "bow"
     },
     {
       "id": "armory-ranger-2",
@@ -180,7 +207,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/bow_golden/bow_golden.glb",
       "license": "CC0-1.0",
       "hash": "1148c89e2e0531a58b1a4750fab90e6e69c00a5a",
-      "shapeOrigin": "bow_golden.glb"
+      "shapeOrigin": "bow_golden.glb",
+      "meshFamily": "bow"
     },
     {
       "id": "armory-ranger-3",
@@ -190,7 +218,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/bow_evil/bow_evil.glb",
       "license": "CC0-1.0",
       "hash": "fdba59622dfe3ac02d9691f1cc920390096c3e52",
-      "shapeOrigin": "bow_evil.glb"
+      "shapeOrigin": "bow_evil.glb",
+      "meshFamily": "bow"
     },
     {
       "id": "armory-ranger-4",
@@ -200,7 +229,8 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/equipment/CC0_longbow.glb",
       "license": "CC0-1.0",
       "hash": "3be9dbd424ef0fb81076855397ceca7d0cef85d5",
-      "shapeOrigin": "CC0_longbow.glb"
+      "shapeOrigin": "CC0_longbow.glb",
+      "meshFamily": "bow"
     },
     {
       "id": "armory-elementalist-0",
@@ -210,7 +240,8 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
       "hash": "66cfbceb377fadd80f16e72dc031ef083799d580",
-      "shapeOrigin": "KayKit_Weapon_staff.glb"
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "arcane-staff-wand"
     },
     {
       "id": "armory-elementalist-1",
@@ -220,37 +251,56 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_wand.glb",
       "license": "CC0-1.0",
       "hash": "0f3a31a5e2445168ca60f13af6fc3db84b8d891f",
-      "shapeOrigin": "KayKit_Weapon_wand.glb"
+      "shapeOrigin": "KayKit_Weapon_wand.glb",
+      "meshFamily": "arcane-staff-wand"
     },
     {
       "id": "armory-elementalist-2",
       "file": "models/weapons/armory-elementalist-2.glb",
       "classId": "elementalist",
       "tier": 2,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_spellbook_open.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "b639cb1bab807698c20883e2e78e974651304ef3",
-      "shapeOrigin": "KayKit_Weapon_spellbook_open.glb"
+      "hash": "cab45defe3e54fb425191a94d6c111db710f3d7f",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "arcane-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "arcane-staff-wand"
+      }
     },
     {
       "id": "armory-elementalist-3",
       "file": "models/weapons/armory-elementalist-3.glb",
       "classId": "elementalist",
       "tier": 3,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book1_open/book1_open.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_wand.glb",
       "license": "CC0-1.0",
-      "hash": "f73c78cc2c4170af247552432a4412acc9fb55d6",
-      "shapeOrigin": "book1_open.glb"
+      "hash": "81bc788e70f71f2cee76f77e3c9a94220705e054",
+      "shapeOrigin": "KayKit_Weapon_wand.glb",
+      "meshFamily": "arcane-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "arcane-staff-wand"
+      }
     },
     {
       "id": "armory-elementalist-4",
       "file": "models/weapons/armory-elementalist-4.glb",
       "classId": "elementalist",
       "tier": 4,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book2_open/book2_open.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "6cf4babcc426cd8fa32d0a6af66506c5672550bb",
-      "shapeOrigin": "book2_open.glb"
+      "hash": "27464d8064fd65912ff5745c79325d4bfe290bfd",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "arcane-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "arcane-staff-wand"
+      }
     },
     {
       "id": "armory-necromancer-0",
@@ -260,97 +310,152 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/scythe/scythe.glb",
       "license": "CC0-1.0",
       "hash": "db64c4ee72660f6e8459c8b5d1d05f2bf68b8ca1",
-      "shapeOrigin": "scythe.glb"
+      "shapeOrigin": "scythe.glb",
+      "meshFamily": "scythe"
     },
     {
       "id": "armory-necromancer-1",
       "file": "models/weapons/armory-necromancer-1.glb",
       "classId": "necromancer",
       "tier": 1,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book1_closed/book1_closed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/scythe/scythe.glb",
       "license": "CC0-1.0",
-      "hash": "0566c579a36bd7474e510e229858fc17dc818ced",
-      "shapeOrigin": "book1_closed.glb"
+      "hash": "548a82521f2b42908f4f81eb96a0fa7359d1661a",
+      "shapeOrigin": "scythe.glb",
+      "meshFamily": "scythe",
+      "derivative": {
+        "basedOn": "armory-necromancer-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "scythe"
+      }
     },
     {
       "id": "armory-necromancer-2",
       "file": "models/weapons/armory-necromancer-2.glb",
       "classId": "necromancer",
       "tier": 2,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book2_closed/book2_closed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/scythe/scythe.glb",
       "license": "CC0-1.0",
-      "hash": "3f73d2deedd421928cc4bbc8a478a7baf5bb3865",
-      "shapeOrigin": "book2_closed.glb"
+      "hash": "dcf802dd1996d53c2f26b84b4a411fec1edbf655",
+      "shapeOrigin": "scythe.glb",
+      "meshFamily": "scythe",
+      "derivative": {
+        "basedOn": "armory-necromancer-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "scythe"
+      }
     },
     {
       "id": "armory-necromancer-3",
       "file": "models/weapons/armory-necromancer-3.glb",
       "classId": "necromancer",
       "tier": 3,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book3_closed/book3_closed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/scythe/scythe.glb",
       "license": "CC0-1.0",
-      "hash": "d39a642053cdc4350ad0a5f9a40552b13a4e8f5a",
-      "shapeOrigin": "book3_closed.glb"
+      "hash": "2fbb81fb2e8a472dfabac17f953894685561c170",
+      "shapeOrigin": "scythe.glb",
+      "meshFamily": "scythe",
+      "derivative": {
+        "basedOn": "armory-necromancer-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "scythe"
+      }
     },
     {
       "id": "armory-necromancer-4",
       "file": "models/weapons/armory-necromancer-4.glb",
       "classId": "necromancer",
       "tier": 4,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book4_closed/book4_closed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/scythe/scythe.glb",
       "license": "CC0-1.0",
-      "hash": "42b05fedcaa43f89a5c480f52c003467c1c495ec",
-      "shapeOrigin": "book4_closed.glb"
+      "hash": "29a1ed9c9229febfc311ff55c486c00b4bd7e230",
+      "shapeOrigin": "scythe.glb",
+      "meshFamily": "scythe",
+      "derivative": {
+        "basedOn": "armory-necromancer-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "scythe"
+      }
     },
     {
       "id": "armory-monk-0",
       "file": "models/weapons/armory-monk-0.glb",
       "classId": "monk",
       "tier": 0,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/hammer_small/hammer_small.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "1b5f4b9e2bc130ac7a88126fc8bd8f003b3fd127",
-      "shapeOrigin": "hammer_small.glb"
+      "hash": "10d8f87c48ea9a38b037593ed34b2977e19f25de",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "martial-staff",
+      "derivative": {
+        "basedOn": "public/models/KayKit_Weapon_staff.glb",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "martial-staff"
+      }
     },
     {
       "id": "armory-monk-1",
       "file": "models/weapons/armory-monk-1.glb",
       "classId": "monk",
       "tier": 1,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/hammer_double/hammer_double.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "0997dd069686697eb772c08548671430dd93eade",
-      "shapeOrigin": "hammer_double.glb"
+      "hash": "0e1f9ccb6724ac18654c1081105679d8139989c7",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "martial-staff",
+      "derivative": {
+        "basedOn": "public/models/KayKit_Weapon_staff.glb",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "martial-staff"
+      }
     },
     {
       "id": "armory-monk-2",
       "file": "models/weapons/armory-monk-2.glb",
       "classId": "monk",
       "tier": 2,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_round/shield_round.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "d85eeded5a2eb8c128ed0f56c60bd7dfbaa7f07c",
-      "shapeOrigin": "shield_round.glb"
+      "hash": "a4378d38bf52b1bb0839088c053c8140da3dfe0a",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "martial-staff",
+      "derivative": {
+        "basedOn": "public/models/KayKit_Weapon_staff.glb",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "martial-staff"
+      }
     },
     {
       "id": "armory-monk-3",
       "file": "models/weapons/armory-monk-3.glb",
       "classId": "monk",
       "tier": 3,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_round_2/shield_round_2.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "b4fbe46d8985bb5f0d2c1c581018bf0fce1bdb2e",
-      "shapeOrigin": "shield_round_2.glb"
+      "hash": "594af091124e9ac649a4e5a5bb218ce118c7f740",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "martial-staff",
+      "derivative": {
+        "basedOn": "public/models/KayKit_Weapon_staff.glb",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "martial-staff"
+      }
     },
     {
       "id": "armory-monk-4",
       "file": "models/weapons/armory-monk-4.glb",
       "classId": "monk",
       "tier": 4,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_heater/shield_heater.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "463954f1bf9993da28d9b1fe94c070797896ab1b",
-      "shapeOrigin": "shield_heater.glb"
+      "hash": "f6dac9bfc528314465a4e0096fd903623b0f6a44",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "martial-staff",
+      "derivative": {
+        "basedOn": "public/models/KayKit_Weapon_staff.glb",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "martial-staff"
+      }
     },
     {
       "id": "armory-lanceman-0",
@@ -360,7 +465,8 @@
       "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/spear/spear.glb",
       "license": "CC0-1.0",
       "hash": "dd6a5b8ede27bb7690e2925d8ce6b897ddf991bd",
-      "shapeOrigin": "spear.glb"
+      "shapeOrigin": "spear.glb",
+      "meshFamily": "spear"
     },
     {
       "id": "armory-lanceman-1",
@@ -370,87 +476,209 @@
       "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/environment/Kenney_mini-dungeon_weapon-spear.glb",
       "license": "CC0-1.0",
       "hash": "83d5f145ad75cf29cee81f22452679b7b749f37c",
-      "shapeOrigin": "Kenney_mini-dungeon_weapon-spear.glb"
+      "shapeOrigin": "Kenney_mini-dungeon_weapon-spear.glb",
+      "meshFamily": "spear"
     },
     {
       "id": "armory-lanceman-2",
       "file": "models/weapons/armory-lanceman-2.glb",
       "classId": "lanceman",
       "tier": 2,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_axe_1handed.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/spear/spear.glb",
       "license": "CC0-1.0",
-      "hash": "397376374463096f2aa66410721cbbf915a28b10",
-      "shapeOrigin": "KayKit_Weapon_axe_1handed.glb"
+      "hash": "7a35589b466bf0c1eed51542e330b3619fcb8760",
+      "shapeOrigin": "spear.glb",
+      "meshFamily": "spear",
+      "derivative": {
+        "basedOn": "armory-lanceman-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "spear"
+      }
     },
     {
       "id": "armory-lanceman-3",
       "file": "models/weapons/armory-lanceman-3.glb",
       "classId": "lanceman",
       "tier": 3,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_axe_2handed.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/environment/Kenney_mini-dungeon_weapon-spear.glb",
       "license": "CC0-1.0",
-      "hash": "387b39da2b5b917e09c48110733cf254e8e597f2",
-      "shapeOrigin": "KayKit_Weapon_axe_2handed.glb"
+      "hash": "786b61d3d37058393929e2273c14d2ee1d61d39e",
+      "shapeOrigin": "Kenney_mini-dungeon_weapon-spear.glb",
+      "meshFamily": "spear",
+      "derivative": {
+        "basedOn": "armory-lanceman-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "spear"
+      }
     },
     {
       "id": "armory-lanceman-4",
       "file": "models/weapons/armory-lanceman-4.glb",
       "classId": "lanceman",
       "tier": 4,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/axe_small/axe_small.glb",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/spear/spear.glb",
       "license": "CC0-1.0",
-      "hash": "c9294aa426d1c35d9ee9d02be43bf56b449d4ee4",
-      "shapeOrigin": "axe_small.glb"
+      "hash": "13b6c269e60588caa3bc69c978a64000520652a8",
+      "shapeOrigin": "spear.glb",
+      "meshFamily": "spear",
+      "derivative": {
+        "basedOn": "armory-lanceman-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "spear"
+      }
     },
     {
       "id": "armory-warlock-0",
       "file": "models/weapons/armory-warlock-0.glb",
       "classId": "warlock",
       "tier": 0,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book3_open/book3_open.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_wand.glb",
       "license": "CC0-1.0",
-      "hash": "22c1c6dac79b1b67af5506a24a04d999133d6cb9",
-      "shapeOrigin": "book3_open.glb"
+      "hash": "50c1f85e285ffb96230f2f12ade2c5326f98c918",
+      "shapeOrigin": "KayKit_Weapon_wand.glb",
+      "meshFamily": "occult-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "occult-staff-wand"
+      }
     },
     {
       "id": "armory-warlock-1",
       "file": "models/weapons/armory-warlock-1.glb",
       "classId": "warlock",
       "tier": 1,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimaterpg/models/book4_open/book4_open.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "560e0c8217312a9833652abcce9fbcc3ba4a7201",
-      "shapeOrigin": "book4_open.glb"
+      "hash": "d137509d00a2953dc452f3c62612c1fbcc546496",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "occult-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "occult-staff-wand"
+      }
     },
     {
       "id": "armory-warlock-2",
       "file": "models/weapons/armory-warlock-2.glb",
       "classId": "warlock",
       "tier": 2,
-      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_spellbook_closed.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_wand.glb",
       "license": "CC0-1.0",
-      "hash": "b3159ef1dc2e062a7c0206c11778526a6e2fbf9c",
-      "shapeOrigin": "KayKit_Weapon_spellbook_closed.glb"
+      "hash": "7cc9577b5b6c87c96c0a7b9877cd9b88ef7a3673",
+      "shapeOrigin": "KayKit_Weapon_wand.glb",
+      "meshFamily": "occult-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "occult-staff-wand"
+      }
     },
     {
       "id": "armory-warlock-3",
       "file": "models/weapons/armory-warlock-3.glb",
       "classId": "warlock",
       "tier": 3,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_heater_2/shield_heater_2.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_staff.glb",
       "license": "CC0-1.0",
-      "hash": "bf2f92dba2b73660fd01a09d3fb72b427f08b5fe",
-      "shapeOrigin": "shield_heater_2.glb"
+      "hash": "f584aabb86324728d8600a81f4900b5a898ba3ad",
+      "shapeOrigin": "KayKit_Weapon_staff.glb",
+      "meshFamily": "occult-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-0",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "occult-staff-wand"
+      }
     },
     {
       "id": "armory-warlock-4",
       "file": "models/weapons/armory-warlock-4.glb",
       "classId": "warlock",
       "tier": 4,
-      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_celtic_golden/shield_celtic_golden.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/06d2b2caa349c28abd8363fc77e7642e381b30cd/public/models/KayKit_Weapon_wand.glb",
       "license": "CC0-1.0",
-      "hash": "a1e0747a2d33759874cbfbaa8d371b8c87973b7f",
-      "shapeOrigin": "shield_celtic_golden.glb"
+      "hash": "4114fb50a385bcd2ad565fecd5cbf68fcea521d4",
+      "shapeOrigin": "KayKit_Weapon_wand.glb",
+      "meshFamily": "occult-staff-wand",
+      "derivative": {
+        "basedOn": "armory-elementalist-1",
+        "method": "real CC0 source mesh vertex reprofile (taper, curvature, silhouette) plus original materials",
+        "category": "occult-staff-wand"
+      }
     }
-  ]
+  ],
+  "shields": [
+    {
+      "id": "paladin-shield-0",
+      "file": "models/weapons/paladin-shield-0.glb",
+      "tier": 0,
+      "classId": "paladin",
+      "meshFamily": "shield",
+      "shapeOrigin": "shield_round.glb",
+      "hash": "d85eeded5a2eb8c128ed0f56c60bd7dfbaa7f07c",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_round/shield_round.glb"
+    },
+    {
+      "id": "paladin-shield-1",
+      "file": "models/weapons/paladin-shield-1.glb",
+      "tier": 1,
+      "classId": "paladin",
+      "meshFamily": "shield",
+      "shapeOrigin": "shield_round_2.glb",
+      "hash": "b4fbe46d8985bb5f0d2c1c581018bf0fce1bdb2e",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_round_2/shield_round_2.glb"
+    },
+    {
+      "id": "paladin-shield-2",
+      "file": "models/weapons/paladin-shield-2.glb",
+      "tier": 2,
+      "classId": "paladin",
+      "meshFamily": "shield",
+      "shapeOrigin": "shield_heater.glb",
+      "hash": "463954f1bf9993da28d9b1fe94c070797896ab1b",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_heater/shield_heater.glb"
+    },
+    {
+      "id": "paladin-shield-3",
+      "file": "models/weapons/paladin-shield-3.glb",
+      "tier": 3,
+      "classId": "paladin",
+      "meshFamily": "shield",
+      "shapeOrigin": "shield_heater_2.glb",
+      "hash": "bf2f92dba2b73660fd01a09d3fb72b427f08b5fe",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_heater_2/shield_heater_2.glb"
+    },
+    {
+      "id": "paladin-shield-4",
+      "file": "models/weapons/paladin-shield-4.glb",
+      "tier": 4,
+      "classId": "paladin",
+      "meshFamily": "shield",
+      "shapeOrigin": "shield_celtic_golden.glb",
+      "hash": "a1e0747a2d33759874cbfbaa8d371b8c87973b7f",
+      "license": "CC0-1.0",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/shield_celtic_golden/shield_celtic_golden.glb"
+    }
+  ],
+  "validation": {
+    "weaponClasses": {
+      "berserker": "greataxe-greatsword",
+      "paladin": "one-hand-sword",
+      "assassin": "dagger",
+      "ranger": "bow",
+      "elementalist": "arcane-staff-wand",
+      "necromancer": "scythe",
+      "monk": "martial-staff",
+      "lanceman": "spear",
+      "warlock": "occult-staff-wand"
+    },
+    "meshVariants": 22,
+    "shieldCount": 5,
+    "reviewNote": "Derived meshes retain originally-authored triangles/textures; morph variants do not constitute 22 independently hand-sculpted source models."
+  }
 }

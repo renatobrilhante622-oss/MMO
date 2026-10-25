@@ -182,7 +182,7 @@ export class AnimatedGLB {
     const candidates:Record<string,string[]>={
       idle:flyer?['flying_idle','idle','idle_b']:['idle','idle_b','idle_combat','unarmed_idle','2h_melee_idle'],
       walk:flyer?['fast_flying','flying_idle']:['walking_a','walking_b','walk','gallop'],
-      run:flyer?['fast_flying','flying_idle']:['running_a','running_b','gallop','run','walk'],
+      run:flyer?['fast_flying','flying_idle']:this.name==='Creature_horse'?['gallop','run','walk']:['running_a','running_b','run','gallop','walk'],
       mounted:['sit_chair_idle','sit_chair_pose','idle'],
       slide:['dodge_forward','idle'],
       jump:['jump_idle','jump_full_short','jump','idle'],

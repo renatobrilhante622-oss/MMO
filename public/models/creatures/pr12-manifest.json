@@ -53,6 +53,42 @@
         "Bite_Front",
         "Death"
       ]
+    },
+    {
+      "id": "Creature_horse",
+      "hash": "b02f6cb043e693890e87a976ccadfb358720faf7",
+      "file": "models/creatures/Creature_horse.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/061bcac2e9d466ca83afff073a6bb61c6a5522c/public/models/creatures/Creature_horse.glb",
+      "sourceHash": "49bbc84bd1d3807dc5d86b851a46ff852d3f0de1",
+      "license": "ETERNA project-owned base mesh; independent CC0 status not established",
+      "rigMethod": "retrofit skin weights to existing authored mesh, 7-9 bones + glTF skeletal animation channels",
+      "bones": 9,
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Run",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_golem",
+      "hash": "9e93bf38fda959f05fcd7a5f0c30d07bab754cac",
+      "file": "models/creatures/Creature_golem.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/061bcac2e9d466ca83afff073a6bb61c6a5522c/public/models/creatures/Creature_golem.glb",
+      "sourceHash": "8aaf9ff8d7ad8aed6d1f3782a387bc120c999383",
+      "license": "ETERNA project-owned base mesh; independent CC0 status not established",
+      "rigMethod": "retrofit skin weights to existing authored mesh, 7-9 bones + glTF skeletal animation channels",
+      "bones": 7,
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Run",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
     }
   ]
 }
