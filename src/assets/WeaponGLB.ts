@@ -1,4 +1,4 @@
-import { Mesh, Object3D } from 'three';
+import { Box3, Mesh, Object3D, Vector3 } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { ClassId } from '../core/GameTypes';
@@ -8,7 +8,9 @@ export type WeaponModelId =
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
   | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
   | 'spellbook_open' | 'spellbook_closed'
-  | 'dungeon_sword' | 'prototype_sword' | 'dungeon_shield_round' | 'dungeon_shield_rectangle';
+  | 'dungeon_sword' | 'prototype_sword' | 'dungeon_shield_round' | 'dungeon_shield_rectangle'
+  | `armory-${ClassId}-${0 | 1 | 2 | 3 | 4}`
+  | `paladin-shield-${0 | 1 | 2 | 3 | 4}`;
 
 export interface EquipmentVisual {
   model: WeaponModelId;
@@ -42,7 +44,9 @@ const models = new Map<WeaponModelId, Promise<GLTF>>();
 export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
-    const url=import.meta.env.BASE_URL+(name==='spear'
+    const url=import.meta.env.BASE_URL+((name.startsWith('armory-') || name.startsWith('paladin-shield-'))
+      ?'models/weapons/'+name+'.glb'
+      :name==='spear'
       ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
       :name==='longbow'?'models/equipment/CC0_longbow.glb'
       :name.startsWith('dungeon_')||name.startsWith('prototype_')
@@ -58,6 +62,18 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   // Mini Forest bow is modeled at 0.48m. Scale it to a readable 1.56m
   // ranger longbow before applying inverse scaling for the hand bone.
   if(name==='longbow')model.scale.multiplyScalar(3.25);
+  // Scale author-created GLBs to a stable silhouette without generating geometry.
+  if(name.startsWith('armory-') || name.startsWith('paladin-shield-')){
+    const bounds=new Box3().setFromObject(model);
+    if(!bounds.isEmpty()){
+      const size=bounds.getSize(new Vector3());
+      const type=name.startsWith('paladin-shield-')?'shield':name.split('-')[1];
+      const target=type==='shield'?.84:type==='assassin'?.72:type==='ranger'?1.5:type==='lanceman'?1.9
+        :type==='monk'?.92:type==='necromancer'?1.35:1.45;
+      const longest=Math.max(size.x,size.y,size.z);
+      if(longest>0.001)model.scale.multiplyScalar(Math.max(.04,Math.min(20,target/longest)));
+    }
+  }
   model.traverse(object=>{
     if(object instanceof Mesh){
       object.frustumCulled=false;

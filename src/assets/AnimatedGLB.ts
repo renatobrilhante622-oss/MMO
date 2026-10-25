@@ -53,6 +53,7 @@ export class AnimatedGLB {
   private readonly creaturePhase={value:0};
   private readonly creatureStride={value:0};
   private readonly creatureTime={value:0};
+  private readonly creatureAttack={value:0};
   private readonly staticCreature:boolean;
   private baseColor = new Color(0x617080);
   private accent = new Color(0x9c7dcc);
@@ -118,7 +119,8 @@ export class AnimatedGLB {
               shader.uniforms.creaturePhase=this.creaturePhase;
               shader.uniforms.creatureStride=this.creatureStride;
               shader.uniforms.creatureTime=this.creatureTime;
-              shader.vertexShader='uniform float creaturePhase, creatureStride, creatureTime;\n'+shader.vertexShader;
+              shader.uniforms.creatureAttack=this.creatureAttack;
+              shader.vertexShader='uniform float creaturePhase, creatureStride, creatureTime, creatureAttack;\n'+shader.vertexShader;
               shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
                 `#include <begin_vertex>
                   float bodyH=clamp((position.y-${pY.toFixed(6)})/${Math.max(.0001,extent.y).toFixed(6)},0.,1.);
@@ -128,7 +130,12 @@ export class AnimatedGLB {
                   ${wing? `float membrane=smoothstep(.15,.42,abs(sideX))*smoothstep(.35,.7,bodyH);
                      transformed.y+=sin(creatureTime*2.6+abs(sideX)*3.2)*membrane*.052*${Math.max(.001,extent.y).toFixed(6)};`:
                      `float paws=(1.-smoothstep(.18,.37,bodyH))*creatureStride;
-                      transformed.z+=sin(creaturePhase*2.0+sign(sideX)*1.57)*paws*.032*${Math.max(.001,extent.z).toFixed(6)};`}
+                      float lateral=sign(sideX);
+                      float front=sign(position.z-${px.z.toFixed(6)});
+                      float cycle=creaturePhase*1.45+(front<0.?3.14159:0.)+(lateral<0.?1.5708:0.);
+                      transformed.z+=sin(cycle)*paws*.23*${Math.max(.001,extent.z).toFixed(6)};
+                      transformed.y+=max(0.,cos(cycle))*paws*.075*${Math.max(.001,extent.y).toFixed(6)};
+                      transformed.z+=creatureAttack*smoothstep(.3,.65,bodyH)*abs(sideX)*.16*${Math.max(.001,extent.z).toFixed(6)};`}
                 `);
             };
             material.customProgramCacheKey=()=>wing?'eterna-dragon-membrane-v1':'eterna-ungaited-quadruped-v1';
@@ -157,35 +164,48 @@ export class AnimatedGLB {
   }
 
   private findAction(state: string): { action: AnimationAction; key: string } | undefined {
-    const candidates: Record<string, string[]> = {
-      idle: ['idle', 'idle_b', 'idle_combat', 'unarmed_idle', '2h_melee_idle'],
-      walk: ['walking_a', 'walking_b', 'walk'],
-      run: ['running_a', 'running_b', 'run'],
-      mounted: ['sit_chair_idle', 'sit_chair_pose', 'idle'],
-      slide: ['dodge_forward', 'idle'],
-      jump: ['jump_idle', 'jump_full_short', 'idle'],
-      dead: ['death_a_pose', 'death_a', 'idle'],
-      attack: ({
-        axe:['2h_melee_attack_chop','1h_melee_attack_chop'],
-        sword:['1h_melee_attack_slice_horizontal','1h_melee_attack_chop'],
-        daggers:['dualwield_melee_attack_slice','dualwield_melee_attack_stab'],
-        bow:['2h_ranged_shoot','1h_ranged_shoot','2h_ranged_shooting'],
-        staff:['spellcast_shoot','spellcast_long'],
-        scythe:['2h_melee_attack_slice','spellcast_shoot'],
-        fists:['unarmed_melee_attack_punch_a','unarmed_melee_attack_punch_b'],
-        lance:['2h_melee_attack_stab','1h_melee_attack_stab'],
-        orb:['spellcast_shoot','spellcast_raise'],
-      } as Record<ClassDefinition['weapon'],string[]>)[this.attackWeapon],
+    // Imported clips are often prefixed by their armature (AnimalArmature|Gallop,
+    // CharacterArmature|Fast_Flying). Match semantic suffixes before fallback.
+    const animal=this.name.startsWith('Creature_');
+    const flyer=this.name==='Creature_dragon'||this.name==='Creature_wyvern';
+    const attacks:Record<ClassDefinition['weapon'],string[]>={
+      axe:['2h_melee_attack_chop','1h_melee_attack_chop'],
+      sword:['1h_melee_attack_slice_horizontal','1h_melee_attack_chop'],
+      daggers:['dualwield_melee_attack_slice','dualwield_melee_attack_stab'],
+      bow:['2h_ranged_shoot','1h_ranged_shoot','2h_ranged_shooting'],
+      staff:['spellcast_shoot','spellcast_long'],
+      scythe:['2h_melee_attack_slice','spellcast_shoot'],
+      fists:['unarmed_melee_attack_punch_a','unarmed_melee_attack_punch_b'],
+      lance:['2h_melee_attack_stab','1h_melee_attack_stab'],
+      orb:['spellcast_shoot','spellcast_raise'],
     };
-    for (const candidate of candidates[state] ?? [state]) {
-      const clip=this.clips.get(candidate);
-      if(!clip)continue;
-      let action=this.actions.get(candidate);
-      if(!action && this.mixer){
-        action=this.mixer.clipAction(clip);
-        this.actions.set(candidate,action);
+    const candidates:Record<string,string[]>={
+      idle:flyer?['flying_idle','idle','idle_b']:['idle','idle_b','idle_combat','unarmed_idle','2h_melee_idle'],
+      walk:flyer?['fast_flying','flying_idle']:['walking_a','walking_b','walk','gallop'],
+      run:flyer?['fast_flying','flying_idle']:this.name==='Creature_horse'?['gallop','run','walk']:['running_a','running_b','run','gallop','walk'],
+      mounted:['sit_chair_idle','sit_chair_pose','idle'],
+      slide:['dodge_forward','idle'],
+      jump:['jump_idle','jump_full_short','jump','idle'],
+      dead:['death_a_pose','death_a','death','dead'],
+      attack:animal?['attack','bite_front','punch','headbutt','bite']:attacks[this.attackWeapon],
+    };
+    const findClip=(candidate:string):AnimationClip|undefined=>{
+      const exact=this.clips.get(candidate.toLowerCase());
+      if(exact)return exact;
+      const match=normalize(candidate);
+      for(const [key,clip] of this.clips){
+        const normalized=normalize(key);
+        if(normalized===match||normalized.endsWith(match))return clip;
       }
-      if(action)return {action,key:candidate};
+      return undefined;
+    };
+    for(const candidate of candidates[state]??[state]){
+      const clip=findClip(candidate);
+      if(!clip)continue;
+      const key=clip.name.toLowerCase();
+      let action=this.actions.get(key);
+      if(!action&&this.mixer){action=this.mixer.clipAction(clip);this.actions.set(key,action);}
+      if(action)return {action,key};
     }
     const fallbackClip=this.clips.get('idle')??this.clips.values().next().value;
     if(!fallbackClip||!this.mixer)return undefined;
@@ -309,7 +329,7 @@ export class AnimatedGLB {
     const found = this.findAction(state);
     if (!found || (this.active === found.action && this.activeKey === state)) return;
     const { action } = found;
-    if (state === 'attack' || state === 'slide' || state === 'jump') {
+    if (state === 'attack' || state === 'slide' || state === 'jump' || state === 'dead') {
       action.setLoop(LoopOnce, 1);
       action.clampWhenFinished = true;
     }
@@ -347,6 +367,7 @@ export class AnimatedGLB {
     const state = this.attackTime > 0 ? 'attack' : target;
     this.play(state);
     if (this.active) this.active.timeScale = state === 'run' ? Math.min(1.6, Math.max(0.8, speed + .25)) : 1;
+    this.creatureAttack.value=this.attackTime>0?Math.sin((1-this.attackTime)*10):0;
     this.mixer?.update(step);
   }
 

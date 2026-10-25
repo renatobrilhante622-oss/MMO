@@ -2,42 +2,33 @@ import type {ClassId,Rarity} from '../core/GameTypes';
 import type {WeaponModelId,EquipmentVisual} from '../assets/WeaponGLB';
 
 export const WEAPON_PACK_RARITIES=['common','rare','epic','legendary','mythic'] as const satisfies readonly Rarity[];
-const layouts:Record<ClassId,{names:readonly string[];models:readonly WeaponModelId[];offhand?:WeaponModelId}>={
-  berserker:{names:['Machado de Ferro','Machado Rúnico','Espadão Vulcânico','Cortadora Astral','Excalibur Eterna'],
-    models:['axe_1handed','axe_2handed','sword_2handed','dungeon_sword','prototype_sword']},
-  paladin:{names:['Espada do Juramento','Lâmina Rúnica','Espada Solar','Lâmina da Aurora','Excalibur Eterna'],
-    models:['sword_1handed','sword_2handed','dungeon_sword','prototype_sword','sword_1handed'],offhand:'shield_round'},
-  assassin:{names:['Adagas da Sombra','Presas de Veneno','Lâminas Fantasmas','Gêmeas do Eclipse','Farpas do Vazio'],
-    models:['dagger','dagger','dagger','dagger','dagger'],offhand:'dagger'},
-  ranger:{names:['Arco de Caça','Arco Élfico de Vento','Arco de Cristal','Arco Celestial','Arco do Crepúsculo'],
-    models:['longbow','longbow','longbow','longbow','longbow'],offhand:'quiver'},
-  elementalist:{names:['Cajado Aprendiz','Cajado de Cristal Glacial','Cetro Solar','Báculo Abissal','Cajado Mítico do Dragão'],
-    models:['staff','wand','staff','staff','staff'],offhand:'spellbook_open'},
-  necromancer:{names:['Báculo de Ossos','Foice dos Espectros','Cetro das Cinzas','Cajado do Submundo','Báculo do Lich'],
-    models:['staff','staff','wand','staff','staff'],offhand:'spellbook_closed'},
-  monk:{names:['Punhos do Discípulo','Manoplas do Vento','Punhos Sagrados','Foco Celestial','Punhos Eternos'],
-    models:['wand','dagger','wand','spear','wand']},
-  lanceman:{names:['Lança de Ferro','Lança Rúnica','Lança Glacial','Lança do Sol','Lança do Abismo'],
-    models:['spear','spear','spear','spear','spear']},
-  warlock:{names:['Varinha do Iniciado','Cetro de Cristal','Báculo do Eclipse','Varinha Astral','Cetro do Vazio'],
-    models:['wand','staff','wand','staff','wand'],offhand:'spellbook_closed'}
+const layouts:Record<ClassId,{names:readonly string[];offhand?:WeaponModelId}>={
+  berserker:{names:['Machado de Ferro','Machado Rúnico','Espadão Vulcânico','Cortadora Astral','Excalibur Eterna']},
+  paladin:{names:['Espada do Juramento','Lâmina Rúnica','Espada Solar','Lâmina da Aurora','Excalibur Eterna'],offhand:'shield_round'},
+  assassin:{names:['Adagas da Sombra','Presas de Veneno','Lâminas Fantasmas','Gêmeas do Eclipse','Farpas do Vazio'],offhand:'dagger'},
+  ranger:{names:['Arco de Caça','Arco Élfico de Vento','Arco de Cristal','Arco Celestial','Arco do Crepúsculo'],offhand:'quiver'},
+  elementalist:{names:['Cajado Aprendiz','Cajado de Cristal Glacial','Cetro Solar','Báculo Abissal','Cajado Mítico do Dragão'],offhand:'spellbook_open'},
+  necromancer:{names:['Foice de Ossos','Foice dos Espectros','Foice das Cinzas','Foice do Submundo','Foice do Lich'],offhand:'spellbook_closed'},
+  monk:{names:['Bastão do Discípulo','Bastão do Vento','Bastão Sagrado','Bastão Celestial','Bastão Eterno']},
+  lanceman:{names:['Lança de Ferro','Lança Rúnica','Lança Glacial','Lança do Sol','Lança do Abismo']},
+  warlock:{names:['Varinha do Iniciado','Cetro de Cristal','Báculo do Eclipse','Varinha Astral','Cetro do Vazio'],offhand:'spellbook_closed'}
 };
 export interface WeaponPack {
   id:string;classId:ClassId;tier:number;name:[string,string];
   rarity:Rarity;color:number;weapons:readonly EquipmentVisual[];
 }
-/** 45 deterministic gameplay cosmetics, all backed by locally bundled authored GLBs.
- * A "tier" changes material/effects: it does NOT claim 45 separately sculpted meshes. */
+/** 45 deterministic gameplay cosmetics, each using a separate bundled CC0 GLB.
+ * Rarity shaders and particles remain independent of the weapon geometry. */
 export const WEAPON_PACKS:readonly WeaponPack[]=Object.freeze(
  (Object.keys(layouts) as ClassId[]).flatMap(classId=>{
   const group=layouts[classId];
   return group.names.map((name,tier)=>{
-   const main=group.models[tier];
+   const main=`armory-${classId}-${tier}` as WeaponModelId;
    const weapons:EquipmentVisual[]=classId==='ranger'
     ?[{model:main,bone:'lefthand'},{model:'quiver',bone:'spine2',offset:[0,0,-.17]}]
     :classId==='assassin'
-     ?[{model:'dagger',bone:'righthand'},{model:'dagger',bone:'lefthand'}]
-    :[{model:main,bone:'righthand'},...(group.offhand?[{model:group.offhand,bone:'lefthand'} as EquipmentVisual]:[])];
+     ?[{model:main,bone:'righthand'},{model:main,bone:'lefthand'}]
+    :[{model:main,bone:'righthand'},...(classId==='paladin'?[{model:`paladin-shield-${tier}` as WeaponModelId,bone:'lefthand'} as EquipmentVisual]:group.offhand?[{model:group.offhand,bone:'lefthand'} as EquipmentVisual]:[])];
    return Object.freeze({
     id:'armory-'+classId+'-'+tier,classId,tier,
     name:[name,name] as [string,string],

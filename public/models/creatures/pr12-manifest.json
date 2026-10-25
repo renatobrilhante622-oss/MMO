@@ -1,0 +1,94 @@
+{
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "id": "Creature_wolf",
+      "hash": "2408c887ec97ecfae368ceb8a5ee1f7f9cfaf236",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/Wolf.glb",
+      "file": "models/creatures/Creature_wolf.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_wyvern",
+      "hash": "114c2311759fd037d01ffd74c1ca4a1199f874eb",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/DragonEvolved.glb",
+      "file": "models/creatures/Creature_wyvern.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Flying_Idle",
+        "Fast_Flying",
+        "Punch",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_dragon",
+      "hash": "e65d61b76981f55dbe68bb82191a8178301d3df8",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/Dragon.glb",
+      "file": "models/creatures/Creature_dragon.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Flying_Idle",
+        "Fast_Flying",
+        "Punch",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_slime",
+      "hash": "490bde7bad82d0f8a764ba9596fbfda57705c474",
+      "source": "https://github.com/samoylenkodmitry/vibeage/blob/f9df17580d8f76b8aeaec151229cb481340beb66/public/models/monsters/PinkSlime.glb",
+      "file": "models/creatures/Creature_slime.glb",
+      "license": "CC0-1.0",
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Bite_Front",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_horse",
+      "hash": "b02f6cb043e693890e87a976ccadfb358720faf7",
+      "file": "models/creatures/Creature_horse.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/061bcac2e9d466ca83afff073a6bb61c6a5522c/public/models/creatures/Creature_horse.glb",
+      "sourceHash": "49bbc84bd1d3807dc5d86b851a46ff852d3f0de1",
+      "license": "ETERNA project-owned base mesh; independent CC0 status not established",
+      "rigMethod": "retrofit skin weights to existing authored mesh, 7-9 bones + glTF skeletal animation channels",
+      "bones": 9,
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Run",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
+    },
+    {
+      "id": "Creature_golem",
+      "hash": "9e93bf38fda959f05fcd7a5f0c30d07bab754cac",
+      "file": "models/creatures/Creature_golem.glb",
+      "source": "https://github.com/renatobrilhante622-oss/MMO/blob/061bcac2e9d466ca83afff073a6bb61c6a5522c/public/models/creatures/Creature_golem.glb",
+      "sourceHash": "8aaf9ff8d7ad8aed6d1f3782a387bc120c999383",
+      "license": "ETERNA project-owned base mesh; independent CC0 status not established",
+      "rigMethod": "retrofit skin weights to existing authored mesh, 7-9 bones + glTF skeletal animation channels",
+      "bones": 7,
+      "expectedClips": [
+        "Idle",
+        "Walk",
+        "Run",
+        "Gallop",
+        "Attack",
+        "Death"
+      ]
+    }
+  ]
+}
