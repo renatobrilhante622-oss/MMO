@@ -5,7 +5,7 @@ export interface RegionRewards {
   exclusive: readonly string[];
   rarity: 'common'|'rare'|'epic'|'legendary'|'mythic';
 }
-export const REGION_REWARDS:ReadOnly<Record<string,RegionRewards>>={
+export const REGION_REWARDS:Readonly<Record<string,RegionRewards>>={
   aurora:{equipment:'Comum / Incomum',exclusive:['Minério de Ferro','Poção Básica'],rarity:'common'},
   crypt:{equipment:'Raro',exclusive:['Fragmento de Asa Esquelética','Joia Sombria'],rarity:'rare'},
   highlands:{equipment:'Épico',exclusive:['Arma Rúnica','Cristal de Refino Avançado'],rarity:'epic'},
