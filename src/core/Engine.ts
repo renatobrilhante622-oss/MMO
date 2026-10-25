@@ -455,6 +455,12 @@ export class Engine {
       }
       this.dungeon.update(simDt, this.hero);
       this.dungeonInstance?.update(simDt,this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.completed);
+      if(this.dungeonInstance){
+        const firstClear=this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)||this.dungeon.completed;
+        const secondClear=(this.dungeon.wave>this.dungeon.definition.waves&&this.dungeonInstance.crystalsRemaining===0)||this.dungeon.completed;
+        this.physics.setDungeonGateOpen(0,firstClear);
+        this.physics.setDungeonGateOpen(1,secondClear);
+      }
       if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
       const targets = this.enemies.enemies.filter(enemy => enemy.alive);
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
