@@ -3,84 +3,6 @@
   "source": "https://3dassets.dev/",
   "assets": [
     {
-      "key": "staff-0",
-      "group": "staff",
-      "index": 0,
-      "title": "Staff and inmate prop study (Prison Complex Builder)",
-      "file": "models/weapon-packs/staff-0.glb",
-      "source": "https://3dassets.dev/assets/prison-complex-builder-staff-and-inmate-props-c6c48fd8",
-      "license": "CC0-1.0",
-      "sha256": "4991cf3768c6c999636e26df67c47085bef8afc336af32ec11399c9f066354b5",
-      "size": 858892,
-      "meshes": 36,
-      "animations": 0
-    },
-    {
-      "key": "staff-1",
-      "group": "staff",
-      "index": 1,
-      "title": "Staff locker bank, six door (Office Lobby and Building Facilities)",
-      "file": "models/weapon-packs/staff-1.glb",
-      "source": "https://3dassets.dev/assets/office-lobby-and-facilities-staff-locker-bank-aaf13317",
-      "license": "CC0-1.0",
-      "sha256": "13f1ce27114090fd2d8ac44d2e71876e1491c47e896c99328ef738c95bc76952",
-      "size": 45604,
-      "meshes": 8,
-      "animations": 2
-    },
-    {
-      "key": "staff-2",
-      "group": "staff",
-      "index": 2,
-      "title": "Staff Locker Bank (Hospital Wards and Clinic Operations)",
-      "file": "models/weapon-packs/staff-2.glb",
-      "source": "https://3dassets.dev/assets/hospital-wards-and-clinic-operations-staff-locker-bank-b5d22764",
-      "license": "CC0-1.0",
-      "sha256": "23ecb1a1d2de71f7af467b597ffc94df31bd5a8f2cd60dc3c335bcec005e18c9",
-      "size": 29528,
-      "meshes": 5,
-      "animations": 0
-    },
-    {
-      "key": "staff-3",
-      "group": "staff",
-      "index": 3,
-      "title": "Staff locker bank, four doors (Parcel Depot and Sorting Hall)",
-      "file": "models/weapon-packs/staff-3.glb",
-      "source": "https://3dassets.dev/assets/parcel-depot-and-sorting-hall-parcel-depot-and-sorting-0493c966",
-      "license": "CC0-1.0",
-      "sha256": "9de3700d04d50a8e466d3e6ee2abe6e7478e96c6a5fba1380ee1c66924aff48e",
-      "size": 16852,
-      "meshes": 26,
-      "animations": 2
-    },
-    {
-      "key": "staff-4",
-      "group": "staff",
-      "index": 4,
-      "title": "Staff locker bank (Hotel and Resort Operations)",
-      "file": "models/weapon-packs/staff-4.glb",
-      "source": "https://3dassets.dev/assets/hotel-and-resort-operations-staff-locker-bank-01c98ddb",
-      "license": "CC0-1.0",
-      "sha256": "ebc78bc9d79dca12d91f7d65a1db5508fad840b807f9b993d24300de37d0f418",
-      "size": 75084,
-      "meshes": 15,
-      "animations": 2
-    },
-    {
-      "key": "sword-0",
-      "group": "sword",
-      "index": 0,
-      "title": "Sword glyph (3D Game UI Icons)",
-      "file": "models/weapon-packs/sword-0.glb",
-      "source": "https://3dassets.dev/assets/game-ui-icon-library-sword-glyph-eb075df5",
-      "license": "CC0-1.0",
-      "sha256": "da9c55f7a7142d9040ae80a90e3264eb71f270a93cf678ba8cdff607c9992286",
-      "size": 28104,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
       "key": "sword-1",
       "group": "sword",
       "index": 1,
@@ -133,19 +55,6 @@
       "animations": 0
     },
     {
-      "key": "dagger-0",
-      "group": "dagger",
-      "index": 0,
-      "title": "Dagger Sheath (Swords, Shields and Melee Arms)",
-      "file": "models/weapon-packs/dagger-0.glb",
-      "source": "https://3dassets.dev/assets/swords-shields-and-melee-arms-dagger-sheath-20d2e7d4",
-      "license": "CC0-1.0",
-      "sha256": "88d0b7392884a443a7693c2c54590904f488646b0f57decad5e36baa8b83be16",
-      "size": 57748,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
       "key": "dagger-1",
       "group": "dagger",
       "index": 1,
@@ -182,110 +91,6 @@
       "sha256": "36748fc585f1828877caa3cf513cc57264a0db4280b850ce52b1bd4131f0ee05",
       "size": 68340,
       "meshes": 4,
-      "animations": 0
-    },
-    {
-      "key": "dagger-4",
-      "group": "dagger",
-      "index": 4,
-      "title": "Grey heron (Birds and Reptiles HD)",
-      "file": "models/weapon-packs/dagger-4.glb",
-      "source": "https://3dassets.dev/assets/birds-and-reptiles-hd-grey-heron-ef83b2bc",
-      "license": "CC0-1.0",
-      "sha256": "044b6151225b7960d62e457abbb78476e82ac692ceb8a04cfc8b5828208d2cb7",
-      "size": 317656,
-      "meshes": 5,
-      "animations": 0
-    },
-    {
-      "key": "bow-0",
-      "group": "bow",
-      "index": 0,
-      "title": "Bow thruster tunnel unit (Shipyard and Dry Dock)",
-      "file": "models/weapon-packs/bow-0.glb",
-      "source": "https://3dassets.dev/assets/shipyard-and-dry-dock-shipyard-and-dry-dock-bow-thrust-778f84b5",
-      "license": "CC0-1.0",
-      "sha256": "f03114fcdbc146d22425dbec14c68ffff64423706b98b45c1dfd599b000daa54",
-      "size": 27192,
-      "meshes": 9,
-      "animations": 1
-    },
-    {
-      "key": "bow-1",
-      "group": "bow",
-      "index": 1,
-      "title": "Bow glyph (3D Game UI Icons)",
-      "file": "models/weapon-packs/bow-1.glb",
-      "source": "https://3dassets.dev/assets/game-ui-icon-library-bow-glyph-12d21df2",
-      "license": "CC0-1.0",
-      "sha256": "e444ddeb909c4321ccb5fbee8ec3f52f7fece7d976305e2036ccbce0182fcc91",
-      "size": 59272,
-      "meshes": 5,
-      "animations": 0
-    },
-    {
-      "key": "bow-2",
-      "group": "bow",
-      "index": 2,
-      "title": "Bow Drill (Wilderness Survival Camp)",
-      "file": "models/weapon-packs/bow-2.glb",
-      "source": "https://3dassets.dev/assets/wilderness-survival-camp-bow-drill-ba17a352",
-      "license": "CC0-1.0",
-      "sha256": "33c5575b7eac2e42a466203f4c372a560dc27014445be53a4bd9927b7aa1d277",
-      "size": 69620,
-      "meshes": 2,
-      "animations": 0
-    },
-    {
-      "key": "bow-3",
-      "group": "bow",
-      "index": 3,
-      "title": "Bow ram (Modular Spaceships and Space Fleet)",
-      "file": "models/weapon-packs/bow-3.glb",
-      "source": "https://3dassets.dev/assets/interstellar-fleet-modular-starships-bow-ram-f95e6e5b",
-      "license": "CC0-1.0",
-      "sha256": "65cf8cf9f5388c2b221e6ed79f43c2cbab91e12fc46ee54c875248dad0143723",
-      "size": 9584,
-      "meshes": 2,
-      "animations": 0
-    },
-    {
-      "key": "bow-4",
-      "group": "bow",
-      "index": 4,
-      "title": "Cello Bow (Orchestra and Band Instruments)",
-      "file": "models/weapon-packs/bow-4.glb",
-      "source": "https://3dassets.dev/assets/orchestra-and-band-instruments-cello-bow-830fea2a",
-      "license": "CC0-1.0",
-      "sha256": "546f0db574bdc09cbb014e33f2c429c7c274002d47fa1c1a3e0fb2b5c4ee7fc9",
-      "size": 20032,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
-      "key": "axe-0",
-      "group": "axe",
-      "index": 0,
-      "title": "Axe In Stump (Halloween Slasher Street)",
-      "file": "models/weapon-packs/axe-0.glb",
-      "source": "https://3dassets.dev/assets/halloween-slasher-street-axe-in-stump-31725d62",
-      "license": "CC0-1.0",
-      "sha256": "980ceb25acdd239eb3816b16953b03024445151d86139eab7540aaf961345704",
-      "size": 53172,
-      "meshes": 3,
-      "animations": 0
-    },
-    {
-      "key": "axe-1",
-      "group": "axe",
-      "index": 1,
-      "title": "Axe glyph (3D Game UI Icons)",
-      "file": "models/weapon-packs/axe-1.glb",
-      "source": "https://3dassets.dev/assets/game-ui-icon-library-axe-glyph-5fda986a",
-      "license": "CC0-1.0",
-      "sha256": "af5edb5c776f304f013b8c5eac024e55e7c2bb04cffe15eefaf54cf44ea367a5",
-      "size": 23968,
-      "meshes": 3,
       "animations": 0
     },
     {
@@ -341,32 +146,6 @@
       "animations": 0
     },
     {
-      "key": "spear-1",
-      "group": "spear",
-      "index": 1,
-      "title": "Spear rosette (Alien Planet Plants and Terrain)",
-      "file": "models/weapon-packs/spear-1.glb",
-      "source": "https://3dassets.dev/assets/alien-biosphere-spear-rosette-e8c68d9c",
-      "license": "CC0-1.0",
-      "sha256": "e15046a397b3b934656aa0c5ab795701c4ec55d7e905615109a18de609fef6af",
-      "size": 68104,
-      "meshes": 1,
-      "animations": 0
-    },
-    {
-      "key": "spear-2",
-      "group": "spear",
-      "index": 2,
-      "title": "Spearman (Medieval Siege and Castle Defence)",
-      "file": "models/weapon-packs/spear-2.glb",
-      "source": "https://3dassets.dev/assets/medieval-siege-and-castle-defence-spearman-8d0f869a",
-      "license": "CC0-1.0",
-      "sha256": "9035f56d8d90cc0c22ce4fb12c9c6ec2ba687999e90a4696709ec500c844ac14",
-      "size": 17544,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
       "key": "spear-3",
       "group": "spear",
       "index": 3,
@@ -417,77 +196,12 @@
       "size": 89208,
       "meshes": 3,
       "animations": 0
-    },
-    {
-      "key": "wand-0",
-      "group": "wand",
-      "index": 0,
-      "title": "Feather Wand (Cats, Dogs and Pets at Home)",
-      "file": "models/weapon-packs/wand-0.glb",
-      "source": "https://3dassets.dev/assets/companion-animals-and-pet-home-feather-wand-a2501f85",
-      "license": "CC0-1.0",
-      "sha256": "408a05c8f533fa4d0382cab39a54dd1721c1f05605666c6a8f71805512b0d4b4",
-      "size": 47948,
-      "meshes": 6,
-      "animations": 0
-    },
-    {
-      "key": "wand-1",
-      "group": "wand",
-      "index": 1,
-      "title": "Tube Bore Inspection Wand (Pneumatic Tube Mail Exchange)",
-      "file": "models/weapon-packs/wand-1.glb",
-      "source": "https://3dassets.dev/assets/pneumatic-tube-mail-exchange-pneumatic-tube-mail-excha-46254b34",
-      "license": "CC0-1.0",
-      "sha256": "676bec9509f864bbeb35255ad3754d10329058c915da9e6630b66804e79c7d33",
-      "size": 36768,
-      "meshes": 3,
-      "animations": 0
-    },
-    {
-      "key": "wand-2",
-      "group": "wand",
-      "index": 2,
-      "title": "Marshalling Wand Pair (Airport Terminal and Ground Operations)",
-      "file": "models/weapon-packs/wand-2.glb",
-      "source": "https://3dassets.dev/assets/airport-terminal-and-ground-operations-marshalling-wan-9ec4509d",
-      "license": "CC0-1.0",
-      "sha256": "1cbf0dcda188658e83e6ef34ccf0707212470954d1fd5ff2d4cebd12504eb9df",
-      "size": 18840,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
-      "key": "wand-3",
-      "group": "wand",
-      "index": 3,
-      "title": "Route marker wand line (Mountaineering and Summit Expedition)",
-      "file": "models/weapon-packs/wand-3.glb",
-      "source": "https://3dassets.dev/assets/mountaineering-and-summit-expedition-route-marker-wand-2b016b53",
-      "license": "CC0-1.0",
-      "sha256": "4f3b80a67cf8a480c2a5a0e8f9da4937e57652f7900dfd42e3224614b75fa0ff",
-      "size": 32152,
-      "meshes": 4,
-      "animations": 0
-    },
-    {
-      "key": "wand-4",
-      "group": "wand",
-      "index": 4,
-      "title": "Start Hut (Ski Resort and Snow Park)",
-      "file": "models/weapon-packs/wand-4.glb",
-      "source": "https://3dassets.dev/assets/ski-resort-and-snow-park-start-hut-789df9c7",
-      "license": "CC0-1.0",
-      "sha256": "a0f53b063191a1a05217842675d70bf8d337a032a5ee7f266ce576345b6a7b05",
-      "size": 10820,
-      "meshes": 8,
-      "animations": 0
     }
   ],
-  "missing": [
-    {
-      "group": "mace",
-      "needed": 3
-    }
-  ]
+  "unavailable": {
+    "staff": "No verified staff-only model from this search; base KayKit staff retained",
+    "bow": "Existing authentic Kenney longbow retained",
+    "wand": "Existing KayKit wand retained"
+  },
+  "notes": "Manually audited: office staff lockers, boat bows, bird names, icons, mounts, and accessory-only sheath models excluded. Distinct meshes may not exist for every class tier."
 }
