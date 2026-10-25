@@ -1,5 +1,6 @@
 import {upgradeItem as applyUpgrade} from './InventorySystem';
 import { EventBus, type EquipmentSlot, type Item, type LootDrop, type Rarity } from '../core/GameTypes';
+import {WEAPON_PACKS,WEAPON_PACK_BY_ID} from './WeaponPacks';
 
 export const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
 export const EQUIPMENT_SLOTS: readonly EquipmentSlot[] = ['weapon', 'helmet', 'armor', 'boots', 'ring', 'amulet'];
@@ -129,7 +130,7 @@ export class InventoryAndLoot {
     const slot = ALL_EQUIPMENT_SLOTS[Math.floor(this.random() * ALL_EQUIPMENT_SLOTS.length)];
     const itemLevel = [...tiers].reverse().find(tier => tier <= safeLevel) ?? 1;
     const realPackDrops=slot==='weapon'&&boss
-      ?WEAPON_PACK_ITEM_TEMPLATES.filter(item=>item.rarity===RARITIES[rarityIndex]&&item.requiredLevel!<=safeLevel)
+      ?WEAPON_PACK_ITEM_TEMPLATES.filter(item=>item.rarity===RARITIES[rarityIndex]&&item.requiredLevel! <= safeLevel)
       :[];
     const selectedPack=realPackDrops.length&&roll<.55
       ?realPackDrops[Math.floor(this.random()*realPackDrops.length)]:undefined;
