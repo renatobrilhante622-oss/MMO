@@ -438,6 +438,16 @@ export class Engine {
       this.enemies.update(simDt, this.hero,this.camera.position);
       this.companions.update(simDt, this.enemies.enemies, this.drops);
       const clears=this.dungeon.clears;
+      // Interaction with real crystal props shares the hero's melee input.
+      if(this.dungeonInstance&&this.dungeon.active
+         &&this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)
+         &&this.dungeon.wave<=this.dungeon.definition.waves
+         &&(input.attack||input.interact)
+         &&this.dungeonInstance.strikeCrystal(this.hero.position,this.hero.stats.attack)){
+        this.sound.impact(true);
+        this.combat.particles.burst(this.hero.position,0x9c8ffd,12);
+        this.hud.notify('Cristal danificado · '+this.dungeonInstance.crystalsRemaining+' restantes','info');
+      }
       this.dungeon.update(simDt, this.hero);
       this.dungeonInstance?.update(simDt,this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.completed);
       if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
@@ -465,7 +475,9 @@ export class Engine {
     if(this.playing&&!document.hidden&&!this.hudEditor.active)this.base.update(dt);
     this.dungeonUI.update(dt,!!this.dungeonInstance&&this.dungeon.active,
       !!this.dungeonInstance&&this.dungeon.completed,
-      this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.status);
+      this.dungeon.wave,this.dungeon.definition.waves,
+      this.dungeonInstance&&this.dungeon.wave>Math.ceil(this.dungeon.definition.waves/2)&&this.dungeon.wave<=this.dungeon.definition.waves?
+      this.dungeon.status+' • '+this.dungeonInstance.crystalsRemaining+'/3 cristais':this.dungeon.status);
     const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
     const bossPhase = boss ? (boss.hp / boss.maxHp > 0.65 ? 1 : boss.hp / boss.maxHp > 0.3 ? 2 : 3) : 0;
     if (bossPhase > 0 && this.previousBossPhase > 0 && bossPhase !== this.previousBossPhase) this.sound.bossRoar();
@@ -765,6 +777,7 @@ export class Engine {
       const portal=new Vector3(0,this.terrain.heightAt(0,-70)+1.2,-70);
       this.dungeon.setPortalPosition(portal);
       this.dungeon.setInstanceRooms((wave,waves)=>this.dungeonInstance!.roomPoint(wave,waves));
+      this.dungeon.setRoomGate((wave,waves)=>wave<waves||!this.dungeonInstance||this.dungeonInstance.crystalsRemaining===0);
       this.hero.mounted=false;
       this.companions.mount.visible=false;
       this.hero.teleportTo(portal.clone());
