@@ -205,7 +205,7 @@ export class AnimatedGLB {
       righthand: ['righthand', 'handr', 'rhand', 'rightwrist', 'wristr'],
       lefthand: ['lefthand', 'handl', 'lhand', 'leftwrist', 'wristl'],
       head: ['head', 'headend'],
-      spine2: ['spine2', 'spine02', 'upperchest', 'chest'],
+      spine2: ['spine2', 'spine02', 'upperchest', 'chest', 'spine'],
     };
     this.model?.traverse(node => {
       const n = normalize(node.name);
