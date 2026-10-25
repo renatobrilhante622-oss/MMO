@@ -9,6 +9,7 @@ import './ui/clan-visual.css';
 import './ui/collection-forge.css';
 import './ui/vip.css';
 import './ui/intro.css';
+import './ui/region-travel.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
