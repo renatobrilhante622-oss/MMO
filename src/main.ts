@@ -1,5 +1,5 @@
 import {Engine} from './core/Engine';
-import {SplashScreen} from './ui/SplashScreen';
+import {CinematicIntro} from './ui/CinematicIntro';
 import './ui/style.css';
 import './ui/mobile-ux.css';
 import './ui/expansion.css';
@@ -15,21 +15,33 @@ import './ui/part2-forge-collection.css';
 import './ui/part2-hud-npc.css';
 import './ui/physical-portals.css';
 import './ui/dungeon-audit.css';
+import './ui/pr10-cinematic-hud.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
 if(!app)throw new Error('Contêiner principal não encontrado.');
 let game:Engine|undefined;
-const splash=new SplashScreen(app,()=>{
-  try{
-    document.getElementById('boot')?.remove();
-    game=new Engine(app);
-    if(import.meta.env.DEV)window.__ETERNA__=game;
-    game.start();
-  }catch(error){
-    game?.dispose();game=undefined;delete window.__ETERNA__;
-    for(const child of [...app.children])if(child!==splash.root)child.remove();
-    throw error;
-  }
+let intro:CinematicIntro|undefined;
+try{
+  document.getElementById('boot')?.remove();
+  app.dataset.screen='cinematic';
+  app.classList.add('entry-isolated');
+  game=new Engine(app);
+  if(import.meta.env.DEV)window.__ETERNA__=game;
+  game.start();
+  intro=new CinematicIntro(app,
+    t=>game?.setOpeningProgress(t),
+    ()=>{
+      game?.setOpeningProgress(null);
+      app.dataset.screen='menu';
+      app.classList.add('entry-isolated');
+    });
+}catch(error){
+  game?.dispose();
+  game=undefined;
+  console.error('Falha na inicialização gráfica de ETERNA',error);
+  app.innerHTML='<section class="eterna-start-error" role="alert">Não foi possível iniciar o mundo 3D. Reinicie o aplicativo.</section>';
+}
+if(import.meta.hot)import.meta.hot.dispose(()=>{
+  intro?.dispose();game?.dispose();delete window.__ETERNA__;
 });
-if(import.meta.hot)import.meta.hot.dispose(()=>{splash.dispose();game?.dispose();delete window.__ETERNA__;});
