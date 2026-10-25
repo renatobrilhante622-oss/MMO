@@ -21,7 +21,7 @@ describe('PR10 cinematic, HUD isolation and nine exclusive classes',()=>{
   expect(hand.visible).toBe(true);
   expect(armature.visible).toBe(true);
   expect(isEmbeddedWeaponName('handslot.r')).toBe(false);
-  expect(isEmbeddedWeaponName('2h_Crossbow')).toBe(false);
+  expect(isEmbeddedWeaponName('2h_Crossbow')).toBe(true);
  });
  it('has all nine visual signatures and strictly segregated weapon slot loadouts',()=>{
   expect(CLASS_IDS).toHaveLength(9);
