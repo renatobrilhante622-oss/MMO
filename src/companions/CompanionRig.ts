@@ -34,13 +34,19 @@ export class CompanionRig {
   private readonly wings=new Group();
   private readonly armor=new Group();
   private readonly particles:RarityAura;
+  private saddleRestY=1.6;
+  private readonly ownOrigin=new Vector3();
+  private readonly bodyBoundsCenter=new Vector3();
+  private visualPhase=0;
+  get saddleHeight():number{return this.saddle.position.y;}
+  get loadedModel():boolean{return !!this.imported?.ready;}
   constructor(readonly horse:boolean){
     this.root.name=horse?'Articulated horse mount':'Articulated wolf companion';
     this.coat=this.material(horse?0x8a6041:0x8b969e,.88);
     const dark=this.material(0x252328,.9),light=this.material(0xd6cab0,.88),leather=this.material(0x363331,.76),metal=this.material(0xc7ab6e,.3,.7);
     this.glow=this.material(0xa9e8ff,.4);this.glow.emissive.setHex(0xa9e8ff);
     this.root.add(this.spine);this.spine.position.y=horse?1.23:.68;
-    if(horse){this.saddle.name='mountSaddleNode';this.saddle.position.set(0,1.6,-.08);this.root.add(this.saddle);}
+    if(horse){this.saddle.name='mountSaddleNode';this.saddle.position.set(0,1.6,0);this.root.add(this.saddle);}
     // Geometry primitives exist solely for old, headless physics/unit tests.
     // Browser/Android actors render only imported authored GLB meshes.
     if(typeof document==='undefined'){
@@ -129,13 +135,18 @@ export class CompanionRig {
       :c.id==='wyvern'?'Creature_wyvern'
       :c.id==='dracolich'?'Creature_dragon'
       :['fenrir','nighthorse','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf'].includes(c.id)?'Creature_wolf'
-      :this.horse?'Horse':'Creature_wolf';
+      :this.horse?'Creature_horse':'Creature_wolf';
     if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
-      if(importedType){this.imported=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
+      if(importedType){const asset=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
+        if(this.imported!==asset)return;
         this.spine.visible=false;
         if(this.batch)this.batch.mesh.visible=false;
-      },false);this.root.add(this.imported.root);}}
-    this.imported?.tint(c.color,c.color);
+        asset.setCompanionAppearance(c.color,c.id==='hellhound');
+        this.updateSaddleFromGLB();
+      },false);
+      this.imported=asset;
+      this.root.add(asset.root);}}
+    this.imported?.setCompanionAppearance(c.color,hell);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
@@ -163,8 +174,37 @@ export class CompanionRig {
     this.wings.visible=typeof document==='undefined';
     if(typeof document==='undefined'&&!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
+  /** The saddle is computed from the actual loaded GLB world bounding box. */
+  updateSaddleFromGLB():void {
+    if(!this.horse||!this.imported?.ready)return;
+    const bounds=this.imported.getVisibleBounds();
+    if(!bounds)return;
+    this.root.updateWorldMatrix(true,true);
+    const origin=this.root.getWorldPosition(this.ownOrigin);
+    const height=bounds.max.y-bounds.min.y;
+    if(!Number.isFinite(height)||height<=.1)return;
+    // Input contract: 78% of authored mount height above the feet;
+    // no arbitrary horizontal offsets behind the mount's belly.
+    this.saddleRestY=bounds.min.y-origin.y+height*.78;
+    this.saddle.position.set(0,this.saddleRestY,0);
+    this.root.userData.realMountHeight=height;
+    this.root.userData.saddleMeasured=true;
+  }
   update(dt:number,speed:number,time:number,attack=false):void {
     this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);
+    // Animated wolf clips play through the model mixer. For static meshes,
+    // give a restrained breathing/gallop/flight sway; rigid sub-limb gaits
+    // need individually rigged bones and cannot be fabricated from a single mesh.
+    if(this.imported?.ready&&this.imported.animationCount===0){
+      this.visualPhase+=Math.max(0,Math.min(.05,dt))*(1.9+Math.max(0,speed)*.85);
+      const locomotion=Math.min(1,Math.max(0,speed/8));
+      const pulse=Math.sin(this.visualPhase);
+      this.imported.root.position.y=Math.abs(pulse)*.035*locomotion;
+      this.imported.root.rotation.x=.018*Math.sin(time*1.7)+locomotion*.027*pulse;
+      this.imported.root.rotation.z=.012*Math.sin(time*1.17);
+      this.imported.root.scale.x=1+Math.sin(time*2.1)*.009;
+    }
+    if(this.horse&&this.imported?.ready&&!this.root.userData.saddleMeasured)this.updateSaddleFromGLB();
     this.wings.children.forEach(wing=>{wing.rotation.z=Math.sin(time*3.5)*.2*(wing.userData.side as number);});
     const step=Math.min(.05,Math.max(0,dt));this.stride=MathUtils.damp(this.stride,Math.min(1,speed/(this.horse?10:6)),9,step);
     this.phase+=step*(this.horse?5+speed*.7:6+speed*.9);
@@ -177,7 +217,7 @@ export class CompanionRig {
       leg.ankle.rotation.x=-leg.hip.rotation.x*.25-leg.knee.rotation.x*.4;
     }
     this.spine.position.y=(this.horse?1.23:.68)+Math.abs(Math.sin(phase))*this.stride*(gallop?.09:.035);
-    if(this.horse)this.saddle.position.y=1.6+(this.spine.position.y-1.23);
+    if(this.horse)this.saddle.position.y=this.saddleRestY+(this.spine.position.y-1.23)*.35;
     this.spine.rotation.x=Math.sin(phase)*(gallop?.055:.018)*this.stride;
     this.neck.rotation.x=(this.horse?.3:.5)+Math.sin(phase+.3)*this.stride*.06;
     this.head.rotation.x=(this.horse?-.22:-.3)+Math.sin(time*1.1)*.025-(attack?.25:0);
