@@ -4,9 +4,9 @@ import type {WeaponModelId,EquipmentVisual} from '../assets/WeaponGLB';
 export const WEAPON_PACK_RARITIES=['common','rare','epic','legendary','mythic'] as const satisfies readonly Rarity[];
 const layouts:Record<ClassId,{names:readonly string[];models:readonly WeaponModelId[];offhand?:WeaponModelId}>={
   berserker:{names:['Machado de Ferro','Machado Rúnico','Espadão Vulcânico','Cortadora Astral','Excalibur Eterna'],
-    models:['axe_1handed','axe_2handed','sword_2handed','sword_1handed','sword_2handed']},
+    models:['axe_1handed','axe_2handed','sword_2handed','dungeon_sword','prototype_sword']},
   paladin:{names:['Espada do Juramento','Lâmina Rúnica','Espada Solar','Lâmina da Aurora','Excalibur Eterna'],
-    models:['sword_1handed','sword_2handed','sword_1handed','sword_2handed','sword_1handed'],offhand:'shield_round'},
+    models:['sword_1handed','sword_2handed','dungeon_sword','prototype_sword','sword_1handed'],offhand:'shield_round'},
   assassin:{names:['Adagas da Sombra','Presas de Veneno','Lâminas Fantasmas','Gêmeas do Eclipse','Farpas do Vazio'],
     models:['dagger','dagger','dagger','dagger','dagger'],offhand:'dagger'},
   ranger:{names:['Arco de Caça','Arco Élfico de Vento','Arco de Cristal','Arco Celestial','Arco do Crepúsculo'],
