@@ -1,5 +1,5 @@
 import {
-  Box3,Group,InstancedMesh,Matrix4,Mesh,Quaternion,Scene,Vector3
+  Box3,DoubleSide,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3
 } from 'three';
 import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -48,7 +48,9 @@ export class EnvironmentGLB {
   readonly root=new Group();
   private disposed=false;
   private readonly meshes:InstancedMesh[]=[];
-  constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number){
+  private readonly materials=new Set<MeshStandardMaterial>();
+  constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number,
+    private readonly activeRegion?:string){
     this.root.name='CC0 authored environment — instanced GLB scenery';
     scene.add(this.root);
     if(typeof document!=='undefined')void this.build();
@@ -57,6 +59,7 @@ export class EnvironmentGLB {
     for(let index=0;index<ASSETS.length;index++){
       if(this.disposed)return;
       const entry=ASSETS[index];
+      if(this.activeRegion&&entry.region!==this.activeRegion)continue;
       let gltf:GLTF;
       try{gltf=await model(entry.file);}
       catch(error){console.warn('Unable to load authored environment:',entry.file,error);continue;}
@@ -66,7 +69,7 @@ export class EnvironmentGLB {
       if(bounds.isEmpty())continue;
       const center=bounds.getCenter(new Vector3());
       const scale=entry.height/Math.max(.001,bounds.max.y-bounds.min.y);
-      const [cx,cz]=CENTERS[entry.region];
+      const [cx,cz]=this.activeRegion?[0,18]:CENTERS[entry.region];
       const rng=random(13021+index*973);
       const transforms:Matrix4[]=[];
       for(let n=0;n<entry.count;n++){
@@ -84,10 +87,25 @@ export class EnvironmentGLB {
       }
       scene.traverse(object=>{
         if(!(object instanceof Mesh)||transforms.length===0)return;
-        const instanced=new InstancedMesh(object.geometry,object.material,transforms.length);
+        // Mobile GPUs can render vegetation almost black when thin single-sided
+        // leaves face away from the key light or the cascaded shadow splits.
+        // Preserve authored albedo/maps and give them physically lit fill.
+        const sources=Array.isArray(object.material)?object.material:[object.material];
+        const visual=sources.map(source=>{
+          if(!(source instanceof MeshStandardMaterial))return source;
+          const material=source.clone();
+          material.side=DoubleSide;
+          material.roughness=Math.max(.62,material.roughness);
+          material.emissive.setRGB(.12,.12,.12);
+          material.emissiveIntensity=.45;
+          this.materials.add(material);
+          return material;
+        });
+        const instanced=new InstancedMesh(object.geometry,Array.isArray(object.material)?visual:visual[0],transforms.length);
         instanced.name='Instanced '+entry.file+'/'+object.name;
-        instanced.castShadow=true;
-        instanced.receiveShadow=true;
+        // Tiny forest foliage no longer self-occludes as a single opaque shadow.
+        instanced.castShadow=!entry.file.includes('tree-');
+        instanced.receiveShadow=false;
         for(let i=0;i<transforms.length;i++){
           instanced.setMatrixAt(i,transforms[i].clone().multiply(object.matrixWorld));
         }
@@ -102,6 +120,8 @@ export class EnvironmentGLB {
     this.disposed=true;
     for(const mesh of this.meshes)mesh.removeFromParent();
     this.meshes.length=0;
+    for(const material of this.materials)material.dispose();
+    this.materials.clear();
     this.root.removeFromParent();
   }
 }

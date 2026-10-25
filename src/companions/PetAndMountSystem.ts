@@ -41,8 +41,12 @@ export class PetAndMountSystem {
     const rider=this.hero.rig.root;
     if(this.hero.mounted&&this.hero.alive){
       if(rider.parent!==this.mountRig.saddle)this.mountRig.saddle.add(rider);
-      // Rig pivot starts at the feet. Offset its hips onto the saddle.
-      rider.position.set(0,-.75,0);
+      // Seat normalization is relative to the real mount saddle, not world
+      // physics; never rewrite imported GLB materials on parent transitions.
+      // KayKit's seated animation keeps the torso upright while the feet
+      // remain below the saddle surface.
+      rider.position.set(0,-.88,.02);
+      rider.rotation.set(0,0,0);
       this.mountRig.root.getWorldScale(this.mountScale);
       rider.scale.set(
         this.riderOriginalScale.x/Math.max(.001,this.mountScale.x),
@@ -52,6 +56,7 @@ export class PetAndMountSystem {
     }else if(rider.parent!==this.hero.model){
       this.hero.model.add(rider);
       rider.position.set(0,0,0);
+      rider.rotation.set(0,0,0);
       rider.scale.copy(this.riderOriginalScale);
     }
   }

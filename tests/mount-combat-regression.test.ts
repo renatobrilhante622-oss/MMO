@@ -69,7 +69,7 @@ describe('rider saddle binding',()=>{
     const saddle=companions.mount.getObjectByName('mountSaddleNode');
     expect(saddle).toBeDefined();
     expect(rig.parent).toBe(saddle);
-    expect(rig.position.y).toBeCloseTo(-.75,6);
+    expect(rig.position.y).toBeCloseTo(-.88,6);
     companions.toggleMount();
     companions.update(.016,[],[]);
     expect(rig.parent).toBe(model);

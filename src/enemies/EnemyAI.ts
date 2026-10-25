@@ -183,12 +183,47 @@ export class EnemyAI {
   private spawnIndex = 0;
   private bossRespawn: Record<string, number> = {};
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
+  private activeRegionId:string|null=null;
+  private dungeonMode=false;
+  setDungeonMode(enabled:boolean):void{this.dungeonMode=enabled;}
+  get regionId():string|null{return this.activeRegionId;}
+  private regionAtPosition(x:number,z:number){
+    return this.activeRegionId?REGIONS.find(region=>region.id===this.activeRegionId)!:regionAt(x,z);
+  }
+  private levelAtPosition(x:number,z:number){
+    const region=this.regionAtPosition(x,z);
+    if(!this.activeRegionId)return regionalLevel(x,z);
+    const distance=Math.min(1,Math.hypot(x,z-18)/63);
+    return Math.round(region.minLevel+(region.maxLevel-region.minLevel)*distance);
+  }
+  /** No cross-map actors survive after a successful region swap. */
+  resetForRegion(regionId:string):void{
+    const region=REGIONS.find(r=>r.id===regionId);
+    if(!region)throw new Error('Unknown enemy region: '+regionId);
+    this.dispose();
+    this.activeRegionId=regionId;
+    this.bossRespawn={};
+    this.spawnTimer=5;
+    this.spawnIndex=0;
+    // Position mobs around authored regional spots, never inside the safe camp.
+    for(let index=0;index<24;index++){
+      const angle=index*2.399963;
+      const radius=34+(index%5)*6;
+      const x=Math.cos(angle)*radius;
+      const z=18+Math.sin(angle)*radius;
+      const height=this.physics.terrainHeight(x,z);
+      if(height<=this.physics.waterLevel+.5)continue;
+      this.spawn(region.kinds[index%region.kinds.length],
+        new Vector3(x,height+1.4,z),
+        Math.round(region.minLevel+(region.maxLevel-region.minLevel)*(index%6)/5));
+    }
+  }
   constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus) {
     const locations: [number, number][] = [[-14, -8], [13, -9], [-24, -18], [22, -25], [9, -34], [-19, -43], [35, -47], [-44, -30], [28, -77], [-32, -82], [58, -52], [-60, -65], [-38, 46], [48, 45]];
     for(const site of WORLD_SITES)for(let i=0;i<3;i++)locations.push([site.x+Math.cos(i*2.094)*12,site.z+Math.sin(i*2.094)*12]);
     locations.forEach(([x, z], i) => {
       const height = physics.terrainHeight(x, z);
-      if (height > physics.waterLevel + .5) this.spawn(regionAt(x,z).kinds[i % regionAt(x,z).kinds.length], new Vector3(x, height + 1.5, z), i<5?1+Math.floor(i/2):regionalLevel(x,z));
+      if (height > physics.waterLevel + .5) this.spawn(this.regionAtPosition(x,z).kinds[i % this.regionAtPosition(x,z).kinds.length], new Vector3(x, height + 1.5, z), i<5?1+Math.floor(i/2):this.levelAtPosition(x,z));
     });
   }
 
@@ -210,22 +245,24 @@ export class EnemyAI {
       enemy.tick(dt, hero, this.elapsed);
       if (!enemy.alive && enemy.deathTime > 1.1) { enemy.dispose(); this.enemies.splice(i, 1); }
     }
-    for (const region of REGIONS) {
+    for (const region of (this.dungeonMode?[]:this.activeRegionId?REGIONS.filter(region=>region.id===this.activeRegionId):REGIONS)) {
+      const bossX=this.activeRegionId?region.boss.x-region.center.x:region.boss.x;
+      const bossZ=this.activeRegionId?18+region.boss.z-region.center.z:region.boss.z;
       this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
-      if (hero.position.distanceTo(new Vector3(region.boss.x,hero.position.y,region.boss.z)) < 55 && this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-region.boss.x,e.home.z-region.boss.z)<5)) {
+      if (hero.position.distanceTo(new Vector3(bossX,hero.position.y,bossZ)) < 55 && this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-bossX,e.home.z-bossZ)<5)) {
         this.bossRespawn[region.id]=300;
-        const x=region.boss.x,z=region.boss.z;
+        const x=bossX,z=bossZ;
         this.spawn('boss', new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);
       }
     }
     this.spawnTimer -= dt;
     const ambientCount = this.enemies.filter(enemy => !enemy.boss && enemy.alive).length;
-    if (this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
+    if (!this.dungeonMode && this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
       this.spawnTimer = 8;
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;
       const y = this.physics.terrainHeight(x, z);
-      if (Math.abs(x) < 135 && Math.abs(z) < 135 && y > this.physics.waterLevel + .5 && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(regionAt(x,z).kinds[this.spawnIndex % regionAt(x,z).kinds.length], new Vector3(x, y + 1.5, z), regionalLevel(x,z));
+      if (Math.abs(x) < 135 && Math.abs(z) < 135 && y > this.physics.waterLevel + .5 && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(this.regionAtPosition(x,z).kinds[this.spawnIndex % this.regionAtPosition(x,z).kinds.length], new Vector3(x, y + 1.5, z), this.levelAtPosition(x,z));
     }
   }
 

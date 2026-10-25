@@ -9,7 +9,7 @@ import { WorldLife } from './WorldLife';
 export interface WorldCollider {
   position: THREE.Vector3;
   size: THREE.Vector3;
-  type: 'solid' | 'climbable' | 'slide';
+  type: 'solid' | 'climbable' | 'slide' | 'gate';
 }
 
 export interface MapMarker { x: number; z: number; label: string; color: string }
@@ -45,7 +45,8 @@ export class OpenWorldGenerator {
   private readonly materials = new Set<THREE.Material>();
   private readonly textures = new Set<THREE.Texture>();
 
-  constructor(private readonly scene: THREE.Scene, private readonly seed = 61857) {
+  constructor(private readonly scene: THREE.Scene, private readonly seed = 61857,
+    readonly regionId = 'aurora') {
     this.randomState = seed >>> 0;
     this.life = new WorldLife((x, z) => this.heightAt(x, z));
     this.grid = new Float32Array((SEGMENTS + 1) * (SEGMENTS + 1));
@@ -56,7 +57,7 @@ export class OpenWorldGenerator {
     }
     this.spawnPoint.y = this.heightAt(this.spawnPoint.x, this.spawnPoint.z) + 1.1;
     this.portalPosition.y = this.heightAt(0, -70);
-    this.root.name = 'Aetherfall open world';
+    this.root.name = 'ETERNA map instance: '+this.regionId;
   }
 
   private random(): number {
@@ -76,6 +77,29 @@ export class OpenWorldGenerator {
   }
 
   private rawHeight(x: number, z: number): number {
+    // Hidden, planar Cannon support under authored indoor GLB floor tiles.
+    if(this.regionId==='dungeon')return 3.4;
+    if(this.regionId!=='aurora'){
+      // Separate terrain instance; every regional scene samples its own
+      // immutable height field through the exact same Cannon triangle split.
+      const params:Record<string,{base:number;ridge:number;frequency:number}>={
+        crypt:{base:3.6,ridge:3.7,frequency:.026},
+        highlands:{base:8.2,ridge:12,frequency:.022},
+        rift:{base:6.1,ridge:8.5,frequency:.037},
+        eclipse:{base:9,ridge:13,frequency:.018}
+      };
+      const p=params[this.regionId]??params.crypt;
+      const seedOffset={crypt:115,highlands:361,rift:597,eclipse:827}[this.regionId]??115;
+      let h=p.base+this.noise(x*p.frequency+seedOffset,z*p.frequency)*p.ridge
+        +(this.noise(x*.081+seedOffset,z*.081)-.5)*2.2;
+      // Fixed safe village and portal landings, with native slope continuity.
+      const camp=Math.hypot(x,z-18);
+      h=lerp(h,p.base+2.2,1-smooth(THREE.MathUtils.clamp((camp-12)/18,0,1)));
+      const gate=Math.hypot(x,z+70);
+      h=lerp(h,p.base+1.5,1-smooth(THREE.MathUtils.clamp((gate-9)/12,0,1)));
+      h+=Math.pow(THREE.MathUtils.clamp((Math.max(Math.abs(x),Math.abs(z))-125)/35,0,1),2)*22;
+      return h;
+    }
     let h = 2.5 + this.noise(x * .016, z * .016) * 12
       + (this.noise(x * .052, z * .052) - .5) * 5
       + (this.noise(x * .12, z * .12) - .5) * 1.5;
@@ -108,22 +132,28 @@ export class OpenWorldGenerator {
     this.scene.add(this.root);
     if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
-    this.createWater();
+    if(this.regionId==='dungeon'){
+      const physicsOnly=this.root.getObjectByName('Triangulated terrain');
+      if(physicsOnly)physicsOnly.visible=false;
+    }
+    if(this.regionId==='aurora')this.createWater();
     // Authored CC0 GLBs replace procedural tree and regional building primitives.
-    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z));
-    for(const site of WORLD_SITES)this.markers.push({x:site.x,z:site.z,label:site.name,color:site.type==='cemetery'?'#b58ccc':'#c8b78e'});
-    this.createPortal();
+    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId);
+    if(this.regionId==='aurora')for(const site of WORLD_SITES)this.markers.push({x:site.x,z:site.z,label:site.name,color:site.type==='cemetery'?'#b58ccc':'#c8b78e'});
+    if(this.regionId!=='dungeon')this.createPortal();
     this.root.add(this.life.root);
     // Interactive KayKit NPCs replace geometric village mannequins.
-    this.life.createAmbient();
+    if(this.regionId!=='dungeon')this.life.createAmbient();
     this.life.createVortex(this.portalPosition);
     this.life.createFire();
-    this.markers.push(
-      { x: 0, z: 18, label: 'Vila Aurora', color: '#edc278' },
-      { x: 47, z: -3, label: 'Lago Espelhado', color: '#72c9de' },
-      { x: 0, z: -70, label: 'Portal da Fenda', color: '#be82ed' },
-      { x: -60, z: -45, label: 'Ermos', color: '#95b774' },
-    );
+    this.markers.push({x:0,z:18,label:({
+      aurora:'Vila de Aster',crypt:'Acampamento da Cripta',
+      highlands:'Refúgio Glacial',rift:'Posto da Forja',
+      eclipse:'Santuário Abissal',dungeon:'Cripta Subterrânea'
+    } as Record<string,string>)[this.regionId]??'Acampamento',color:'#edc278'});
+    if(this.regionId==='aurora'){
+      this.markers.push({x:47,z:-3,label:'Lago Espelhado',color:'#72c9de'});
+    }
   }
 
   private material(parameters: THREE.MeshStandardMaterialParameters): THREE.MeshStandardMaterial {
@@ -149,6 +179,7 @@ export class OpenWorldGenerator {
     material.name = 'Scanned CC0 PBR grass, soil, stone, snow and scorched ground';
     material.onBeforeCompile = shader => {
       shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
+      shader.uniforms.terrainBiome={value:this.regionId==='dungeon'?5:Math.max(0,['aurora','crypt','highlands','rift','eclipse'].indexOf(this.regionId))};
       shader.uniforms.terrainStone={value:this.ground?.cobble.map};shader.uniforms.terrainDirt={value:this.ground?.dirt.map};shader.uniforms.terrainGrass={value:this.ground?.grass.map};shader.uniforms.terrainSnow={value:this.ground?.snow.map};shader.uniforms.terrainScorched={value:this.ground?.scorched.map};shader.uniforms.terrainStoneNormal={value:this.ground?.cobble.normalMap};shader.uniforms.terrainStoneRough={value:this.ground?.cobble.roughnessMap};
       shader.vertexShader = shader.vertexShader.replace('#include <common>', `
         #include <common>

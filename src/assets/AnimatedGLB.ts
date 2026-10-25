@@ -187,8 +187,10 @@ export class AnimatedGLB {
     this.accent.setHex(accent);
     for (const { material, original } of this.materials) {
       if (this.preservedPalette) {
-        // Retain KayKit's authored atlas and distinguish actual character designs.
-        material.color.copy(original).lerp(this.accent, material.map ? 0.035 : 0.12);
+        // Preserve original albedo and atlas 1:1, including during parent changes
+        // to a saddle: tinting lit atlas texels can wash details out on Android.
+        material.color.copy(original);
+        if(material.map)material.map.needsUpdate=material.map.version===0;
       } else {
         material.color.copy(this.baseColor).lerp(this.accent, 0.18);
       }
