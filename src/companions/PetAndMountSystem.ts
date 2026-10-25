@@ -26,7 +26,7 @@ export class PetAndMountSystem {
   readonly mount = this.mountRig.root;
   powerMultiplier=1;
   private petLevel=1;
-  setEvolution(pet:number,mount:number):void{this.petLevel=pet;this.mountRig.root.scale.setScalar(1+(mount-1)*.018);this.petRig.root.scale.setScalar(1+(pet-1)*.025);}
+  setEvolution(pet:number,mount:number):void{this.petLevel=pet;this.mountRig.root.scale.setScalar(1+(mount-1)*.018);this.petRig.root.scale.setScalar(.45*(1+(pet-1)*.025));}
   private time = 0;
   private attackCooldown = 0;
   private lastMountPosition = new Vector3();
@@ -36,6 +36,7 @@ export class PetAndMountSystem {
 
   constructor(private scene: Scene, private hero: HeroController, private physics: PhysicsWorld, private events: EventBus) {
     this.riderOriginalScale.copy(hero.rig.root.scale);
+    this.petRig.root.scale.setScalar(.45);
     this.pet.position.copy(petFollowPosition(hero.position,hero.facing,false));
     this.lastMountPosition.copy(hero.position);
     this.scene.add(this.pet, this.mount);
@@ -43,8 +44,8 @@ export class PetAndMountSystem {
   }
 
   setAppearances(pet: Cosmetic, mount: Cosmetic): void {
-    if(this.appearanceKey===pet.id+mount.id)return;
-    this.appearanceKey=pet.id+mount.id;
+    if(this.appearanceKey===pet.id+'::'+mount.id)return;
+    this.appearanceKey=pet.id+'::'+mount.id;
     this.petRig.appearance(pet);this.mountRig.appearance(mount);
   }
 
@@ -147,6 +148,9 @@ export class PetAndMountSystem {
       }
     }
     this.pet.position.y = Math.max(this.physics.terrainHeight(this.pet.position.x, this.pet.position.z), this.physics.waterLevel - 0.28);
+    // Compact familiars do not overlap the saddle; flying birds hover separately.
+    const flying=['phoenix','frostphoenix','dracolich'].includes(this.appearanceKey.split('::')[0]);
+    if(flying)this.pet.position.y+=.55+Math.sin(this.time*2.3)*.1;
     this.petRig.update(dt, distance > .65 ? speed : 0, this.time, !!target && nearest < 2);
     if (target && nearest < target.radius + 1.15 && this.attackCooldown === 0 && this.hero.alive) {
       this.attackCooldown = 1.1;

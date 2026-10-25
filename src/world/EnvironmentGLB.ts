@@ -100,10 +100,18 @@ export class EnvironmentGLB {
             // Real PBR foliage is never metallic, even on low-end Android GPUs.
             material.metalness=0;
             material.roughness=.85;
-            // Keep original GLB atlas RGB instead of painting trunks green.
-            material.color.setRGB(Math.max(.68,source.color.r),Math.max(.75,source.color.g),Math.max(.58,source.color.b));
-            material.emissive.setRGB(.085,.19,.09);
-            material.emissiveIntensity=.75;
+            // Kenney tree GLBs provide separate leafsGreen and woodBark
+            // material slots. Never wash out authored vertex colors or textures.
+            const label=(source.name+' '+object.name).toLowerCase();
+            const bark=/bark|wood|trunk|branch|stem/.test(label);
+            const foliage=/leaf|foliage|canopy|crown|green/.test(label);
+            if(!source.map&&!object.geometry.hasAttribute('color')){
+              if(bark)material.color.set('#5c3a21');
+              else if(foliage)material.color.set(index%2?'#3b8046':'#2d6a3e');
+            }
+            material.vertexColors=source.vertexColors;
+            material.emissive.copy(source.emissive);
+            material.emissiveIntensity=Math.min(.16,source.emissiveIntensity);
             material.depthWrite=true;
           }else{
             material.metalness=Math.min(.12,material.metalness);
@@ -117,7 +125,7 @@ export class EnvironmentGLB {
         const instanced=new InstancedMesh(object.geometry,Array.isArray(object.material)?visual:visual[0],transforms.length);
         instanced.name='Instanced '+entry.file+'/'+object.name;
         // Tiny forest foliage no longer self-occludes as a single opaque shadow.
-        instanced.castShadow=!entry.file.includes('tree-');
+        instanced.castShadow=true;
         instanced.receiveShadow=false;
         for(let i=0;i<transforms.length;i++){
           instanced.setMatrixAt(i,transforms[i].clone().multiply(object.matrixWorld));

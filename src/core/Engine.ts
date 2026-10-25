@@ -161,7 +161,7 @@ export class Engine {
     this.renderer.domElement.setAttribute('aria-label', 'Mundo 3D de Eterna');
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = 1.15;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.info.autoReset = false;
@@ -1058,7 +1058,10 @@ export class Engine {
       if (!(object instanceof Mesh)) return;
       let parent=object.parent,hero=false;while(parent){if(parent===this.hero.model||parent===this.hero.rig.root){hero=true;break;}parent=parent.parent;}
       const building=object.name==='Batched village architecture'||object.userData.majorBuilding===true;
-      object.castShadow=(hero&&!object.name.includes('alpha wing'))||building;
+      const authoredEnvironment=object.name.startsWith('Instanced ')||object.userData.worldDecoration===true;
+      // Respect casts from imported mounts, NPCs, bosses and portal arches.
+      // Imported trees are InstancedMesh and receive CSM via setupMaterial.
+      object.castShadow=object.castShadow||authoredEnvironment||(hero&&!object.name.includes('alpha wing'))||building;
       if(!object.receiveShadow&&!object.castShadow)return;
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) if (material instanceof MeshStandardMaterial && !this.csmMaterials.has(material)) {

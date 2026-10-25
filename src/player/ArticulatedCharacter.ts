@@ -1,10 +1,11 @@
 import {
-  BufferGeometry, CapsuleGeometry, ConeGeometry, Color, DoubleSide,
+  BufferGeometry, Box3, CapsuleGeometry, ConeGeometry, Color, DoubleSide,
   Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, SphereGeometry, Vector2,
   TorusGeometry, Vector3,
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
 import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CLASS_EQUIPMENT_MODELS, loadWeaponModel } from '../assets/WeaponGLB';
 import {CLASS_IDENTITIES} from './ClassVisualIdentity';
 import {weaponPackForClass} from '../rpg/WeaponPacks';
@@ -164,6 +165,10 @@ export class ArticulatedCharacter {
   private importedShoulders:Mesh[]=[];
   private readonly casterOrbs=new Group();
   private readonly skinGeometry=new Group();
+  private readonly importedSkinParts:Object3D[]=[];
+  private readonly importedSkinMaterials=new Set<MeshStandardMaterial>();
+  private skinVisualVersion=0;
+  private readonly skinLoader=new GLTFLoader();
   private readonly skinAura=new RarityAura(.6);
   private skinKey='';
   private weaponPackId='ironweapon';
@@ -385,6 +390,7 @@ export class ArticulatedCharacter {
     const name=this.importedName(definition);
     if(this.imported?.name===name){this.imported.setAttackWeapon(definition.weapon);this.imported.setClassPalette(CLASS_IDENTITIES[definition.id].tint);this.attachImportedGear();return;}
     this.clearGlbWeapons();
+    this.clearImportedSkin();
     this.imported?.dispose();
     const actor = new AnimatedGLB(name, 1.9, () => {
       if (this.imported !== actor) return;
@@ -419,15 +425,18 @@ export class ArticulatedCharacter {
     // Move the wings with the actual animated chest bone: never attach to
     // feet/world space or to a mount's belly.
     this.root.add(this.wings.root,this.skinAura);
-    this.wings.root.scale.setScalar(.58);
+    // The KayKit spine bone is already fitted to world height. Half-size
+    // wings were the cause of tiny paper-like collection cosmetics.
+    this.wings.root.scale.setScalar(1.16);
     this.wings.root.rotation.set(0,0,0);
     const attached=actor.attachAt('spine2',this.wings.root,new Vector3(0,0,-.19));
     if(!attached){
       this.torso.add(this.wings.root);
       this.wings.root.position.set(0,.14,-.19);
-      this.wings.root.scale.setScalar(.58);
+      this.wings.root.scale.setScalar(1.16);
     }
     this.skinAura.position.y=1.3;
+    this.updateImportedSkin(actor);
     actor.clearWeaponSlots();
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
     actor.setCosmeticPalette(this.skinTone,this.skinTier);
@@ -463,6 +472,65 @@ export class ArticulatedCharacter {
     }
   }
 
+  private clearImportedSkin():void {
+    this.skinVisualVersion++;
+    for(const object of this.importedSkinParts)object.removeFromParent();
+    this.importedSkinParts.length=0;
+    for(const mat of this.importedSkinMaterials)mat.dispose();
+    this.importedSkinMaterials.clear();
+    // Restore the cape to its original simulation anchor when the GLB changes.
+    if(this.cape?.mesh&&this.cape.mesh.parent!==this.torso)this.torso.add(this.cape.mesh);
+  }
+  private updateImportedSkin(actor:AnimatedGLB):void {
+    this.clearImportedSkin();
+    if(typeof document==='undefined'||!actor.ready)return;
+    if(this.skinKey==='traveler')return;
+    const revision=this.skinVisualVersion;
+    const rarity=this.skinTier;
+    const tint=new Color(this.skinTone);
+    // The existing Verlet cloth now follows the authored GLB spine rather than
+    // a hidden procedural torso. Its physics and shadows remain active.
+    this.cape.mesh.material.color.copy(tint).lerp(new Color('#ddd5ba'),.19);
+    this.cape.mesh.scale.set(1+rarity*.09,1+rarity*.11,1);
+    if(!actor.attachAt('spine2',this.cape.mesh,new Vector3(0,-.51,-.27))){
+      actor.root.add(this.cape.mesh);this.cape.mesh.position.set(0,.84,-.34);
+    }
+    const attach=(source:Object3D,bone:'head'|'spine2',offset:Vector3,target:number,tilt:number)=>{
+      if(this.imported!==actor||this.skinVisualVersion!==revision)return;
+      const bounds=new Box3().setFromObject(source);if(bounds.isEmpty())return;
+      const center=bounds.getCenter(new Vector3()),extent=bounds.getSize(new Vector3());
+      const parent=new Group();source.position.sub(center);
+      parent.add(source);
+      parent.scale.setScalar(target/Math.max(.001,Math.max(extent.x,extent.y,extent.z)));
+      parent.rotation.z=tilt;parent.name='Equipped cosmetic '+this.skinKey+' '+bone;
+      source.traverse(child=>{
+        if(!(child instanceof Mesh))return;
+        child.castShadow=true;
+        const mats=Array.isArray(child.material)?child.material:[child.material];
+        const clones=mats.map(m=>{
+          if(!(m instanceof MeshStandardMaterial))return m;
+          const mat=m.clone();mat.color.lerp(tint,Math.min(.75,.28+rarity*.09));
+          mat.metalness=Math.max(.43,mat.metalness);mat.roughness=Math.min(.48,mat.roughness);
+          mat.emissive.copy(tint);mat.emissiveIntensity=.08+rarity*.045;
+          this.importedSkinMaterials.add(mat);return mat;
+        });
+        child.material=Array.isArray(child.material)?clones:clones[0];
+      });
+      if(!actor.attachAt(bone,parent,offset)){
+        actor.root.add(parent);parent.position.copy(offset).add(new Vector3(0,bone==='head'?1.64:1.25,0));
+      }
+      this.importedSkinParts.push(parent);
+    };
+    const url=import.meta.env.BASE_URL+'models/equipment/CC0_knight_helmet.glb';
+    void this.skinLoader.loadAsync(url).then(gltf=>{
+      attach(gltf.scene.clone(true),'head',new Vector3(0,.13,.015),.46+rarity*.028,0);
+    }).catch(error=>console.warn('No authored helmet:',error));
+    for(const side of [-1,1]){
+      void loadWeaponModel('dungeon_shield_round').then(piece=>{
+        attach(piece,'spine2',new Vector3(side*.44,.14,-.02),.39+rarity*.018,side*.55);
+      }).catch(error=>console.warn('No authored pauldron:',error));
+    }
+  }
   private styleSilhouette(definition:ClassDefinition):void {
     const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.importedHelmet??this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
@@ -489,6 +557,7 @@ export class ArticulatedCharacter {
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
     this.replaceImportedModel(this.definition);
+    if(this.imported?.ready)this.updateImportedSkin(this.imported);
     // Runtime cosmetic VFX stay shader/particle-based; no sculpted mesh horns or spheres.
     if(typeof document!=='undefined'||id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
@@ -757,6 +826,7 @@ export class ArticulatedCharacter {
   }
 
   dispose(): void {
+    this.clearImportedSkin();
     this.clearGlbWeapons();
     this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
     this.weapons.dispose();

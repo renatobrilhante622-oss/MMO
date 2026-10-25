@@ -71,7 +71,7 @@ export class LootToastFeed {
     content.append(title,detail);
     entry.append(content);
     this.list.prepend(entry);
-    while(this.list.childElementCount>4)this.list.lastElementChild?.remove();
+    while(this.list.childElementCount>2)this.list.lastElementChild?.remove();
     this.root.hidden=false;
     this.root.classList.add('has-drops');
     const timer=setTimeout(()=>{

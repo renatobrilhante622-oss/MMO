@@ -1,0 +1,68 @@
+/* PR13: World markers must never intercept or visually obscure controls.
+   All gameplay overlays are explicit stacking layers, even on 16:9 phones. */
+#app{isolation:isolate}
+.eterna-npc-label,.physical-portal-plaque{
+  z-index:5!important;pointer-events:none!important;
+}
+.eterna-hud{z-index:30;isolation:isolate}
+.eterna-hud .hud-top,
+.eterna-hud .hero-card,
+.eterna-hud .map-card,
+.eterna-hud .resource-bar,
+.eterna-hud .menu-dock,
+.eterna-hud .combat-controls,
+.eterna-hud .move-zone,
+.eterna-hud .movement-actions,
+.eterna-hud .journey-widgets,
+.eterna-quest-tracker{
+  z-index:35;position:relative;
+}
+/* Explicit positioning for absolute/fixed controls is retained. */
+.eterna-hud .hud-top,.eterna-hud .resource-bar,.eterna-hud .menu-dock,
+.eterna-hud .combat-controls,.eterna-hud .move-zone,
+.eterna-hud .movement-actions{position:absolute}
+.eterna-quest-tracker{position:fixed;z-index:45}
+.physical-portal-enter,.eterna-npc-talk{
+  z-index:38!important;pointer-events:auto;
+}
+/* Compact reward history: two records, no text collisions or joystick overlap. */
+.journey-widgets.drop-toast-widget{
+  position:fixed!important;
+  top:auto!important;
+  bottom:max(220px,calc(env(safe-area-inset-bottom) + 204px))!important;
+  left:max(10px,env(safe-area-inset-left))!important;
+  right:auto!important;
+  width:clamp(160px,22vw,220px)!important;
+  max-width:min(44vw,220px);
+  max-height:111px!important;
+  overflow:hidden;
+  z-index:46!important;
+  pointer-events:none!important;
+}
+.drop-toast-widget .drop-toast-toggle{height:22px;min-height:22px;padding:1px 8px;pointer-events:auto}
+.drop-toast-widget .drop-toast-list{max-height:88px!important;overflow:hidden}
+.drop-toast-widget .drop-toast-entry{
+  display:grid!important;grid-template-columns:28px minmax(0,1fr)!important;
+  align-items:center;gap:5px;padding:4px 6px!important;
+  height:42px;min-height:0!important;overflow:hidden;
+}
+.drop-toast-widget .drop-toast-entry>div:last-child{min-width:0;max-width:100%;overflow:hidden;display:flex;flex-direction:column;gap:0}
+.drop-toast-widget .drop-toast-entry b,
+.drop-toast-widget .drop-toast-entry small{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;line-height:1.25;font-size:10px;
+}
+.drop-toast-widget .drop-toast-entry small{font-size:9px;color:#c7d7dc}
+.drop-toast-widget .item-illustration{width:27px!important;height:27px!important;min-width:27px;overflow:hidden}
+@media(max-height:540px) and (min-width:600px){
+  .journey-widgets.drop-toast-widget{
+    top:max(6px,env(safe-area-inset-top))!important;
+    bottom:auto!important;
+    left:50%!important;
+    transform:translateX(-50%);
+    width:min(230px,28vw)!important;max-width:28vw!important;
+  }
+}
+@media(max-width:600px) and (min-height:541px){
+  .journey-widgets.drop-toast-widget{bottom:max(220px,calc(env(safe-area-inset-bottom) + 205px))!important;width:165px!important;max-width:48vw!important}
+}

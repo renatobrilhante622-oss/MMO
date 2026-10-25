@@ -293,7 +293,7 @@ export class AnimatedGLB {
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
   setCosmeticPalette(color:number,rarity:number):void{
     this.cosmeticTint.setHex(color);
-    this.cosmeticStrength=Math.min(.28,Math.max(0,rarity)*.052);
+    this.cosmeticStrength=Math.min(.76,Math.max(0,rarity)*.16);
     this.tint(this.baseColor.getHex(),this.accent.getHex());
   }
 
