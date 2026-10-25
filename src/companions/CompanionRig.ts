@@ -1,4 +1,4 @@
-import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending, Box3, Raycaster } from 'three';
+import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending, Box3, Raycaster, Color } from 'three';
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
