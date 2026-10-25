@@ -3,6 +3,7 @@ import {RigidSkinBatch} from '../assets/RigidSkinBatch';
 import {AnimatedGLB} from '../assets/AnimatedGLB';
 import {WingsSystem} from './WingsSystem';
 import { RarityAura } from './RarityAura';
+import {saddleHeightFromBounds} from './MountPlacement';
 import type { Cosmetic } from '../progression/AdventureProgress';
 import { RARITIES } from '../rpg/InventoryAndLoot';
 interface Leg { hip:Group; knee:Group; ankle:Group; rear:boolean; side:number; }
@@ -34,6 +35,10 @@ export class CompanionRig {
   private readonly wings=new Group();
   private readonly armor=new Group();
   private readonly particles:RarityAura;
+  private readonly hellfire=new RarityAura(.32);
+  private saddleBaseHeight=1.6;
+  private staticVisual=false;
+  private isHellhound=false;
   constructor(readonly horse:boolean){
     this.root.name=horse?'Articulated horse mount':'Articulated wolf companion';
     this.coat=this.material(horse?0x8a6041:0x8b969e,.88);
@@ -111,6 +116,9 @@ export class CompanionRig {
     }
     this.wings.visible=false;this.armor.visible=false;
     this.particles=new RarityAura(horse?.8:.5);this.root.add(this.particles);
+    this.hellfire.visible=false;
+    this.hellfire.position.set(0,1.38,-.25);
+    this.root.add(this.hellfire);
     this.aura=new Mesh(new RingGeometry(.7,.75,48),new MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.3,transparent:true,opacity:.35,depthWrite:false,blending:AdditiveBlending,side:2}));
     this.aura.rotation.x=-Math.PI/2;this.aura.position.y=.06;this.root.add(this.aura);this.aura.visible=false;
   }
@@ -123,6 +131,10 @@ export class CompanionRig {
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
     const bird=c.id==='phoenix',dragon=['wyvern','dracolich'].includes(c.id),giant=['fenrir','nighthorse'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
+    this.isHellhound=hell;
+    this.hellfire.visible=hell;
+    if(hell)this.hellfire.configure(5,0xff5b17);
+    this.saddleBaseHeight=this.horse?1.6:0;
     // Every in-game companion has an authored GLB silhouette. Variant effects
     // remain particles/shaders; no orange-cylinder wyvern appears during loading.
     const importedType=bird?'Parrot'
@@ -133,9 +145,11 @@ export class CompanionRig {
     if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
       if(importedType){this.imported=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
         this.spine.visible=false;
+        this.updateSaddleFromGLB();
         if(this.batch)this.batch.mesh.visible=false;
       },false);this.root.add(this.imported.root);}}
     this.imported?.tint(c.color,c.color);
+    if(this.horse&&this.imported?.ready)this.updateSaddleFromGLB();
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
@@ -163,8 +177,19 @@ export class CompanionRig {
     this.wings.visible=typeof document==='undefined';
     if(typeof document==='undefined'&&!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
+  /** Position the socket from this GLB's actual loaded bounds, not old horse anatomy. */
+  updateSaddleFromGLB():void{
+    if(!this.horse||!this.imported?.visualRoot)return;
+    this.saddleBaseHeight=saddleHeightFromBounds(this.root,this.imported.visualRoot,.78);
+    this.saddle.position.set(0,this.saddleBaseHeight,0);
+    this.saddle.userData.boundToActualGLB=true;
+  }
+  /** Mounted hero's real animated hip height, or safe test fallback. */
+  riderHipHeight():number{return .88;}
   update(dt:number,speed:number,time:number,attack=false):void {
-    this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);
+    this.imported?.update(dt,Math.min(1,speed/7));
+    this.particles.update(time);this.flight.update(dt,time,speed*.1);
+    if(this.isHellhound)this.hellfire.update(time);
     this.wings.children.forEach(wing=>{wing.rotation.z=Math.sin(time*3.5)*.2*(wing.userData.side as number);});
     const step=Math.min(.05,Math.max(0,dt));this.stride=MathUtils.damp(this.stride,Math.min(1,speed/(this.horse?10:6)),9,step);
     this.phase+=step*(this.horse?5+speed*.7:6+speed*.9);
@@ -177,7 +202,10 @@ export class CompanionRig {
       leg.ankle.rotation.x=-leg.hip.rotation.x*.25-leg.knee.rotation.x*.4;
     }
     this.spine.position.y=(this.horse?1.23:.68)+Math.abs(Math.sin(phase))*this.stride*(gallop?.09:.035);
-    if(this.horse)this.saddle.position.y=1.6+(this.spine.position.y-1.23);
+    if(this.horse){
+      // Follow gait bounce without recentering the mount or clipping the rump.
+      this.saddle.position.y=this.saddleBaseHeight+Math.abs(Math.sin(phase))*.025*this.stride;
+    }
     this.spine.rotation.x=Math.sin(phase)*(gallop?.055:.018)*this.stride;
     this.neck.rotation.x=(this.horse?.3:.5)+Math.sin(phase+.3)*this.stride*.06;
     this.head.rotation.x=(this.horse?-.22:-.3)+Math.sin(time*1.1)*.025-(attack?.25:0);
@@ -186,5 +214,5 @@ export class CompanionRig {
     this.batch?.sync();
     this.aura.rotation.z=time*(.3+this.rarity*.1);this.aura.scale.setScalar((this.horse?1.3:.7)*(1+Math.sin(time*2)*.045));
   }
-  dispose():void {this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
+  dispose():void {this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();this.hellfire.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
 }
