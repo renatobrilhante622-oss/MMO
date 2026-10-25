@@ -24,8 +24,7 @@ export function safePetOffset(forward:Vector3,lateral=1.8,behind=1.2):Vector3{
 export function separatePetFromMount(pet:Vector3,mount:Vector3,minDistance=2.05):Vector3{
  const away=pet.clone().sub(mount).setY(0);
  if(away.lengthSq()<1e-8)away.set(1,0,0);
- if(away.lengthSq()<minDistance*minDistance)pet.add(
-   away.normalize().multiplyScalar(minDistance-Math.sqrt(Math.max(0,away.lengthSq())))
- );
+ const distance=away.length();
+ if(distance<minDistance)pet.add(away.normalize().multiplyScalar(minDistance-distance));
  return pet;
 }
