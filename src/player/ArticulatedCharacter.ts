@@ -452,6 +452,8 @@ export class ArticulatedCharacter {
     if(rarity>=3)for(let i=0;i<rarity;i++){const crystal=new Mesh(new SphereGeometry(.045,8,6),mat);crystal.frustumCulled=false;crystal.scale.y=2;crystal.position.set(Math.cos(i*6.28/rarity)*.42,.12,Math.sin(i*6.28/rarity)*.4);this.skinGeometry.add(crystal);}
     this.cape.mesh.scale.set(1+rarity*.08,1+rarity*.04,1);
   }
+  /** Exact rigged hip height in seated GLB pose, not an invented saddle offset. */
+  seatedHipHeight():number{return this.imported?.seatedHipHeight()??.88;}
   weaponAppearance(color:number,refine:number,rarity:string):void {this.weapons.appearance(color,refine,rarity);}
 
   setClass(definition: ClassDefinition): void {
