@@ -703,6 +703,7 @@ export class Engine {
     const key=skin.id+p.equipped.weapon+(weapon?.rarity??'common')+(weapon?.upgrade??0)+this.classId;
     if(key!==this.appearanceKey){this.appearanceKey=key;hero.setAppearance(skin.color,weapon?.upgrade??0,COSMETICS.find(c=>c.id===p.equipped.weapon)!.color,weapon?.rarity??'common');}
     hero.rig.weapons.skin(p.equipped.weapon);
+    hero.rig.weaponPackAppearance(p.equipped.weapon);
     if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;
     if(this.channel){
