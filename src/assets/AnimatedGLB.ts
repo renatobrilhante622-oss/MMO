@@ -5,6 +5,7 @@ import {
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { createFootPivot, disableCharacterCulling } from '../player/PlayerRenderer';
+import type { ClassDefinition } from '../core/GameTypes';
 
 export type ModelName =
   | 'Soldier' | 'Horse' | 'Parrot'
@@ -47,6 +48,7 @@ export class AnimatedGLB {
   private baseColor = new Color(0x617080);
   private accent = new Color(0x9c7dcc);
   private readonly preservedPalette: boolean;
+  private attackWeapon:ClassDefinition['weapon']='sword';
   private readonly hitColor = new Color(0xff6b6b);
 
   constructor(
@@ -118,13 +120,17 @@ export class AnimatedGLB {
       slide: ['dodge_forward', 'idle'],
       jump: ['jump_idle', 'jump_full_short', 'idle'],
       dead: ['death_a_pose', 'death_a', 'idle'],
-      attack: this.name.includes('Mage')
-        ? ['spellcast_shoot', 'spellcast_long', '1h_melee_attack_chop']
-        : this.name.includes('Rogue')
-          ? ['dualwield_melee_attack_slice', '1h_ranged_shoot', '1h_melee_attack_slice_horizontal']
-          : this.name.includes('Barbarian')
-            ? ['2h_melee_attack_chop', '2h_melee_attack_slice', '1h_melee_attack_chop']
-            : ['1h_melee_attack_slice_horizontal', '1h_melee_attack_chop', 'unarmed_melee_attack_punch_a'],
+      attack: ({
+        axe:['2h_melee_attack_chop','1h_melee_attack_chop'],
+        sword:['1h_melee_attack_slice_horizontal','1h_melee_attack_chop'],
+        daggers:['dualwield_melee_attack_slice','dualwield_melee_attack_stab'],
+        bow:['2h_ranged_shoot','1h_ranged_shoot','2h_ranged_shooting'],
+        staff:['spellcast_shoot','spellcast_long'],
+        scythe:['2h_melee_attack_slice','spellcast_shoot'],
+        fists:['unarmed_melee_attack_punch_a','unarmed_melee_attack_punch_b'],
+        lance:['2h_melee_attack_stab','1h_melee_attack_stab'],
+        orb:['spellcast_shoot','spellcast_raise'],
+      } as Record<ClassDefinition['weapon'],string[]>)[this.attackWeapon],
     };
     for (const candidate of candidates[state] ?? [state]) {
       const clip=this.clips.get(candidate);
@@ -209,6 +215,8 @@ export class AnimatedGLB {
     this.active = action;
     this.activeKey = state;
   }
+
+  setAttackWeapon(weapon:ClassDefinition['weapon']):void {this.attackWeapon=weapon;}
 
   attack(): void {
     if (!this.ready || this.disposed) return;
