@@ -129,7 +129,7 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
    const engine=readFileSync('src/core/Engine.ts','utf8');
    const preview=readFileSync('src/ui/CharacterPreview.ts','utf8');
    const hero=readFileSync('src/player/ArticulatedCharacter.ts','utf8');
-   expect(engine).toContain('hero.rig.weaponPackAppearance(p.equipped.weapon)');
+   expect(engine).toContain('hero.rig.weaponPackAppearance(packId)');
    expect(preview).toContain('this.rig.weaponPackAppearance(cosmetic.id)');
    expect(hero).toContain('setCosmeticPalette(this.skinTone,this.skinTier)');
    expect(hero).toContain('this.imported?.setCosmeticPalette?.(color,this.skinTier)');
