@@ -49,6 +49,7 @@ import { regionArrival, travelPermission } from '../world/RegionTravel';
 import { RegionTravelUI } from '../ui/RegionTravelUI';
 import { PortalChannelVFX } from '../world/PortalChannelVFX';
 import {MapInstanceManager} from '../world/MapInstanceManager';
+import {WorldPortals} from '../world/WorldPortals';
 import {QuestSystem,type QuestDefinition} from '../rpg/QuestSystem';
 import {regionalMaterialForKill} from '../rpg/RegionalLoot';
 import {NPCSystem} from '../world/NPCSystem';
@@ -83,6 +84,7 @@ export class Engine {
   readonly portalVfx=new PortalChannelVFX();
   readonly quests:QuestSystem;
   npcs:NPCSystem;
+  portals:WorldPortals;
   readonly questTracker:QuestTrackerHUD;
   private deferredQuestSave:unknown;
   private questAutoMove:MapPoint|null=null;
@@ -270,6 +272,12 @@ export class Engine {
       inDungeon:this.dungeon.active,
       channeling:!!this.channel
     }),id=>this.startRegionTravel(id),()=>this.progress.language);
+    this.portals=new WorldPortals(this.scene,this.container,this.mapInstances.regionId,
+      (x,z)=>this.terrain.heightAt(x,z),
+      ()=>({level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+        adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+        inDungeon:this.dungeon.active,channeling:!!this.channel}),
+      id=>this.startRegionTravel(id),()=>this.progress.language);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
@@ -404,6 +412,7 @@ export class Engine {
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
     this.npcs.update(dt,this.camera,this.hero.position,active);
+    this.portals.update(dt,this.camera,this.hero.position,active);
     this.quests.refreshDaily();
     this.quests.updateMilestones(
       this.inventory.level,
@@ -476,7 +485,7 @@ export class Engine {
       (Math.sin(this.elapsed * 83 + 0.8) + Math.sin(this.elapsed * 137) * 0.3) * trauma * 0.35,
       0,
     );
-    const targetFov = this.hero.machine.state === 'slide' ? 66 : active && this.hero.machine.state === 'run' ? 61 : 58;
+    const targetFov = this.channel ? 48 : this.hero.machine.state === 'slide' ? 66 : active && this.hero.machine.state === 'run' ? 61 : 58;
     const fov = this.camera.fov + (targetFov - this.camera.fov) * (1 - Math.exp(-dt * 5));
     if (Math.abs(fov - this.camera.fov) > 0.001) {
       this.camera.fov = fov;
@@ -701,6 +710,7 @@ export class Engine {
   private activateMap(id:string):void{
     if(id===this.mapInstances.regionId)return;
     this.npcs.dispose();
+    this.portals.dispose();
     this.enemies.dispose();
     this.drops.splice(0);
     for(const object of this.dropMeshes.values())this.scene.remove(object);
@@ -717,6 +727,13 @@ export class Engine {
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
         onQuestClaimed:questId=>this.claimQuest(questId),
       },()=>this.progress.language,id);
+    this.portals=new WorldPortals(this.scene,this.container,id,
+      (x,z)=>this.terrain.heightAt(x,z),
+      ()=>({level:this.inventory.level,unlocked:this.progress.unlockedRegions,
+        adminOverride:this.hero.godMode,inCombat:this.recentCombat>0,
+        inDungeon:this.dungeon.active,channeling:!!this.channel}),
+      destinationId=>this.startRegionTravel(destinationId),
+      ()=>this.progress.language);
     this.hero.mounted=false;
     this.companions.mount.visible=false;
     const region=REGIONS.find(item=>item.id===id)!;
@@ -738,6 +755,7 @@ export class Engine {
   }
 
   private interact(): void {
+    if(this.portals.interact())return;
     if(this.npcs.interact(this.hero.position))return;
     const delta = this.hero.position.clone().sub(this.terrain.portalPosition); delta.y = 0;
     if (delta.length() < 12) {
@@ -984,7 +1002,7 @@ export class Engine {
     this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.lootFeed.dispose();
     this.hud.dispose();
-    this.questTracker.dispose();this.npcs.dispose();
+    this.questTracker.dispose();this.npcs.dispose();this.portals.dispose();
     this.regionTravel.dispose();this.portalVfx.dispose();
     this.sound.dispose();
     this.companions.dispose?.();
