@@ -7,7 +7,7 @@ export interface FarmContext {
   vip: boolean; enabled: boolean; alive: boolean; inDungeon: boolean; level: number;
   x: number; z: number; hp: number; maxHp: number; mana: number; maxMana: number;
   healthThreshold: number; manaThreshold: number; input: HeroInput;
-  /** World units. Limit the farming zone relative to its activation point. */
+  /** World units. The safe acquisition leash remains within 45 metres of activation. */
   radius?: number;
   attackRange?: number;
 }
@@ -21,7 +21,7 @@ export interface FarmStep extends FarmDecision {
 }
 const distanceSq = (a: FarmPosition, b: FarmPosition): number => (a.x - b.x) ** 2 + (a.z - b.z) ** 2;
 const finitePosition = (position: FarmPosition): boolean => Number.isFinite(position.x) && Number.isFinite(position.z);
-const scanRadius = (context: FarmContext): number => Math.max(4, Math.min(75, context.radius ?? 65));
+const scanRadius = (context: FarmContext): number => Math.max(4, Math.min(45, context.radius ?? 45));
 function eligible(context: FarmContext, target: FarmTarget, origin: FarmPosition, radius: number): boolean {
   return target.alive && !target.boss && Number.isFinite(target.level) && finitePosition(target.position)
     && target.level <= context.level + 8 && target.level >= Math.max(1, context.level - 30)
