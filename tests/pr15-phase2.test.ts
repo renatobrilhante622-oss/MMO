@@ -109,6 +109,14 @@ describe('PR15 — Phase 2 isolated local systems',()=>{
   expect(gather).toContain('Math.min(2,this.working.progress+Math.max(0,dt))');
   expect(gather).toContain('GATHER_RECIPES');
  });
+ it('adds the same interactive 3D hero viewer to legacy Profile',()=>{
+  const profile=readFileSync('src/ui/PlayerJournal.ts','utf8');
+  expect(profile).toContain("import {CharacterPreview} from './CharacterPreview'");
+  expect(profile).toContain('data-profile-preview');
+  expect(profile).toContain('this.preview.mount(host,this.currentClass()');
+  expect(profile).toContain('this.preview?.hide()');
+  expect(readFileSync('src/ui/pr15-systems.css','utf8')).toContain('.pr15-profile-preview');
+ });
  it('wires menus, save slots, runtime rune effects and touch camera zoom',()=>{
   const code=readFileSync('src/core/Engine.ts','utf8');
   for(const text of ['this.phase2UI=new Phase2UI','this.phase2Arena.tick(dt)','this.phase2Combat.onAttack','this.phase2Combat.onSkill','this.phase2Combat.onDash','this.phase2Gathering.update','this.phase2Weather.update','phase2:{arena:','this.phase2Arena.restore','this.phase2Title.set'])expect(code).toContain(text);

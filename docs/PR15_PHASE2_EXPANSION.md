@@ -21,7 +21,7 @@
 - A IA opera em arena offline com uma simulação real de vida, distância, skills e cooldowns; **não reproduz um segundo cliente humano completo** nem utiliza o sistema de física do mundo aberto.
 - A economia simulado/local pode ser modificada pelo proprietário do aparelho; não pode ser usada em trocas online verificadas.
 - Recompensas de tempo são progressão opcional sem anúncios e sem compras reais; o usuário pode parar a qualquer momento.
-- A prévia por pinça e roda do mouse foi implementada no renderizador `CharacterPreview` usado nas telas Coleção/Inventário; não foi confirmado que todas as telas legadas de Perfil/Armas usem o mesmo componente.
+- A prévia por pinça e roda do mouse foi integrada ao renderizador `CharacterPreview` em Coleção, Inventário **e Perfil (PlayerJournal)**, com rotação por arrastar. Outras telas legadas de inspeção de arma podem usar componentes próprios.
 - Os objetivos artísticos e de calibração 3D do PR #13 continuam separados e não devem ser chamados de concluídos automaticamente.
 
 ## Execução
@@ -33,3 +33,5 @@ CI: `npm test` e `npm run build` na branch. Somente após merge do PR #15 em `ma
 - Corrigida persistência inter-regional: recursos e buffs, materiais fabricados, relógio de coleta e cooldowns de cada mapa são transportados ao ativar a nova região e salvos em `phase2.gathering`.
 - Vegetação/minerais/baús esgotados têm matrizes de instância ocultadas até o respawn, evitando visual de objeto disponível não coletável.
 - Testes de regressão adicionais verificam receitas e integração com `activateMap`.
+
+- O painel de Perfil agora monta e desliga corretamente `CharacterPreview` com classe atual e skin equipada; testes de regressão cobrem o gesto de câmera, host do perfil e descarte do renderizador ao fechar.
