@@ -1,7 +1,8 @@
 import {describe,expect,it} from 'vitest';
 import {Mesh,BoxGeometry,MeshStandardMaterial,Group,Bone} from 'three';
 import {readFileSync} from 'node:fs';
-import {CLASS_IDS} from '../src/combat/ClassSystem';
+import {CLASS_IDS,CLASS_DEFINITIONS} from '../src/combat/ClassSystem';
+import {ArticulatedCharacter} from '../src/player/ArticulatedCharacter';
 import {CLASS_EQUIPMENT_MODELS} from '../src/assets/WeaponGLB';
 import {CLASS_IDENTITIES,clearWeaponSlots,isEmbeddedWeaponName} from '../src/player/ClassVisualIdentity';
 
@@ -42,6 +43,17 @@ describe('PR10 cinematic, HUD isolation and nine exclusive classes',()=>{
    if(id==='ranger')continue;
    expect(gear.some(g=>g.model==='longbow'||g.model==='quiver'),id).toBe(false);
   }
+ });
+ it('never turns Assassin into Hooded Ranger when a cosmetic skin changes',()=>{
+  const assassin=new ArticulatedCharacter(CLASS_DEFINITIONS.assassin);
+  assassin.skinAppearance('forest',0x408754,2);
+  expect(assassin.root.children.some(c=>c.name==='GLB KayKit_Rogue')).toBe(true);
+  expect(assassin.root.children.some(c=>c.name==='GLB KayKit_Rogue_Hooded')).toBe(false);
+  assassin.dispose();
+  const ranger=new ArticulatedCharacter(CLASS_DEFINITIONS.ranger);
+  ranger.skinAppearance('void',0x551787,4);
+  expect(ranger.root.children.some(c=>c.name==='GLB KayKit_Rogue_Hooded')).toBe(true);
+  ranger.dispose();
  });
  it('ships a real independent CC0 bow mesh and required atlas',()=>{
   const path='public/models/equipment/';
