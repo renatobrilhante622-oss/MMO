@@ -4,6 +4,7 @@ import { TERRAIN_GLSL, WATER_VERTEX_GLSL, WATER_FRAGMENT_GLSL, PORTAL_VERTEX_GLS
 import { createGroundTextures, type PBRTextureSet } from './ProceduralTextures';
 import {WORLD_SITES} from './WorldSites';
 import {EnvironmentGLB} from './EnvironmentGLB';
+import {GroundDetail} from './GroundDetail';
 import { WorldLife } from './WorldLife';
 
 export interface WorldCollider {
@@ -33,6 +34,7 @@ export class OpenWorldGenerator {
   private readonly grid: Float32Array;
   private readonly life: WorldLife;
   private environment?: EnvironmentGLB;
+  private details?:GroundDetail;
   private generated = false;
   private elapsed = 0;
   private ground?:{grass:PBRTextureSet;dirt:PBRTextureSet;cobble:PBRTextureSet;snow:PBRTextureSet;scorched:PBRTextureSet};
@@ -132,6 +134,10 @@ export class OpenWorldGenerator {
     this.scene.add(this.root);
     if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
+    if(this.regionId!=='dungeon'){
+      this.details=new GroundDetail((x,z)=>this.heightAt(x,z),this.regionId,this.seed);
+      this.root.add(this.details.root);
+    }
     if(this.regionId==='dungeon'){
       const physicsOnly=this.root.getObjectByName('Triangulated terrain');
       if(physicsOnly)physicsOnly.visible=false;
@@ -744,6 +750,7 @@ export class OpenWorldGenerator {
 
   dispose(): void {
     this.environment?.dispose();
+    this.details?.dispose();
     this.life.dispose();
     if(this.ground)Object.values(this.ground).forEach(set=>set.dispose());
     this.root.traverse(object => {

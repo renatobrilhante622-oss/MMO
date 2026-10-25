@@ -1,0 +1,70 @@
+{
+  "license": "CC0-1.0",
+  "source": "Papyszoo/CC0-Public-Domain-Models",
+  "statement": "Each file preserves the original Quaternius GLB bytes; these are distinct model files for creatures/pets, not 3D placeholder primitives.",
+  "assets": [
+    {
+      "id": "Creature_stag",
+      "file": "models/creatures/Creature_stag.glb",
+      "sha": "689c05ecef3d15b024b6ed677e332703c4618e29",
+      "path": "packs/quaternius-cutemonsters/models/deer/deer.glb",
+      "note": "CC0 cute deer silhouette used for stag mount",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-cutemonsters/models/deer/deer.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_warhorse",
+      "file": "models/creatures/Creature_warhorse.glb",
+      "sha": "5f9413d40907dc1a7e8aafe68922a0ec0a314b6d",
+      "path": "packs/quaternius-farmanimal/models/horse/horse.glb",
+      "note": "Farm horse silhouette; premium plated harness assembled from real Kenney GLBs",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-farmanimal/models/horse/horse.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_pet_fox",
+      "file": "models/creatures/Creature_pet_fox.glb",
+      "sha": "5a5defcca459e98204579b2b265b37360b01ce80",
+      "path": "packs/quaternius-ultimate-monsters/models/cat/cat.glb",
+      "note": "Forest familiar uses a CC0 cat silhouette, not a true fox; further art revision recommended",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimate-monsters/models/cat/cat.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_pet_hellhound",
+      "file": "models/creatures/Creature_pet_hellhound.glb",
+      "sha": "88db71d74e2dd2839f9095b5d3042f763e4444ef",
+      "path": "packs/quaternius-ultimate-monsters/models/dog/dog.glb",
+      "note": "Canine companion distinct from Fenrir mount",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimate-monsters/models/dog/dog.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_pet_fairy",
+      "file": "models/creatures/Creature_pet_fairy.glb",
+      "sha": "2ad5ba0e200277fbc204a8c5435b875526590d2e",
+      "path": "packs/quaternius-ultimate-monsters/models/ghost/ghost.glb",
+      "note": "Spirit pet silhouette distinct from any mount",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimate-monsters/models/ghost/ghost.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_pet_babygolem",
+      "file": "models/creatures/Creature_pet_babygolem.glb",
+      "sha": "5c86c45505603051c4b31e50e0c2cfaa6ed5bf2b",
+      "path": "packs/quaternius-ultimate-monsters/models/goleling/goleling.glb",
+      "note": "Mini golem companion",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimate-monsters/models/goleling/goleling.glb",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "Creature_pet_dracolich",
+      "file": "models/creatures/Creature_pet_dracolich.glb",
+      "sha": "b9be2a20127388fde6d0783fca27976785417d06",
+      "path": "packs/quaternius-cutemonsters/models/yellow_dragon/yellow_dragon.glb",
+      "note": "Compact dragon source model, not a fully skeletal/ossified dracolich",
+      "source": "https://github.com/Papyszoo/CC0-Public-Domain-Models/blob/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-cutemonsters/models/yellow_dragon/yellow_dragon.glb",
+      "license": "CC0-1.0"
+    }
+  ]
+}

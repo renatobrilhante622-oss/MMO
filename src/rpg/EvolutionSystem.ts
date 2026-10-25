@@ -1,9 +1,9 @@
 import type {InventoryAndLoot} from './InventoryAndLoot';
-export const WING_STYLES=['necrotic','celestial','magma','glacial'] as const;
+export const WING_STYLES=['necrotic','celestial','magma','glacial','solar','astral'] as const;
 export type WingStyle=typeof WING_STYLES[number];
 export class EvolutionSystem {
   wings:WingStyle|null=null;
-  wingLevels:Record<WingStyle,number>={necrotic:1,celestial:1,magma:1,glacial:1};
+  wingLevels:Record<WingStyle,number>={necrotic:1,celestial:1,magma:1,glacial:1,solar:1,astral:1};
   levels:Record<string,number>={};
   wingOwned:WingStyle[]=['necrotic'];
   level(id:string):number{return this.levels[id]??1;}

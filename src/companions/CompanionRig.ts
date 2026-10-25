@@ -1,13 +1,33 @@
-import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending } from 'three';
+import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending, Box3, Raycaster, Color } from 'three';
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
-import {AnimatedGLB} from '../assets/AnimatedGLB';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
 import {WingsSystem} from './WingsSystem';
 import { RarityAura } from './RarityAura';
 import type { Cosmetic } from '../progression/AdventureProgress';
 import { RARITIES } from '../rpg/InventoryAndLoot';
+/** Strict equipment namespace: pet cosmetics never share a GLB with mount cosmetics. */
+export function companionAssetFor(id:string,riding:boolean):ModelName {
+  if(riding){
+    if(['stag','spiritstag'].includes(id))return 'Creature_stag';
+    if(['wyvern','ashdrake'].includes(id))return 'Creature_wyvern';
+    if(id==='eternalhorse')return 'Creature_dragon';
+    if(['nighthorse','fenrir','obsidianwolf'].includes(id))return 'Creature_wolf';
+    if(['sunhorse','magmahorse'].includes(id))return 'Creature_warhorse';
+    if(id==='nightmare')return 'Horse';
+    return 'Creature_horse';
+  }
+  if(['phoenix','frostphoenix'].includes(id))return 'Parrot';
+  if(id==='dracolich')return 'Creature_pet_dracolich';
+  if(['fox','emberfox'].includes(id))return 'Creature_pet_fox';
+  if(['spiritwolf','moonwolf'].includes(id))return 'Creature_pet_fairy';
+  if(id==='ashwolf')return 'Creature_pet_babygolem';
+  return 'Creature_pet_hellhound';
+}
 interface Leg { hip:Group; knee:Group; ankle:Group; rear:boolean; side:number; }
 /** Anatomical horse/wolf rig. Lower joints absorb each planted stance instead of rotating rigid poles. */
 export class CompanionRig {
+  private static readonly decorLoader=new GLTFLoader();
   readonly root=new Group();
   /** Stable socket for an independently animated rider. Coordinates follow the horse's scaled root. */
   readonly saddle=new Group();
@@ -23,6 +43,10 @@ export class CompanionRig {
   private readonly ornaments=new Group();
   private readonly morph=new Group();
   private readonly flight=new WingsSystem();
+  private readonly importedProps=new Group();
+  private readonly importedPropMaterials=new Set<MeshStandardMaterial>();
+  private propRevision=0;
+  private readonly raycaster=new Raycaster();
   private batch?:RigidSkinBatch;
   private imported?:AnimatedGLB;
   private importedType='';
@@ -47,7 +71,7 @@ export class CompanionRig {
     this.coat=this.material(horse?0x8a6041:0x8b969e,.88);
     const dark=this.material(0x252328,.9),light=this.material(0xd6cab0,.88),leather=this.material(0x363331,.76),metal=this.material(0xc7ab6e,.3,.7);
     this.glow=this.material(0xa9e8ff,.4);this.glow.emissive.setHex(0xa9e8ff);
-    this.root.add(this.spine);this.spine.position.y=horse?1.23:.68;
+    this.root.add(this.spine,this.importedProps);this.spine.position.y=horse?1.23:.68;
     if(horse){this.saddle.name='mountSaddleNode';this.saddle.position.set(0,1.6,0);this.root.add(this.saddle);}
     // Geometry primitives exist solely for old, headless physics/unit tests.
     // Browser/Android actors render only imported authored GLB meshes.
@@ -128,27 +152,29 @@ export class CompanionRig {
   private between(parent:Object3D,a:Vector3,b:Vector3,radius:number,material:MeshStandardMaterial):void {const d=b.clone().sub(a);const m=this.mesh(parent,new CylinderGeometry(radius,radius,d.length(),6),material,0,0,0);m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new Vector3(0,1,0),d.normalize());}
   appearance(c:Cosmetic):void {
     if(this.appearanceId===c.id)return;this.batch?.dispose();this.batch=undefined;this.appearanceId=c.id;this.rarity=RARITIES.indexOf(c.rarity);
+    this.clearImportedProps();this.root.userData.saddleMeasured=false;
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
     const bird=['phoenix','frostphoenix'].includes(c.id),dragon=['wyvern','dracolich','ashdrake'].includes(c.id),giant=['fenrir','nighthorse','obsidianwolf'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
     // Every in-game companion has an authored GLB silhouette. Variant effects
     // remain particles/shaders; no orange-cylinder wyvern appears during loading.
-    const importedType=bird?'Parrot'
-      :['wyvern','ashdrake'].includes(c.id)?'Creature_wyvern'
-      :c.id==='dracolich'?'Creature_dragon'
-      :['fenrir','nighthorse','obsidianwolf','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf','emberfox','ashwolf','stormhound'].includes(c.id)?'Creature_wolf'
-      :this.horse?'Creature_horse':'Creature_wolf';
+    // Pet assets live in an entirely separate GLB namespace from rideable
+    // mounts: not even an equipped Fenrir + wolf pet shares a model file.
+    const importedType=companionAssetFor(c.id,this.horse);
     if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
-      if(importedType){const asset=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
+      if(importedType){const asset=new AnimatedGLB(importedType,
+        this.horse?(dragon||importedType==='Creature_dragon'?3.45:giant?2.6:2.35):bird?1.45:1.85,()=>{
         if(this.imported!==asset)return;
         this.spine.visible=false;
         if(this.batch)this.batch.mesh.visible=false;
         asset.setCompanionAppearance(c.color,c.id==='hellhound');
         this.updateSaddleFromGLB();
-      },false);
+        this.installImportedProps(c);
+      },this.horse);
       this.imported=asset;
       this.root.add(asset.root);}}
     this.imported?.setCompanionAppearance(c.color,hell);
+    if(this.imported?.ready)this.installImportedProps(c);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
@@ -176,6 +202,75 @@ export class CompanionRig {
     this.wings.visible=typeof document==='undefined';
     if(typeof document==='undefined'&&!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
+  private clearImportedProps():void {
+    this.propRevision++;
+    this.importedProps.clear();
+    for(const material of this.importedPropMaterials)material.dispose();
+    this.importedPropMaterials.clear();
+  }
+  /** Real CC0 authored metalwork/crystals, visible in BOTH gameplay and Collection. */
+  private installImportedProps(c:Cosmetic):void {
+    if(typeof document==='undefined')return;
+    this.clearImportedProps();
+    const token=this.propRevision;
+    const shield='models/weapon-packs/Kenney_dungeon_shield_round.glb';
+    const gem='models/equipment/CC0_crystal_gems.glb';
+    const helmet='models/equipment/CC0_knight_helmet.glb';
+    const extras:Array<{file:string;xyz:[number,number,number];scale:number;rot?:number;tint?:number}>=[];
+    const armored=['sunhorse','nightmare','magmahorse','lunarhorse','frosthorse'].includes(c.id);
+    const crystal=['fenrir','obsidianwolf','nighthorse','spiritstag','eternalhorse','wyvern','ashdrake','nightmare'].includes(c.id);
+    if(this.horse&&armored){
+      for(const sign of [-1,1]){
+        extras.push({file:shield,xyz:[sign*.38,1.12,-.20],scale:.42,rot:sign*Math.PI/2,tint:c.id==='nightmare'?0x3b254f:0xd2d6e1});
+        extras.push({file:shield,xyz:[sign*.32,1.55,-.45],scale:.21,rot:sign*Math.PI/2,tint:c.color});
+      }
+      extras.push({file:helmet,xyz:[0,2.0,.68],scale:.40,tint:c.color});
+    }
+    if(this.horse&&crystal){
+      for(const sign of [-1,1]){
+        extras.push({file:gem,xyz:[sign*.45,1.8,-.55],scale:c.id==='fenrir'?.36:.24,tint:c.color});
+        extras.push({file:gem,xyz:[sign*.3,1.66,-.02],scale:.23,tint:c.color});
+      }
+    }
+    if(this.horse&&['wyvern','ashdrake','eternalhorse'].includes(c.id)){
+      extras.push({file:shield,xyz:[0,this.saddleRestY-.15,this.saddle.position.z],scale:.80,tint:c.id==='wyvern'?0xa79c78:0x5c4a64});
+    }
+    if(!this.horse&&['dracolich','phoenix','frostphoenix','hellhound'].includes(c.id)){
+      extras.push({file:gem,xyz:[0,1.54,-.20],scale:.23,tint:c.color});
+    }
+    // Materials are cloned, but the authored GLB triangle geometry is shared
+    // through the loader cache. No proxy shapes are rendered over real actors.
+    const loader=CompanionRig.decorLoader;
+    for(const spec of extras){
+      void loader.loadAsync(import.meta.env.BASE_URL+spec.file).then(gltf=>{
+        if(this.propRevision!==token)return;
+        const model=gltf.scene.clone(true);
+        const bounds=new Box3().setFromObject(model);
+        if(bounds.isEmpty())return;
+        const extent=bounds.getSize(new Vector3());
+        const factor=spec.scale/Math.max(.001,Math.max(extent.x,extent.y,extent.z));
+        model.scale.setScalar(factor);
+        model.position.set(...spec.xyz);
+        if(spec.rot)model.rotation.y=spec.rot;
+        model.traverse(node=>{
+          if(!(node instanceof Mesh))return;
+          node.castShadow=this.horse;
+          const original=Array.isArray(node.material)?node.material:[node.material];
+          const copy=original.map(material=>{
+            if(!(material instanceof MeshStandardMaterial))return material;
+            const cloned=material.clone();
+            if(spec.tint!==undefined)cloned.color.lerp(new Color(spec.tint),.36);
+            cloned.metalness=Math.max(.38,cloned.metalness);
+            cloned.roughness=Math.min(.63,cloned.roughness);
+            this.importedPropMaterials.add(cloned);return cloned;
+          });
+          node.material=Array.isArray(node.material)?copy:copy[0];
+        });
+        this.importedProps.add(model);
+        this.root.userData.characterRevision=(this.root.userData.characterRevision??0)+1;
+      }).catch(error=>console.warn('CC0 companion accessory unavailable:',spec.file,error));
+    }
+  }
   /** The saddle is computed from the actual loaded GLB world bounding box. */
   updateSaddleFromGLB():void {
     if(!this.horse||!this.imported?.ready)return;
@@ -185,13 +280,25 @@ export class CompanionRig {
     const origin=this.root.getWorldPosition(this.ownOrigin);
     const height=bounds.max.y-bounds.min.y;
     if(!Number.isFinite(height)||height<=.1)return;
-    // Input contract: 78% of authored mount height above the feet;
-    // no arbitrary horizontal offsets behind the mount's belly.
-    const worldScale=this.root.getWorldScale(new Vector3());
-    this.saddleRestY=(bounds.min.y-origin.y+height*.78)/Math.max(.001,Math.abs(worldScale.y));
+    // Raycast the visible dorsal surface, not 78% of a bounding box which
+    // may include wings, horns and the long wyvern's neck.
     const dimensions=bounds.getSize(new Vector3());
-    this.footprintRadius=Math.min(4.2,Math.max(1.65,Math.max(dimensions.x,dimensions.z)*.5+.35));
-    this.saddle.position.set(0,this.saddleRestY,0);
+    const backZ=bounds.getCenter(new Vector3()).z-dimensions.z*.19;
+    const worldBack=new Vector3(origin.x,bounds.max.y+3,backZ);
+    this.raycaster.set(worldBack,new Vector3(0,-1,0));
+    this.raycaster.far=height+6;
+    const hits=this.raycaster.intersectObject(this.imported.root,true);
+    const isDragon=['Creature_wyvern','Creature_dragon'].includes(this.importedType);
+    const dorsalY=hits.length?hits[0].point.y:bounds.min.y+height*(isDragon?.80:.70);
+    // Keep both the mount's actual mesh surface and the rider hip above the
+    // local back, with extra clearance for sweeping wyvern animation.
+    const worldY=Math.max(dorsalY+(isDragon?.46:.23),bounds.min.y+height*(isDragon?.86:.70));
+    const worldScale=this.root.getWorldScale(new Vector3());
+    this.saddleRestY=(worldY-origin.y)/Math.max(.001,Math.abs(worldScale.y));
+    this.footprintRadius=Math.min(4.8,Math.max(1.65,Math.max(dimensions.x,dimensions.z)*.5+.35));
+    this.saddle.position.set(0,this.saddleRestY,-dimensions.z*.19/Math.max(.001,Math.abs(worldScale.z)));
+    this.root.userData.dorsalSample=hits.length?'raycast':'conservative-back-bounds';
+    this.root.userData.saddleClearance=worldY-dorsalY;
     this.root.userData.realMountHeight=height;
     this.root.userData.saddleMeasured=true;
   }
@@ -231,5 +338,5 @@ export class CompanionRig {
     this.batch?.sync();
     this.aura.rotation.z=time*(.3+this.rarity*.1);this.aura.scale.setScalar((this.horse?1.3:.7)*(1+Math.sin(time*2)*.045));
   }
-  dispose():void {this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
+  dispose():void {this.clearImportedProps();this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
 }

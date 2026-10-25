@@ -4,7 +4,7 @@ import type {WingStyle} from '../rpg/EvolutionSystem';
 export function wingTexture(style:WingStyle):CanvasTexture|undefined {
   if(typeof document==='undefined')return undefined;
   const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;const c=canvas.getContext('2d');if(!c)return undefined;
-  const palette={necrotic:['#c4bda7','#2a1838','#9984bd'],celestial:['#fff3c4','#c2a777','#fff9ea'],magma:['#ff9f39','#542331','#ffc557'],glacial:['#c3f5ff','#537ca8','#edfaff']}[style];
+  const palette={necrotic:['#c4bda7','#2a1838','#9984bd'],celestial:['#fff3c4','#c2a777','#fff9ea'],magma:['#ff9f39','#542331','#ffc557'],glacial:['#c3f5ff','#537ca8','#edfaff'],solar:['#ffe9a1','#ec9732','#fffbe8'],astral:['#cdb7ff','#492c80','#edccff']}[style];
   c.clearRect(0,0,1024,1024);
   if(style==='necrotic'||style==='magma'){
     const g=c.createLinearGradient(140,200,820,900);g.addColorStop(0,palette[1]);g.addColorStop(1,palette[2]);c.fillStyle=g;c.beginPath();c.moveTo(70,350);c.bezierCurveTo(260,60,650,30,960,155);c.bezierCurveTo(860,480,880,700,800,910);c.quadraticCurveTo(650,730,610,880);c.quadraticCurveTo(470,650,410,780);c.quadraticCurveTo(290,600,230,640);c.closePath();c.fill();

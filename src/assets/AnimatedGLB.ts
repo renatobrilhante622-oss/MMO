@@ -15,7 +15,10 @@ export type ModelName =
   | 'KayKit_Skeleton_Minion' | 'KayKit_Skeleton_Warrior'
   | 'Quaternius_ghost' | 'Quaternius_demon' | 'Quaternius_bat'
   | 'Creature_wyvern' | 'Creature_horse' | 'Creature_wolf'
-  | 'Creature_slime' | 'Creature_golem' | 'Creature_dragon';
+  | 'Creature_slime' | 'Creature_golem' | 'Creature_dragon'
+  | 'Creature_stag' | 'Creature_warhorse'
+  | 'Creature_pet_fox' | 'Creature_pet_hellhound' | 'Creature_pet_fairy'
+  | 'Creature_pet_babygolem' | 'Creature_pet_dracolich';
 
 const loader = new GLTFLoader();
 const cache = new Map<string, Promise<GLTF>>();
@@ -293,7 +296,7 @@ export class AnimatedGLB {
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
   setCosmeticPalette(color:number,rarity:number):void{
     this.cosmeticTint.setHex(color);
-    this.cosmeticStrength=Math.min(.28,Math.max(0,rarity)*.052);
+    this.cosmeticStrength=Math.min(.76,Math.max(0,rarity)*.16);
     this.tint(this.baseColor.getHex(),this.accent.getHex());
   }
 

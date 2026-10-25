@@ -16,6 +16,7 @@ import './ui/part2-hud-npc.css';
 import './ui/physical-portals.css';
 import './ui/dungeon-audit.css';
 import './ui/pr10-cinematic-hud.css';
+import './ui/pr13-visual.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
