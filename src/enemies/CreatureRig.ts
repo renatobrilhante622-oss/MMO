@@ -4,6 +4,7 @@ import {
 } from 'three';
 
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
+import {AnimatedGLB} from '../assets/AnimatedGLB';
 
 interface CreatureLimb { shoulder: Group; elbow: Group; foot: Group; side: number; rear: boolean }
 
@@ -21,7 +22,9 @@ export class CreatureRig {
   private readonly dark: MeshStandardMaterial;
   private readonly bone: MeshStandardMaterial;
   private readonly scale: number;
-  private readonly batch:RigidSkinBatch;
+  private readonly batch?:RigidSkinBatch;
+  private readonly imported?:AnimatedGLB;
+  private previousAttack=false;
   private attackBlend = 0;
   private readonly tendrils:Group[]=[];
 
@@ -33,10 +36,18 @@ export class CreatureRig {
     this.scale = boss ? 2.3 : kind === 'golem' ? 1.45 : 1;
     this.root.name = `${kind}-articulated-rig`;
     this.root.add(this.spine);
-    if (kind === 'slime' && !boss) this.slime();
-    else if (kind === 'wolf' && !boss) this.wolf();
-    else this.humanoid();
-    this.batch=new RigidSkinBatch(this.root,this.body);
+    if (typeof document !== 'undefined' && (kind === 'skeleton' || boss)) {
+      // Visible skeleton enemies/bosses are real rigged KayKit GLBs, not primitive meshes.
+      const model = kind === 'skeleton' && !boss ? 'KayKit_Skeleton_Minion' : 'KayKit_Skeleton_Warrior';
+      this.imported = new AnimatedGLB(model, boss ? 4.0 : 1.95, () => {}, true);
+      this.root.add(this.imported.root);
+    } else {
+      // Keep the existing diagnostic rig in unit tests and for unported species.
+      if (kind === 'slime' && !boss) this.slime();
+      else if (kind === 'wolf' && !boss) this.wolf();
+      else this.humanoid();
+      this.batch = new RigidSkinBatch(this.root,this.body);
+    }
   }
 
   private mesh(parent: Object3D, geometry: BufferGeometry, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
@@ -198,6 +209,13 @@ export class CreatureRig {
 
   update(dt: number, elapsed: number, speed: number, attack: boolean, windup: number, hurt: number): void {
     dt = MathUtils.clamp(dt, 0, .05);
+    if (this.imported) {
+      if (attack && !this.previousAttack) this.imported.attack();
+      this.previousAttack = attack;
+      this.imported.update(dt,Math.min(1,Math.max(0,speed/4)));
+      this.imported.setHitFlash(hurt>0?1:0);
+      return;
+    }
     this.attackBlend = MathUtils.damp(this.attackBlend, attack ? 1 : 0, 10, dt);
     const phase = elapsed * (this.kind === 'wolf' ? 11 : 6.5);
     const movement = Math.min(1, speed / (this.kind === 'wolf' ? 4.5 : 3));
@@ -237,12 +255,14 @@ export class CreatureRig {
       if (this.kind === 'wraith') ornament.rotation.x = Math.sin(elapsed * 3 + i) * .2;
       else if (this.boss) ornament.rotation.z += dt * (.4 + i * .2);
     }
-    this.batch.sync();
+    this.batch?.sync();
   }
 
   dispose(): void {
-    this.batch.dispose();
-    this.root.traverse(object => { if (object instanceof Mesh) object.geometry.dispose(); });
+    this.imported?.dispose();
+    this.batch?.dispose();
+    // Never dispose meshes from a cached shared GLTF: clones reuse those buffers.
+    this.spine.traverse(object => { if (object instanceof Mesh) object.geometry.dispose(); });
     this.materials.forEach(material => material.dispose());
     this.materials.clear();
     this.root.removeFromParent();

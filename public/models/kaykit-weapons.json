@@ -1,0 +1,105 @@
+{
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "name": "axe_1handed",
+      "file": "models/KayKit_Weapon_axe_1handed.glb",
+      "bytes": 29028,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/axe_1handed.gltf",
+      "sourceGltfGitSha1": "b367258502ed8f8b172d18c72c71d81befbb39f4",
+      "sourceBinGitSha1": "6f2a1f938805bfc829c8b83851f061179b7ac657",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "axe_2handed",
+      "file": "models/KayKit_Weapon_axe_2handed.glb",
+      "bytes": 38460,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/axe_2handed.gltf",
+      "sourceGltfGitSha1": "d0295aca8c5354070a58c6e9fca1647812b71067",
+      "sourceBinGitSha1": "b8abd54b0662070dbaf24d3a74851a606bb06e92",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "crossbow_2handed",
+      "file": "models/KayKit_Weapon_crossbow_2handed.glb",
+      "bytes": 52976,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/crossbow_2handed.gltf",
+      "sourceGltfGitSha1": "6c70f58913d64db677e6a2cd8e62b9aa4cf24ae3",
+      "sourceBinGitSha1": "3ca37dcaefbd4daeaa48d6bb78201a599524a945",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "dagger",
+      "file": "models/KayKit_Weapon_dagger.glb",
+      "bytes": 25728,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/dagger.gltf",
+      "sourceGltfGitSha1": "f090037e4ecdd0e6e891a412b2c4a9409226825e",
+      "sourceBinGitSha1": "8825c09e4f6cf6cba918770082505ab9cc5d9a48",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "quiver",
+      "file": "models/KayKit_Weapon_quiver.glb",
+      "bytes": 31956,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/quiver.gltf",
+      "sourceGltfGitSha1": "6ed3f94fff3fb02773f6437db8b0089e8ed1493d",
+      "sourceBinGitSha1": "585cc493399a31a100dfa31d995b9fee62ea6256",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "shield_round",
+      "file": "models/KayKit_Weapon_shield_round.glb",
+      "bytes": 27588,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/shield_round.gltf",
+      "sourceGltfGitSha1": "d1a20d3ce24239a540236806c4ce424e137439ea",
+      "sourceBinGitSha1": "9e35d339cfb38425253a3c236de7bdf5da199ae4",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "staff",
+      "file": "models/KayKit_Weapon_staff.glb",
+      "bytes": 36284,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/staff.gltf",
+      "sourceGltfGitSha1": "d8bbebc6f3f6fb59e152d6b45de52add254f0697",
+      "sourceBinGitSha1": "680e289846b61c83a6c10ea444caa34faf43c9e4",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "sword_1handed",
+      "file": "models/KayKit_Weapon_sword_1handed.glb",
+      "bytes": 28832,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/sword_1handed.gltf",
+      "sourceGltfGitSha1": "ea5115c52ee9c07b2128105c0701fe706add7593",
+      "sourceBinGitSha1": "1aca5d22ca1dbae65756af6c0b438f251c2c7e45",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "sword_2handed",
+      "file": "models/KayKit_Weapon_sword_2handed.glb",
+      "bytes": 35492,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/sword_2handed.gltf",
+      "sourceGltfGitSha1": "593016769c491c37ce4705bc76f80e2a042ccaee",
+      "sourceBinGitSha1": "11d1a5627499582733d4d5918807415fd0dc2baf",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    },
+    {
+      "name": "wand",
+      "file": "models/KayKit_Weapon_wand.glb",
+      "bytes": 23664,
+      "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/blob/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Assets/gltf/wand.gltf",
+      "sourceGltfGitSha1": "67f272fb273bdeb403674509464d7948a3aeb826",
+      "sourceBinGitSha1": "492d79a4b86352d1e7c81cfed4ac3a02ae48565b",
+      "license": "CC0-1.0",
+      "author": "Kay Lousberg"
+    }
+  ]
+}
