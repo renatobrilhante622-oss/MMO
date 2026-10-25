@@ -12,7 +12,7 @@ export type Gem = 'ruby'|'sapphire'|'emerald'|'diamond';
 export type Language = 'pt'|'en';
 export const ATTRIBUTES:readonly Attribute[]=['power','vitality','guard','spirit','precision'];
 export const ATTRIBUTE_NAMES:Record<Attribute,[string,string]>={power:['Poder','Power'],vitality:['Vitalidade','Vitality'],guard:['Proteção','Guard'],spirit:['Espírito','Spirit'],precision:['Precisão','Precision']};
-export interface Bookmark { name:string; x:number; z:number; region:string; }
+export interface Bookmark { name:string; x:number; z:number; region:string; localMap?:boolean; }
 export interface Cosmetic { id:string; name:[string,string]; type:'skin'|'pet'|'mount'|'weapon'|'wing'; rarity:Rarity; color:number; }
 export const COSMETICS:readonly Cosmetic[]=[
   {id:'traveler',name:['Viajante','Traveler'],type:'skin',rarity:'common',color:0xa8b9c4},
@@ -134,7 +134,7 @@ export class AdventureProgress {
   record(index:number,name:string,x:number,z:number,blocked:boolean,regionId?:string):boolean {
     if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>140||Math.abs(z)>140)return false;
     const region=REGIONS.find(r=>r.id===regionId)??REGIONS.reduce((best,r)=>Math.hypot(x-r.center.x,z-r.center.z)<Math.hypot(x-best.center.x,z-best.center.z)?r:best,REGIONS[0]);
-    this.bookmarks[index]={name:name.trim().slice(0,30)||region.name[this.language==='pt'?0:1],x,z,region:region.id};return true;
+    this.bookmarks[index]={name:name.trim().slice(0,30)||region.name[this.language==='pt'?0:1],x,z,region:region.id,localMap:!!regionId};return true;
   }
   destination(index:number,blocked:boolean):Bookmark|null {
     if(blocked||!this.slotUnlocked(index)||this.teleportCooldown>0)return null;
@@ -279,7 +279,7 @@ export class AdventureProgress {
     this.pulls=integer(raw.pulls,0,1e9);this.pity=integer(raw.pity,0,59);this.purchasedSlots=integer(raw.purchasedSlots,0,4);
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;
-    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=140&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=140)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora'};}
+    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=140&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=140)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora',localMap:b.localMap===true};}
     if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=140&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=140)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
     if(Array.isArray(raw.discovered))this.discovered=[...new Set(['aurora',...raw.discovered.filter((id):id is string=>REGIONS.some(r=>r.id===id))])];
     if(Array.isArray(raw.unlockedRegions))this.unlockedRegions=[...new Set(['aurora',...raw.unlockedRegions.filter((id):id is string=>typeof id==='string'&&REGIONS.some(r=>r.id===id))])];
