@@ -291,6 +291,9 @@ export class Engine {
     this.dungeonUI=new DungeonUI(this.container,()=>this.inventory.level,
       (id,difficulty)=>this.launchDungeon(id,difficulty),
       ()=>this.leaveDungeon());
+    // Real navigation remains in the top-right expandable menu, never above skills.
+    this.hud.registerShortcut(this.regionTravel.trigger);
+    this.hud.registerShortcut(this.dungeonUI.trigger);
     this.i18n = new GameI18n(this.container,this.progress.language);
     const journey=document.createElement('button');journey.className='journey-button';journey.innerHTML='<span aria-hidden="true">✧</span><span>Jornada</span>';journey.title='Jornada / Journey';journey.onclick=()=>this.hub.openJourney();this.hud.registerShortcut(journey);
     this.autoButton.className='autofarm-button';this.autoButton.hidden=true;this.autoButton.innerHTML='<span aria-hidden="true">⟳</span>';this.autoButton.title='Auto-Farm';this.autoButton.setAttribute('aria-label','Auto-Farm');this.autoButton.onclick=()=>{this.farmController.reset();this.autoTarget='';this.autoRoute=[];this.progress.autoFarm=this.progress.vip&&!this.progress.autoFarm;this.autoButton.classList.toggle('active',this.progress.autoFarm);};this.container.append(this.autoButton);
