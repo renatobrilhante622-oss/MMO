@@ -225,7 +225,7 @@ export class Engine {
       this.terrain=this.mapInstances.activate(this.restoredRegionId);
     }
     this.phase2Gathering=new GatheringSystem(this.scene,this.container,this.mapInstances.regionId,
-      (x,z)=>this.terrain.heightAt(x,z),kind=>{this.hud?.notify('Coleta: '+kind+' +1','success');this.save();});
+      (x,z)=>this.terrain.heightAt(x,z),kind=>{if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud?.notify('Coleta: '+kind+' +1','success');this.save();});
     this.phase2Gathering.restore(this.phase2GatheringSave);
     this.phase2Weather=new RegionalWeather(this.scene);
     this.phase2Weather.setRegion(this.mapInstances.regionId);
@@ -950,7 +950,7 @@ export class Engine {
     this.phase2Gathering.dispose();
     this.terrain=this.mapInstances.activate(id);
     this.phase2Gathering=new GatheringSystem(this.scene,this.container,id,
-      (x,z)=>this.terrain.heightAt(x,z),kind=>{this.hud.notify('Coleta: '+kind+' +1','success');this.save();});
+      (x,z)=>this.terrain.heightAt(x,z),kind=>{if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud.notify('Coleta: '+kind+' +1','success');this.save();});
     this.phase2Weather.setRegion(id);
     this.enemies.resetForRegion(id);
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),

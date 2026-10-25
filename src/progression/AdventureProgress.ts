@@ -22,6 +22,8 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'void',name:['Arauto Astral','Astral Herald'],type:'skin',rarity:'epic',color:0xba85ff},
   {id:'solar',name:['Soberano Solar','Solar Sovereign'],type:'skin',rarity:'legendary',color:0xffc664},
   {id:'eternal',name:['Eterno','Eternal'],type:'skin',rarity:'mythic',color:0xff75ac},
+  {id:'gladiator-skin',name:['Armadura do Gladiador','Gladiator Armor'],type:'skin',rarity:'legendary',color:0xd8b56f},
+  {id:'gladiator-blade',name:['Lâmina da Arena','Arena Blade'],type:'weapon',rarity:'legendary',color:0xffc36b},
   {id:'wolf',name:['Lobo Cinzento','Grey Wolf'],type:'pet',rarity:'common',color:0xa6b6be},
   {id:'fox',name:['Raposa do Bosque','Forest Fox'],type:'pet',rarity:'uncommon',color:0xe4a575},
   {id:'frostwolf',name:['Lobo Glacial','Frost Wolf'],type:'pet',rarity:'rare',color:0x6fcfff},
@@ -250,19 +252,19 @@ export class AdventureProgress {
     if(this.pity>=60)rarity=Math.max(4,rarity);
     else if(this.pulls%10===0)rarity=Math.max(2,rarity);
     if(rarity>=4)this.pity=0;
-    const pool=COSMETICS.filter(c=>RARITIES.indexOf(c.rarity)===rarity&&c.type===this.banner);
+    const pool=COSMETICS.filter(c=>RARITIES.indexOf(c.rarity)===rarity&&c.type===this.banner&&!c.id.startsWith('gladiator-'));
     const cosmetic=pool[Math.min(pool.length-1,Math.floor(typeRoll*pool.length))];
     const duplicate=this.owned.includes(cosmetic.id);
     if(duplicate)this.shards+=5*(rarity+1);else this.owned.push(cosmetic.id);
     return {cosmetic,duplicate};
   }
   redeem(id:string):boolean {
-    const cosmetic=COSMETICS.find(c=>c.id===id);if(!cosmetic||this.owned.includes(id))return false;
+    const cosmetic=COSMETICS.find(c=>c.id===id);if(!cosmetic||this.owned.includes(id)||id.startsWith('gladiator-'))return false;
     const cost=[20,40,100,200,500,1200][RARITIES.indexOf(cosmetic.rarity)];if(this.shards<cost)return false;
     this.shards-=cost;this.owned.push(id);return true;
   }
   redeemVip(id:string):boolean {
-    const c=COSMETICS.find(c=>c.id===id);if(!c||this.owned.includes(id))return false;
+    const c=COSMETICS.find(c=>c.id===id);if(!c||this.owned.includes(id)||id.startsWith('gladiator-'))return false;
     const cost=[5,10,25,50,100,200][RARITIES.indexOf(c.rarity)];if(this.vipDiamonds<cost)return false;
     this.vipDiamonds-=cost;this.owned.push(id);return true;
   }

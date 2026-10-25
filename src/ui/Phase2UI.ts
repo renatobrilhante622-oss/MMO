@@ -30,7 +30,19 @@ export class Phase2UI{
    if(action==='challenge')success=a.start(button.dataset.id??'',this.game.currentClass,this.game.hero.stats.attack*12+this.game.hero.stats.defense*6);
    if(action==='duel'){const cmd=button.dataset.cmd as 'strike'|'dash'|'dodge'|'guard'|'potion'|'skill';success=a.action(cmd,Number(button.dataset.index??0));}
    if(action==='equip-title')success=a.equipTitle(button.dataset.id??'');
-   if(action==='buy-honor')success=a.buy(button.dataset.id??'');
+   if(action==='buy-honor'){
+     const id=button.dataset.id??'';
+     success=a.buy(id);
+     if(success&&['gladiator-skin','gladiator-blade'].includes(id)){
+       if(!this.game.progress.owned.includes(id))this.game.progress.owned.push(id);
+       this.game.progress.equipCosmetic(id);
+     }
+   }
+   if(action==='equip-gladiator')success=this.game.progress.equipCosmetic(button.dataset.id??'');
+   if(action==='refine'){
+     const item=this.game.inventory.equipment.weapon;
+     if(g.crafts.refine>0&&item&&this.game.inventory.upgrade(item)){g.crafts.refine--;success=true;}
+   }
    if(action==='rune')success=r.unlock(button.dataset.id??'',this.game.inventory.level);
    if(action==='daily'){const gift=p.claim();if(gift){this.award(gift);success=true;}}
    if(action==='time'){const gift=p.claimMilestone(Number(button.dataset.seconds));if(gift){this.award(gift);success=true;}}
@@ -69,7 +81,9 @@ export class Phase2UI{
  }
  private professions():string{
   const g=this.game.phase2Gathering;
-  return `<h2>⛏️ Profissões de Mundo Aberto</h2><p>Minérios ${g.stock.ore} · Ervas ${g.stock.herb} · Baús ${g.stock.chest} — aproxime-se de um objeto brilhante e complete a canalização de 2 segundos.</p><div class="pr15-grid">${GATHER_RECIPES.map(r=>`<article class="pr15-card"><h3>${esc(r.name)}</h3><small>⛏ ${r.cost.ore} · 🌿 ${r.cost.herb} · 🗝 ${r.cost.chest}</small><p>${r.seconds?Math.round(g.buffs[r.id]??0)+'s de buff':'Possui '+(g.crafts[r.id]??0)}</p>${this.button('craft','Fabricar',`data-id="${r.id}"`)}</article>`).join('')}</div>`;
+  return `<h2>⛏️ Profissões de Mundo Aberto</h2><p>Minérios ${g.stock.ore} · Ervas ${g.stock.herb} · Baús ${g.stock.chest} — aproxime-se de um objeto brilhante e complete a canalização de 2 segundos.</p><p>🗝️ Para abrir baús antigos é obrigatório possuir uma Chave Ancestral; uma chave é consumida ao concluir.</p>
+    ${this.button('refine','⚒️ Aplicar pedra ao armamento equipado (possui '+(g.crafts.refine??0)+')','',!(g.crafts.refine>0))}
+    <div class="pr15-grid">${GATHER_RECIPES.map(r=>`<article class="pr15-card"><h3>${esc(r.name)}</h3><small>⛏ ${r.cost.ore} · 🌿 ${r.cost.herb} · 🗝 ${r.cost.chest}</small><p>${r.seconds?Math.round(g.buffs[r.id]??0)+'s de buff':'Possui '+(g.crafts[r.id]??0)}</p>${this.button('craft','Fabricar',`data-id="${r.id}"`)}</article>`).join('')}</div>`;
  }
  private rewards():string{
   const r=this.game.phase2Rewards;
@@ -82,7 +96,7 @@ export class Phase2UI{
  }
  private titles():string{
   const a=this.game.phase2Arena;
-  return `<h2>👑 Títulos e Honra</h2><p>Honra: ${a.honor} · ${a.wins} vitórias · ${a.losses} derrotas</p><div class="pr15-grid">${ARENA_TITLE_DEFINITIONS.map(t=>`<article class="pr15-card"><h3>${esc(t.name)}</h3><p>+ATK ${Math.round(t.attack*100)}% · +HP ${Math.round(t.hp*100)}% · Vel. ${Math.round(t.speed*100)}% · Crit ${Math.round(t.crit*100)}%</p><small>Necessita ${t.wins} vitórias</small>${this.button('equip-title',a.equippedTitle===t.id?'Equipado':'Equipar',`data-id="${t.id}"`,!a.titles.includes(t.id))}</article>`).join('')}</div><h3>Loja do Gladiador</h3><div class="pr15-grid">${ARENA_SHOP.map(i=>`<article class="pr15-card"><h3>${esc(i.name)}</h3><p>🏅 ${i.price}</p>${this.button('buy-honor',a.shop.includes(i.id)?'Comprado':'Comprar',`data-id="${i.id}"`,a.shop.includes(i.id)||a.honor<i.price)}</article>`).join('')}</div>`;
+  return `<h2>👑 Títulos e Honra</h2><p>Honra: ${a.honor} · ${a.wins} vitórias · ${a.losses} derrotas</p><div class="pr15-grid">${ARENA_TITLE_DEFINITIONS.map(t=>`<article class="pr15-card"><h3>${esc(t.name)}</h3><p>+ATK ${Math.round(t.attack*100)}% · +HP ${Math.round(t.hp*100)}% · Vel. ${Math.round(t.speed*100)}% · Crit ${Math.round(t.crit*100)}%</p><small>Necessita ${t.wins} vitórias</small>${this.button('equip-title',a.equippedTitle===t.id?'Equipado':'Equipar',`data-id="${t.id}"`,!a.titles.includes(t.id))}</article>`).join('')}</div><h3>Loja do Gladiador</h3><div class="pr15-grid">${ARENA_SHOP.map(i=>`<article class="pr15-card"><h3>${esc(i.name)}</h3><p>🏅 ${i.price}</p>${this.button('buy-honor',a.shop.includes(i.id)?'Comprado':'Comprar',`data-id="${i.id}"`,a.shop.includes(i.id)||a.honor<i.price)}${a.shop.includes(i.id)&&i.type!=='title'?this.button('equip-gladiator','Equipar recompensa',`data-id="${i.id}"`):''}</article>`).join('')}</div>`;
  }
  private paintArena():void{
   if(!this.visible)return;

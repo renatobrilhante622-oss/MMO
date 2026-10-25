@@ -11,6 +11,7 @@ export const ARENA_TITLE_DEFINITIONS=[
  {id:'arena-imperador',name:'👑 Imperador da Arena',wins:12,attack:.04,hp:.08,speed:.01,crit:.01},
  {id:'arena-guerra',name:'⚡ Deus da Guerra',wins:25,attack:.07,hp:.05,speed:.02,crit:.025},
  {id:'arena-ceifador',name:'💀 Ceifador Abissal',wins:6,attack:.03,hp:.02,speed:.03,crit:.015},
+ {id:'champion-crown',name:'♛ Coroa do Campeão',wins:0,attack:.02,hp:.03,speed:.01,crit:.01},
 ] as const;
 export const ARENA_SHOP=[
  {id:'gladiator-skin',name:'Armadura do Gladiador',price:160,type:'skin'},
@@ -111,7 +112,7 @@ export class ArenaSystem{
     this.wins++;const earned=Math.max(15,Math.round(24+(d.challenger.rating-this.rating)*.035));
     this.rating=clamp(this.rating+Math.max(8,Math.round(24+(d.challenger.rating-this.rating)*.03)),800,2400);
     this.honor+=earned;this.add('🏆 Vitória · +'+earned+' Moedas de Honra');
-    for(const t of ARENA_TITLE_DEFINITIONS){if(this.wins>=t.wins&&!this.titles.includes(t.id)){this.titles.push(t.id);this.add('✨ Título desbloqueado: '+t.name);}}
+    for(const t of ARENA_TITLE_DEFINITIONS){if(t.wins>0&&this.wins>=t.wins&&!this.titles.includes(t.id)){this.titles.push(t.id);this.add('✨ Título desbloqueado: '+t.name);}}
   }else{this.losses++;this.rating=Math.max(800,this.rating-12);this.add('Derrota. Estude o combo e desafie novamente.');}
  }
  equipTitle(id:string):boolean{if(id!==''&&!this.titles.includes(id))return false;this.equippedTitle=id;return true;}
@@ -119,13 +120,13 @@ export class ArenaSystem{
   const t=ARENA_TITLE_DEFINITIONS.find(t=>t.id===this.equippedTitle);
   return t?{attack:t.attack,hp:t.hp,speed:t.speed,crit:t.crit}:{attack:0,hp:0,speed:0,crit:0};
  }
- buy(id:string):boolean{const item=ARENA_SHOP.find(i=>i.id===id);if(!item||this.shop.includes(id)||this.honor<item.price)return false;this.honor-=item.price;this.shop.push(id);return true;}
+ buy(id:string):boolean{const item=ARENA_SHOP.find(i=>i.id===id);if(!item||this.shop.includes(id)||this.honor<item.price)return false;this.honor-=item.price;this.shop.push(id);if(item.type==='title'&&!this.titles.includes(id))this.titles.push(id);return true;}
  snapshot():ArenaSave{return {rating:this.rating,honor:this.honor,wins:this.wins,losses:this.losses,matches:this.matches,titles:[...this.titles],equippedTitle:this.equippedTitle,shop:[...this.shop]};}
  restore(raw:unknown):void{
   if(!raw||typeof raw!=='object')return;const r=raw as Record<string,unknown>;
   const num=(x:unknown,min:number,max:number,def:number)=>typeof x==='number'&&Number.isFinite(x)?clamp(Math.floor(x),min,max):def;
   this.rating=num(r.rating,800,2400,900);this.honor=num(r.honor,0,1e8,0);this.wins=num(r.wins,0,1e6,0);this.losses=num(r.losses,0,1e6,0);this.matches=num(r.matches,0,1e6,0);
-  this.titles=Array.isArray(r.titles)?r.titles.filter((id):id is string=>typeof id==='string'&&ARENA_TITLE_DEFINITIONS.some(t=>t.id===id)).slice(0,3):[];
+  this.titles=Array.isArray(r.titles)?r.titles.filter((id):id is string=>typeof id==='string'&&ARENA_TITLE_DEFINITIONS.some(t=>t.id===id)).slice(0,4):[];
   this.shop=Array.isArray(r.shop)?r.shop.filter((id):id is string=>typeof id==='string'&&ARENA_SHOP.some(t=>t.id===id)):[];this.equippedTitle=typeof r.equippedTitle==='string'&&this.titles.includes(r.equippedTitle)?r.equippedTitle:'';
  }
 }

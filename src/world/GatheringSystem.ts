@@ -12,7 +12,7 @@ export const GATHER_RECIPES=[
 ] as const;
 const models:Record<GatherKind,string>={
  ore:'models/dungeon/Kenney_Dungeon_crystal.glb',
- herb:'models/environment/Kenney_nature-kit_tree-detailed.glb',
+ herb:'models/gathering/Kenney_Flower_Astral.glb',
  chest:'models/dungeon/Kenney_Dungeon_chest.glb',
 };
 const loader=new GLTFLoader();
@@ -82,6 +82,7 @@ export class GatheringSystem{
  start():boolean{
   const id=this.label.dataset.id;
   if(!id||!this.nodes.some(n=>n.id===id))return false;
+  if(this.nodes.find(n=>n.id===id)?.kind==='chest'&&(this.crafts.key??0)<1)return false;
   this.working={id,progress:0};return true;
  }
  update(dt:number,position:Vector3,active:boolean):void{
@@ -99,6 +100,7 @@ export class GatheringSystem{
   this.working.progress=Math.min(2,this.working.progress+Math.max(0,dt));
   this.bar.value=this.working.progress;this.action.disabled=true;
   if(this.working.progress>=2){
+    if(node.kind==='chest'){if((this.crafts.key??0)<1){this.working=null;return;}this.crafts.key--;}
     this.exhausted.set(node.id,this.elapsed+node.cooldown);
     this.stock[node.kind]=Math.min(99999,this.stock[node.kind]+1);
     this.onCollect(node.kind);this.working=null;this.action.disabled=false;this.label.hidden=true;
