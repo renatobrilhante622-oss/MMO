@@ -481,7 +481,7 @@ export class ArticulatedCharacter {
     this.skinKey=id;
     this.skinTone=color;
     this.skinTier=Math.max(0,Math.min(5,rarity));
-    this.imported?.setCosmeticPalette(color,this.skinTier);
+    this.imported?.setCosmeticPalette?.(color,this.skinTier);
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
     this.replaceImportedModel(this.definition);
