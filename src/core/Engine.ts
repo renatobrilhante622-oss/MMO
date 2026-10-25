@@ -48,6 +48,7 @@ import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
 import { regionArrival, travelPermission } from '../world/RegionTravel';
 import { RegionTravelUI } from '../ui/RegionTravelUI';
 import { PortalChannelVFX } from '../world/PortalChannelVFX';
+import {MapInstanceManager} from '../world/MapInstanceManager';
 import {QuestSystem,type QuestDefinition} from '../rpg/QuestSystem';
 import {regionalMaterialForKill} from '../rpg/RegionalLoot';
 import {NPCSystem} from '../world/NPCSystem';
@@ -65,7 +66,9 @@ export class Engine {
   readonly camera = new PerspectiveCamera(58, 1, 0.1, 1000);
   readonly renderer: WebGLRenderer;
   readonly events = new EventBus();
-  readonly terrain: OpenWorldGenerator;
+  terrain: OpenWorldGenerator;
+  readonly mapInstances:MapInstanceManager;
+  private restoredRegionId='aurora';
   readonly physics: PhysicsWorld;
   readonly hero: HeroController;
   readonly combat: CombatSystem;
@@ -79,7 +82,7 @@ export class Engine {
   readonly regionTravel:RegionTravelUI;
   readonly portalVfx=new PortalChannelVFX();
   readonly quests:QuestSystem;
-  readonly npcs:NPCSystem;
+  npcs:NPCSystem;
   readonly questTracker:QuestTrackerHUD;
   private deferredQuestSave:unknown;
   private questAutoMove:MapPoint|null=null;
@@ -179,11 +182,15 @@ export class Engine {
     this.terrain = new OpenWorldGenerator(this.scene, 713);
     this.terrain.generate();
     this.physics = new PhysicsWorld(this.terrain);
+    this.mapInstances=new MapInstanceManager(this.scene,this.physics,this.terrain);
     this.inventory = new InventoryAndLoot(this.events, 407);
     this.progress = new AdventureProgress(this.inventory);
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
+    if(this.restoredRegionId!=='aurora'){
+      this.terrain=this.mapInstances.activate(this.restoredRegionId);
+    }
     this.quests=new QuestSystem(this.inventory,this.progress);
     this.quests.restore(this.deferredQuestSave);
     if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
@@ -194,6 +201,7 @@ export class Engine {
     this.refreshStats();
     this.combat = new CombatSystem(this.scene, this.events);
     this.enemies = new EnemyAI(this.scene, this.physics, this.events);
+    this.enemies.resetForRegion(this.mapInstances.regionId);
     this.dungeon = new DungeonBossManager(this.scene, this.enemies, this.events, this.terrain.portalPosition);
     this.companions = new PetAndMountSystem(this.scene, this.hero, this.physics, this.events);
     this.csm = new CSM({
@@ -253,7 +261,7 @@ export class Engine {
         onTeleport:()=>this.regionTravel.open(),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
         onQuestClaimed:id=>this.claimQuest(id),
-      },()=>this.progress.language);
+      },()=>this.progress.language,this.mapInstances.regionId);
     this.scene.add(this.portalVfx.root);
     this.regionTravel=new RegionTravelUI(this.container,()=>({
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -334,7 +342,7 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
-      const slainRegion=regionAt(position.x,position.z).id;
+      const slainRegion=this.mapInstances.regionId;
       this.quests.onKill(kind,slainRegion,boss);
       this.questTracker.refresh();
       this.progress.earnKill(level,boss,slainRegion);if(boss)this.progress.profile.bossKills++;
@@ -570,7 +578,7 @@ export class Engine {
   private updateJourney(dt:number,active:boolean,input:ReturnType<typeof emptyInput>):void {
     const p=this.progress,hero=this.hero;
     this.autoButton.hidden=!p.vip&&!this.hudEditor.active;this.autoButton.classList.toggle('active',p.autoFarm);
-    const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
+    const region=REGIONS.find(r=>r.id===this.mapInstances.regionId)!;if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
     this.quests.onVisit(region.id);
     const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;hero.rig.skinAppearance(skin.id,skin.color,RARITIES.indexOf(skin.rarity));hero.rig.wings.configure(p.evolution.wings,p.evolution.wings?p.evolution.wingLevels[p.evolution.wings]:1);
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);this.companions.setEvolution(p.evolution.level(pet.id),p.evolution.level(mount.id));
@@ -589,7 +597,10 @@ export class Engine {
         this.portalVfx.update(dt,this.channel.remaining);
         if(this.channel.remaining<=0){
           const dest=this.channel;
-          hero.teleportTo(new Vector3(dest.x,this.terrain.heightAt(dest.x,dest.z)+1.1,dest.z));
+          if(dest.regionId&&dest.regionId!==this.mapInstances.regionId){
+            this.activateMap(dest.regionId);
+            hero.teleportTo(this.terrain.spawnPoint.clone().add(new Vector3(0,.2,0)));
+          }else hero.teleportTo(new Vector3(dest.x,this.terrain.heightAt(dest.x,dest.z)+1.1,dest.z));
           if(dest.regionId&&!p.discovered.includes(dest.regionId))p.discovered.push(dest.regionId);
           this.channel=null;this.portalVfx.stop();
           this.combat.particles.celebration(hero.position);this.save();
@@ -686,6 +697,32 @@ export class Engine {
     this.portalVfx.start(this.hero.position.clone().add(new Vector3(0,-this.hero.radius,.0)));
     this.combat.particles.celebration(this.hero.position);
   }
+  /** Replaces the entire terrain scene graph and static physics, then regional actors. */
+  private activateMap(id:string):void{
+    if(id===this.mapInstances.regionId)return;
+    this.npcs.dispose();
+    this.enemies.dispose();
+    this.drops.splice(0);
+    for(const object of this.dropMeshes.values())this.scene.remove(object);
+    this.dropMeshes.clear();
+    this.questAutoMove=null;this.questAutoRoute=[];
+    this.setWaypoint(null);
+    this.terrain=this.mapInstances.activate(id);
+    this.enemies.resetForRegion(id);
+    this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
+      this.quests,{
+        onForge:()=>this.hub.openForge(),
+        onShop:()=>this.hub.open('shop'),
+        onTeleport:()=>this.regionTravel.open(),
+        onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
+        onQuestClaimed:questId=>this.claimQuest(questId),
+      },()=>this.progress.language,id);
+    this.hero.mounted=false;
+    this.companions.mount.visible=false;
+    const region=REGIONS.find(item=>item.id===id)!;
+    this.hud.notify('Região carregada: '+region.name[0],'success');
+  }
+
   private startRegionTravel(id:string):void{
     const permission=travelPermission(id,{
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -867,7 +904,7 @@ export class Engine {
     this.hud.update({
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
-      regionName:regionAt(this.hero.position.x,this.hero.position.z).name[this.progress.language==='pt'?0:1],
+      regionName:REGIONS.find(region=>region.id===this.mapInstances.regionId)!.name[this.progress.language==='pt'?0:1],
       classId: this.classId, state: this.hero.machine.state,
       gold: this.inventory.gold, crystals: this.inventory.crystals, items: this.inventory.items, equipment: this.inventory.equipment,
       buildings: this.base.buildings.map(building => ({ ...building, cost: this.base.cost(building.id) })),
@@ -911,7 +948,7 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, regionId:this.mapInstances.regionId, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
     } catch {
       if (!this.saveErrorReported && this.hud) { this.hud.notify('Armazenamento local indisponível. Esta sessão continua sem salvar.', 'warning'); this.saveErrorReported = true; }
     }
@@ -930,6 +967,7 @@ export class Engine {
       this.base.restore(save.base);
       this.codex.restore(save.codex);
       this.deferredQuestSave=save.quests;
+      if(typeof save.regionId==='string'&&REGIONS.some(r=>r.id===save.regionId))this.restoredRegionId=save.regionId;
     } catch { /* Invalid or unavailable browser storage starts a fresh, playable session. */ }
   }
 
