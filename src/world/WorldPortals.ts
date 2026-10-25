@@ -119,7 +119,10 @@ export class WorldPortals {
       if(active&&distance<closest){closest=distance;chosen=portal;}
       this.scratch.copy(portal.root.position).add(new Vector3(0,7.4,0)).project(camera);
       const screen=this.scratch;
-      const visible=distance<66&&screen.z>-1&&screen.z<1&&Math.abs(screen.x)<1&&Math.abs(screen.y)<1;
+      // World-space proximity + frustum gating. Never pin out-of-range labels
+      // to the top edge, over HP, VIP or minimap.
+      const visible=active&&distance<18&&screen.z>-1&&screen.z<1
+        &&Math.abs(screen.x)<.92&&Math.abs(screen.y)<.82;
       portal.label.hidden=!visible;
       if(!visible)continue;
       portal.label.style.left=((screen.x+1)*.5*bounds.width)+'px';
