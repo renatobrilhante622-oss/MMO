@@ -408,8 +408,17 @@ export class ArticulatedCharacter {
     this.pelvis.visible=false;
     this.weapons.right.visible=false;
     this.weapons.left.visible=false;
+    // Move the wings with the actual animated chest bone: never attach to
+    // feet/world space or to a mount's belly.
     this.root.add(this.wings.root,this.skinAura);
-    this.wings.root.position.set(0,1.3,-.16);
+    this.wings.root.scale.setScalar(.58);
+    this.wings.root.rotation.set(0,0,0);
+    const attached=actor.attachAt('spine2',this.wings.root,new Vector3(0,0,-.19));
+    if(!attached){
+      this.torso.add(this.wings.root);
+      this.wings.root.position.set(0,.14,-.19);
+      this.wings.root.scale.setScalar(.58);
+    }
     this.skinAura.position.y=1.3;
     actor.clearWeaponSlots();
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
