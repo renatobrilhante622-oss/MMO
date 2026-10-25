@@ -5,7 +5,7 @@ export function petFollowPosition(position:Vector3,facing:Vector3,mounted:boolea
   const forward=facing.clone().setY(0);
   if(forward.lengthSq()<1e-6)forward.set(0,0,1);
   forward.normalize();
-  const lateral=new Vector3(-forward.z,0,forward.x);
+  const lateral=new Vector3(forward.z,0,-forward.x);
   const offset=lateral.multiplyScalar(1.8).addScaledVector(forward,-1.2);
   // Keep claws outside the entire mounted animal body, not under its feet.
   if(mounted&&offset.length()<2.4)offset.setLength(2.4);
