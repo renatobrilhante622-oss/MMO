@@ -1,5 +1,5 @@
 import {
-  BufferGeometry, CapsuleGeometry, ConeGeometry, DoubleSide,
+  BufferGeometry, CapsuleGeometry, ConeGeometry, Color, DoubleSide,
   Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, SphereGeometry, Vector2,
   TorusGeometry, Vector3,
 } from 'three';
