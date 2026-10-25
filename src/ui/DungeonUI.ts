@@ -24,6 +24,12 @@ export class DungeonUI {
  private seconds=0;
  private paintClock=0;
  private paintKey='';
+ private loadingMessage:string|null=null;
+ setLoading(message:string|null):void{
+   this.loadingMessage=message;
+   this.paintKey='';
+   if(message){this.status.hidden=false;this.status.textContent=message;}
+ }
  constructor(private readonly host:HTMLElement,private readonly level:()=>number,
    private readonly onEnter:(id:string,difficulty:DungeonDifficulty)=>boolean,
    private readonly onExit:()=>void){
@@ -92,6 +98,7 @@ export class DungeonUI {
    panel.append(gallery,details);this.body.append(panel);
  }
  update(dt:number,active:boolean,completed:boolean,wave:number,waves:number,status:string):void{
+   if(this.loadingMessage){this.status.hidden=false;this.status.textContent=this.loadingMessage;return;}
    if(!active&&!completed){this.status.hidden=true;this.seconds=0;this.paintKey='';return;}
    if(active)this.seconds+=Math.max(0,dt);
    this.status.hidden=false;
