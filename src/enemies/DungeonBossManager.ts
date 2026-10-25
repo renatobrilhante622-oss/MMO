@@ -28,6 +28,7 @@ export class DungeonBossManager {
   private elapsed = 0;
   private externalArchitecture=false;
   private roomAtWave?: (wave:number,waves:number)=>Vector3;
+  private roomGate?: (wave:number,waves:number)=>boolean;
 
   constructor(private scene: Scene, private enemies: EnemyAI, private events: EventBus, private portalPosition: Vector3) {
     this.architecture=new DungeonArchitecture(scene,portalPosition,(x,z)=>enemies.terrainHeight(x,z));
@@ -42,8 +43,9 @@ export class DungeonBossManager {
     this.externalArchitecture=true;
     this.architecture.root.visible=false;
   }
+  setRoomGate(gate:(wave:number,waves:number)=>boolean):void{this.roomGate=gate;}
   clearInstanceRooms():void{
-    this.roomAtWave=undefined;this.externalArchitecture=false;
+    this.roomAtWave=undefined;this.roomGate=undefined;this.externalArchitecture=false;
   }
   setPortalPosition(position:Vector3):void{
     this.portalPosition.copy(position);
@@ -85,6 +87,10 @@ export class DungeonBossManager {
     (this.arenaRing.material as MeshBasicMaterial).opacity = .3 + Math.sin(this.elapsed * 2) * .1;
     const living = this.waveEnemies.filter(enemy => enemy.alive);
     if (living.length === 0) {
+      if(this.active&&this.roomGate&&!this.roomGate(this.wave,this.definition.waves)){
+        this.status='Sala 2/3: Destrua os Cristais para abrir o portão';
+        return;
+      }
       if (this.wave === this.definition.waves + 1) {
         if(this.floor<this.maxFloors){this.floor++;this.wave=0;this.boss=null;this.bossPhase=0;this.waveDelay=5;this.waveEnemies=[];this.events.emit('message',{text:`Andar ${this.floor} / ${this.maxFloors} · Floor`,tone:'success'});}
         else{this.finish();return;}
