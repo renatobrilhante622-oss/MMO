@@ -50,6 +50,10 @@ export class AnimatedGLB {
   private disposed = false;
   private attackTime = 0;
   private model?: Object3D;
+  private readonly creaturePhase={value:0};
+  private readonly creatureStride={value:0};
+  private readonly creatureTime={value:0};
+  private readonly staticCreature:boolean;
   private baseColor = new Color(0x617080);
   private accent = new Color(0x9c7dcc);
   private readonly preservedPalette: boolean;
@@ -65,6 +69,7 @@ export class AnimatedGLB {
   ) {
     this.root.name = 'GLB ' + name;
     this.preservedPalette = name.startsWith('KayKit_') || name.startsWith('Creature_') || name==='Horse' || name==='Parrot';
+    this.staticCreature=name.startsWith('Creature_')&&name!=='Creature_wolf';
     // Browser-only I/O. Vitest/server-side execution never requests graphics.
     if (typeof document === 'undefined') return;
     void this.importModel(name);
@@ -96,6 +101,37 @@ export class AnimatedGLB {
       const isolated = (source: MeshStandardMaterial): MeshStandardMaterial => {
         const material = source.clone();
         this.materials.push({ material, original: source.color.clone(), originalEmissive: source.emissive.clone(), originalEmissiveIntensity: source.emissiveIntensity });
+        if(this.staticCreature && gltf.animations.length===0 && object.geometry?.attributes.position){
+          // Non-skinned GLBs have no bones. A vertex shader gives a small,
+          // reversible breathing / hoof / membrane deformation in local space.
+          // This must not be mistaken for a sourced skeletal gallop animation.
+          object.geometry.computeBoundingBox();
+          const bounds=object.geometry.boundingBox;
+          if(bounds){
+            const extent=bounds.getSize(new Vector3());
+            const wing=name==='Creature_wyvern'||name==='Creature_dragon';
+            const px=bounds.getCenter(new Vector3());
+            const pY=bounds.min.y;
+            material.onBeforeCompile=(shader)=>{
+              shader.uniforms.creaturePhase=this.creaturePhase;
+              shader.uniforms.creatureStride=this.creatureStride;
+              shader.uniforms.creatureTime=this.creatureTime;
+              shader.vertexShader='uniform float creaturePhase, creatureStride, creatureTime;\n'+shader.vertexShader;
+              shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+                `#include <begin_vertex>
+                  float bodyH=clamp((position.y-${pY.toFixed(6)})/${Math.max(.0001,extent.y).toFixed(6)},0.,1.);
+                  float sideX=(position.x-${px.x.toFixed(6)})/${Math.max(.0001,extent.x).toFixed(6)};
+                  float breath=sin(creatureTime*2.2)*.006;
+                  transformed.y+=breath*${Math.max(.001,extent.y).toFixed(6)}*bodyH;
+                  ${wing? `float membrane=smoothstep(.15,.42,abs(sideX))*smoothstep(.35,.7,bodyH);
+                     transformed.y+=sin(creatureTime*2.6+abs(sideX)*3.2)*membrane*.052*${Math.max(.001,extent.y).toFixed(6)};`:
+                     `float paws=(1.-smoothstep(.18,.37,bodyH))*creatureStride;
+                      transformed.z+=sin(creaturePhase*2.0+sign(sideX)*1.57)*paws*.032*${Math.max(.001,extent.z).toFixed(6)};`}
+                `);
+            };
+            material.customProgramCacheKey=()=>wing?'eterna-dragon-membrane-v1':'eterna-ungaited-quadruped-v1';
+          }
+        }
         return material;
       };
       object.material = Array.isArray(object.material)
@@ -270,6 +306,9 @@ export class AnimatedGLB {
   update(dt: number, speed: number, riding = false, locomotion?: string): void {
     if (!this.ready || !this.root.visible) return;
     const step = Math.min(.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
+    this.creatureTime.value+=step;
+    this.creatureStride.value=Math.min(1,Math.max(0,speed));
+    this.creaturePhase.value+=step*(2.5+speed*8);
     const target = locomotion === 'dead' ? 'dead'
       : riding ? 'mounted'
       : locomotion === 'slide' ? 'slide'
