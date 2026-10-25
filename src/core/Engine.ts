@@ -905,11 +905,25 @@ export class Engine {
     const twilight = Math.max(0, 1 - Math.abs(sun.y) * 3);
     const top = new Color('#09152c').lerp(new Color('#477f9d'), daylight);
     const horizon = new Color('#192f49').lerp(new Color('#b4d1c6'), daylight).lerp(new Color('#e9b69b'), twilight * 0.32);
+    const biome=({
+      aurora:{zenith:'#648fa2',horizon:'#9baea0',ground:'#545d3b'},
+      crypt:{zenith:'#4b4b65',horizon:'#827c90',ground:'#64546a'},
+      highlands:{zenith:'#92c4d8',horizon:'#c2dce5',ground:'#92a8b5'},
+      rift:{zenith:'#934b50',horizon:'#b67d69',ground:'#74544a'},
+      eclipse:{zenith:'#3c3564',horizon:'#75609b',ground:'#554d71'}
+    } as Record<string,{zenith:string;horizon:string;ground:string}>)[this.mapInstances.regionId];
+    if(biome){
+      top.lerp(new Color(biome.zenith),.44);
+      horizon.lerp(new Color(biome.horizon),.4);
+      this.hemisphere.color.set(biome.horizon);
+      this.hemisphere.groundColor.set(biome.ground);
+    }
     this.sky.update(this.elapsed, sun, top, horizon);
     this.csm.lightDirection.copy(sun).negate();
     if (this.csm.lightDirection.y > -0.15) this.csm.lightDirection.y = -0.15;
     this.csm.lights.forEach(light => { light.intensity = 0.24 + daylight * 2.5; light.color.set(daylight > 0.2 ? '#fff0d6' : '#8facd8'); });
-    this.hemisphere.intensity = 0.65 + daylight * 1.5;
+    this.hemisphere.intensity = 1.25 + daylight * 1.15;
+    this.scene.environmentIntensity=.64+daylight*.12;
     const fogColor = horizon.clone().multiplyScalar(0.72);
     (this.scene.fog as FogExp2).color.copy(fogColor);
     this.atmosphere.uniforms.fogColor.value.copy(fogColor);
