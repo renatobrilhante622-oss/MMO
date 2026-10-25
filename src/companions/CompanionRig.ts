@@ -41,6 +41,9 @@ export class CompanionRig {
     this.glow=this.material(0xa9e8ff,.4);this.glow.emissive.setHex(0xa9e8ff);
     this.root.add(this.spine);this.spine.position.y=horse?1.23:.68;
     if(horse){this.saddle.name='mountSaddleNode';this.saddle.position.set(0,1.6,-.08);this.root.add(this.saddle);}
+    // Geometry primitives exist solely for old, headless physics/unit tests.
+    // Browser/Android actors render only imported authored GLB meshes.
+    if(typeof document==='undefined'){
     this.ellipsoid(this.spine,this.coat,[horse?.4:.25,horse?.5:.28,horse?.83:.53],[0,0,0]);
     this.ellipsoid(this.spine,this.coat,[horse?.43:.3,horse?.53:.34,horse?.39:.29],[0,0,horse?.44:.29]);
     this.ellipsoid(this.spine,this.coat,[horse?.43:.27,horse?.46:.29,horse?.38:.26],[0,0,horse?-.49:-.32]);
@@ -101,6 +104,11 @@ export class CompanionRig {
       }
       this.ellipsoid(this.armor,metal,[.32,.1,.3],[0,.52,.42]);
     }
+    }
+    if(typeof document!=='undefined'){
+      this.spine.visible=false;
+      this.root.add(this.flight.root);
+    }
     this.wings.visible=false;this.armor.visible=false;
     this.particles=new RarityAura(horse?.8:.5);this.root.add(this.particles);
     this.aura=new Mesh(new RingGeometry(.7,.75,48),new MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.3,transparent:true,opacity:.35,depthWrite:false,blending:AdditiveBlending,side:2}));
@@ -115,15 +123,25 @@ export class CompanionRig {
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
     for(const group of [this.ornaments,this.morph]){group.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});group.clear();}
     const bird=c.id==='phoenix',dragon=['wyvern','dracolich'].includes(c.id),giant=['fenrir','nighthorse'].includes(c.id),stag=['stag','spiritstag'].includes(c.id),hell=c.id==='hellhound';
-    const importedType=bird?'Parrot':this.horse&&!['fenrir','nighthorse','wyvern','stag','spiritstag'].includes(c.id)?'Horse':'';
-    if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=true;
-      if(importedType){this.imported=new AnimatedGLB(importedType as 'Horse'|'Parrot',bird?.9:2.1,()=>{this.spine.visible=false;if(this.batch)this.batch.mesh.visible=false;},false);this.root.add(this.imported.root);}}
+    // Every in-game companion has an authored GLB silhouette. Variant effects
+    // remain particles/shaders; no orange-cylinder wyvern appears during loading.
+    const importedType=bird?'Parrot'
+      :c.id==='wyvern'?'Creature_wyvern'
+      :c.id==='dracolich'?'Creature_dragon'
+      :['fenrir','nighthorse','wolf','fox','hellhound','frostwolf','spiritwolf','sunwolf','moonwolf'].includes(c.id)?'Creature_wolf'
+      :this.horse?'Horse':'Creature_wolf';
+    if(importedType!==this.importedType){this.imported?.dispose();this.imported=undefined;this.importedType=importedType;this.spine.visible=typeof document==='undefined';
+      if(importedType){this.imported=new AnimatedGLB(importedType,bird?.9:dragon?3.2:giant?2.6:2.1,()=>{
+        this.spine.visible=false;
+        if(this.batch)this.batch.mesh.visible=false;
+      },false);this.root.add(this.imported.root);}}
     this.imported?.tint(c.color,c.color);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
     (this.aura.material as MeshStandardMaterial).emissive.setHex(c.color);this.aura.visible=this.rarity>=2;
     this.flight.configure(bird?'celestial':dragon?(c.id==='wyvern'?'magma':'necrotic'):null,Math.min(10,3+this.rarity));
+    if(typeof document==='undefined'){
     if(stag)for(const side of [-1,1]){this.between(this.ornaments,new Vector3(side*.13,.2,-.1),new Vector3(side*.43,.9,-.25),.025,this.glow);for(let i=0;i<4;i++)this.between(this.ornaments,new Vector3(side*(.21+i*.08),.4+i*.17,-.16),new Vector3(side*(.37+i*.09),.58+i*.17,.02),.015,this.glow);}
     if(bird){const beak=this.mesh(this.ornaments,new ConeGeometry(.1,.35,8),this.glow,0,-.06,.42);beak.rotation.x=Math.PI/2;for(let i=0;i<5;i++){const feather=this.mesh(this.morph,new CapsuleGeometry(.045,.7,4,8),this.glow,(i-2)*.1,-.05,-.6);feather.rotation.x=-.6;feather.rotation.z=(i-2)*.2;}}
     if(hell||dragon||giant||c.id==='nightmare'){
@@ -136,7 +154,14 @@ export class CompanionRig {
       if(c.id==='dracolich'){const rib=this.mesh(this.morph,new TorusGeometry(.29,.025,5,16,Math.PI),this.coat,0,0,-.36+i*.13);rib.rotation.y=Math.PI/2;}
     }
     if(this.rarity>=4){const halo=this.mesh(this.morph,new TorusGeometry(.37,.018,6,32),this.glow,0,.9,.35);halo.rotation.x=Math.PI/2;}
-    if(!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
+    }
+    // Legacy placeholder batching is only available in headless unit tests.
+    // It is never shown in the Android/WebGL game even while GLB loads.
+    this.ornaments.visible=typeof document==='undefined';
+    this.morph.visible=typeof document==='undefined';
+    this.armor.visible=typeof document==='undefined';
+    this.wings.visible=typeof document==='undefined';
+    if(typeof document==='undefined'&&!this.imported?.ready)this.batch=new RigidSkinBatch(this.root,this.coat);
   }
   update(dt:number,speed:number,time:number,attack=false):void {
     this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);

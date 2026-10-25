@@ -36,13 +36,20 @@ export class CreatureRig {
     this.scale = boss ? 2.3 : kind === 'golem' ? 1.45 : 1;
     this.root.name = `${kind}-articulated-rig`;
     this.root.add(this.spine);
-    if (typeof document !== 'undefined' && (kind === 'skeleton' || kind === 'wraith' || boss)) {
-      // All migrated species are imported skinned GLBs: no procedural visual stand-ins.
-      const model = boss ? 'Quaternius_demon' : kind === 'wraith' ? 'Quaternius_ghost' : 'KayKit_Skeleton_Minion';
-      this.imported = new AnimatedGLB(model, boss ? 4.0 : 1.95, () => {}, true);
+    if (typeof document !== 'undefined') {
+      // Browser rendering is GLB-only. Legacy primitive rigs remain available
+      // only for non-rendering unit tests, never as visible world art.
+      const model = boss ? 'Quaternius_demon'
+        : kind === 'skeleton' ? 'KayKit_Skeleton_Minion'
+        : kind === 'wraith' ? 'Quaternius_ghost'
+        : kind === 'wolf' ? 'Creature_wolf'
+        : kind === 'slime' ? 'Creature_slime'
+        : kind === 'golem' ? 'Creature_golem'
+        : 'KayKit_Skeleton_Warrior';
+      this.spine.visible = false;
+      this.imported = new AnimatedGLB(model, boss ? 4.0 : kind==='golem'?3.2:kind==='slime'?1.25:1.95, () => {}, true);
       this.root.add(this.imported.root);
     } else {
-      // Keep the existing diagnostic rig in unit tests and for unported species.
       if (kind === 'slime' && !boss) this.slime();
       else if (kind === 'wolf' && !boss) this.wolf();
       else this.humanoid();

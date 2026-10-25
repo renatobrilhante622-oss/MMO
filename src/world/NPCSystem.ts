@@ -2,6 +2,7 @@ import {PerspectiveCamera,Scene,Vector3} from 'three';
 import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
 import {REGIONS} from './Regions';
 import type {QuestSystem} from '../rpg/QuestSystem';
+import {npcPortrait,localizeQuestText,questRewardCard} from '../ui/NPCDialogUI';
 
 export type NPCRole='quest'|'merchant'|'smith'|'teleport';
 export interface NPCDefinition {id:string;name:string;role:NPCRole;x:number;z:number;model:ModelName;region:string;icon:string;}
@@ -116,7 +117,8 @@ export class NPCSystem {
     window.className='eterna-npc-window';
     const title=document.createElement('header');
     const portrait=document.createElement('span');portrait.className='eterna-npc-portrait';
-    portrait.textContent=npc.definition.icon;
+    portrait.innerHTML=npcPortrait(npc.definition.id);
+    portrait.setAttribute('aria-label','Retrato de '+npc.definition.name);
     const name=document.createElement('div');
     const heading=document.createElement('h2');heading.textContent=npc.definition.name;
     const job=document.createElement('small');job.textContent=npc.definition.role.toUpperCase();
@@ -134,9 +136,10 @@ export class NPCSystem {
     for(const quest of this.quests.all().filter(q=>q.npcId===npc.definition.id)){
       const progress=this.quests.progressOf(quest);
       if(progress.claimed)continue;
-      if(progress.ready)action('🎁 '+(pt?'Resgatar: ':'Claim: ')+quest.title,()=>{this.callbacks.onQuestClaimed(quest.id);this.renderDialogue();});
-      else if(!progress.accepted)action('❗ '+(pt?'Aceitar: ':'Accept: ')+quest.title,()=>{if(this.quests.accept(quest.id))this.callbacks.onQuestAccepted(quest.id);this.renderDialogue();});
-      else action('📜 '+quest.title+' ('+progress.progress+'/'+quest.required+')',()=>{});
+      actions.append(questRewardCard(quest,pt));
+      if(progress.ready)action('🎁 '+(pt?'Resgatar: ':'Claim: ')+localizeQuestText(quest.title,pt),()=>{this.callbacks.onQuestClaimed(quest.id);this.renderDialogue();});
+      else if(!progress.accepted)action('❗ '+(pt?'Aceitar: ':'Accept: ')+localizeQuestText(quest.title,pt),()=>{if(this.quests.accept(quest.id))this.callbacks.onQuestAccepted(quest.id);this.renderDialogue();});
+      else action('📜 '+localizeQuestText(quest.title,pt)+' ('+progress.progress+'/'+quest.required+')',()=>{});
     }
     if(npc.definition.role==='smith')action('⚒️ '+(pt?'Abrir Forja':'Open Forge'),()=>{this.close();this.callbacks.onForge();});
     if(npc.definition.role==='merchant')action('🧪 '+(pt?'Abrir Loja':'Open Shop'),()=>{this.close();this.callbacks.onShop();});

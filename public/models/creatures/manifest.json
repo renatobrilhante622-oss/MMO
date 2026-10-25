@@ -1,0 +1,88 @@
+{
+  "license": "CC0-1.0",
+  "source": "https://3dassets.dev/",
+  "assets": [
+    {
+      "id": "wyvern",
+      "file": "models/creatures/Creature_wyvern.glb",
+      "source": "https://3dassets.dev/assets/dragons-and-wyverns-wyvern-wings-spread-a6d1b274",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/36715/v1/model.glb",
+      "title": "Wyvern With Wings Spread",
+      "license": "CC0-1.0",
+      "sha256": "c1f51de5250d1283b874f20f2e12d7a2f5f4b0036e44b9123f3ef81bbf14fea6",
+      "size": 152872,
+      "meshCount": 6,
+      "animationCount": 0,
+      "animated": false
+    },
+    {
+      "id": "horse",
+      "file": "models/creatures/Creature_horse.glb",
+      "source": "https://3dassets.dev/assets/frontier-saddle-horse",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/129/v1/model.glb",
+      "title": "Frontier saddle horse",
+      "license": "CC0-1.0",
+      "sha256": "4fc828e0f38aa67a32e76b4e3eb8101cfd13e348747c3e58c5e6bebdf586d707",
+      "size": 70156,
+      "meshCount": 3,
+      "animationCount": 0,
+      "animated": false
+    },
+    {
+      "id": "wolf",
+      "file": "models/creatures/Creature_wolf.glb",
+      "source": "https://3dassets.dev/assets/fps-survival-forest-outpost-creature-wolf-4be4d311",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/32709/v1/model.glb",
+      "title": "Timber Wolf, Jointed",
+      "license": "CC0-1.0",
+      "sha256": "e9e910152bdbd694a1272f26368936017f7a58493a98d0ca28b7cef9185745d6",
+      "size": 169004,
+      "meshCount": 8,
+      "animationCount": 2,
+      "animated": true
+    },
+    {
+      "id": "slime",
+      "file": "models/creatures/Creature_slime.glb",
+      "source": "https://3dassets.dev/assets/ember-quest-moss-slime",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/305/v1/model.glb",
+      "title": "Ember Quest moss slime",
+      "license": "CC0-1.0",
+      "sha256": "a53ba51f20a94dc61466228c6f3d6f08f231c14e94efc08da133a49ceb2f893b",
+      "size": 13864,
+      "meshCount": 4,
+      "animationCount": 0,
+      "animated": false
+    },
+    {
+      "id": "golem",
+      "file": "models/creatures/Creature_golem.glb",
+      "source": "https://3dassets.dev/assets/runestone-conservatory-stone-garden-golem",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/106/v1/model.glb",
+      "title": "Runestone Stone Garden Golem",
+      "license": "CC0-1.0",
+      "sha256": "abd253496feb85ae816d99f01070c16136d53234d00533733bb32108483c25c3",
+      "size": 89436,
+      "meshCount": 4,
+      "animationCount": 0,
+      "animated": false
+    },
+    {
+      "id": "dragon",
+      "file": "models/creatures/Creature_dragon.glb",
+      "source": "https://3dassets.dev/assets/dragons-and-wyverns-western-dragon-wings-spread-8d633362",
+      "cdnUrl": "https://cdn.3dassets.dev/assets/36695/v1/model.glb",
+      "title": "Western Dragon With Wings Spread",
+      "license": "CC0-1.0",
+      "sha256": "e6d97b12ff47d996025af6f75fa7bc1670d0747ae81b86a83ed6d4247f789172",
+      "size": 198252,
+      "meshCount": 6,
+      "animationCount": 0,
+      "animated": false
+    }
+  ],
+  "pending": [
+    "hellhound"
+  ],
+  "note": "Standalone Hellhound animation/model unavailable in the verified CC0 source; use authentic animated wolf mesh with fire VFX until a distinct Hellhound asset is approved."
+}
