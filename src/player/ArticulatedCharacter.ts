@@ -511,7 +511,8 @@ export class ArticulatedCharacter {
       pose.rightArm = [.15, .3, .3];
     }
     if (state === 'mounted') {
-      pose.bodyY = 1.94 + Math.sin(time * 15) * .025;
+      // The rider is now parented to the saddle socket; no floating hip offset.
+      pose.bodyY = .75 + Math.sin(time * 8) * .012;
       pose.leftThigh = [-.8, -.1, -.32];
       pose.rightThigh = [-.8, .1, .32];
       pose.leftKnee = pose.rightKnee = .9;
@@ -620,7 +621,7 @@ export class ArticulatedCharacter {
   }
 
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
-    dt = MathUtils.clamp(dt, 0, .05);this.imported?.update(dt,movement);
+    dt = MathUtils.clamp(dt, 0, .05);this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted');
     const angularDelta = Math.atan2(Math.sin(heading - this.lastHeading), Math.cos(heading - this.lastHeading));
     this.lastHeading = heading;
     this.turning = MathUtils.damp(this.turning, angularDelta / Math.max(dt, .001), 5, dt);
