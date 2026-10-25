@@ -140,12 +140,14 @@ export class OpenWorldGenerator {
     this.life.createAmbient();
     this.life.createVortex(this.portalPosition);
     this.life.createFire();
-    this.markers.push(
-      { x: 0, z: 18, label: 'Vila Aurora', color: '#edc278' },
-      { x: 47, z: -3, label: 'Lago Espelhado', color: '#72c9de' },
-      { x: 0, z: -70, label: 'Portal da Fenda', color: '#be82ed' },
-      { x: -60, z: -45, label: 'Ermos', color: '#95b774' },
-    );
+    this.markers.push({x:0,z:18,label:({
+      aurora:'Vila de Aster',crypt:'Acampamento da Cripta',
+      highlands:'Refúgio Glacial',rift:'Posto da Forja',
+      eclipse:'Santuário Abissal'
+    } as Record<string,string>)[this.regionId]??'Acampamento',color:'#edc278'});
+    if(this.regionId==='aurora'){
+      this.markers.push({x:47,z:-3,label:'Lago Espelhado',color:'#72c9de'});
+    }
   }
 
   private material(parameters: THREE.MeshStandardMaterialParameters): THREE.MeshStandardMaterial {
@@ -171,6 +173,7 @@ export class OpenWorldGenerator {
     material.name = 'Scanned CC0 PBR grass, soil, stone, snow and scorched ground';
     material.onBeforeCompile = shader => {
       shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
+      shader.uniforms.terrainBiome={value:Math.max(0,['aurora','crypt','highlands','rift','eclipse'].indexOf(this.regionId))};
       shader.uniforms.terrainStone={value:this.ground?.cobble.map};shader.uniforms.terrainDirt={value:this.ground?.dirt.map};shader.uniforms.terrainGrass={value:this.ground?.grass.map};shader.uniforms.terrainSnow={value:this.ground?.snow.map};shader.uniforms.terrainScorched={value:this.ground?.scorched.map};shader.uniforms.terrainStoneNormal={value:this.ground?.cobble.normalMap};shader.uniforms.terrainStoneRough={value:this.ground?.cobble.roughnessMap};
       shader.vertexShader = shader.vertexShader.replace('#include <common>', `
         #include <common>
