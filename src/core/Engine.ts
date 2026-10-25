@@ -636,7 +636,7 @@ export class Engine {
     }
     const farmCandidates=this.enemies.enemies.filter(e=>e.alive&&e.hp>0&&!e.boss);
     const objective=this.quests.active();
-    const priority=objective?.goal==='kill'?farmCandidates.filter(e=>e.kind===objective.target&&regionAt(e.position.x,e.position.z).id===objective.region):[];
+    const priority=objective?.goal==='kill'?farmCandidates.filter(e=>e.kind===objective.target&&this.mapInstances.regionId===objective.region):[];
     const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},(priority.length?priority:farmCandidates),this.drops,dt);
     if(decision.stop)p.autoFarm=false;
     if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active){this.autoTarget='';this.autoRoute=[];return;}
@@ -683,7 +683,7 @@ export class Engine {
       if(npc)destination={x:npc.x,z:npc.z};
     }else if(quest.goal==='boss')destination={...region.boss};
     else if(quest.goal==='kill'){
-      const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target&&regionAt(e.position.x,e.position.z).id===quest.region)
+      const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target&&this.mapInstances.regionId===quest.region)
         .sort((a,b)=>a.position.distanceToSquared(this.hero.position)-b.position.distanceToSquared(this.hero.position))[0];
       if(target)destination={x:target.position.x,z:target.position.z};
     }
@@ -713,8 +713,7 @@ export class Engine {
     this.portals.dispose();
     this.enemies.dispose();
     this.drops.splice(0);
-    for(const object of this.dropMeshes.values())this.scene.remove(object);
-    this.dropMeshes.clear();
+    for(const id of [...this.dropMeshes.keys()])this.removeDropMesh(id);
     this.questAutoMove=null;this.questAutoRoute=[];
     this.setWaypoint(null);
     this.terrain=this.mapInstances.activate(id);
