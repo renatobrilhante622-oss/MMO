@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "assets": [
+    {
+      "file": "Kenney_Dungeon_floor.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/floor.glb",
+      "sourceBlobSha1": "65ed388c46b1149d1371edff8ebd0a4b02ff3ba7",
+      "bytes": 12656,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_floor-detail.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/floor-detail.glb",
+      "sourceBlobSha1": "01d2df1f9c1f7f013548e90d956c5b4aaedb445a",
+      "bytes": 22796,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_wall.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/wall.glb",
+      "sourceBlobSha1": "4d036dbbe9e77227a2361c7560a3f22a8d75da38",
+      "bytes": 29012,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_wall-half.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/wall-half.glb",
+      "sourceBlobSha1": "f06337447a7d8af745696608ec6c4a84220eb9d7",
+      "bytes": 26688,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_wall-opening.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/wall-opening.glb",
+      "sourceBlobSha1": "fec1907e1ea42f1985a17efc0a33ece218ca85aa",
+      "bytes": 30080,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_gate.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/gate.glb",
+      "sourceBlobSha1": "eacdf4b5b1a7ec4205e33b20096cf6cc3e73a79a",
+      "bytes": 24864,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_column.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/column.glb",
+      "sourceBlobSha1": "b02503a9148449d579a13b7bd811c859d872b4bd",
+      "bytes": 22128,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_chest.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/chest.glb",
+      "sourceBlobSha1": "04c69e7cefec4a34ada418856174bbcafa93ed69",
+      "bytes": 44768,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_trap.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/trap.glb",
+      "sourceBlobSha1": "d54094ff7982094d1a8f0664b2f52b23513bcd69",
+      "bytes": 53668,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_stairs.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/mini-dungeon/stairs.glb",
+      "sourceBlobSha1": "814f32b0a9884e045e0b0aee2b67664d68cff59b",
+      "bytes": 22420,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    },
+    {
+      "file": "Kenney_Dungeon_fire-basket.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/graveyard-kit/fire-basket.glb",
+      "sourceBlobSha1": "0b8c6ec2ea4a4be3d7bce24b0c100601f6f278c7",
+      "bytes": 29740,
+      "license": "CC0-1.0",
+      "author": "Kenney"
+    }
+  ]
+}
