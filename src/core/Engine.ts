@@ -48,6 +48,9 @@ import { REGIONS, DUNGEONS, regionAt, dungeonVariant } from '../world/Regions';
 import { regionArrival, travelPermission } from '../world/RegionTravel';
 import { RegionTravelUI } from '../ui/RegionTravelUI';
 import { PortalChannelVFX } from '../world/PortalChannelVFX';
+import {QuestSystem,type QuestDefinition} from '../rpg/QuestSystem';
+import {NPCSystem} from '../world/NPCSystem';
+import {QuestTrackerHUD} from '../ui/QuestTrackerHUD';
 import { route, type MapPoint } from '../world/Navigation';
 import { Line, LineBasicMaterial } from 'three';
 import { MobileHUD } from '../ui/MobileHUD';
@@ -74,6 +77,13 @@ export class Engine {
   readonly hud: MobileHUD;
   readonly regionTravel:RegionTravelUI;
   readonly portalVfx=new PortalChannelVFX();
+  readonly quests:QuestSystem;
+  readonly npcs:NPCSystem;
+  readonly questTracker:QuestTrackerHUD;
+  private deferredQuestSave:unknown;
+  private questAutoMove:MapPoint|null=null;
+  private questMoveTimer=0;
+  private questAutoRoute:MapPoint[]=[];
   readonly lootFeed: LootToastFeed;
   readonly progress: AdventureProgress;
   readonly hub: AdventureHub;
@@ -173,6 +183,8 @@ export class Engine {
     this.base = new BaseBuilding(this.inventory, this.events);
     this.codex = new CodexSystem(this.events);
     this.restore();
+    this.quests=new QuestSystem(this.inventory,this.progress);
+    this.quests.restore(this.deferredQuestSave);
     if(!this.progress.profile.id)this.progress.profile.id=crypto.randomUUID();
     this.hero = new HeroController(this.scene, this.camera, this.physics, this.events, CLASS_DEFINITIONS[this.classId]);
     configureCharacterCamera(this.camera);disableCharacterCulling(this.hero.model);
@@ -229,6 +241,18 @@ export class Engine {
     });
     this.lootFeed = new LootToastFeed(this.container);
     this.hub = new AdventureHub(this.container,this);
+    this.questTracker=new QuestTrackerHUD(this.container,this.quests,{
+      navigate:quest=>this.navigateQuest(quest),
+      claim:id=>this.claimQuest(id),
+    });
+    this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
+      this.quests,{
+        onForge:()=>this.hub.openForge(),
+        onShop:()=>this.hub.open('shop'),
+        onTeleport:()=>this.regionTravel.open(),
+        onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
+        onQuestClaimed:id=>this.claimQuest(id),
+      },()=>this.progress.language);
     this.scene.add(this.portalVfx.root);
     this.regionTravel=new RegionTravelUI(this.container,()=>({
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -309,7 +333,10 @@ export class Engine {
       }
     }));
     this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
-      this.progress.earnKill(level,boss,regionAt(position.x,position.z).id);if(boss)this.progress.profile.bossKills++;
+      const slainRegion=regionAt(position.x,position.z).id;
+      this.quests.onKill(kind,slainRegion,boss);
+      this.questTracker.refresh();
+      this.progress.earnKill(level,boss,slainRegion);if(boss)this.progress.profile.bossKills++;
       this.codex.recordKill(kind, boss);
       const loot = this.inventory.generateLoot(kind, level, boss);
       const drop: LootDrop = { ...loot, position: position.clone() };
@@ -330,6 +357,8 @@ export class Engine {
       this.save();
     }));
     this.disposers.push(this.events.on('levelUp', ({ level }) => {
+      this.quests.refreshDaily();
+      this.questTracker.refresh();
       this.sound.levelUp();
       this.combat.particles.celebration(this.hero.position);
       this.refreshStats();
@@ -352,12 +381,20 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     this.elapsed += dt;
     const input = this.hud.readInput();
-    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !document.hidden;
+    const active = this.playing && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.regionTravel.blocking && !this.npcs.blocking && !document.hidden;
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
     this.progress.tick(document.hidden?0:dt);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
+    this.npcs.update(dt,this.camera,this.hero.position,active);
+    this.quests.refreshDaily();
+    this.quests.updateMilestones(
+      this.inventory.level,
+      Math.max(0,...this.inventory.items.filter(item=>item.slot==='weapon').map(item=>item.upgrade)),
+      Math.max(0,...Object.values(this.progress.evolution.wingLevels)),
+      this.progress.owned.some(id=>id!=='horse'&&id.includes('mount'))||this.hero.mounted
+    );
     if (active) {
       this.progress.profile.playSeconds+=dt;
       const simDt = this.combat.hitstop > 0 ? dt * 0.13 : dt;
@@ -526,6 +563,7 @@ export class Engine {
     const p=this.progress,hero=this.hero;
     this.autoButton.hidden=!p.vip&&!this.hudEditor.active;this.autoButton.classList.toggle('active',p.autoFarm);
     const region=regionAt(hero.position.x,hero.position.z);if(!p.discovered.includes(region.id)){p.discovered.push(region.id);this.hud.notify(region.name[p.language==='pt'?0:1]+' · Lv. '+region.minLevel+'–'+region.maxLevel);this.save();}
+    this.quests.onVisit(region.id);
     const skin=COSMETICS.find(c=>c.id===p.equipped.skin)!;hero.rig.skinAppearance(skin.id,skin.color,RARITIES.indexOf(skin.rarity));hero.rig.wings.configure(p.evolution.wings,p.evolution.wings?p.evolution.wingLevels[p.evolution.wings]:1);
     const pet=COSMETICS.find(c=>c.id===p.equipped.pet)!,mount=COSMETICS.find(c=>c.id===p.equipped.mount)!;this.companions.setAppearances(pet,mount);this.companions.setEvolution(p.evolution.level(pet.id),p.evolution.level(mount.id));
     const weapon=this.inventory.items.find(i=>i.id===this.inventory.equipment.weapon);
@@ -552,7 +590,26 @@ export class Engine {
       input.move={x:0,y:0};input.attack=false;input.skill=null;return;
     }
     if(p.waypoint){this.gpsTimer-=dt;if(this.gpsTimer<=0){this.gpsTimer=3;this.setWaypoint(p.waypoint);}}
-    const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},this.enemies.enemies.filter(e=>e.alive&&e.hp>0&&!e.boss),this.drops,dt);
+    if(this.questAutoMove&&!p.autoFarm){
+      if(Math.hypot(input.move.x,input.move.y)>.16||input.dash||input.jump){
+        this.questAutoMove=null;this.questAutoRoute=[];
+      }else{
+        const distance=Math.hypot(hero.position.x-this.questAutoMove.x,hero.position.z-this.questAutoMove.z);
+        if(distance<3){this.questAutoMove=null;this.questAutoRoute=[];input.move={x:0,y:0};}
+        else{
+          this.questMoveTimer-=dt;
+          if(this.questMoveTimer<=0){
+            this.questMoveTimer=1;this.questAutoRoute=route(this.terrain,hero.position,this.questAutoMove);
+          }
+          while(this.questAutoRoute.length&&Math.hypot(this.questAutoRoute[0].x-hero.position.x,this.questAutoRoute[0].z-hero.position.z)<1.5)this.questAutoRoute.shift();
+          input.move=hero.inputToward(this.questAutoRoute[0]??this.questAutoMove);
+        }
+      }
+    }
+    const farmCandidates=this.enemies.enemies.filter(e=>e.alive&&e.hp>0&&!e.boss);
+    const objective=this.quests.active();
+    const priority=objective?.goal==='kill'?farmCandidates.filter(e=>e.kind===objective.target&&regionAt(e.position.x,e.position.z).id===objective.region):[];
+    const decision=this.farmController.update({vip:p.vip,enabled:p.autoFarm,alive:hero.alive,inDungeon:this.dungeon.active,level:this.inventory.level,x:hero.position.x,z:hero.position.z,hp:hero.hp,maxHp:hero.maxHp,mana:hero.mana,maxMana:hero.stats.maxMana,healthThreshold:p.autoHealthThreshold,manaThreshold:p.autoManaThreshold,input,attackRange:hero.stats.range},(priority.length?priority:farmCandidates),this.drops,dt);
     if(decision.stop)p.autoFarm=false;
     if(!p.autoFarm||!p.vip||!hero.alive||this.dungeon.active){this.autoTarget='';this.autoRoute=[];return;}
     if(decision.healthPotion)this.usePotion('health');
@@ -576,6 +633,40 @@ export class Engine {
       const skill=CLASS_DEFINITIONS[this.classId].skills.findIndex((s,i)=>this.combat.cooldowns[i]<=0&&hero.mana>=s.mana);
       if(skill>=0)input.skill=skill;
     }
+  }
+
+  private claimQuest(id:string):void{
+    const definition=this.quests.get(id);
+    if(!definition||!this.quests.claim(id)){
+      this.hud.notify('Objetivo ainda não concluído.','warning');return;
+    }
+    this.sound.levelUp();
+    this.combat.particles.celebration(this.hero.position,true);
+    this.questTracker.refresh();
+    this.hud.notify('🎁 Missão concluída: '+definition.title,'success');
+    this.save();
+  }
+  private navigateQuest(quest:QuestDefinition):void{
+    const region=REGIONS.find(r=>r.id===quest.region);
+    if(!region)return;
+    let destination:MapPoint={...region.center};
+    if(quest.goal==='talk'){
+      const npc=this.npcs.definitions.find(n=>n.id===quest.target);
+      if(npc)destination={x:npc.x,z:npc.z};
+    }else if(quest.goal==='boss')destination={...region.boss};
+    else if(quest.goal==='kill'){
+      const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target&&regionAt(e.position.x,e.position.z).id===quest.region)
+        .sort((a,b)=>a.position.distanceToSquared(this.hero.position)-b.position.distanceToSquared(this.hero.position))[0];
+      if(target)destination={x:target.position.x,z:target.position.z};
+    }
+    if(quest.goal==='level'||quest.goal==='refine'||quest.goal==='wing'||quest.goal==='mount'){
+      this.hub.open('talents');return;
+    }
+    this.questAutoMove=destination;
+    this.questMoveTimer=0;
+    this.questAutoRoute=[];
+    this.setWaypoint(destination);
+    this.hud.notify('Rota da missão traçada. Use o joystick para cancelar.','info');
   }
 
   /** Shared channeling for bookmarks and story-gated map portals. */
@@ -602,6 +693,7 @@ export class Engine {
   }
 
   private interact(): void {
+    if(this.npcs.interact(this.hero.position))return;
     const delta = this.hero.position.clone().sub(this.terrain.portalPosition); delta.y = 0;
     if (delta.length() < 12) {
       this.dungeon.start(this.hero,dungeonVariant(DUNGEONS.find(d=>d.id===this.progress.selectedDungeon)??DUNGEONS[0],this.progress.dungeonDifficulty),this.inventory.level);
@@ -810,7 +902,7 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot() }));
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, classId: this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot() }));
     } catch {
       if (!this.saveErrorReported && this.hud) { this.hud.notify('Armazenamento local indisponível. Esta sessão continua sem salvar.', 'warning'); this.saveErrorReported = true; }
     }
@@ -828,6 +920,7 @@ export class Engine {
       this.progress.restore(save.progress);
       this.base.restore(save.base);
       this.codex.restore(save.codex);
+      this.deferredQuestSave=save.quests;
     } catch { /* Invalid or unavailable browser storage starts a fresh, playable session. */ }
   }
 
@@ -844,6 +937,7 @@ export class Engine {
     this.admin.dispose();this.gacha.dispose();this.journal.dispose();this.hudEditor.dispose();this.hub.dispose();this.i18n.dispose();
     this.lootFeed.dispose();
     this.hud.dispose();
+    this.questTracker.dispose();this.npcs.dispose();
     this.regionTravel.dispose();this.portalVfx.dispose();
     this.sound.dispose();
     this.companions.dispose?.();
