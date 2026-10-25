@@ -29,6 +29,7 @@ export const TERRAIN_GLSL = /* glsl */ `
 varying vec3 vTerrainPosition;
 varying vec3 vTerrainNormal;
 uniform float terrainWaterLevel;
+uniform float terrainBiome;
 uniform sampler2D terrainStone,terrainDirt,terrainGrass,terrainStoneNormal,terrainStoneRough;
 uniform sampler2D terrainSnow,terrainScorched;
 
@@ -49,6 +50,13 @@ vec3 terrainAlbedo(vec3 p,vec3 n){
   float frozen=1.-smoothstep(28.,74.,length(p.xz-vec2(95.,-83.)));
   float volcanic=1.-smoothstep(28.,64.,length(p.xz-vec2(0.,-85.)));
   float abyssal=1.-smoothstep(26.,68.,length(p.xz-vec2(-92.,97.)));
+  // Each independent map samples its own authentic, scanned ground atlas.
+  if(terrainBiome>.5){
+    vec3 biome=terrainBiome<1.5?mix(dirt,stone,.35):
+      terrainBiome<2.5?snow:
+      terrainBiome<3.5?scorched:mix(stone,scorched,.48);
+    return mix(biome,stone,cliffs*.48);
+  }
   vec3 color=mix(grass,stone,cliffs);
   color=mix(color,dirt,shoreline*(1.-cliffs));
   color=mix(color,stone,village);
