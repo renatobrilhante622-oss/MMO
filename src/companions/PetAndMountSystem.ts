@@ -19,10 +19,11 @@ export class PetAndMountSystem {
   private attackCooldown = 0;
   private lastMountPosition = new Vector3();
   private mountMoving = 0;
-  private readonly riderOriginalScale = this.hero.rig.root.scale.clone();
+  private readonly riderOriginalScale = new Vector3(1,1,1);
   private readonly mountScale = new Vector3();
 
   constructor(private scene: Scene, private hero: HeroController, private physics: PhysicsWorld, private events: EventBus) {
+    this.riderOriginalScale.copy(hero.rig.root.scale);
     this.pet.position.copy(hero.position).add(new Vector3(-2, 0, 1));
     this.lastMountPosition.copy(hero.position);
     this.scene.add(this.pet, this.mount);
