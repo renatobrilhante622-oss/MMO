@@ -3,6 +3,7 @@ import {
  Group,MathUtils,Mesh,MeshStandardMaterial,PlaneGeometry,Points,PointsMaterial,Texture,
 } from 'three';
 import type {WingStyle} from '../rpg/EvolutionSystem';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {RarityAura} from './RarityAura';
 import {wingTexture} from './WingTexture';
 
@@ -11,7 +12,7 @@ export class WingsSystem {
  readonly root=new Group();
  private readonly assembly=new Group();
  private readonly aura=new RarityAura(.8);
- private readonly geometries:PlaneGeometry[]=[];
+ private readonly geometries:BufferGeometry[]=[];
  private readonly materials:MeshStandardMaterial[]=[];
  private sparks?:Points<BufferGeometry,PointsMaterial>;
  private particlePhase=0;
@@ -38,7 +39,7 @@ export class WingsSystem {
    const makeMat=(layer:number)=>{
      const m=new MeshStandardMaterial({
        map:this.texture,color:new Color(color).lerp(new Color(0xffffff),.58+layer*.09),
-       alphaTest:.19,side:DoubleSide,roughness:.49,metalness:style==='glacial'?.34:.1,
+       alphaTest:.3,side:DoubleSide,roughness:.49,metalness:style==='glacial'?.34:.1,
        emissive:color,emissiveMap:this.texture,emissiveIntensity:.38+layer*.1+level*.04,
        transparent:true,opacity:.97,depthWrite:true,
      });
@@ -53,9 +54,10 @@ export class WingsSystem {
      this.materials.push(m);return m;
    };
    const span=2.9+level*.11;
-   const materials=[makeMat(0),makeMat(1),makeMat(2)];
+   const material=makeMat(0);
+   const layers:PlaneGeometry[]=[];
    for(let layer=0;layer<3;layer++){
-     const geometry=new PlaneGeometry(1,1,18,10);
+     const geometry=new PlaneGeometry(1,1,18+level*2,10+level);
      const pos=geometry.attributes.position;
      for(let i=0;i<pos.count;i++){
        const u=pos.getX(i)+.5,v=pos.getY(i)+.5;
@@ -64,16 +66,23 @@ export class WingsSystem {
          -.21-Math.sin(u*Math.PI)*(.30+layer*.12)+Math.pow(u,1.7)*.11);
      }
      geometry.computeVertexNormals();geometry.computeBoundingSphere();
-     this.geometries.push(geometry);
-     for(const sign of [-1,1]){
-       const pivot=new Group();
-       pivot.userData.side=sign;pivot.userData.layer=layer;
-       pivot.position.set(sign*.06,0,-layer*.045);
-       pivot.scale.x=sign;
-       const mesh=new Mesh(geometry,materials[layer]);
-       mesh.name=style+' curved feather/membrane layer '+layer;
-       mesh.castShadow=false;mesh.frustumCulled=false;pivot.add(mesh);this.assembly.add(pivot);
-     }
+     layers.push(geometry);
+   }
+   // Three layered 3D wing surfaces are merged into one draw call per side.
+   // The material stays alpha-cutout to avoid transparent overdraw on Android.
+   const combined=mergeGeometries(layers,false);
+   if(!combined)throw new Error('Unable to combine wing layers');
+   layers.forEach(g=>g.dispose());
+   combined.computeVertexNormals();combined.computeBoundingSphere();
+   this.geometries.push(combined);
+   for(const sign of [-1,1]){
+     const pivot=new Group();
+     pivot.userData.side=sign;pivot.userData.layer=0;
+     pivot.position.set(sign*.06,0,0);
+     pivot.scale.x=sign;
+     const mesh=new Mesh(combined,material);
+     mesh.name=style+' three-curved-layer wing';
+     mesh.castShadow=false;mesh.frustumCulled=false;pivot.add(mesh);this.assembly.add(pivot);
    }
    const count=level>5?84:56;
    const points=new Float32Array(count*3),velocity=new Float32Array(count);

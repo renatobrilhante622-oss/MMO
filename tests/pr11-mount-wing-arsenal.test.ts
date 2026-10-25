@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {Box3,Vector3} from 'three';
+import {Box3,Group,Vector3} from 'three';
 import {existsSync,readFileSync} from 'node:fs';
 import {CompanionRig} from '../src/companions/CompanionRig';
 import {petFollowPosition} from '../src/companions/PetAndMountSystem';
@@ -11,15 +11,16 @@ import {InventoryAndLoot,WEAPON_PACK_ITEM_TEMPLATES} from '../src/rpg/InventoryA
 import {EventBus} from '../src/core/GameTypes';
 
 describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapons',()=>{
- it('uses loaded GLB Box3 at exactly 78% to place the real saddle, not the old fixed height',()=>{
+ it('positions the rider above the rear dorsal surface instead of a fixed height ratio',()=>{
    const mount=new CompanionRig(true);
-   const mock={ready:true,getVisibleBounds:()=>new Box3(
+   const mock={ready:true,root:new Group(),getVisibleBounds:()=>new Box3(
       new Vector3(-.75,0,-1.4),new Vector3(.75,2.6,1.4))};
    (mount as unknown as {imported:unknown}).imported=mock;
    mount.updateSaddleFromGLB();
    expect(mount.saddle.position.x).toBe(0);
-   expect(mount.saddle.position.z).toBe(0);
-   expect(mount.saddle.position.y).toBeCloseTo(2.6*.78,5);
+   expect(mount.saddle.position.z).toBeLessThan(0);
+   expect(mount.saddle.position.y).toBeGreaterThan(2.6*.70);
+   expect(mount.root.userData.saddleClearance).toBeGreaterThan(0);
    expect(mount.root.userData.saddleMeasured).toBe(true);
    (mount as unknown as {imported:unknown}).imported=undefined;
    mount.dispose();
@@ -42,16 +43,16 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
    expect(code).toContain('creaturePhase');
    const rig=readFileSync('src/companions/CompanionRig.ts','utf8');
    expect(rig).toContain('this.imported.getVisibleBounds()');
-   expect(rig).toContain('height*.78');
+   expect(rig).toContain('this.raycaster.intersectObject');
    expect(rig).toContain('this.imported.animationCount===0');
  });
- it('wings attach to spine2 and have size-capped skins and real GPU particles',()=>{
+ it('wings attach to spine2 at heroic scale with multi-layer skins and real GPU particles',()=>{
    const hero=readFileSync('src/player/ArticulatedCharacter.ts','utf8');
    expect(hero).toContain("actor.attachAt('spine2',this.wings.root");
    const wings=readFileSync('src/companions/WingsSystem.ts','utf8');
-   expect(wings).toContain('Math.min(.94,.58+level*.035)');
+   expect(wings).toContain('const span=2.9+level*.11');
    expect(wings).toContain('this.aura.position.set(0,.05,-.18)');
-   expect(hero).toContain('this.wings.root.scale.setScalar(.58)');
+   expect(hero).toContain('this.wings.root.scale.setScalar(1.16)');
  });
  it('bundles five class-themed persisted visual packs per each of nine classes',()=>{
    expect(WEAPON_PACKS).toHaveLength(45);
