@@ -1,0 +1,134 @@
+/*
+ * Mobile UI collision contract: one quest system, one compact drop control,
+ * currency never covered by the quest panel, safe-area aware touch controls.
+ */
+.eterna-hud .quest-card { display:none !important; }
+.eterna-quest-tracker{
+  left:max(12px,env(safe-area-inset-left));
+  top:calc(max(12px,env(safe-area-inset-top)) + 88px);
+  width:clamp(142px,24vw,208px);
+  max-width:min(34vw,208px);
+  max-height:118px;
+  overflow:hidden;
+  gap:4px;
+  padding:8px 10px;
+  border-radius:9px;
+  border:1px solid #cdb27a4d;
+  background:#101c29cc;
+  box-shadow:0 6px 20px #0004;
+  z-index:37;
+}
+.eterna-quest-tracker .quest-tracker-title{
+  font-size:clamp(10px,1.1vw,12px);
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+.eterna-quest-tracker .quest-tracker-text{
+  font-size:10px;
+  line-height:1.35;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.eterna-quest-tracker .quest-tracker-action{flex:none;min-height:26px;padding:5px 4px;font-size:9px;}
+.journey-widgets.drop-toast-widget {
+  left:max(12px,env(safe-area-inset-left));
+  top:calc(max(12px,env(safe-area-inset-top)) + 216px);
+  width:168px;
+  max-width:33vw;
+  z-index:36;
+  opacity:.84;
+}
+.drop-toast-widget .drop-toast-list{max-height:135px}
+.eterna-hud .resource-bar{
+  z-index:47;
+  right:max(10px,env(safe-area-inset-right));
+  left:auto;
+  white-space:nowrap;
+}
+/* Card text never sits under the next grid row or clips at the lower edge. */
+.adventure-layer .collection-thumbnails{
+  align-content:start;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding-bottom:24px;
+  row-gap:12px;
+}
+.adventure-layer button.collection-thumbnail{
+  min-height:138px;
+  height:auto;
+  padding:12px 7px 15px;
+  overflow:visible;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+}
+.adventure-layer button.collection-thumbnail>span{
+  display:block;
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.45;
+  min-height:2.8em;
+  font-size:clamp(9px,.9vw,12px);
+  text-align:center;
+  text-overflow:clip;
+}
+.adventure-layer button.collection-thumbnail>small{
+  position:relative;
+  flex:0 0 auto;
+  display:block;
+  line-height:1.35;
+  min-height:1.35em;
+}
+/* NPC markers are unobtrusive symbols, not full opaque rectangles. */
+.eterna-npc-label{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  padding:0;
+  font-size:24px;
+  filter:drop-shadow(0 2px 3px #0009) drop-shadow(0 0 5px #f6d27e80);
+  animation:eternaNpcSymbol 2.2s ease-in-out infinite;
+}
+@keyframes eternaNpcSymbol{50%{translate:0 -6px}}
+@media(max-width:649px){
+  .eterna-quest-tracker{
+    top:calc(max(8px,env(safe-area-inset-top)) + 81px);
+    width:min(172px,42vw);
+    max-width:42vw;
+    max-height:104px;
+    padding:7px;
+  }
+  .eterna-quest-tracker .quest-tracker-title{font-size:10px}
+  .eterna-quest-tracker .quest-tracker-text{font-size:9px}
+  .journey-widgets.drop-toast-widget{
+    top:calc(max(8px,env(safe-area-inset-top)) + 198px);
+    width:145px;
+    max-width:37vw;
+  }
+  .adventure-layer button.collection-thumbnail{
+    min-height:130px;
+    padding:9px 5px 15px;
+  }
+}
+@media(max-height:480px) and (min-width:650px){
+  .eterna-quest-tracker{
+    top:calc(max(6px,env(safe-area-inset-top)) + 71px);
+    width:155px;
+    max-width:26vw;
+    max-height:96px;
+  }
+  .journey-widgets.drop-toast-widget{
+    top:calc(max(6px,env(safe-area-inset-top)) + 176px);
+    width:148px;
+    max-width:26vw;
+  }
+}
+@media(prefers-reduced-motion:reduce){.eterna-npc-label{animation:none}}
