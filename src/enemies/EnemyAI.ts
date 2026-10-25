@@ -184,6 +184,8 @@ export class EnemyAI {
   private bossRespawn: Record<string, number> = {};
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
   private activeRegionId:string|null=null;
+  private dungeonMode=false;
+  setDungeonMode(enabled:boolean):void{this.dungeonMode=enabled;}
   get regionId():string|null{return this.activeRegionId;}
   private regionAtPosition(x:number,z:number){
     return this.activeRegionId?REGIONS.find(region=>region.id===this.activeRegionId)!:regionAt(x,z);
@@ -243,7 +245,7 @@ export class EnemyAI {
       enemy.tick(dt, hero, this.elapsed);
       if (!enemy.alive && enemy.deathTime > 1.1) { enemy.dispose(); this.enemies.splice(i, 1); }
     }
-    for (const region of (this.activeRegionId?REGIONS.filter(region=>region.id===this.activeRegionId):REGIONS)) {
+    for (const region of (this.dungeonMode?[]:this.activeRegionId?REGIONS.filter(region=>region.id===this.activeRegionId):REGIONS)) {
       const bossX=this.activeRegionId?region.boss.x-region.center.x:region.boss.x;
       const bossZ=this.activeRegionId?18+region.boss.z-region.center.z:region.boss.z;
       this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
@@ -255,7 +257,7 @@ export class EnemyAI {
     }
     this.spawnTimer -= dt;
     const ambientCount = this.enemies.filter(enemy => !enemy.boss && enemy.alive).length;
-    if (this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
+    if (!this.dungeonMode && this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
       this.spawnTimer = 8;
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;
