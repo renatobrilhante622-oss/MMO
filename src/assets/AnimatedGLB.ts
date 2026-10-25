@@ -39,7 +39,7 @@ export class AnimatedGLB {
   private readonly actions = new Map<string, AnimationAction>();
   private active?: AnimationAction;
   private activeKey = '';
-  private materials: Array<{ material: MeshStandardMaterial; original: Color }> = [];
+  private materials: Array<{ material: MeshStandardMaterial; original: Color; originalEmissive: Color; originalEmissiveIntensity: number }> = [];
   private disposed = false;
   private attackTime = 0;
   private model?: Object3D;
@@ -84,7 +84,7 @@ export class AnimatedGLB {
       object.frustumCulled = false;
       const isolated = (source: MeshStandardMaterial): MeshStandardMaterial => {
         const material = source.clone();
-        this.materials.push({ material, original: source.color.clone() });
+        this.materials.push({ material, original: source.color.clone(), originalEmissive: source.emissive.clone(), originalEmissiveIntensity: source.emissiveIntensity });
         return material;
       };
       object.material = Array.isArray(object.material)
@@ -171,6 +171,16 @@ export class AnimatedGLB {
       } else {
         material.color.copy(this.baseColor).lerp(this.accent, 0.18);
       }
+    }
+  }
+
+  /** Real GLB materials flash in sync with authoritative enemy HP loss. */
+  setHitFlash(strength: number): void {
+    const flash = Math.min(1, Math.max(0, Number.isFinite(strength) ? strength : 0));
+    const hit = new Color(0xff6b6b);
+    for (const entry of this.materials) {
+      entry.material.emissive.copy(entry.originalEmissive).lerp(hit, flash);
+      entry.material.emissiveIntensity = flash > 0 ? Math.max(1, entry.originalEmissiveIntensity) : entry.originalEmissiveIntensity;
     }
   }
 
