@@ -59,6 +59,8 @@ export class AnimatedGLB {
   private readonly preservedPalette: boolean;
   private attackWeapon:ClassDefinition['weapon']='sword';
   private classPalette=new Color(0xffffff);
+  private cosmeticTint=new Color(0xffffff);
+  private cosmeticStrength=0;
   private readonly hitColor = new Color(0xff6b6b);
 
   constructor(
@@ -250,6 +252,11 @@ export class AnimatedGLB {
   }
   clearWeaponSlots():number{return this.model?clearWeaponSlots(this.model):0;}
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
+  setCosmeticPalette(color:number,rarity:number):void{
+    this.cosmeticTint.setHex(color);
+    this.cosmeticStrength=Math.min(.28,Math.max(0,rarity)*.052);
+    this.tint(this.baseColor.getHex(),this.accent.getHex());
+  }
 
   tint(color: number, accent: number): void {
     this.baseColor.setHex(color);
@@ -259,6 +266,8 @@ export class AnimatedGLB {
         // Preserve original albedo and atlas 1:1, including during parent changes
         // to a saddle: tinting lit atlas texels can wash details out on Android.
         material.color.copy(original).multiply(this.classPalette);
+        if(this.name.startsWith('KayKit_')&&this.cosmeticStrength>0)
+          material.color.lerp(original.clone().multiply(this.cosmeticTint),this.cosmeticStrength);
         material.roughness=Math.max(.67,material.roughness);
         material.metalness=Math.min(.22,material.metalness);
         if(material.map)material.map.needsUpdate=material.map.version===0;
