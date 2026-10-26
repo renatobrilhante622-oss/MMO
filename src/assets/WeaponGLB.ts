@@ -5,6 +5,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { ClassId } from '../core/GameTypes';
 
 export type WeaponModelId =
+  | `relicbase-${string}`
   | 'axe_1handed' | 'axe_2handed' | 'crossbow_2handed'
   | 'dagger' | 'quiver' | 'shield_round' | 'staff'
   | 'sword_1handed' | 'sword_2handed' | 'wand' | 'spear' | 'longbow'
@@ -44,7 +45,7 @@ const models = new Map<WeaponModelId, Promise<GLTF>>();
 export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
-    const url=((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
+    const url=name.startsWith('relicbase-')?'models/pr22/'+name.slice(10)+'.glb':((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
       ?'models/weapons/'+name+'.glb'
       :name==='spear'
       ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
@@ -73,6 +74,15 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
       const longest=Math.max(size.x,size.y,size.z);
       if(longest>0.001)model.scale.multiplyScalar(Math.max(.04,Math.min(20,target/longest)));
     }
+  }
+  if(name.startsWith('relicbase-')){
+    let bounds=new Box3().setFromObject(model),size=bounds.getSize(new Vector3());
+    if(size.z>size.y&&size.z>size.x)model.rotation.x=Math.PI/2;
+    else if(size.x>size.y)model.rotation.z=Math.PI/2;
+    model.updateMatrixWorld(true);bounds=new Box3().setFromObject(model);size=bounds.getSize(new Vector3());
+    model.scale.multiplyScalar(1.6/Math.max(.001,size.y));
+    model.updateMatrixWorld(true);bounds=new Box3().setFromObject(model);
+    const c=bounds.getCenter(new Vector3());model.position.set(-c.x,-bounds.min.y-.18,-c.z);
   }
   model.traverse(object=>{
     if(object instanceof Mesh){

@@ -29,6 +29,7 @@ export const DUNGEONS:readonly DungeonDefinition[]=[
   {id:'titan',name:['Templo do Cristal Corrompido','Temple of Corrupted Crystal'],level:45,waves:5,bossName:['Colosso de Cristal','Crystal Colossus'],region:'highlands',gold:2800,crystals:16},
   {id:'void',name:['Fornalha do Titã de Magma','Furnace of the Magma Titan'],level:60,waves:5,bossName:['Senhor da Forja Ardente','Lord of the Blazing Forge'],region:'rift',gold:1600,crystals:12},
   {id:'eclipse',name:['Cidadela do Vazio Abissal','Citadel of the Abyssal Void'],level:85,waves:6,bossName:['Imperador Abissal','Abyssal Emperor'],region:'eclipse',gold:4200,crystals:20},
+  {id:'tower',name:['Torre da Eternidade','Eternity Tower'],level:35,waves:5,bossName:['Oráculo da Aurora','Dawn Oracle'],region:'highlands',gold:2200,crystals:12},
 ];
 
 export const DUNGEON_DIFFICULTIES = [

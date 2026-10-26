@@ -1,3 +1,4 @@
+import {SkinCombatEffects} from '../combat/SkinCombatEffects';
 import type {PvPFighter} from '../combat/PvPTypes';
 import { Group, MathUtils, PerspectiveCamera, Scene, Vector3 } from 'three';
 import type { Body } from 'cannon-es';
@@ -7,6 +8,8 @@ import { DASH_DISTANCE, DASH_DURATION, HeroStateMachine } from './HeroStateMachi
 import { ArticulatedCharacter } from './ArticulatedCharacter';
 
 export class HeroController implements Combatant {
+  readonly skinCombat=new SkinCombatEffects();
+  skinShield=0;
   readonly id = 'hero';
   readonly team = 'hero' as const;
   readonly radius = 0.5;
@@ -114,6 +117,8 @@ export class HeroController implements Combatant {
 
   receiveDamage(amount: number, knockback?: Vector3): number {
     if (this.invulnerable || !Number.isFinite(amount) || amount <= 0) return 0;
+    const absorbed=Math.min(this.skinShield,amount);this.skinShield-=absorbed;amount-=absorbed;
+    if(amount<=0)return 0;
     const dealt = Math.min(this.hp, amount);
     this.hp -= dealt;
     this.hurtTime = 0.3;
@@ -131,6 +136,7 @@ export class HeroController implements Combatant {
   }
 
   respawn(point: Vector3): void {
+    this.skinShield=0;
     this.cancelDash();
     this.dashWasPressed = false;
     const center = point.clone();

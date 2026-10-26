@@ -1,0 +1,196 @@
+{
+  "license": "CC0-1.0",
+  "sourceLicense": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/LICENSE",
+  "assets": [
+    {
+      "id": "ImperialStag",
+      "file": "models/pr22/ImperialStag.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimateanimatedanimals/models/stag/stag.glb",
+      "license": "CC0-1.0",
+      "bytes": 564792,
+      "sourceBytes": 2071656,
+      "sourceSha256": "f80dd7a7880522797f1ef9ddb844d35569d6355dc9b9e56a5239aff4f9a5b310",
+      "sha256": "c1cfdb13a6e3db91ec00347a5ca616e45df52493c1408109b63839446ad355e7"
+    },
+    {
+      "id": "CelestialDragon",
+      "file": "models/pr22/CelestialDragon.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimate-monsters/models/dragon_evolved/dragon_evolved.glb",
+      "license": "CC0-1.0",
+      "bytes": 46436,
+      "sourceBytes": 186108,
+      "sourceSha256": "0e7a346f62ff3fa63e8a4566e221def33c71a315ef1e62ed2f3a96ea8789a705",
+      "sha256": "a497fc4e8ff323919807db72cb28d55901b6daf57b5b0618a08be9c888e3a5d9"
+    },
+    {
+      "id": "HarvestScythe",
+      "file": "models/pr22/HarvestScythe.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/the-base-mesh/models/vintage_sickle_scythe/vintage_sickle_scythe.glb",
+      "license": "CC0-1.0",
+      "bytes": 12336,
+      "sourceBytes": 26680,
+      "sourceSha256": "5a7ae2882120fe931da98824ada6f38467efd0a1d1c4b84aeda3589617d0a168",
+      "sha256": "d4541bc0ae7c9b68604ab26c785816c2c71784e53d00c8e0a9a66d43215c88cb"
+    },
+    {
+      "id": "VoidHalberd",
+      "file": "models/pr22/VoidHalberd.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/the-base-mesh/models/halberd/halberd.glb",
+      "license": "CC0-1.0",
+      "bytes": 10912,
+      "sourceBytes": 26776,
+      "sourceSha256": "ac22054ecdb4cab20f13f278375fd9e4d70a3646cc4741625feff2b894960ef9",
+      "sha256": "f065a77f4b8043334e8fae19ac33aed510141e7099e7fef5a69dd42ca7d4b50c"
+    },
+    {
+      "id": "IceStaff",
+      "file": "models/pr22/IceStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg/models/ice_staff/ice_staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 19884,
+      "sourceBytes": 33768,
+      "sourceSha256": "7b49518d9313a90f5135041777941f90aa1f15f75369db39d576385479825922",
+      "sha256": "e9412424c6154e8dde1396e0108d9eede0cd0239f25da324e49432c5900229db"
+    },
+    {
+      "id": "ArcaneStaff",
+      "file": "models/pr22/ArcaneStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg/models/staff/staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 17204,
+      "sourceBytes": 27056,
+      "sourceSha256": "e62955d3a1c7888f44b920033016c7d167871483d65804764efaefeac49a5837",
+      "sha256": "0768785755e50094ac791b09415ca091fd89faf97335d0b14dcdc5bd62b0059b"
+    },
+    {
+      "id": "WoodStaff",
+      "file": "models/pr22/WoodStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg/models/wooden_staff/wooden_staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 14208,
+      "sourceBytes": 22276,
+      "sourceSha256": "bda1aae00fe1ccefd6f9462fcfbe6897ed895c2815fa39002354eb710a5b601a",
+      "sha256": "61d9ff99cc9cef3bd37127431f063cbe24bdd980b61c89f97de0cf17fbe27fe8"
+    },
+    {
+      "id": "ClericStaff",
+      "file": "models/pr22/ClericStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg-characters/models/cleric_staff/cleric_staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 37372,
+      "sourceBytes": 74828,
+      "sourceSha256": "a7583b431b37714e96435073f8a2cb817322984698f119aea18c48bcdb2d8a91",
+      "sha256": "3b08e77e5b61ec134468dd6680a141bb3b7910dd4fa758ce59cc9dd24eb7b7cd"
+    },
+    {
+      "id": "WizardStaff",
+      "file": "models/pr22/WizardStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg-characters/models/wizard_staff/wizard_staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 23940,
+      "sourceBytes": 45728,
+      "sourceSha256": "a446aa346325d08e7d774f2e7b23de2780e3609f81e13a7336d74bc39b737c43",
+      "sha256": "569db00cdab613d3889140908c922f05dedb0a2965054dc9b4d157e3f074a49a"
+    },
+    {
+      "id": "BoneStaff",
+      "file": "models/pr22/BoneStaff.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kaykit-character-pack-skeletons/models/skeleton_staff/skeleton_staff.glb",
+      "license": "CC0-1.0",
+      "bytes": 47348,
+      "sourceBytes": 89152,
+      "sourceSha256": "818b1cf1cf504ae6c83b3e078884ca904c5167e6cbf1e90722cf8cc01d749e09",
+      "sha256": "25500f083770f31fa3ec291b15015706c49bc0821225e52ce60839bdd2981896"
+    },
+    {
+      "id": "BronzeSword",
+      "file": "models/pr22/BronzeSword.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-fantasy-props-megakit/models/sword_bronze/sword_bronze.glb",
+      "license": "CC0-1.0",
+      "bytes": 739216,
+      "sourceBytes": 9793952,
+      "sourceSha256": "5f2495e94fb85461d89144dbf0a3926814e260f543bf56b6d2891de80cf44421",
+      "sha256": "6859c79cbdc61528ec8cd6cc37905be3260b5e098497ac561698be9bda86f028"
+    },
+    {
+      "id": "KnightSword",
+      "file": "models/pr22/KnightSword.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-knightcharacter/models/sword/sword.glb",
+      "license": "CC0-1.0",
+      "bytes": 22584,
+      "sourceBytes": 37744,
+      "sourceSha256": "510bc6f8c2eabc1321d90724cb74feeda5fb381cf88c1d3004d35a81e3e841b2",
+      "sha256": "3d6c1b0b42b403f4a3d71c92af0e269b8c44317a49ec26fde9e92ffa964b8f90"
+    },
+    {
+      "id": "GreatSword",
+      "file": "models/pr22/GreatSword.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medieval-weapons/models/sword_big/sword_big.glb",
+      "license": "CC0-1.0",
+      "bytes": 22848,
+      "sourceBytes": 43716,
+      "sourceSha256": "af98be37be82bb0f4e8e4b4f619077a663bfcc33e4bf2671fa375975fdd2614f",
+      "sha256": "d11f49e84741af6a0c967dd299425cc4167406185776cae4023bbd04af4bcc3c"
+    },
+    {
+      "id": "OrnateDagger",
+      "file": "models/pr22/OrnateDagger.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg-characters/models/rogue_dagger/rogue_dagger.glb",
+      "license": "CC0-1.0",
+      "bytes": 13772,
+      "sourceBytes": 29316,
+      "sourceSha256": "6763d869da171eb57004eacc621eccb96a10cad7b464d7ea84fd24a4299b1085",
+      "sha256": "d88cbfa43a1a2a981224ba68b3203f329b7eb7c0a18db05706410b8d4000f727"
+    },
+    {
+      "id": "CrystalDagger",
+      "file": "models/pr22/CrystalDagger.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-rpg/models/dagger/dagger.glb",
+      "license": "CC0-1.0",
+      "bytes": 15480,
+      "sourceBytes": 25516,
+      "sourceSha256": "bdb2d5c2c912c58ea7a544dc84cdcbf18dc0c443ffe53856340c7157ddd4a3f0",
+      "sha256": "134bcbf9a822d1caa72382f069b78914a4a1a2b6060aabdb04cddbbd55a0739a"
+    },
+    {
+      "id": "TitanHelmet",
+      "file": "models/pr22/TitanHelmet.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-knightcharacter/models/helmet3/helmet3.glb",
+      "license": "CC0-1.0",
+      "bytes": 25888,
+      "sourceBytes": 49356,
+      "sourceSha256": "24d3365d91e309a424c7d04104da0003e08bdc648bc1f711101f9572f7679f43",
+      "sha256": "09ef487c6704c96e6126a20f772be4d34cfb448a08ef121c203866543e2c6e70"
+    },
+    {
+      "id": "SolarHelmet",
+      "file": "models/pr22/SolarHelmet.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-knightcharacter/models/helmet1/helmet1.glb",
+      "license": "CC0-1.0",
+      "bytes": 21312,
+      "sourceBytes": 41308,
+      "sourceSha256": "89e7e8d17ea2be581b04c1a279d869e4dca6e15e02a76323ac4531cd98e74050",
+      "sha256": "7ba51b81313405670f5ae0d84f60e63a4bfe6092b2bc88cdc139dc9754c1fee3"
+    },
+    {
+      "id": "ShadowHelmet",
+      "file": "models/pr22/ShadowHelmet.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-knightcharacter/models/helmet2/helmet2.glb",
+      "license": "CC0-1.0",
+      "bytes": 19692,
+      "sourceBytes": 42860,
+      "sourceSha256": "e7978077f6fb0597b5f217c812d79798d583f68bfea0fe94c1ac87ae52d04455",
+      "sha256": "8415109e44f21eeea23b7f45ca152773c97ce4b711b884abd9165f4fde673450"
+    },
+    {
+      "id": "Horn",
+      "file": "models/pr22/Horn.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/the-base-mesh/models/rhino_large_horn/rhino_large_horn.glb",
+      "license": "CC0-1.0",
+      "bytes": 8008,
+      "sourceBytes": 16988,
+      "sourceSha256": "b95a5e63c2837f516f66921b264f2d7f8e1a65ad1b63735a66b686b3ac92e50d",
+      "sha256": "f32eb269b170ca0db7ae1bad3442fda93c0978d084e46460ca3d01e24f87cdb7"
+    }
+  ]
+}

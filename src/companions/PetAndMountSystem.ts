@@ -1,3 +1,5 @@
+import {catalogSkin} from '../player/SkinCatalog';
+import {MountTrail} from './MountTrail';
 import { MathUtils, Scene, Vector3 } from 'three';
 
 /** Relative to the mount: pet walks 1.8 m laterally, 1.2 m behind. */
@@ -21,6 +23,8 @@ import { HeroController } from '../player/HeroController';
 export class PetAndMountSystem {
   private readonly petRig = new CompanionRig(false);
   private readonly mountRig = new CompanionRig(true);
+  private readonly trail:MountTrail;
+  private mountElement:import('../player/SkinCatalog').SkinElement='steel';
   private appearanceKey = '';
   readonly pet = this.petRig.root;
   readonly mount = this.mountRig.root;
@@ -35,6 +39,7 @@ export class PetAndMountSystem {
   private readonly mountScale = new Vector3();
 
   constructor(private scene: Scene, private hero: HeroController, private physics: PhysicsWorld, private events: EventBus) {
+    this.trail=new MountTrail(scene);
     this.riderOriginalScale.copy(hero.rig.root.scale);
     this.petRig.root.scale.setScalar(.45);
     this.pet.position.copy(petFollowPosition(hero.position,hero.facing,false));
@@ -46,6 +51,7 @@ export class PetAndMountSystem {
   setAppearances(pet: Cosmetic, mount: Cosmetic): void {
     if(this.appearanceKey===pet.id+'::'+mount.id)return;
     this.appearanceKey=pet.id+'::'+mount.id;
+    this.mountElement=catalogSkin(mount.id)?.element??(mount.rarity==='common'?'steel':mount.id.includes('frost')?'frost':mount.id.includes('magma')?'fire':'solar');
     this.petRig.appearance(pet);this.mountRig.appearance(mount);
   }
 
@@ -76,7 +82,7 @@ export class PetAndMountSystem {
     }
   }
 
-  dismount():void {this.hero.mounted=false;this.mount.visible=false;this.syncRider();}
+  dismount():void {this.trail.clear();this.hero.mounted=false;this.mount.visible=false;this.syncRider();}
 
   toggleMount(): void {
     if (!this.hero.alive) return;
@@ -86,6 +92,7 @@ export class PetAndMountSystem {
     }
     this.hero.mounted = !this.hero.mounted;
     this.mount.visible = this.hero.mounted;
+    if(this.hero.mounted)this.hero.skinShield=Math.max(this.hero.skinShield??0,this.hero.skinCombat?.onMount(this.hero.maxHp)??0);
     this.mount.position.copy(this.hero.position);
     this.mount.position.y-=this.hero.radius;
     this.mount.rotation.y=this.hero.model.rotation.y;
@@ -95,6 +102,7 @@ export class PetAndMountSystem {
 
   update(dt: number, enemies: Combatant[], drops: LootDrop[]): void {
     this.time += dt;
+    this.trail.update(dt,this.hero.mounted&&this.hero.alive,this.hero.position,this.hero.model.rotation.y,this.mountElement,(x,z)=>this.physics.terrainHeight(x,z));
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
     this.mount.visible = this.hero.mounted && this.hero.alive;
     if (this.hero.machine.state === 'swim' || this.hero.machine.state === 'dive' || !this.hero.alive) {
@@ -163,8 +171,9 @@ export class PetAndMountSystem {
     }
     for (let i = drops.length - 1; i >= 0; i--) {
       if (this.hero.alive && (this.pet.position.distanceTo(drops[i].position) < 1.5 || this.hero.position.distanceTo(drops[i].position) < 1.8)) {
-        const [drop] = drops.splice(i, 1);
+        const drop=drops[i];
         this.events.emit('loot', drop);
+        const remaining=drops.indexOf(drop);if(remaining>=0)drops.splice(remaining,1);
       }
     }
     if (this.mount.visible) {
@@ -182,6 +191,7 @@ export class PetAndMountSystem {
   dispose(): void {
     this.hero.mounted=false;
     this.syncRider();
+    this.trail.dispose();
     this.petRig.dispose();
     this.mountRig.dispose();
   }

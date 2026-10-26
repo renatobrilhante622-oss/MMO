@@ -1,0 +1,33 @@
+{
+  "pickup": {
+    "eliteFragments": 8,
+    "replayed": false,
+    "removed": true,
+    "xpGranted": true
+  },
+  "unlock": {
+    "owned": true,
+    "equipped": "regalia-solar",
+    "passive": 0.18,
+    "statIncreased": true,
+    "remaining": 90,
+    "saved": true
+  },
+  "openWorld": {
+    "body": "KayKit_Knight",
+    "outfit": "regalia-solar",
+    "weapon": "relic-warlock-2",
+    "weaponEnergy": 1,
+    "drawCalls": 126
+  },
+  "preview": {
+    "width": 473.0625,
+    "height": 287.40625,
+    "pointerRotation": true,
+    "attackTest": true,
+    "mountTest": true,
+    "compact844x390Height": 169.8125
+  },
+  "errors": [],
+  "note": "Local DEV only: injected encounter deaths and source fragments; no online accounts modified. Functional loop render stubbed; open-world screenshot renders once with shadows disabled. Comparison fixture renders production GLBs."
+}

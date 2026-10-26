@@ -8,7 +8,7 @@ export function regionArtwork(regionId:string):string {
   return import.meta.env.BASE_URL+'assets/landscapes/'+id+'.webp';
 }
 export function dungeonArtwork(dungeonId:string):string {
-  const regions:Record<string,RegionArtwork>={roots:'aurora',tide:'aurora',tombs:'crypt',titan:'highlands',void:'rift',eclipse:'eclipse'};
+  const regions:Record<string,RegionArtwork>={tower:'highlands',roots:'aurora',tide:'aurora',tombs:'crypt',titan:'highlands',void:'rift',eclipse:'eclipse'};
   const id=regions[dungeonId]??'crypt';
   return import.meta.env.BASE_URL+'assets/landscapes/'+(id==='aurora'?'':'dungeon-')+id+'.webp';
 }

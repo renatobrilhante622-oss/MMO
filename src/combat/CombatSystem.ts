@@ -1,3 +1,4 @@
+import type {SkinCombatEffects} from './SkinCombatEffects';
 import { AdditiveBlending, Color, Group, IcosahedronGeometry, Mesh, MeshBasicMaterial, Scene, TorusGeometry, Vector3 } from 'three';
 import type { CharacterStats, ClassId, Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
@@ -33,26 +34,32 @@ export class CombatSystem {
     this.combo = this.comboWindow > 0 ? (this.combo % 3) + 1 : 1;
     this.comboWindow = 1.5;
     this.attackCooldown = 1 / Math.max(.1, stats.attackSpeed);
+    const cosmetic=(source as Combatant & {skinCombat?:SkinCombatEffects}).skinCombat;
+    const attackColor=cosmetic?.epic?cosmetic.color:0xffd699;
     const lock=this.nearest(source,targets,stats.range+1.8);
     const direction = lock?this.horizontalDirection(lock.position.clone().sub(source.position)):this.horizontalDirection(facing);
     if(lock)(source as Combatant & {aimAt?:(point:Vector3,lunge:number)=>void}).aimAt?.(lock.position,stats.range>8?0:Math.max(0,source.position.distanceTo(lock.position)-stats.range+.4));
     const multiplier = this.combo === 3 ? 1.65 : 1 + (this.combo - 1) * .15;
     if (stats.range > 8) {
-      this.shoot(source, targets, stats, direction, stats.range, .5, multiplier, 0xc2efff,lock);
+      this.shoot(source, targets, stats, direction, stats.range, .5, multiplier, cosmetic?.epic?attackColor:0xc2efff,lock);
     } else {
       const range = stats.range + (this.combo === 3 ? .65 : 0);
-      this.cone(source, targets, stats, direction, range, Math.cos(70*Math.PI/180), multiplier, 0xffd699);
+      this.cone(source, targets, stats, direction, range, Math.cos(70*Math.PI/180), multiplier, attackColor);
       const center = source.position.clone().addScaledVector(direction, Math.min(1.6, range * .4));
       center.y += .5;
-      this.pulse(center, range * .6, 0xffd699, .17);
+      this.pulse(center, range * .6, attackColor, .17);
     }
     this.visualAttack(source, undefined, this.combo);
-    if (stats.range <= 8) this.particles.slash(source.position, direction, 0xffd699, this.combo);
+    if (stats.range <= 8) {this.particles.slash(source.position, direction, attackColor, this.combo);
+      if(cosmetic?.epic){if(cosmetic.element==='fire')this.particles.burst(source.position.clone().addScaledVector(direction,1.2),attackColor,10);else if(cosmetic.element==='void')this.particles.shockwave(source.position,1.7,attackColor,.3);else if(cosmetic.element==='frost')this.particles.burst(source.position.clone().addScaledVector(direction,1.2),attackColor,6);else this.particles.slash(source.position.clone().add(new Vector3(0,.3,0)),direction,attackColor,3);}
+    }
     return true;
   }
 
   cast(index: number, classId: ClassId, source: Caster, targets: Combatant[], stats: CharacterStats, facing: Vector3): boolean {
-    const skill = getClass(classId).skills[index];
+    const cosmetic=(source as Combatant & {skinCombat?:SkinCombatEffects}).skinCombat;
+    const baseSkill = getClass(classId).skills[index];
+    const skill=baseSkill&&cosmetic?.epic?{...baseSkill,color:cosmetic.color}:baseSkill;
     if (!skill || !source.alive || (!this.noCooldown&&this.cooldowns[index] > 0)) return false;
     if (!source.consumeMana(skill.mana)) {
       this.events.emit('message', { text: 'Mana insuficiente. Aguarde a regeneração.', tone: 'warning' });
@@ -112,6 +119,9 @@ export class CombatSystem {
 
   private hit(source: Combatant, target: Combatant, stats: CharacterStats, multiplier: number, color: number): void {
     if (!this.canHit(source, target)) return;
+    const cosmetic=(source as Combatant & {skinCombat?:SkinCombatEffects}).skinCombat;
+    if(cosmetic?.epic)color=cosmetic.color;
+    multiplier*=cosmetic?.multiplier(!!(target as Combatant & {elite?:boolean}).elite,!!(target as Combatant & {boss?:boolean}).boss)??1;
     const critical = Math.random() < stats.critChance;
     const modifiers=(source as Combatant & {combatModifiers?:{armorPenetration:number;lifeSteal:number}}).combatModifiers;
     const damage = this.oneHitKill?target.hp:Math.max(1,calculateDamage(stats.attack, target.defense*(1-(modifiers?.armorPenetration??0)), multiplier, critical, stats.critMultiplier));
@@ -120,7 +130,9 @@ export class CombatSystem {
     const dealt = target.receiveDamage(damage, knockback);
     if (dealt <= 0) return;
     const healer=source as Combatant & {heal?:(amount:number)=>void};
-    if(modifiers?.lifeSteal)healer.heal?.(dealt*modifiers.lifeSteal);
+    if(modifiers?.lifeSteal||cosmetic?.passive.lifeSteal)healer.heal?.(dealt*((modifiers?.lifeSteal??0)+(cosmetic?.passive.lifeSteal??0)));
+    const proc=cosmetic?.onHit();
+    if(proc&&target.alive){const extra=target.receiveDamage(calculateDamage(stats.attack,target.defense,proc.power));this.events.emit('damage',{position:target.position.clone(),amount:extra,critical:false,team:target.team,color});this.particles.cast(target.position.clone().add(new Vector3(0,7,0)),new Vector3(0,-1,0),{...getClass('elementalist').skills[proc.kind==='meteor'?3:2],color:proc.kind==='meteor'?0xff6929:0x72bfff},3);}
     this.events.emit('damage', { position: target.position.clone().add(new Vector3(0, 1.2, 0)), amount: dealt, critical, team: target.team, color });
     this.particles.impact(target.position.clone().add(new Vector3(0, .7, 0)), color, critical);
     this.hitstop = Math.max(this.hitstop, critical ? .065 : .03);
