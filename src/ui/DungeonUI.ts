@@ -14,6 +14,7 @@ export const DUNGEON_SHOWCASE:readonly {id:string;name:string;subtitle:string;te
   {id:'titan',name:'Templo do Cristal Corrompido',subtitle:'Ruínas arcanas',texture:'Snow010A'},
   {id:'void',name:'Fornalha do Titã de Magma',subtitle:'Forja subterrânea',texture:'Ground093C'},
   {id:'eclipse',name:'Cidadela do Vazio Abissal',subtitle:'Confronto final',texture:'Ground071'},
+  {id:'tower',name:'Torre da Eternidade',subtitle:'3 andares · Fragmentos Divinos',texture:'PavingStones046'},
 ];
 export class DungeonUI {
  readonly trigger=document.createElement('button');

@@ -1,3 +1,5 @@
+import {catalogSkin,weaponSkin} from './SkinCatalog';
+import {relicEquipment,decorateRelic,outfitParts,fittedSkinPart,disposeSkinPart,styleSkinMaterial,SkinEnergy} from './SkinAssembly';
 import {loadSharedModel} from '../assets/ModelResources';
 import {actorIsVisible,registerActor} from '../core/ActorVisibility';
 import {SKIN_IDENTITIES} from './SkinIdentity';
@@ -174,6 +176,9 @@ export class ArticulatedCharacter {
   private readonly skinAura=new RarityAura(.6);
   private skinKey='';
   private weaponPackId='ironweapon';
+  private outfitEnergy?:SkinEnergy;
+  private weaponEnergy:SkinEnergy[]=[];
+  private relicParts:Object3D[]=[];
   private skinTone=0xffffff;
   private skinTier=0;
   weapons: WeaponForge;
@@ -394,9 +399,9 @@ export class ArticulatedCharacter {
   }
 
   private importedName(definition:ClassDefinition):ModelName {
-    // Cosmetic skins may recolor GLB materials/VFX but must not change the
-    // underlying class mesh: an Assassin must never become Ranger_Hooded.
-    return CLASS_IDENTITIES[definition.id].model;
+    // Legacy appearances retain the class body. Full regalia selects an
+    // authored outfit body while class skills and hand equipment stay unchanged.
+    return catalogSkin(this.skinKey)?.body??CLASS_IDENTITIES[definition.id].model;
   }
 
   private replaceImportedModel(definition:ClassDefinition):void {
@@ -421,6 +426,8 @@ export class ArticulatedCharacter {
 
   private clearGlbWeapons():void {
     this.glbWeaponGeneration++;
+    this.weaponEnergy.forEach(e=>e.dispose());this.weaponEnergy=[];
+    this.relicParts.forEach(disposeSkinPart);this.relicParts=[];
     for(const model of this.glbWeapons)model.removeFromParent();
     this.glbWeapons.length=0;
     for(const material of this.weaponPackMaterials)material.dispose();
@@ -455,20 +462,22 @@ export class ArticulatedCharacter {
     actor.setCosmeticPalette(this.skinTone,this.skinTier);
     this.clearGlbWeapons();
     const version=this.glbWeaponGeneration;
+    const relic=weaponSkin(this.weaponPackId,this.definition.id);
     const equipped=weaponPackForClass(this.weaponPackId,this.definition.id);
     const gladiatorGear=this.weaponPackId==='gladiator-blade'
       ? [{model:'gladiator-blade' as const,bone:'righthand' as const},
          ...CLASS_EQUIPMENT_MODELS[this.definition.id].filter(g=>g.bone!=='righthand')]
       :null;
-    for(const gear of gladiatorGear??equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
-      void loadWeaponModel(gear.model).then(model=>{
+    for(const gear of relic?relicEquipment(relic):gladiatorGear??equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
+      void loadWeaponModel(gear.model).then(async imported=>{
+        const model=new Group();model.add(imported);
         if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
         const offset=gear.offset??[0,0,0];
         // KayKit hand sockets point down at rest; reverse the staff's long
         // axis so its focus is above the grip instead of buried in the ground.
-        if(gear.model==='staff'||gear.model==='wand')model.rotation.z+=Math.PI;
-        if(equipped){
-          model.scale.multiplyScalar(1+equipped.tier*.035);
+        if(gear.model==='staff'||gear.model==='wand'||gear.model.startsWith('relicbase-')&&['elementalist','warlock','necromancer','monk'].includes(this.definition.id))model.rotation.z+=Math.PI;
+        if(equipped||relic){
+          model.scale.multiplyScalar(1+(relic?.tier??equipped!.tier)*.035);
           model.traverse(object=>{
             if(!(object instanceof Mesh))return;
             const originals=Array.isArray(object.material)?object.material:[object.material];
@@ -476,15 +485,22 @@ export class ArticulatedCharacter {
               if(!(m instanceof MeshStandardMaterial))return m;
               const mat=m.clone();
               this.weaponPackMaterials.add(mat);
-              mat.color.lerp(new Color(equipped.color),Math.min(.22,equipped.tier*.052));
-              mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+equipped.tier*.08));
-              mat.roughness=Math.max(.26,mat.roughness-equipped.tier*.065);
-              mat.emissive.setHex(equipped.color);
-              mat.emissiveIntensity=equipped.tier*.13;
+              mat.color.lerp(new Color(relic?.color??equipped!.color),Math.min(.22,(relic?.tier??equipped!.tier)*.052));
+              mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+(relic?.tier??equipped!.tier)*.08));
+              mat.roughness=Math.max(.26,mat.roughness-(relic?.tier??equipped!.tier)*.065);
+              mat.emissive.setHex(relic?.color??equipped!.color);
+              mat.emissiveIntensity=(relic?.tier??equipped!.tier)*.13;
+              if(relic)styleSkinMaterial(mat,relic.element);
               return mat;
             });
             object.material=Array.isArray(object.material)?tinted:tinted[0];
           });
+        }
+        if(relic&&gear.bone!=='spine2'&&!gear.model.startsWith('paladin-shield-')){
+          const parts=await decorateRelic(model,relic);
+          if(this.imported!==actor||version!==this.glbWeaponGeneration){parts.forEach(disposeSkinPart);return;}
+          this.relicParts.push(...parts);
+          if((relic.tier??0)>=2){const energy=new SkinEnergy(relic.element,relic.tier);energy.root.scale.setScalar(.8);model.add(energy.root);this.weaponEnergy.push(energy);}
         }
         if(actor.attachAt(gear.bone,model,new Vector3(...offset)))this.glbWeapons.push(model);
         else console.warn('KayKit skeleton missing attachment socket:',gear.bone,actor.name);
@@ -494,6 +510,7 @@ export class ArticulatedCharacter {
 
   private clearImportedSkin():void {
     this.skinVisualVersion++;
+    this.outfitEnergy?.dispose();this.outfitEnergy=undefined;
     for(const object of this.importedSkinParts)object.removeFromParent();
     this.importedSkinParts.length=0;
     for(const mat of this.importedSkinMaterials)mat.dispose();
@@ -542,6 +559,20 @@ export class ArticulatedCharacter {
       }
       this.importedSkinParts.push(parent);
     };
+    const outfit=catalogSkin(this.skinKey);
+    if(outfit?.body){
+      this.cape.mesh.material.color.setHex(outfit.id==='regalia-solar'?0x8d1028:outfit.id==='regalia-reaper'?0x120e1b:outfit.id==='regalia-glacial'?0x84c7e8:outfit.color);
+      this.cape.mesh.scale.set(outfit.id==='regalia-titan'?1.65:1.25,outfit.id==='regalia-reaper'?1.55:1.3,1);
+      this.outfitEnergy=new SkinEnergy(outfit.element,3,['regalia-astral','regalia-void','regalia-solar'].includes(outfit.id));
+      this.root.add(this.outfitEnergy.root);
+      for(const part of outfitParts(outfit.id))void fittedSkinPart(part,outfit.element).then(model=>{
+        if(this.imported!==actor||this.skinVisualVersion!==revision){disposeSkinPart(model);return;}
+        if(!actor.attachAt(part.bone,model,new Vector3(...part.at))){disposeSkinPart(model);return;}
+        this.importedSkinParts.push(model);model.traverse(n=>{if(n instanceof Mesh)for(const m of Array.isArray(n.material)?n.material:[n.material])if(m instanceof MeshStandardMaterial)this.importedSkinMaterials.add(m);});
+        this.root.userData.characterRevision=(this.root.userData.characterRevision??0)+1;
+      }).catch(error=>console.warn('Outfit attachment unavailable',part.file,error));
+      return;
+    }
     const url='models/equipment/CC0_knight_helmet.glb';
     if(identity.helmet)void loadSharedModel(url).then(gltf=>{
       attach(gltf.scene.clone(true),'head',new Vector3(0,.13,.015),.46+rarity*.028,0);
@@ -555,7 +586,8 @@ export class ArticulatedCharacter {
   private styleSilhouette(definition:ClassDefinition):void {
     if(typeof document!=='undefined'){
       this.imported?.setClassPalette(CLASS_IDENTITIES[definition.id].tint);
-      this.imported?.tint(0xffffff,definition.color);return;
+      this.imported?.tint(0xffffff,definition.color);
+      const outfit=catalogSkin(this.skinKey);if(outfit?.body)this.imported?.setRegaliaStyle(outfit.id==='regalia-reaper'?0x201426:outfit.id==='regalia-titan'?0x28191a:outfit.color,!['regalia-reaper','regalia-astral'].includes(outfit.id));return;
     }
     const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.importedHelmet??this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
@@ -578,11 +610,12 @@ export class ArticulatedCharacter {
     this.skinKey=id;
     this.skinTone=color;
     this.skinTier=Math.max(0,Math.min(5,rarity));
+    if(typeof document!=='undefined'&&this.imported&&this.imported.name!==this.importedName(this.definition))this.replaceImportedModel(this.definition);
     this.imported?.setCosmeticPalette?.(color,this.skinTier);
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
     this.replaceImportedModel(this.definition);
-    if(this.imported?.ready)this.updateImportedSkin(this.imported);
+    if(this.imported?.ready){this.updateImportedSkin(this.imported);this.styleSilhouette(this.definition);}
     // Runtime cosmetic VFX stay shader/particle-based; no sculpted mesh horns or spheres.
     if(typeof document!=='undefined'||id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
@@ -821,6 +854,7 @@ export class ArticulatedCharacter {
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
     if(!actorIsVisible(this.root))return;
     dt = MathUtils.clamp(dt, 0, .05);
+    this.outfitEnergy?.update(time);this.weaponEnergy.forEach(e=>e.update(time));
     this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted',state);
     this.imported?.setHitFlash(hurt>0?Math.min(1,hurt*4):0);
     // Browser actors use authored clip animation. Do not simulate ~100 hidden

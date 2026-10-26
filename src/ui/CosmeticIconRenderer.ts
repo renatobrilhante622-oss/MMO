@@ -1,3 +1,4 @@
+import {catalogSkin} from '../player/SkinCatalog';
 import type {Cosmetic} from '../progression/AdventureProgress';
 import {itemIcon} from './ItemIconRenderer';
 import type {Rarity} from '../core/GameTypes';
@@ -21,12 +22,12 @@ const skinBodies:Record<string,string>={
 export function cosmeticIcon(c:Cosmetic,label=c.name[0]):string {
   const color='#'+c.color.toString(16).padStart(6,'0');
   let body:string;
-  if(c.type==='skin')body=skinBodies[c.id]??skinBodies.void;
-  else if(c.type==='wing')return illustratedWings(c.rarity,label,c.id);
+  if(c.type==='skin'){const alias=({'regalia-solar':'solar','regalia-reaper':'void','regalia-astral':'forest','regalia-titan':'eternal','regalia-glacial':'frost','regalia-void':'void'} as Record<string,string>)[c.id];body=skinBodies[c.id]??skinBodies[alias]??skinBodies.void;if(c.id==='regalia-reaper')body+='<path d="M14 48V20l6-9 8 9v28m13 0V20l6-9 7 9v28" stroke="#b7a9c5" fill="#1a1027"/><circle cx="21" cy="23" r="4" fill="url(#jewel)"/>';if(c.id==='regalia-astral')body+='<ellipse cx="32" cy="26" rx="26" ry="12" stroke="#b6e6ff" fill="none"/>';}
+  else if(c.type==='wing')return illustratedWings(c.rarity,label,({'plume-seraph':'wing-1','plume-dragon':'wing-3','plume-crystal':'wing-2','plume-phoenix':'wing-4','plume-necrotic':'wing-0'} as Record<string,string>)[c.id]??c.id);
   else if(c.id==='phoenix')body=bird;
-  else if(['dracolich','wyvern','eternalhorse'].includes(c.id))body=dragon+(c.id==='dracolich'?'<path d="M26 45h15m-14 4h13m-10-5v11m6-11v11" stroke="#e8fff5"/>':'');
-  else if(['stag','spiritstag'].includes(c.id))body=stag;
-  else if(c.type==='pet'||['nighthorse','fenrir'].includes(c.id)){
+  else if(['dracolich','wyvern','eternalhorse','steed-magma','steed-astral'].includes(c.id))body=dragon+(c.id==='dracolich'?'<path d="M26 45h15m-14 4h13m-10-5v11m6-11v11" stroke="#e8fff5"/>':'');
+  else if(['stag','spiritstag','steed-glacial'].includes(c.id))body=stag;
+  else if(c.type==='pet'||['nighthorse','fenrir','steed-fenrir'].includes(c.id)){
     body=wolf;
     if(c.id==='fox')body='<path d="m7 57 7-18-3-30 16 14h12L55 7l-3 30 7 17-20-4-7 9-8-9Z" fill="url(#wood)" stroke="#ecc5a5"/>'+eyes+'<path d="m18 36 14 5 14-5-14 19Z" fill="#efe4ce"/><path d="m28 43 9-1-5 6Z" fill="#1f2432"/>';
     if(c.id==='hellhound')body+='<path d="M16 22 10 4l15 14m17 3L54 4l-5 23m-26 6 5 8m13-9-4 9" fill="url(#jewel)" stroke="#ffa360"/><path d="M15 47 7 43l5 13m36-10 9-4-5 14" fill="#ff783c"/>';
@@ -34,7 +35,19 @@ export function cosmeticIcon(c:Cosmetic,label=c.name[0]):string {
     body+=motifs[c.id]??'';
   }else if(c.type==='weapon'){
     const forms:Record<string,string>={ironweapon:'<path d="m18 51 22-37 10-8-1 14-24 35Z" fill="url(#steel)"/><path d="m14 43 21 12-3 5-21-13" fill="url(#gold)"/>',forestweapon:'<path d="m17 55 20-33 18-12-9 23-24 25Z" fill="url(#jewel)" stroke="#daffd9"/><path d="M19 46 9 41l2-8 14 9m7-7 12 7 8-5-16-8" fill="url(#gold)"/>',frostweapon:'<path d="m14 55 20-28 1-13 13-10-1 17-7 11-21 26Z" fill="url(#jewel)" stroke="#dbfbff"/><path d="m20 34 17 13m-7-19 17 12" stroke="#9be7ff" stroke-width="4"/>',voidweapon:'<path d="M19 53 30 28C17 2 50 0 56 26 42 12 36 23 39 31L24 57Z" fill="url(#jewel)" stroke="#e5c8ff"/>',sunweapon:'<path d="m17 55 16-25-5-13 8-11 7 14 10-6-4 19-11 2-15 24Z" fill="url(#gold)" stroke="#fff3c9"/>',eternalweapon:'<path d="m13 56 21-30L27 7l13 12L54 3l-4 21 9 5-15 9-25 22Z" fill="url(#jewel)" stroke="#ffdeed"/><path d="m29 40 8-8 7 5-8 9Z" fill="url(#gold)"/>'};
-    body=forms[c.id]??forms.voidweapon;
+    const relic=catalogSkin(c.id);
+    if(relic?.classId){const tint=color,formsByClass:Record<string,string>={
+      berserker:'<path d="m18 55 23-39m-9-5c-23-6-29 19-10 23l11-10 12 6c18-11 8-28-7-21Z" fill="url(#steel)" stroke="url(#gold)" stroke-width="3"/>',
+      paladin:'<path d="m16 55 28-43 10-7-2 15-29 38Z" fill="url(#steel)" stroke="url(#jewel)"/><path d="m16 38 23 14" stroke="url(#gold)" stroke-width="5"/>',
+      assassin:'<path d="M8 49 25 16 30 7l-1 20-14 27M32 55l17-33 7-12-1 23-16 26" fill="url(#jewel)" stroke="url(#gold)" stroke-width="2"/>',
+      ranger:'<path d="M18 8Q58 28 18 58L30 33Z" fill="none" stroke="url(#gold)" stroke-width="5"/><path d="m18 8 2 49m-7-26 43 0m-8-6 8 6-8 6" fill="none" stroke="url(#jewel)" stroke-width="2"/>',
+      necromancer:'<path d="m23 60 13-43m-2-4C5 0 3 29 10 41 9 20 32 21 48 24L56 8 38 11Z" fill="url(#steel)" stroke="url(#jewel)" stroke-width="3"/>',
+      elementalist:'<path d="m23 58 13-35" stroke="url(#gold)" stroke-width="6"/><path d="m34 8 13 9-7 15-16-8Z" fill="url(#jewel)" stroke="#ddfaff" stroke-width="2"/>',
+      warlock:'<path d="m22 58 14-27m-13-6q-5-23 18-18 19 9-1 22" stroke="url(#gold)" stroke-width="5" fill="none"/><circle cx="35" cy="19" r="8" fill="url(#jewel)"/>',
+      lanceman:'<path d="m15 58 27-42M36 21l2-18 16 5-10 16Z" stroke="url(#gold)" stroke-width="4" fill="url(#jewel)"/>',
+      monk:'<path d="M11 54 52 10" stroke="url(#gold)" stroke-width="7"/><path d="m11 54 10-10m22-24 9-10" stroke="url(#jewel)" stroke-width="10"/>'};
+      body=formsByClass[relic.classId];for(let i=0;i<(relic.tier??0);i++)body+=`<path d="m${10+i*9} 5 3 5-3 5-3-5Z" fill="url(#jewel)"/>`;
+    }else body=forms[c.id]??forms.voidweapon;
   }else{body=horse;if(c.id==='sunhorse')body+='<path d="m24 20 14-7 11 15-6 11-10-1Z" fill="url(#gold)" stroke="#fff4c0"/>';if(c.id==='nightmare')body+='<path d="m18 28-6-21 12 10 2-14 8 13m-17 34-9 7 7-18" fill="url(#jewel)"/>';if(c.id==='frosthorse')body+='<path d="m23 19 4-15 5 15m10 2 4-13 3 17" fill="#d1f5ff"/>';}
   return itemIcon(c.type,c.rarity,label,color,body);
 }

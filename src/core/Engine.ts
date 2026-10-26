@@ -1,3 +1,4 @@
+import {catalogSkin,weaponSkin,collectionBonuses,equippedPassives,cosmeticWing} from '../player/SkinCatalog';
 import {FieldProgress,fieldReward} from '../rpg/FieldRewards';
 import {MassacreSystem} from '../combat/MassacreSystem';
 import {OpenWorldActivities} from '../world/OpenWorldActivities';
@@ -257,7 +258,7 @@ export class Engine {
     this.restore();
     this.quests=new QuestSystem(this.inventory,this.progress);
     this.quests.restore(this.deferredQuestSave);
-    this.quests.onReward=reward=>this.fieldProgress.grant({skinFragments:reward.skinFragments,skinChests:reward.skinChests,refinementStones:reward.refinementStones,renown:reward.refinementStones?1:0});
+    this.quests.onReward=reward=>{if(reward.wardrobeSource)this.progress.wardrobe.earn(reward.wardrobeSource,this.progress.wardrobe.nextToken('contract'));this.fieldProgress.grant({skinFragments:reward.skinFragments,skinChests:reward.skinChests,refinementStones:reward.refinementStones,renown:reward.refinementStones?1:0});};
     if(!this.quests.canEnterRegion(this.restoredRegionId))this.restoredRegionId='aurora';
     if(this.restoredRegionId!=='aurora'){
       this.terrain=this.mapInstances.activate(this.restoredRegionId);
@@ -468,7 +469,8 @@ export class Engine {
       this.codex.recordKill(kind, boss);
       const field=!!this.activities&&!this.dungeon.active;
       if(field&&this.massacre.kill())this.activities?.spawnMassacre(this.hero);
-      const loot = field&&elite?fieldReward(this.inventory,level,'elite'):this.inventory.generateLoot(kind, level, boss,field?this.massacre.bonus:0);
+      const loot = field&&elite?fieldReward(this.inventory,level,'elite'):this.inventory.generateLoot(kind, level, boss,field?this.massacre.bonus+(this.quests.progressOf(this.quests.contract(slainRegion)).accepted?(this.hero.skinCombat.passive.contractDrop??0):0):0);
+      if(field&&boss)loot.wardrobeSource='worldboss';
       if(field){loot.xp=Math.round(loot.xp*(1+this.massacre.bonus));if(elite||loot.gold%4===0)loot.fieldExtras={...loot.fieldExtras,abyssalCores:elite?2:1};}
       loot.xp=Math.round(loot.xp*this.phase2Gathering.multiplier('xp'));
       const exclusive=regionalMaterialForKill(slainRegion,kind,level,boss,loot.id);
@@ -484,6 +486,7 @@ export class Engine {
       this.lootFeed.push(drop);
       this.sound.coin();
       this.inventory.addLoot(drop);
+      if(drop.wardrobeSource)this.progress.wardrobe.earn(drop.wardrobeSource,drop.id);
       if(drop.fieldExtras&&this.fieldProgress.collect(drop.id,drop.fieldExtras))for(let i=0;i<(drop.fieldExtras.abyssalCores??0);i++)this.quests.onActivity('core',this.mapInstances.regionId,drop.id+':core:'+i);
       if(drop.activityResource&&drop.activityResource.region===this.mapInstances.regionId)this.quests.onActivity('rareCollect',drop.activityResource.region,drop.activityResource.source,drop.id);
       this.bountyUI.refresh();
@@ -537,7 +540,7 @@ export class Engine {
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(active?dt:0,this.channel.remaining);
     this.progress.tick(active?dt:0);
-    if(active){this.fieldProgress.tick(dt);this.massacre.update(dt,this.hero.alive);this.activities?.update(dt,this.hero);}
+    if(active){this.hero.skinCombat.update(dt);this.fieldProgress.tick(dt);this.massacre.update(dt,this.hero.alive);this.activities?.update(dt,this.hero);}
     this.activityScene?.update(active?dt:0,this.hero.position);
     this.fieldHUD.update(dt,this.activities,this.massacre,this.hero,this.camera,this.enemies);
     this.phase2Rewards.tick(dt,active);
@@ -586,7 +589,7 @@ export class Engine {
         this.dungeonInstance.resetFloor(this.dungeon.floor);
         for(let i=0;i<3;i++)this.physics.setDungeonGateOpen(i,this.dungeonInstance.gateOpen(i,this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.completed));
       }
-      if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
+      if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);if(this.dungeon.definition.id==='tower')this.progress.wardrobe.earn('tower',this.progress.wardrobe.nextToken('tower-clear'));this.save();}
       const targets = [...this.enemies.enemies.filter(enemy => enemy.alive),...(this.activities?.targets??[])];
       if(input.dash&&!this.phase2DashHeld&&this.hero.alive)this.phase2Combat.onDash(this.hero.position,targets,this.hero.stats.attack);
       this.phase2DashHeld=input.dash;
@@ -694,7 +697,7 @@ export class Engine {
     this.activities=new OpenWorldActivities(this.mapInstances.regionId,this.physics,this.enemies,this.quests,this.fieldProgress,{
       board:()=>this.openContracts(),
       message:text=>{this.hud.notify(text,'info');this.questTracker.refresh();this.save();},
-      reward:(kind,position,count=1,level=this.inventory.level)=>{for(let i=0;i<count;i++){const point=position.clone().add(new Vector3(Math.sin(i*2.4)*1.8,0,Math.cos(i*2.4)*1.8));const drop:LootDrop={...fieldReward(this.inventory,level,kind),position:point};if(kind==='rift'&&i>0&&drop.fieldExtras)drop.fieldExtras.skinChests=0;this.drops.push(drop);this.createDropMesh(drop);this.combat.particles.celebration(point,true);}},
+      reward:(kind,position,count=1,level=this.inventory.level)=>{for(let i=0;i<count;i++){const point=position.clone().add(new Vector3(Math.sin(i*2.4)*1.8,0,Math.cos(i*2.4)*1.8));const drop:LootDrop={...fieldReward(this.inventory,level,kind),position:point};if(i>0){drop.wardrobeSource=undefined;if(kind==='rift'&&drop.fieldExtras)drop.fieldExtras.skinChests=0;}this.drops.push(drop);this.createDropMesh(drop);this.combat.particles.celebration(point,true);}},
       resource:(site,token)=>{const base=this.inventory.generateLoot('slime',site.level);const drop:LootDrop={...base,item:undefined,gold:0,xp:20+site.level*4,crystals:1,position:new Vector3(site.x,this.terrain.heightAt(site.x,site.z)+.7,site.z),activityResource:{region:site.region,source:site.id},fieldExtras:{abyssalCores:1}};this.drops.push(drop);this.createDropMesh(drop);},
       storm:targets=>{for(const enemy of targets){const damage=enemy.receiveDamage(calculateDamage(this.hero.stats.attack*.85,enemy.defense));this.combat.particles.cast(enemy.position.clone().add(new Vector3(0,7,0)),new Vector3(0,-1,0),CLASS_DEFINITIONS.elementalist.skills[2],2);this.events.emit('damage',{position:enemy.position,amount:damage,critical:false,team:'enemy',color:0x8bdfff});}this.sound.spell('elementalist',2);},
     });
@@ -713,6 +716,7 @@ export class Engine {
   }
   clearArenaReturn():void {if(!this.arenaMap)this.arenaReturn=undefined;}
   async enterArenaMap(match:PvPMatch,selfId:string):Promise<void>{
+    this.hero.skinShield=0;
     if(!this.arenaReturn)throw Error('Ponto de retorno indisponível.');
     const self=match.fighters.find(f=>f.id===selfId);if(!self)throw Error('Combatente ausente.');
     Object.assign(this.arenaReturn,{stats:{...this.hero.stats},hp:this.hero.hp,mana:this.hero.mana,classId:this.classId,godMode:this.hero.godMode});
@@ -747,6 +751,7 @@ export class Engine {
   }
   private tickArena(dt:number,input:HeroInput):void {
     const match=this.arenaUI.match,self=match?.fighters.find(f=>f.id===this.arenaUI.selfId);if(!match||!self)return;
+    if(match.phase==='ended'&&match.ranked&&match.results.some(r=>r.id===this.arenaUI.selfId)){if(this.progress.wardrobe.earn('pvp','ranked-match-'+match.id))this.save();}
     const playable=match.phase==='active'&&!this.mapLoading&&!document.hidden;
     const controls=playable?input:emptyInput();this.arenaUI.control(controls);this.hero.updateArena(dt,self,controls);
     if(this.arenaLastAction!==self.lastAction){this.hero.visualAttack(self.lastSkill??undefined);this.arenaLastAction=self.lastAction;self.lastSkill===null?this.sound.attack(this.classId):this.sound.spell(this.classId,self.lastSkill);}
@@ -857,7 +862,9 @@ export class Engine {
 
       case 'redeem-vip':ok=p.redeemVip(data.id);break;
       case 'redeem':ok=p.redeem(data.id);break;
-      case 'cosmetic':ok=p.equipCosmetic(data.id);break;
+      case 'cosmetic':{const skin=catalogSkin(data.id);ok=(!skin?.classId||skin.classId===this.classId)&&p.equipCosmetic(data.id);if(ok)this.refreshStats();break;}
+      case 'skin-unlock':ok=p.wardrobe.unlock(data.id,p.owned);if(ok)this.refreshStats();break;
+      case 'skin-forge':ok=p.wardrobe.unlock(data.id,p.owned,true);if(ok)this.refreshStats();break;
       case 'gps-monster':{const enemy=this.enemies.enemies.find(e=>e.id===data.id&&e.alive);if(enemy){this.setWaypoint(enemy.position);ok=true;}break;}
       case 'gps-region':case 'gps-boss':{const r=REGIONS.find(r=>r.id===data.id);if(r?.id===this.mapInstances.regionId){this.setWaypoint(action==='gps-boss'?mapDefinition(r.id).boss:mapDefinition(r.id).exit);ok=true;}break;}
       case 'difficulty':if(['normal','elite','nightmare','abyssal'].includes(data.key)&&!this.dungeon.active){p.dungeonDifficulty=data.key;ok=true;}break;
@@ -1205,8 +1212,10 @@ export class Engine {
     if (!this.hero) return;
     const base = CLASS_DEFINITIONS[this.classId].stats;
     const equipment = this.inventory.getStatBonuses(), buildings = this.base.getBuffs(), codex = this.codex.getBuffs();
-    const talents=this.progress.bonuses(this.classId);
-    const evo=this.progress.evolution.buffs(this.progress.equipped.pet,this.progress.equipped.mount);this.hero.mountSpeedBoost=evo.speed;
+    const talents=this.progress.bonuses(this.classId),collection=collectionBonuses(this.progress.owned,COSMETICS),passive=equippedPassives(this.progress.owned,this.progress.equipped,this.classId),relic=weaponSkin(this.progress.equipped.weapon,this.classId);
+    this.quests.contractGoldBonus=passive.contractGold??0;
+    this.hero.skinCombat.passive=passive;this.hero.skinCombat.epic=!!relic&&(relic.tier??0)>=2;this.hero.skinCombat.element=relic?.element??'steel';this.hero.skinCombat.color=relic?.color??0xffd699;
+    const evo=this.progress.evolution.buffs(this.progress.equipped.pet,this.progress.equipped.mount);this.hero.mountSpeedBoost=evo.speed+(passive.mountSpeed??0);
     const effects=epigraphEffects(this.classId,this.progress.talents[this.classId]);
     const rank=this.phase2Arena.titleBonuses(),runic=this.phase2Runes.bonuses();
     this.hero.combatModifiers=effects;
@@ -1216,9 +1225,9 @@ export class Engine {
       speed:base.speed*(1+rank.speed)*this.phase2Gathering.multiplier('speed')*(this.fieldProgress.buffActive('speed')?1.3:1),
       critMultiplier:base.critMultiplier*(this.fieldProgress.buffActive('critical')?1.25:1),
       critChance:Math.min(.6,base.critChance+talents.critChance+evo.crit+(equipment.critChance??0)+rank.crit),
-      attack: (base.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack)*(1+rank.attack+runic.attack)*this.phase2Gathering.multiplier('damage'),
-      defense: base.defense + talents.defense + evo.defense + equipment.defense + buildings.defense + codex.defense,
-      maxHp: (base.maxHp + talents.maxHp + evo.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp)*(1+rank.hp+runic.hp),
+      attack: (base.attack + collection.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack)*(1+rank.attack+runic.attack)*this.phase2Gathering.multiplier('damage'),
+      defense: base.defense + collection.defense + talents.defense + evo.defense + equipment.defense + buildings.defense + codex.defense,
+      maxHp: (base.maxHp + collection.maxHp + talents.maxHp + evo.maxHp + equipment.maxHp + buildings.maxHp + codex.maxHp)*(1+rank.hp+runic.hp),
     });
   }
 

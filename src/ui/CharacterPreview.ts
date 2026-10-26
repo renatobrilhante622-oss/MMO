@@ -1,3 +1,4 @@
+import {cosmeticWing} from '../player/SkinCatalog';
 import { ACESFilmicToneMapping, HemisphereLight, PerspectiveCamera, Scene, SpotLight, SRGBColorSpace, WebGLRenderer } from 'three';
 import { ArticulatedCharacter } from '../player/ArticulatedCharacter';
 import {configureCharacterCamera,disableCharacterCulling,fitPreviewCamera} from '../player/PlayerRenderer';
@@ -22,6 +23,8 @@ export class CharacterPreview {
   private dragX=0;
   private yaw=-.18;
   private zoom=1;
+  private testMode:'idle'|'attack'|'ride'='idle';
+  private testTime=0;
   private readonly touches=new Map<number,{x:number;y:number}>();
   private pinchDistance=0;
   private host?:HTMLElement;
@@ -63,16 +66,19 @@ export class CharacterPreview {
       if(cosmetic&&(cosmetic.type==='pet'||cosmetic.type==='mount')){this.animal=new CompanionRig(cosmetic.type==='mount');this.animal.appearance(cosmetic);this.scene.add(this.animal.root);}
       else{this.rig=new ArticulatedCharacter(CLASS_DEFINITIONS[id]);this.scene.add(this.rig.root);}
     }
-    if(this.rig){if(cosmetic?.type==='weapon'){this.rig.weapons.skin(cosmetic.id);this.rig.weaponPackAppearance(cosmetic.id);}else this.rig.weaponPackAppearance(weaponVisualId??'ironweapon');if(cosmetic?.type==='skin')this.rig.skinAppearance(cosmetic.id,cosmetic.color,RARITIES.indexOf(cosmetic.rarity));if(cosmetic?.type==='wing')this.rig.wings.configure((['necrotic','celestial','glacial','magma','solar','astral'] as const)[Number(cosmetic.id.split('-')[1])??0],Math.max(1,refine));this.rig.accent.color.setHex(cosmetic?.color??color);this.rig.accent.emissive.setHex(cosmetic?.color??color);this.rig.weaponAppearance(cosmetic?.color??color,refine,cosmetic?.rarity??'rare');}
+    if(this.rig){if(cosmetic?.type!=='wing')this.rig.wings.configure(null,1);if(cosmetic?.type!=='skin')this.rig.skinAppearance('traveler',0xa8b9c4,0);if(cosmetic?.type==='weapon'){this.rig.weapons.skin(cosmetic.id);this.rig.weaponPackAppearance(cosmetic.id);}else this.rig.weaponPackAppearance(weaponVisualId??'ironweapon');if(cosmetic?.type==='skin')this.rig.skinAppearance(cosmetic.id,cosmetic.color,RARITIES.indexOf(cosmetic.rarity));if(cosmetic?.type==='wing')this.rig.wings.configure(cosmeticWing(cosmetic.id)??'necrotic',Math.max(4,refine));this.rig.accent.color.setHex(cosmetic?.color??color);this.rig.accent.emissive.setHex(cosmetic?.color??color);this.rig.weaponAppearance(cosmetic?.color??color,refine,cosmetic?.rarity??'rare');}
     this.stage.appearance(cosmetic?.color??color);this.rim.color.setHex(cosmetic?.color??color);
     this.resizeObserver?.disconnect();this.host=host;this.resizeObserver?.observe(host);host.append(this.renderer.domElement);this.needsFit=true;
     this.draw(0);if(!this.frame)this.frame=requestAnimationFrame(this.animate);
   }
+  testAnimation(mode:'attack'|'ride'):void{this.testMode=mode;this.testTime=3;if(mode==='attack')this.rig?.attack(0,3);}
+  resetView():void{this.yaw=-.18;this.zoom=1;this.needsFit=true;this.draw(0);}
   private draw(dt:number):void {
+    this.testTime=Math.max(0,this.testTime-dt);if(this.testTime===0)this.testMode='idle';
     this.time+=dt;
     this.stage.update(dt);
-    if(this.rig){this.rig.root.rotation.y=this.yaw;this.rig.update(dt,this.time,'idle',0,this.yaw,0);}
-    if(this.animal){this.animal.root.rotation.y=this.yaw+.5;this.animal.update(dt,0,this.time);}
+    if(this.rig){this.rig.root.rotation.y=this.yaw;this.rig.update(dt,this.time,this.testMode==='ride'?'run':'idle',this.testMode==='ride'?1:0,this.yaw,0);}
+    if(this.animal){this.animal.root.rotation.y=this.yaw+.5;this.animal.update(dt,this.testMode==='ride'?9:0,this.time);}
     const root=this.rig?.root??this.animal?.root;if(!root||!this.host)return;
     const width=Math.max(1,this.host.clientWidth),height=Math.max(1,this.host.clientHeight),revision=root.userData.characterRevision??0;
     if(width!==this.width||height!==this.height){this.width=width;this.height=height;this.renderer.setSize(width,height,false);this.needsFit=true;}

@@ -53,16 +53,17 @@ export class WingsSystem {
      m.customProgramCacheKey=()=> 'eterna-pr13-sixlayer-'+layer;
      this.materials.push(m);return m;
    };
-   const span=2.9+level*.11;
+   const shape={necrotic:{span:1.05,layers:1,sweep:.62},celestial:{span:1.2,layers:3,sweep:.25},magma:{span:1.15,layers:1,sweep:.75},glacial:{span:.94,layers:2,sweep:-.25},solar:{span:1.3,layers:3,sweep:.15},astral:{span:1.02,layers:2,sweep:.45}}[style];
+   const span=(2.9+level*.11)*shape.span;
    const material=makeMat(0);
    const layers:PlaneGeometry[]=[];
-   for(let layer=0;layer<3;layer++){
+   for(let layer=0;layer<shape.layers;layer++){
      const geometry=new PlaneGeometry(1,1,18+level*2,10+level);
      const pos=geometry.attributes.position;
      for(let i=0;i<pos.count;i++){
        const u=pos.getX(i)+.5,v=pos.getY(i)+.5;
        const sweep=span*(.78+layer*.12);
-       pos.setXYZ(i,.10+u*sweep, (v-.35)*(1.95+level*.055)-u*.37-layer*.30,
+       pos.setXYZ(i,.10+u*sweep, (v-.35)*(1.95+level*.055)-u*shape.sweep-layer*.30,
          -.21-Math.sin(u*Math.PI)*(.30+layer*.12)+Math.pow(u,1.7)*.11);
      }
      geometry.computeVertexNormals();geometry.computeBoundingSphere();

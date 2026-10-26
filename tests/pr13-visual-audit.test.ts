@@ -65,9 +65,9 @@ describe('PR13 mobile visual regression contracts',()=>{
     const follow=read('src/companions/PetAndMountSystem.ts');
     expect(follow).toContain('this.petRig.root.scale.setScalar(.45');
   });
-  it('has three curved layers per side, particles and all six wing families',()=>{
+  it('has style-specific curved layers per side, particles and all six wing families',()=>{
     const wings=read('src/companions/WingsSystem.ts');
-    expect(wings).toContain('for(let layer=0;layer<3;layer++)');
+    expect(wings).toContain('for(let layer=0;layer<shape.layers;layer++)');
     expect(wings).toContain('for(const sign of [-1,1])');
     expect(wings).toContain('new Points(');
     expect(wings).toContain('sizeAttenuation:true');

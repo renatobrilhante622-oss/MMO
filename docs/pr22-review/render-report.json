@@ -1,0 +1,212 @@
+{
+  "appearances": {
+    "weapon": [
+      {
+        "id": "relic-paladin-0",
+        "body": null,
+        "meshes": 5,
+        "vertices": 1283,
+        "drawCalls": 12,
+        "width": 0.31073928955959407,
+        "height": 1.45
+      },
+      {
+        "id": "relic-paladin-1",
+        "body": null,
+        "meshes": 12,
+        "vertices": 2258,
+        "drawCalls": 31,
+        "width": 0.33286075105569624,
+        "height": 1.4500000000000002
+      },
+      {
+        "id": "relic-paladin-2",
+        "body": null,
+        "meshes": 19,
+        "vertices": 3244,
+        "drawCalls": 27,
+        "width": 0.31817554538086246,
+        "height": 1.45
+      },
+      {
+        "id": "relic-paladin-3",
+        "body": null,
+        "meshes": 22,
+        "vertices": 3882,
+        "drawCalls": 30,
+        "width": 0.41385454782262465,
+        "height": 1.6
+      },
+      {
+        "id": "relic-paladin-4",
+        "body": null,
+        "meshes": 19,
+        "vertices": 3060,
+        "drawCalls": 27,
+        "width": 0.4593657090230144,
+        "height": 1.5999999999999999
+      },
+      {
+        "id": "relic-paladin-5",
+        "body": null,
+        "meshes": 45,
+        "vertices": 7281,
+        "drawCalls": 53,
+        "width": 0.8435466027269727,
+        "height": 1.5999999999999999
+      }
+    ],
+    "skin": [
+      {
+        "id": "regalia-solar",
+        "body": "KayKit_Knight",
+        "meshes": 38,
+        "vertices": 9976,
+        "drawCalls": 47,
+        "width": 1.886683298623784,
+        "height": 2.1314195534816665
+      },
+      {
+        "id": "regalia-reaper",
+        "body": "KayKit_Rogue_Hooded",
+        "meshes": 29,
+        "vertices": 7082,
+        "drawCalls": 38,
+        "width": 1.4714085785871447,
+        "height": 2.2039424330704
+      },
+      {
+        "id": "regalia-astral",
+        "body": "KayKit_Mage",
+        "meshes": 42,
+        "vertices": 9164,
+        "drawCalls": 51,
+        "width": 1.886683298623784,
+        "height": 2.1811689052127177
+      },
+      {
+        "id": "regalia-titan",
+        "body": "KayKit_Barbarian",
+        "meshes": 18,
+        "vertices": 7134,
+        "drawCalls": 27,
+        "width": 1.9393592211589925,
+        "height": 2.1491730037641497
+      },
+      {
+        "id": "regalia-glacial",
+        "body": "KayKit_Knight",
+        "meshes": 46,
+        "vertices": 10652,
+        "drawCalls": 91,
+        "width": 1.257934523389085,
+        "height": 2.1314195534816665
+      },
+      {
+        "id": "regalia-void",
+        "body": "KayKit_Skeleton_Warrior",
+        "meshes": 38,
+        "vertices": 10837,
+        "drawCalls": 47,
+        "width": 1.886683298623784,
+        "height": 2.1447420594411097
+      }
+    ],
+    "wing": [
+      {
+        "id": "plume-seraph",
+        "body": null,
+        "meshes": 14,
+        "vertices": 7732,
+        "drawCalls": 25,
+        "width": 10.22879433645813,
+        "height": 3.638844578390258
+      },
+      {
+        "id": "plume-dragon",
+        "body": null,
+        "meshes": 14,
+        "vertices": 5876,
+        "drawCalls": 25,
+        "width": 7.596527840152217,
+        "height": 3.5035597534591822
+      },
+      {
+        "id": "plume-crystal",
+        "body": null,
+        "meshes": 14,
+        "vertices": 6804,
+        "drawCalls": 25,
+        "width": 7.190145791080683,
+        "height": 3.268575373320255
+      },
+      {
+        "id": "plume-phoenix",
+        "body": null,
+        "meshes": 14,
+        "vertices": 7732,
+        "drawCalls": 25,
+        "width": 11.036411445136718,
+        "height": 3.528876531078198
+      },
+      {
+        "id": "plume-necrotic",
+        "body": null,
+        "meshes": 14,
+        "vertices": 5876,
+        "drawCalls": 25,
+        "width": 6.971920112283495,
+        "height": 3.3481731050821475
+      }
+    ],
+    "mount": [
+      {
+        "id": "steed-imperial",
+        "body": "Creature_warhorse",
+        "meshes": 41,
+        "vertices": 11286,
+        "drawCalls": 51,
+        "width": 2.4965943301782176,
+        "height": 2.3570186160453983
+      },
+      {
+        "id": "steed-fenrir",
+        "body": "Creature_wolf",
+        "meshes": 37,
+        "vertices": 10632,
+        "drawCalls": 47,
+        "width": 3.3725212310974495,
+        "height": 2.338453785361026
+      },
+      {
+        "id": "steed-glacial",
+        "body": "Creature_stag",
+        "meshes": 39,
+        "vertices": 12184,
+        "drawCalls": 49,
+        "width": 2.4965943301782176,
+        "height": 2.366617100096173
+      },
+      {
+        "id": "steed-magma",
+        "body": "Creature_wyvern",
+        "meshes": 38,
+        "vertices": 19326,
+        "drawCalls": 48,
+        "width": 4.286322896520291,
+        "height": 2.320116916084702
+      },
+      {
+        "id": "steed-astral",
+        "body": "Creature_dragon",
+        "meshes": 34,
+        "vertices": 7949,
+        "drawCalls": 44,
+        "width": 5.459888409236895,
+        "height": 3.4973524072491142
+      }
+    ]
+  },
+  "errors": [],
+  "note": "Production GLB assemblies, bounded SwiftShader renders. Not an Android FPS benchmark."
+}

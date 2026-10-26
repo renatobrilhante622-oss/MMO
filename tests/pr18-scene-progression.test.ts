@@ -54,12 +54,12 @@ describe('PR18 owned scene lifetimes',()=>{
  it('has separate islands and forbids GPS paths over void floors',()=>{const world=new OpenWorldGenerator(new Scene(),4749,'eclipse');expect(world.heightAt(0,-174)).toBeGreaterThan(2);expect(world.heightAt(150,150)).toBeLessThan(-10);expect(world.isWalkable(150,150)).toBe(false);world.dispose();});
 });
 describe('PR18 bespoke dungeon maps and licensed art',()=>{
- it('offers only the four dedicated dungeons and migrates retired starter selections',()=>{
-  expect(DUNGEONS.map(d=>d.id)).toEqual(['tombs','titan','void','eclipse']);
+ it('offers the dedicated dungeons and Eternity Tower and migrates retired starter selections',()=>{
+  expect(DUNGEONS.map(d=>d.id)).toEqual(['tombs','titan','void','eclipse','tower']);
   const {progress}=fixture();progress.restore({selectedDungeon:'roots'});expect(progress.selectedDungeon).toBe('tombs');progress.restore({selectedDungeon:'tide'});expect(progress.selectedDungeon).toBe('tombs');
  });
  it('has three traversal rooms plus a unique boss throne and four different floor plans',()=>{
-  const signatures=new Set<string>();for(const plan of Object.values(DUNGEON_MAPS)){expect(plan.rooms.map(r=>r.id)).toEqual(['guardians','crystals','sentinels','boss']);expect(plan.props.some(p=>p.asset==='Throne')).toBe(true);signatures.add(JSON.stringify(plan.rooms));for(const r of plan.rooms)expect(dungeonWalkable(plan,r.x,r.z)).toBe(true);expect(dungeonWalkable(plan,80,80)).toBe(false);expect(dungeonColliders(()=>3.4,plan.id).filter(c=>c.type==='gate')).toHaveLength(3);}expect(signatures.size).toBe(4);expect(new Set(Object.values(DUNGEON_MAPS).map(p=>p.bossModel)).size).toBe(4);
+  const signatures=new Set<string>();for(const plan of Object.values(DUNGEON_MAPS)){expect(plan.rooms.map(r=>r.id)).toEqual(['guardians','crystals','sentinels','boss']);expect(plan.props.some(p=>p.asset==='Throne')).toBe(true);signatures.add(JSON.stringify(plan.rooms));for(const r of plan.rooms)expect(dungeonWalkable(plan,r.x,r.z)).toBe(true);expect(dungeonWalkable(plan,80,80)).toBe(false);expect(dungeonColliders(()=>3.4,plan.id).filter(c=>c.type==='gate')).toHaveLength(3);}expect(signatures.size).toBe(5);expect(new Set(Object.values(DUNGEON_MAPS).map(p=>p.bossModel)).size).toBe(5);
  });
  it('keeps visual and physical gate criteria aligned and resets crystals on a new floor',()=>{
   const scene=new Scene(),world=new OpenWorldGenerator(scene,713,'dungeon'),instance=new DungeonInstance(scene,world,'titan');expect(roomForWave(5,4)).toBe(3);expect(instance.gateOpen(1,3,4)).toBe(false);for(const x of [2,9,16]){instance.update(.5,3,4,false);expect(instance.strikeCrystal(new Vector3(x,3,-44),100)).toBe(true);}expect(instance.gateOpen(1,4,4)).toBe(true);expect(instance.gateOpen(2,5,4)).toBe(true);instance.resetFloor(2);expect(instance.crystalsRemaining).toBe(3);instance.dispose();world.dispose();

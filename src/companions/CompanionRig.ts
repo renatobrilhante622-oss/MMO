@@ -1,3 +1,4 @@
+import {catalogSkin} from '../player/SkinCatalog';
 import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending, Box3, Raycaster, Color } from 'three';
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
 import {loadSharedModel} from '../assets/ModelResources';
@@ -10,6 +11,7 @@ import { RARITIES } from '../rpg/InventoryAndLoot';
 /** Strict equipment namespace: pet cosmetics never share a GLB with mount cosmetics. */
 export function companionAssetFor(id:string,riding:boolean):ModelName {
   if(riding){
+    const model=catalogSkin(id)?.mountModel;if(model)return model;
     if(['stag','spiritstag'].includes(id))return 'Creature_stag';
     if(['wyvern','ashdrake'].includes(id))return 'Creature_wyvern';
     if(id==='eternalhorse')return 'Creature_dragon';
@@ -57,6 +59,7 @@ export class CompanionRig {
   private rarity=0;
   private isStag=false;
   private appearanceId='';
+  private currentCosmetic?:Cosmetic;
   private readonly wings=new Group();
   private readonly armor=new Group();
   private readonly particles:RarityAura;
@@ -153,6 +156,7 @@ export class CompanionRig {
   private ellipsoid(parent:Object3D,material:MeshStandardMaterial,size:number[],at:number[]):Mesh {const m=this.mesh(parent,new SphereGeometry(1,12,8),material,at[0],at[1],at[2]);m.scale.set(size[0],size[1],size[2]);return m;}
   private between(parent:Object3D,a:Vector3,b:Vector3,radius:number,material:MeshStandardMaterial):void {const d=b.clone().sub(a);const m=this.mesh(parent,new CylinderGeometry(radius,radius,d.length(),6),material,0,0,0);m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new Vector3(0,1,0),d.normalize());}
   appearance(c:Cosmetic):void {
+    this.currentCosmetic=c;
     if(this.appearanceId===c.id)return;this.batch?.dispose();this.batch=undefined;this.appearanceId=c.id;this.rarity=RARITIES.indexOf(c.rarity);
     this.clearImportedProps();this.root.userData.saddleMeasured=false;
     this.particles.configure(this.rarity,c.color);this.wings.visible=this.horse&&c.id==='eternalhorse';this.armor.visible=this.horse&&['sunhorse','nightmare'].includes(c.id);
@@ -169,13 +173,14 @@ export class CompanionRig {
         if(this.imported!==asset)return;
         this.spine.visible=false;
         if(this.batch)this.batch.mesh.visible=false;
-        asset.setCompanionAppearance(c.color,c.id==='hellhound');
+        const current=this.currentCosmetic??c;
+        asset.setCompanionAppearance(current.color,current.id==='hellhound',current.id.startsWith('steed-')?.36:.045);
         this.updateSaddleFromGLB();
-        this.installImportedProps(c);
+        this.installImportedProps(current);
       },this.horse);
       this.imported=asset;
       this.root.add(asset.root);}}
-    this.imported?.setCompanionAppearance(c.color,hell);
+    this.imported?.setCompanionAppearance(c.color,hell,c.id.startsWith('steed-')?.36:.045);
     if(this.imported?.ready)this.installImportedProps(c);
     this.legs.forEach(l=>l.hip.visible=!bird);this.root.name=c.name[1];this.spine.scale.set(giant?1.2:1,bird?.8:1,dragon?1.15:1);
     this.neck.scale.setScalar(giant?.65:bird?.6:1);this.head.scale.set(giant?1.3:bird?.7:1,1,giant?1.2:1);
@@ -222,8 +227,8 @@ export class CompanionRig {
     const gem='models/equipment/CC0_crystal_gems.glb';
     const helmet='models/equipment/CC0_knight_helmet.glb';
     const extras:Array<{file:string;xyz:[number,number,number];scale:number;rot?:number;tint?:number}>=[];
-    const armored=['sunhorse','nightmare','magmahorse','lunarhorse','frosthorse'].includes(c.id);
-    const crystal=['fenrir','obsidianwolf','nighthorse','spiritstag','eternalhorse','wyvern','ashdrake','nightmare'].includes(c.id);
+    const armored=c.id.startsWith('steed-')||['sunhorse','nightmare','magmahorse','lunarhorse','frosthorse'].includes(c.id);
+    const crystal=c.id.startsWith('steed-')||['fenrir','obsidianwolf','nighthorse','spiritstag','eternalhorse','wyvern','ashdrake','nightmare'].includes(c.id);
     if(this.horse&&armored){
       for(const sign of [-1,1]){
         extras.push({file:shield,xyz:[sign*.38,1.12,-.20],scale:.42,rot:sign*Math.PI/2,tint:c.id==='nightmare'?0x3b254f:0xd2d6e1});

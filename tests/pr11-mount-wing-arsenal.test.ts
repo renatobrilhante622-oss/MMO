@@ -37,7 +37,7 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
  });
  it('mount actor variants retain their authored maps rather than receiving a flat blue material',()=>{
    const code=readFileSync('src/assets/AnimatedGLB.ts','utf8');
-   expect(code).toContain('original).lerp(tint,hellhound?.11:.045)');
+   expect(code).toContain('original).lerp(tint,hellhound?.11:strength)');
    expect(code).toContain('material.onBeforeCompile=shader=>');
    expect(code).toContain('eterna-hellhound-magma-v1');
    expect(code).toContain('creaturePhase');
@@ -50,7 +50,7 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
    const hero=readFileSync('src/player/ArticulatedCharacter.ts','utf8');
    expect(hero).toContain("actor.attachAt('spine2',this.wings.root");
    const wings=readFileSync('src/companions/WingsSystem.ts','utf8');
-   expect(wings).toContain('const span=2.9+level*.11');
+   expect(wings).toContain('const span=(2.9+level*.11)*shape.span');
    expect(wings).toContain('this.aura.position.set(0,.05,-.18)');
    expect(hero).toContain('this.wings.root.scale.setScalar(1.16)');
  });

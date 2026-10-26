@@ -1,5 +1,5 @@
 import {
-  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
+  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshBasicMaterial, MeshStandardMaterial,
   Object3D, Vector3,
 } from 'three';
 import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -28,7 +28,7 @@ export function loadModel(name: ModelName): Promise<GLTF> {
   const folder=name.startsWith('Quaternius_')?'models/environment/':name.startsWith('Creature_')?'models/creatures/':'models/';
   // Retire both the retrofitted 704-triangle horse and the unrigged farm horse.
   const replacement=['Creature_horse','Creature_warhorse','Horse'].includes(name)
-    ?'models/pr17-source/ImperialHorse.glb':name==='Creature_whitehorse'?'models/pr17-source/ImperialHorseWhite.glb':null;
+    ?'models/pr17-source/ImperialHorse.glb':name==='Creature_stag'?'models/pr22/ImperialStag.glb':name==='Creature_dragon'?'models/pr22/CelestialDragon.glb':name==='Creature_whitehorse'?'models/pr17-source/ImperialHorseWhite.glb':null;
   return loadSharedModel(replacement??folder + name + '.glb');
 }
 
@@ -106,9 +106,9 @@ export class AnimatedGLB {
       object.castShadow = this.castShadow;
       object.receiveShadow = this.castShadow;
       object.frustumCulled = false;
-      const isolated = (source: MeshStandardMaterial): MeshStandardMaterial => {
-        const material = source.clone();
-        this.materials.push({ material, original: source.color.clone(), originalEmissive: source.emissive.clone(), originalEmissiveIntensity: source.emissiveIntensity });
+      const isolated = (source: MeshStandardMaterial|MeshBasicMaterial): MeshStandardMaterial => {
+        const material = source instanceof MeshStandardMaterial?source.clone():new MeshStandardMaterial({color:source.color??0xffffff,map:source.map??null});
+        this.materials.push({ material, original: source.color.clone(), originalEmissive: material.emissive.clone(), originalEmissiveIntensity: material.emissiveIntensity });
         if(this.staticCreature && gltf.animations.length===0 && object.geometry?.attributes.position){
           // Non-skinned GLBs have no bones. A vertex shader gives a small,
           // reversible breathing / hoof / membrane deformation in local space.
@@ -128,15 +128,15 @@ export class AnimatedGLB {
               shader.vertexShader='uniform float creaturePhase, creatureStride, creatureTime, creatureAttack;\n'+shader.vertexShader;
               shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
                 `#include <begin_vertex>
-                  float bodyH=clamp((position.y-${pY.toFixed(6)})/${Math.max(.0001,extent.y).toFixed(6)},0.,1.);
-                  float sideX=(position.x-${px.x.toFixed(6)})/${Math.max(.0001,extent.x).toFixed(6)};
+                  float bodyH=clamp((position.y-(${pY.toFixed(6)}))/${Math.max(.0001,extent.y).toFixed(6)},0.,1.);
+                  float sideX=(position.x-(${px.x.toFixed(6)}))/${Math.max(.0001,extent.x).toFixed(6)};
                   float breath=sin(creatureTime*2.2)*.006;
                   transformed.y+=breath*${Math.max(.001,extent.y).toFixed(6)}*bodyH;
                   ${wing? `float membrane=smoothstep(.15,.42,abs(sideX))*smoothstep(.35,.7,bodyH);
                      transformed.y+=sin(creatureTime*2.6+abs(sideX)*3.2)*membrane*.052*${Math.max(.001,extent.y).toFixed(6)};`:
                      `float paws=(1.-smoothstep(.18,.37,bodyH))*creatureStride;
                       float lateral=sign(sideX);
-                      float front=sign(position.z-${px.z.toFixed(6)});
+                      float front=sign(position.z-(${px.z.toFixed(6)}));
                       float cycle=creaturePhase*1.45+(front<0.?3.14159:0.)+(lateral<0.?1.5708:0.);
                       transformed.z+=sin(cycle)*paws*.23*${Math.max(.001,extent.z).toFixed(6)};
                       transformed.y+=max(0.,cos(cycle))*paws*.075*${Math.max(.001,extent.y).toFixed(6)};
@@ -260,14 +260,15 @@ export class AnimatedGLB {
   }
   get animationCount():number{return this.clips.size;}
   /** Palette safety: keep each author's diffuse + texture atlas distinct. */
-  setCompanionAppearance(color:number,hellhound=false):void{
+  setCompanionAppearance(color:number,hellhound=false,strength=.045):void{
     const tint=new Color(color);
     for(const {material,original,originalEmissive,originalEmissiveIntensity} of this.materials){
-      material.color.copy(original).lerp(tint,hellhound?.11:.045);
+      material.color.copy(original).lerp(tint,hellhound?.11:strength);
       material.metalness=Math.min(.12,material.metalness);
       material.roughness=Math.max(.72,material.roughness);
       material.emissive.copy(originalEmissive);
       material.emissiveIntensity=originalEmissiveIntensity;
+      if(strength>.1){material.color.multiplyScalar(.65);material.emissiveIntensity*=.15;}
       if(hellhound){
         // Animated, narrow emissive magma fissures; original wolf PBR
         // normal/albedo remain untouched and no Canvas texture is generated.
@@ -293,6 +294,19 @@ export class AnimatedGLB {
         material.customProgramCacheKey=()=> 'eterna-wolf-authored-pbr-v1';
       }
       material.needsUpdate=true;
+    }
+  }
+  setRegaliaStyle(color:number,metal:boolean):void {
+    if(!this.name.startsWith('KayKit_'))return;
+    for(const {material}of this.materials){
+      material.metalness=metal?.65:.18;material.roughness=metal?.36:.63;
+      material.onBeforeCompile=shader=>{
+        shader.uniforms.regaliaTint={value:new Color(color)};shader.fragmentShader='uniform vec3 regaliaTint;\n'+shader.fragmentShader;
+        shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+          float flesh=step(diffuseColor.g,diffuseColor.r*.84)*step(diffuseColor.b,diffuseColor.r*.78)*step(.25,diffuseColor.r);
+          float lum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+          diffuseColor.rgb=mix(diffuseColor.rgb,regaliaTint*(.13+lum*.9),(1.-flesh)*.92);`);
+      };material.customProgramCacheKey=()=>`regalia-${color}-${metal}`;material.needsUpdate=true;
     }
   }
   clearWeaponSlots():number{return this.model?clearWeaponSlots(this.model):0;}

@@ -50,6 +50,7 @@ export interface Item {
 
 export interface LootDrop {
   id: string; position: Vector3; gold: number; crystals: number; xp: number; item?: Item;
+  wardrobeSource?:import('../player/SkinCatalog').SkinSource;
   activityResource?:{region:string;source:string};
   fieldExtras?:import('../rpg/FieldRewards').FieldExtras;
   /** Exclusive regional crafting material awarded on legitimate collection. */

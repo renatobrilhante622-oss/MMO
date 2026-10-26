@@ -12,7 +12,7 @@ export type QuestGoal='talk'|'kill'|'boss'|'visit'|'level'|'refine'|'wing'|'moun
 export interface QuestDefinition {
   id:string;category:QuestCategory;region:string;
   title:string;description:string;goal:QuestGoal;target:string;required:number;
-  reward:{xp:number;gold:number;crystals:number;tickets:number;passXp:number;materials?:number;itemRarity?:Rarity;skinFragments?:number;skinChests?:number;refinementStones?:number};
+  reward:{xp:number;gold:number;crystals:number;tickets:number;passXp:number;materials?:number;itemRarity?:Rarity;skinFragments?:number;skinChests?:number;refinementStones?:number;wardrobeSource?:'contract'};
   npcId?:string;act?:number;actName?:string;rank?:'C'|'B'|'A'|'S'|'SS';serial?:number;
 }
 export interface QuestProgress {
@@ -64,6 +64,7 @@ export class QuestSystem {
       seen.add(key);this.counters.set(q.id,Math.min(q.required,(this.counters.get(q.id)??0)+1));this.changed();
     }
   }
+  contractGoldBonus=0;
   private currentDay='';
   private readonly daily:QuestDefinition[]=[];
   constructor(private readonly inventory:InventoryAndLoot,private readonly progress:AdventureProgress,now=new Date()){
@@ -139,7 +140,7 @@ export class QuestSystem {
     const quest=this.get(id);
     if(!quest||!this.progressOf(quest).ready||this.claimed.has(id))return false;
     this.claimed.add(id);
-    this.inventory.gold+=quest.reward.gold;
+    this.inventory.gold+=Math.round(quest.reward.gold*(quest.category==='contract'?1+Math.min(.2,Math.max(0,this.contractGoldBonus)):1));
     this.inventory.crystals+=quest.reward.crystals;
     this.inventory.addXp(quest.reward.xp);
     this.progress.tickets+=quest.reward.tickets;

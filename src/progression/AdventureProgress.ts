@@ -1,3 +1,5 @@
+import {COMPLETE_SKIN_CATALOG,cosmeticWing} from '../player/SkinCatalog';
+import {WardrobeProgress} from './WardrobeProgress';
 import {mapDefinition,WORLD_MAPS} from '../world/maps/MapDefinitions';
 import {avatarId} from '../ui/AvatarRenderer';
 import {EvolutionSystem} from '../rpg/EvolutionSystem';
@@ -67,6 +69,7 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'ashdrake',name:['Dracônico de Fogo','Fire Drake'],type:'mount',rarity:'mythic',color:0xee945d},
   {id:'lunarhorse',name:['Corcel Lunar','Moonlight Courser'],type:'mount',rarity:'legendary',color:0xa3b4ee},
 
+  ...COMPLETE_SKIN_CATALOG,
 ];
 export const GACHA_ODDS=[.50,.29,.14,.055,.014,.001] as const;
 export const SLOT_COSTS=[2000,5000,10000,18000] as const;
@@ -76,6 +79,7 @@ export function seasonId(now=Date.now()):string {return new Date(now).toISOStrin
 
 /** Local PvE progression. Never accepted as authoritative inventory by the online server. */
 export class AdventureProgress {
+  wardrobe=new WardrobeProgress();
   talents:Partial<Record<ClassId,Partial<Record<Attribute,number>>>>={};
   evolution=new EvolutionSystem();
   tickets=0;
@@ -271,13 +275,14 @@ export class AdventureProgress {
     this.vipDiamonds-=cost;this.owned.push(id);return true;
   }
   equipCosmetic(id:string):boolean {
-    const c=COSMETICS.find(c=>c.id===id);if(!c||!this.owned.includes(id))return false;this.equipped[c.type]=id;if(c.type==='wing'){const style=(['necrotic','celestial','glacial','magma','celestial','necrotic'] as const)[Number(id.split('-')[1])??0];if(!this.evolution.wingOwned.includes(style))this.evolution.wingOwned.push(style);this.evolution.wings=style;}return true;
+    const c=COSMETICS.find(c=>c.id===id);if(!c||!this.owned.includes(id))return false;this.equipped[c.type]=id;if(c.type==='wing'){const style=cosmeticWing(id)??'necrotic';if(!this.evolution.wingOwned.includes(style))this.evolution.wingOwned.push(style);this.evolution.wings=style;}return true;
   }
   snapshot():Record<string,unknown> {
-    const {inventory,...data}=this;return structuredClone(data);
+    const {inventory,wardrobe,...data}=this;return {...structuredClone(data),wardrobe:wardrobe.snapshot()};
   }
   restore(raw:unknown):void {
     if(!object(raw))return;
+    this.wardrobe.restore(raw.wardrobe);
     this.evolution.restore(raw.evolution);this.tickets=integer(raw.tickets,0,99999);this.adminPoints=integer(raw.adminPoints,0,99999);
     if(object(raw.profile)){this.profile={id:typeof raw.profile.id==='string'?raw.profile.id.slice(0,40):'',avatar:avatarId(typeof raw.profile.avatar==='string'?raw.profile.avatar:'berserker'),playSeconds:integer(raw.profile.playSeconds,0,1e9),bossKills:integer(raw.profile.bossKills,0,1e9)};}
     if(Array.isArray(raw.dropHistory))this.dropHistory=raw.dropHistory.slice(-100).filter((v):v is typeof this.dropHistory[number]=>object(v)&&typeof v.name==='string'&&RARITIES.includes(v.rarity as Rarity)&&typeof v.time==='number');

@@ -23,9 +23,9 @@ describe('independent dungeon instance and GLB assets',()=>{
      expect(doc.meshes.length).toBeGreaterThan(0);
    }
  });
- it('defines four independent selectable dungeons and exact level tiers',()=>{
-   expect(DUNGEON_SHOWCASE).toHaveLength(4);
-   expect(new Set(DUNGEON_SHOWCASE.map(x=>x.id)).size).toBe(4);
+ it('defines five independent selectable dungeons and exact level tiers',()=>{
+   expect(DUNGEON_SHOWCASE).toHaveLength(5);
+   expect(new Set(DUNGEON_SHOWCASE.map(x=>x.id)).size).toBe(5);
    expect(DUNGEON_TIERS.map(x=>x.minLevel)).toEqual([10,30,60,85]);
    expect(DUNGEON_ROOMS.map(x=>x.id)).toEqual(['guardians','crystals','sentinels','boss']);
  });

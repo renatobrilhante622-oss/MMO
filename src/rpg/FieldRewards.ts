@@ -44,5 +44,5 @@ export function fieldReward(inv:InventoryAndLoot,level:number,kind:'elite'|'rift
  const base=inv.generateLoot('golem',level,false),rarity=kind==='elite'||kind==='camp'?(base.gold%3===0?'epic':'rare'):'epic';
  const source=COMPLETE_ITEM_CATALOG.find(i=>i.rarity===rarity&&i.slot==='weapon')!;
  const item:Item={...scaleWorldItem(source,level),id:'field-item-'+base.id,name:(kind==='elite'?'Troféu do Capitão — ':'Tesouro da Vigília — ')+source.name};
- return {...base,item,gold:base.gold*3,xp:base.xp*(kind==='elite'?4:2),crystals:2+Math.floor(level/20),fieldExtras:{skinFragments:kind==='elite'?3:5,lockedChests:kind==='elite'?1:0,skinChests:kind==='rift'?1:0,refinementStones:kind==='massacre'||kind==='chest'?2:1}};
+ return {...base,item,wardrobeSource:kind==='camp'||kind==='chest'?'fragments':kind,gold:base.gold*3,xp:base.xp*(kind==='elite'?4:2),crystals:2+Math.floor(level/20),fieldExtras:{skinFragments:kind==='elite'?3:5,lockedChests:kind==='elite'?1:0,skinChests:kind==='rift'?1:0,refinementStones:kind==='massacre'||kind==='chest'?2:1}};
 }

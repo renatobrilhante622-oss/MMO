@@ -1,0 +1,15 @@
+import {NodeIO,Logger} from '@gltf-transform/core';
+import {ALL_EXTENSIONS,EXTMeshoptCompression} from '@gltf-transform/extensions';
+import {dedup,weld,simplify,textureCompress,reorder} from '@gltf-transform/functions';
+import {MeshoptEncoder,MeshoptDecoder,MeshoptSimplifier} from 'meshoptimizer';
+import sharp from 'sharp';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const commit='77343cac874f06b73d16ad0063339df7c9ca254c';
+const entries={ImperialStag:'quaternius-ultimateanimatedanimals/stag',CelestialDragon:'quaternius-ultimate-monsters/dragon_evolved',HarvestScythe:'the-base-mesh/vintage_sickle_scythe',VoidHalberd:'the-base-mesh/halberd',IceStaff:'quaternius-rpg/ice_staff',ArcaneStaff:'quaternius-rpg/staff',WoodStaff:'quaternius-rpg/wooden_staff',ClericStaff:'quaternius-rpg-characters/cleric_staff',WizardStaff:'quaternius-rpg-characters/wizard_staff',BoneStaff:'kaykit-character-pack-skeletons/skeleton_staff',BronzeSword:'quaternius-fantasy-props-megakit/sword_bronze',KnightSword:'quaternius-knightcharacter/sword',GreatSword:'quaternius-medieval-weapons/sword_big',OrnateDagger:'quaternius-rpg-characters/rogue_dagger',CrystalDagger:'quaternius-rpg/dagger',TitanHelmet:'quaternius-knightcharacter/helmet3',SolarHelmet:'quaternius-knightcharacter/helmet1',ShadowHelmet:'quaternius-knightcharacter/helmet2',Horn:'the-base-mesh/rhino_large_horn'};
+await Promise.all([MeshoptEncoder.ready,MeshoptDecoder.ready,MeshoptSimplifier.ready]);
+const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.encoder':MeshoptEncoder,'meshopt.decoder':MeshoptDecoder});
+await mkdir('public/models/pr22',{recursive:true});const assets=[];
+for(const [id,path]of Object.entries(entries)){const [pack,name]=path.split('/'),source=`https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/${commit}/packs/${pack}/models/${name}/${name}.glb`,b=execFileSync('curl',['-sSL','--fail','--max-time','30',source],{maxBuffer:10e6});if(b.toString('ascii',0,4)!=='glTF')throw Error(id);const file=`models/pr22/${id}.glb`;const doc=await io.readBinary(b);doc.setLogger(new Logger(Logger.Verbosity.ERROR));await doc.transform(dedup(),weld(),simplify({simplifier:MeshoptSimplifier,ratio:.7,error:.001,lockBorder:true}),textureCompress({encoder:sharp,targetFormat:'webp',resize:[512,512],lossless:true}),reorder({encoder:MeshoptEncoder,target:'performance'}));doc.createExtension(EXTMeshoptCompression).setRequired(true).setEncoderOptions({method:EXTMeshoptCompression.EncoderMethod.FILTER});const output=await io.writeBinary(doc);await writeFile('public/'+file,output);assets.push({id,file,source,license:'CC0-1.0',bytes:output.length,sourceBytes:b.length,sourceSha256:createHash('sha256').update(b).digest('hex'),sha256:createHash('sha256').update(output).digest('hex')});console.log(id,b.length,'->',output.length);}
+await writeFile('public/models/pr22/manifest.json',JSON.stringify({license:'CC0-1.0',sourceLicense:`https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/${commit}/LICENSE`,assets},null,2)+'\n');
