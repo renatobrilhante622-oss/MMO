@@ -1,3 +1,4 @@
+import {finishChapter} from './helpers/campaign';
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
 import {Scene,Vector3} from 'three';
@@ -5,7 +6,7 @@ import {EventBus} from '../src/core/GameTypes';import {InventoryAndLoot} from '.
 import {QuestSystem,QUEST_STORY} from '../src/rpg/QuestSystem';import {portalPermission,PortalTrigger} from '../src/world/PortalTrigger';import {portalSites} from '../src/world/WorldPortals';
 import {WORLD_MAPS} from '../src/world/maps/MapDefinitions';import {DUNGEON_MAPS,dungeonWalkable,roomForWave} from '../src/world/dungeons/DungeonMaps';import {DUNGEONS} from '../src/world/Regions';import {SceneManager} from '../src/world/SceneManager';import {OpenWorldGenerator} from '../src/world/OpenWorldGenerator';import {PhysicsWorld} from '../src/physics/PhysicsWorld';import {dungeonColliders,DungeonInstance} from '../src/world/DungeonInstance';
 const fixture=()=>{const inventory=new InventoryAndLoot(new EventBus());const progress=new AdventureProgress(inventory);return {inventory,progress,quests:new QuestSystem(inventory,progress)};};
-function finish(quests:QuestSystem,id:string){for(const quest of QUEST_STORY.filter(q=>q.region===id)){if(quest.goal==='talk')quests.onTalk(quest.target);else if(quest.goal==='kill')for(let i=0;i<quest.required;i++)quests.onKill(quest.target,id);else if(quest.goal==='collect')quests.onCollect(id,quest.required);else quests.onKill('boss',id,true);expect(quests.claim(quest.id),quest.id).toBe(true);}}
+const finish=finishChapter;
 describe('PR18 physical campaign progression',()=>{
  it('requires real claimed objectives, even with a level-100 save or forged discovery flags',()=>{
   const {inventory,progress,quests}=fixture();inventory.level=100;progress.unlockedRegions.push('crypt');

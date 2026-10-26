@@ -121,7 +121,7 @@ export class InventoryAndLoot {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   }
 
-  generateLoot(kind: string, level: number, boss = false): Omit<LootDrop, 'position'> {
+  generateLoot(kind: string, level: number, boss = false,dropBonus=0): Omit<LootDrop, 'position'> {
     const safeLevel = numberIn(level, 1, 100, 1);
     const roll = this.random();
     const rarityIndex = boss
@@ -141,7 +141,7 @@ export class InventoryAndLoot {
       gold: Math.round((5 + safeLevel * 3) * (boss ? 14 : 1) * (0.85 + this.random() * 0.45)),
       crystals: boss ? 3 + Math.floor(safeLevel / 4) : this.random() < 0.12 ? 1 : 0,
       xp: Math.round((12 + safeLevel * 9) * (boss ? 12 : kind === 'golem' ? 1.7 : 1)),
-      item: boss || this.random() < 0.48 ? { ...scaleWorldItem(template,safeLevel), id: `${template.id}-${id}` } : undefined,
+      item: boss || this.random() < Math.min(1,.48*(1+Math.max(0,Math.min(1,dropBonus)))) ? { ...scaleWorldItem(template,safeLevel), id: `${template.id}-${id}` } : undefined,
     };
   }
 

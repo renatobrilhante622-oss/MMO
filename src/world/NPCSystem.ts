@@ -7,6 +7,7 @@ import {npcPortrait,localizeQuestText,questRewardCard} from '../ui/NPCDialogUI';
 export type NPCRole='quest'|'merchant'|'smith'|'teleport';
 export interface NPCDefinition {id:string;name:string;role:NPCRole;x:number;z:number;model:ModelName;region:string;icon:string;}
 export interface NPCCallbacks {
+  onContracts?():void;
   onForge():void;
   onShop():void;
   onTeleport():void;
@@ -142,6 +143,7 @@ export class NPCSystem {
       else if(!progress.accepted)action('❗ '+(pt?'Aceitar: ':'Accept: ')+localizeQuestText(quest.title,pt),()=>{if(this.quests.accept(quest.id))this.callbacks.onQuestAccepted(quest.id);this.renderDialogue();});
       else action('📜 '+localizeQuestText(quest.title,pt)+' ('+progress.progress+'/'+quest.required+')',()=>{});
     }
+    if(npc.definition.role==='quest')action('📜 '+(pt?'Contratos de Caça':'Hunting Contracts'),()=>{this.close();this.callbacks.onContracts?.();});
     if(npc.definition.role==='smith')action('⚒️ '+(pt?'Abrir Forja':'Open Forge'),()=>{this.close();this.callbacks.onForge();});
     if(npc.definition.role==='merchant')action('🧪 '+(pt?'Abrir Loja':'Open Shop'),()=>{this.close();this.callbacks.onShop();});
     if(npc.definition.role==='teleport')action('🌀 '+(pt?'Mapa-Múndi':'World Portals'),()=>{this.close();this.callbacks.onTeleport();});

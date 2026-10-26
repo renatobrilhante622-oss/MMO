@@ -12,6 +12,7 @@ import {withinActorRadius} from '../core/RenderBudget';
 import {WORLD_SITES} from '../world/WorldSites';
 import { CreatureRig } from './CreatureRig';
 
+export interface EnemyActivity {id:string;kind:'captain'|'guard'|'defense'|'rift';elite?:boolean;}
 type EnemyState = 'patrol' | 'chase' | 'attack' | 'flee' | 'dead';
 interface Archetype { hp: number; attack: number; defense: number; speed: number; radius: number; color: number; emissive: number }
 const ARCHETYPES: Record<string, Archetype> = {
@@ -30,6 +31,9 @@ export class Enemy implements Combatant {
   readonly invulnerable = false;
   readonly position = new Vector3();
   readonly radius: number;
+  readonly elite:boolean;
+  private readonly baseScale:number;
+  private aura?:Mesh;
   readonly maxHp: number;
   readonly defense: number;
   readonly attackPower: number;
@@ -53,14 +57,14 @@ export class Enemy implements Combatant {
   private readonly rig: CreatureRig;
   private archetype: Archetype;
 
-  constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus, readonly kind: string, position: Vector3, readonly level = 1, readonly boss = false) {
+  constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus, readonly kind: string, position: Vector3, readonly level = 1, readonly boss = false,readonly activity?:EnemyActivity) {
     this.archetype = ARCHETYPES[boss ? 'boss' : kind] ?? ARCHETYPES.slime;
     const data = this.archetype;
-    this.radius = data.radius;
-    this.maxHp = Math.round(data.hp * (1 + (level - 1) * .28));
+    this.elite=activity?.elite===true;this.baseScale=this.elite?2.5:1;this.radius = data.radius*this.baseScale;
+    this.maxHp = Math.round(data.hp * (1 + (level - 1) * .28)*(this.elite?6:1));
     this.hp = this.maxHp;
     this.defense = Math.round(data.defense * (1 + (level - 1) * .15));
-    this.attackPower = Math.round(data.attack * (1 + (level - 1) * .18));
+    this.attackPower = Math.round(data.attack * (1 + (level - 1) * .18)*(this.elite?1.6:1));
     this.speed = data.speed;
     this.home = position.clone();
     this.position.copy(position);
@@ -71,8 +75,10 @@ export class Enemy implements Combatant {
     this.material = new MeshStandardMaterial({ color: data.color, roughness: .76, metalness: kind === 'golem' || boss ? .3 : .05, emissive: data.emissive, emissiveIntensity: .25 });
     if(kind==='slime'&&!boss){this.material.transparent=true;this.material.opacity=.72;this.material.roughness=.14;this.material.metalness=.08;}
     this.rig = new CreatureRig(kind, boss, this.material);
+    this.model.scale.setScalar(this.baseScale);
     this.model.add(this.rig.root);this.rig.root.traverse(o=>{if(o instanceof Mesh)o.castShadow=o.receiveShadow=false;});
-    this.model.position.copy(position); this.scene.add(this.model);
+    if(this.elite){this.aura=new Mesh(new RingGeometry(.8,1.15,48),new MeshBasicMaterial({color:new Color('#ffbe44').multiplyScalar(2),transparent:true,opacity:.65,depthWrite:false}));this.aura.rotation.x=-Math.PI/2;this.aura.position.y=.06;this.model.add(this.aura);}
+    this.model.position.copy(position);this.model.position.y-=this.radius; this.scene.add(this.model);
     const bg = new Mesh(new BoxGeometry(boss ? 3.6 : 1.4, .13, .025), new MeshBasicMaterial({ color: 0x182128, transparent: true, opacity: .88 }));
     this.healthFill = new Mesh(new BoxGeometry(boss ? 3.5 : 1.32, .085, .035), new MeshBasicMaterial({ color: boss ? 0xf36c80 : 0xf4ad7c }));
     this.healthFill.position.z = .015;
@@ -82,7 +88,7 @@ export class Enemy implements Combatant {
     this.healthGroup.visible = boss;
     this.telegraph = new Mesh(new RingGeometry(.82, 1, 40), new MeshBasicMaterial({ color: 0xfb5154, transparent: true, opacity: .5, depthWrite: false }));
     this.telegraph.rotation.x = -Math.PI / 2;
-    this.telegraph.scale.setScalar(this.radius + 1.65);
+    this.telegraph.scale.setScalar(this.elite?6:this.radius + 1.65);
     this.telegraph.visible = false; this.scene.add(this.telegraph);
   }
 
@@ -99,11 +105,12 @@ export class Enemy implements Combatant {
     if (this.hp <= 0) {
       this.hp = 0; this.state = 'dead'; this.telegraph.visible = false;
       this.removeBody();
-      this.events.emit('kill', { kind: this.kind, position: this.position.clone(), level: this.level, boss: this.boss });
+      this.events.emit('kill', { kind: this.kind, position: this.position.clone(), level: this.level, boss: this.boss,enemyId:this.id,activityId:this.activity?.id,activityKind:this.activity?.kind,elite:this.elite });
     }
     return dealt;
   }
 
+  setFieldModel(model:ModelName):void{this.rig.setFieldModel(model);}
   setBossPresentation(model:ModelName,color:number):void{this.rig.setBossModel(model,color);}
   setActive(active:boolean):void {
     this.model.visible=active;if(active&&this.dormant){this.body.collisionResponse=true;this.body.wakeUp();this.dormant=false;}
@@ -111,11 +118,12 @@ export class Enemy implements Combatant {
   }
   tick(dt: number, hero: Combatant, elapsed: number): void {
     if (!this.alive) {
-      this.deathTime += dt; this.model.scale.setScalar(Math.max(.01, 1 - this.deathTime)); this.model.rotation.z += dt * 1.6;
+      this.deathTime += dt; this.model.scale.setScalar(this.baseScale*Math.max(.01, 1 - this.deathTime)); this.model.rotation.z += dt * 1.6;
       return;
     }
     this.position.set(this.body.position.x, this.body.position.y, this.body.position.z);
-    this.model.position.copy(this.position);
+    this.model.position.copy(this.position);this.model.position.y-=this.radius;
+    if(this.aura){this.aura.rotation.z+=dt*.7;(this.aura.material as MeshBasicMaterial).opacity=.5+Math.sin(elapsed*4)*.15;}
     if (this.kind === 'wraith') this.model.position.y += Math.sin(elapsed * 2 + this.patrolPhase) * .2;
     this.healthGroup.lookAt(hero.position.x, this.model.position.y + this.healthGroup.position.y, hero.position.z);
     this.material.emissive.setHex(this.hitStun>0?0xffaaaa:this.archetype.emissive);
@@ -125,7 +133,7 @@ export class Enemy implements Combatant {
     const delta = hero.position.clone().sub(this.position); delta.y = 0;
     const distance = delta.length();
     const safeVillage = hero.position.distanceTo(new Vector3(0, 5.5, 18)) < 19;
-    const attackRange = this.radius + hero.radius + (this.boss ? 2 : 1.3);
+    const attackRange = this.elite?6:this.radius + hero.radius + (this.boss ? 2 : 1.3);
     if (this.attackWindup >= 0) {
       this.state = 'attack'; this.body.velocity.x *= .8; this.body.velocity.z *= .8;
       this.attackWindup -= dt;
@@ -148,7 +156,7 @@ export class Enemy implements Combatant {
       } else {
         this.body.velocity.x *= .75; this.body.velocity.z *= .75;
         this.state = 'attack';
-        if (this.attackCooldown <= 0) { this.attackWindup = this.boss ? .9 : .55; this.attackCooldown = this.boss ? 2.6 : 1.8; }
+        if (this.attackCooldown <= 0) { this.attackWindup = this.elite?1.1:this.boss ? .9 : .55; this.attackCooldown = this.elite?4:this.boss ? 2.6 : 1.8; }
       }
       this.model.rotation.y = Math.atan2(delta.x, delta.z);
     } else {
@@ -189,6 +197,8 @@ export class EnemyAI {
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
   private activeRegionId:string|null=null;
   private dungeonMode=false;
+  private regionalBossGate:(region:string)=>boolean=()=>true;
+  setRegionalBossGate(gate:(region:string)=>boolean):void{this.regionalBossGate=gate;}
   readonly zones:Array<{spot:HuntSpot;slots:Array<{enemyId:string|null;readyAt:number}>}>=[];
   setDungeonMode(enabled:boolean):void{this.dungeonMode=enabled;}
   get regionId():string|null{return this.activeRegionId;}
@@ -225,18 +235,19 @@ export class EnemyAI {
 
   terrainHeight(x: number, z: number): number { return this.physics.terrainHeight(x, z); }
 
-  spawn(kind: string, position: Vector3, level = 1, boss = false): Enemy {
-    const radius = (ARCHETYPES[boss ? 'boss' : kind] ?? ARCHETYPES.slime).radius;
+  spawn(kind: string, position: Vector3, level = 1, boss = false,activity?:EnemyActivity): Enemy {
+    const radius = (ARCHETYPES[boss ? 'boss' : kind] ?? ARCHETYPES.slime).radius*(activity?.elite?2.5:1);
     const spawn = position.clone();
     spawn.y = Math.max(this.physics.terrainHeight(spawn.x, spawn.z) + radius + .15, spawn.y);
-    const enemy = new Enemy(this.scene, this.physics, this.events, kind, spawn, Math.max(1, Math.floor(level)), boss);
+    const enemy = new Enemy(this.scene, this.physics, this.events, kind, spawn, Math.max(1, Math.floor(level)), boss,activity);
     this.enemies.push(enemy); return enemy;
   }
 
+  despawnActivity(id:string):void {for(let i=this.enemies.length-1;i>=0;i--)if(this.enemies[i].activity?.id===id){this.enemies[i].dispose();this.enemies.splice(i,1);}}
   /** Slot cooldowns belong to a hunting location, not to the camera or a random spawn ring. */
   private populateZones(hero:Vector3):void {
     if(this.dungeonMode||!this.activeRegionId)return;
-    let count=this.enemies.filter(e=>e.alive&&!e.boss).length;
+    let count=this.enemies.filter(e=>e.alive&&!e.boss&&!e.activity).length;
     for(const zone of this.zones){
       for(const slot of zone.slots)if(slot.enemyId){const enemy=this.enemies.find(e=>e.id===slot.enemyId);if(!enemy||!enemy.alive){slot.enemyId=null;slot.readyAt=this.elapsed+zone.spot.respawn;}}
       if(Math.hypot(hero.x-zone.spot.x,hero.z-zone.spot.z)>75)continue;
@@ -252,7 +263,7 @@ export class EnemyAI {
   }
   private retireDistant(hero:Vector3):void {
     if(this.dungeonMode)return;
-    for(let i=this.enemies.length-1;i>=0;i--){const e=this.enemies[i];if(e.boss||!e.alive||Math.hypot(e.position.x-hero.x,e.position.z-hero.z)<115)continue;
+    for(let i=this.enemies.length-1;i>=0;i--){const e=this.enemies[i];if(e.boss||e.activity||!e.alive||Math.hypot(e.position.x-hero.x,e.position.z-hero.z)<115)continue;
       for(const zone of this.zones)for(const slot of zone.slots)if(slot.enemyId===e.id){slot.enemyId=null;slot.readyAt=this.elapsed;}
       e.dispose();this.enemies.splice(i,1);
     }
@@ -271,7 +282,7 @@ export class EnemyAI {
       const bossX=this.activeRegionId?mapDefinition(this.activeRegionId).boss.x:region.boss.x;
       const bossZ=this.activeRegionId?mapDefinition(this.activeRegionId).boss.z:region.boss.z;
       this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
-      if (hero.position.distanceTo(new Vector3(bossX,hero.position.y,bossZ)) < 55 && this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-bossX,e.home.z-bossZ)<5)) {
+      if (hero.position.distanceTo(new Vector3(bossX,hero.position.y,bossZ)) < 55 && this.regionalBossGate(region.id)&&this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-bossX,e.home.z-bossZ)<5)) {
         this.bossRespawn[region.id]=300;
         const x=bossX,z=bossZ;
         const boss=this.spawn('boss',new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);

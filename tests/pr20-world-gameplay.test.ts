@@ -1,3 +1,4 @@
+import {finishChapter} from './helpers/campaign';
 import {describe,it,expect} from 'vitest';
 import {Box3,Scene,Vector3} from 'three';
 import {Vec3,RaycastResult} from 'cannon-es';
@@ -18,7 +19,7 @@ import {portalPermission,PortalTrigger} from '../src/world/PortalTrigger';
 import {portalSites} from '../src/world/WorldPortals';
 import {route} from '../src/world/Navigation';
 const fixture=()=>{const inv=new InventoryAndLoot(new EventBus()),progress=new AdventureProgress(inv);return {inv,progress,quests:new QuestSystem(inv,progress)};};
-function complete(q:QuestSystem,claimBoss=false){for(const quest of QUEST_STORY.filter(q=>q.region==='aurora')){if(quest.goal==='talk')q.onTalk(quest.target);else if(quest.goal==='collect')q.onCollect('aurora',quest.required);else if(quest.goal==='kill')for(let i=0;i<quest.required;i++)q.onKill(quest.target,'aurora');else q.onKill('boss','aurora',true);if(quest.goal!=='boss'||claimBoss)expect(q.claim(quest.id)).toBe(true);}}
+const complete=(q:QuestSystem,claimBoss=false)=>finishChapter(q,'aurora',claimBoss);
 describe('PR20 main-objective portals',()=>{
  it('opens immediately on the last objective despite stale unlocks, low level and recent boss combat',()=>{const {quests,progress}=fixture(),state={level:1,unlocked:progress.unlockedRegions,inCombat:true};let open=false,notified=0;const unsub=quests.subscribe(()=>{notified++;open=portalPermission('aurora','crypt',state,quests).ok;});expect(open).toBe(false);complete(quests);expect(quests.allMainQuestsDone('aurora')).toBe(true);expect(quests.regionComplete('aurora')).toBe(false);expect(open).toBe(true);expect(notified).toBeGreaterThan(0);unsub();});
  it('does not bypass incomplete missions or skip nonadjacent chapters',()=>{const {quests}=fixture();const state={level:100,unlocked:Object.keys(WORLD_MAPS)};expect(portalPermission('aurora','crypt',state,quests).ok).toBe(false);complete(quests,true);expect(portalPermission('aurora','eclipse',state,quests).ok).toBe(false);expect(quests.regionComplete('invalid')).toBe(false);expect(quests.allMainQuestsDone('invalid')).toBe(false);});

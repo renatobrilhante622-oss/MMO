@@ -1,3 +1,4 @@
+import type {MapMarker} from '../world/OpenWorldGenerator';
 import {avatarSvg} from './AvatarRenderer';
 import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
 import { emptyInput, type ClassId, type EquipmentSlot, type HeroInput, type HeroState, type Item } from '../core/GameTypes';
@@ -21,7 +22,7 @@ export interface HUDModel {
   cooldowns: number[]; cooldownMax: number[];
   player: { x: number; z: number; heading: number };
   enemies: Array<{ x: number; z: number; boss: boolean }>;
-  markers: Array<{ x: number; z: number; label: string; color: string }>;
+  markers: MapMarker[];
   dungeon: { active: boolean; wave: number; status: string;floor?:number;maxFloors?:number };
   boss?: { name: string; hp: number; maxHp: number; phase: number };
   mounted: boolean; fps: number; timeOfDay: number; combo: number;
@@ -483,9 +484,11 @@ export class MobileHUD {
     ctx.beginPath(); p = project(-18, 18); ctx.moveTo(...p); p = project(18, 18); ctx.lineTo(...p); ctx.stroke();
     ctx.fillStyle = 'rgba(100,154,125,.08)'; p = project(0, 18); ctx.beginPath(); ctx.arc(...p, 30 * scale, 0, Math.PI * 2); ctx.fill();
     for (const marker of model.markers) {
+      if(marker.active===false)continue;
       const [x, y] = project(marker.x, marker.z);
       if (x < 8 || x > w - 8 || y < 8 || y > h - 8) continue;
       ctx.fillStyle = marker.color;
+      if(marker.icon){ctx.font=marker.icon==='elite'?'bold 15px sans-serif':'12px sans-serif';ctx.textAlign='center';ctx.fillText(({elite:'☠',chest:'▣',shrine:'✦',rift:'ϟ',board:'▤',activity:'◇'} as const)[marker.icon],x,y);continue;}
       ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-3, -3, 6, 6); ctx.restore();
       ctx.fillStyle = '#ccd8cb'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(translateText(marker.label,this.language), x, y + 15);
     }
@@ -501,15 +504,18 @@ export class MobileHUD {
 
   get blocking(): boolean { return !this.started || this.activePanel !== null || this.drawerOpen; }
 
-  /** Extension shortcuts remain inside the drawer and keep their own action handlers. */
-  registerShortcut(button:HTMLButtonElement):void {
+  /** Shortcuts keep their handlers; selected field actions can use the compact top dock. */
+  registerShortcut(button:HTMLButtonElement,placement:'drawer'|'dock'='drawer'):void {
     button.type='button';
     // Extension actions keep their listeners; presentation does not depend on emoji fonts.
     const emblem:MenuIconName=button.classList.contains('pr15-shortcut')?'arena':button.classList.contains('clan-shortcut')?'clan':button.classList.contains('region-travel-trigger')?'teleports':button.classList.contains('eterna-dungeon-trigger')?'dungeons':'quest';
     const label=button.querySelector<HTMLElement>('span:not([aria-hidden])');
     if(label){button.querySelector('[aria-hidden]')?.remove();button.insertAdjacentHTML('afterbegin',menuIcon(emblem));}
     else if(!button.querySelector('svg')){const text=button.textContent?.replace(/^[^\p{L}\p{N}]+/u,'')??'';button.innerHTML=menuIcon(emblem);const caption=document.createElement('span');caption.textContent=text;button.append(caption);}
-    this.root.querySelector('.hud-drawer-primary')!.append(button);
+    if(placement==='dock'){
+      const dock=this.root.querySelector('.menu-dock')!;dock.classList.add('has-field-shortcut');
+      dock.insertBefore(button,dock.querySelector('.hud-drawer'));
+    }else this.root.querySelector('.hud-drawer-primary')!.append(button);
   }
 
   private setDrawerOpen(open:boolean):void {

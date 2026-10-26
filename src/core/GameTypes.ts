@@ -50,13 +50,15 @@ export interface Item {
 
 export interface LootDrop {
   id: string; position: Vector3; gold: number; crystals: number; xp: number; item?: Item;
+  activityResource?:{region:string;source:string};
+  fieldExtras?:import('../rpg/FieldRewards').FieldExtras;
   /** Exclusive regional crafting material awarded on legitimate collection. */
   regionalMaterial?:{id:string;name:string;region:string;quantity:number};
 }
 
 export interface GameEvents {
   damage: { position: Vector3; amount: number; critical: boolean; team: 'hero' | 'enemy'; color?: number };
-  kill: { kind: string; position: Vector3; level: number; boss: boolean };
+  kill: { kind: string; position: Vector3; level: number; boss: boolean;enemyId?:string;activityId?:string;activityKind?:string;elite?:boolean };
   loot: LootDrop;
   message: { text: string; tone?: 'info' | 'success' | 'warning' };
   classChanged: { id: ClassId };

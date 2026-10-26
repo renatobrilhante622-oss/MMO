@@ -1,0 +1,36 @@
+{
+  "scenes": [
+    {
+      "kind": "camp",
+      "site": "aurora-camp-0",
+      "actors": 19,
+      "specialPopulation": 19,
+      "elites": 1,
+      "drawCalls": 212,
+      "triangles": 492892,
+      "fieldBatches": 14
+    },
+    {
+      "kind": "elite",
+      "site": "aurora-captain-1",
+      "actors": 8,
+      "specialPopulation": 17,
+      "elites": 1,
+      "drawCalls": 203,
+      "triangles": 486690,
+      "fieldBatches": 14
+    },
+    {
+      "kind": "rift",
+      "site": "aurora-rift-0",
+      "actors": 16,
+      "specialPopulation": 23,
+      "elites": 1,
+      "drawCalls": 228,
+      "triangles": 499318,
+      "fieldBatches": 14
+    }
+  ],
+  "errors": [],
+  "note": "Production generators and GLBs; bounded SwiftShader rendering, not an Android FPS benchmark."
+}

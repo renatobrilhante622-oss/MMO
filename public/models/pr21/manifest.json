@@ -1,0 +1,38 @@
+{
+  "license": "CC0-1.0",
+  "sourceLicense": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/LICENSE",
+  "assets": [
+    {
+      "id": "Tent",
+      "file": "models/pr21/Tent.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-nature-kit/models/tent_detailed_open/tent_detailed_open.glb",
+      "license": "CC0-1.0",
+      "bytes": 15324,
+      "sha256": "d54d9665d07e0ff9680e56731c9f5338fc25d93788504d63b8375f54e6444193"
+    },
+    {
+      "id": "Fence",
+      "file": "models/pr21/Fence.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-nature-kit/models/fence_simple/fence_simple.glb",
+      "license": "CC0-1.0",
+      "bytes": 5712,
+      "sha256": "ecaf6c29532aa9fd305a8ef71df769d60748bd797f2eb1c63bdefc4edb8062a7"
+    },
+    {
+      "id": "Campfire",
+      "file": "models/pr21/Campfire.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-nature-kit/models/campfire_stones/campfire_stones.glb",
+      "license": "CC0-1.0",
+      "bytes": 17344,
+      "sha256": "54869db23243a3f4905bc00bd4cd93b1037b28556ab3ef93e7a893a093791e35"
+    },
+    {
+      "id": "Board",
+      "file": "models/pr21/Board.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-survival-kit/models/signpost/signpost.glb",
+      "license": "CC0-1.0",
+      "bytes": 13364,
+      "sha256": "1c51aa27b371afd5ac80696b1295658aea374e87bf286e5cf887e2d5b6c2c1b5"
+    }
+  ]
+}

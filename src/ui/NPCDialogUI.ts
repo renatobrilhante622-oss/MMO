@@ -44,6 +44,7 @@ export function questRewardCard(quest:QuestDefinition,pt=true):HTMLElement {
    const value=document.createElement('small');value.textContent=label;
    token.append(glyph,value);tokens.append(token);
  }
- section.append(heading,tokens);
+ const objective=document.createElement('p');objective.className='npc-quest-objective';objective.textContent=(quest.act?'Ato '+quest.act+' · '+quest.actName+' — ':'')+localizeQuestText(quest.description,pt);
+ section.append(heading,objective,tokens);
  return section;
 }
