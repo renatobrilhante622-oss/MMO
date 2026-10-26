@@ -20,6 +20,6 @@ export function renderVip(progress:AdventureProgress,pt=true,now=Date.now()):str
       <button class="vip-activate" data-do="vip" ${active||progress.inventory.gold<25000?'disabled':''}>${active?'✓ '+t('Pacto ativo','Pact active'):t('Ativar por 25.000 ouro','Activate for 25,000 gold')}</button>
       <small>${t('Moeda do jogo · Sem cobrança real · PvP com atributos normalizados','In-game currency · No real payment · PvP uses normalized stats')}</small>
     </div></section>
-    <div class="vip-benefit-gallery">${benefits.map(b=>`<article class="vip-benefit-plate">${benefitIcon(b.kind)}<div><h3>${b.title}</h3><p>${b.detail}</p><span class="vip-benefit-state ${active?'enabled':''}">${active?'✓ '+t('Disponível','Available'):'◇ '+t('Ative o VIP','Activate VIP')}</span></div></article>`).join('')}</div>
+    <div class="vip-benefit-gallery">${benefits.map(b=>`<article class="vip-benefit-plate">${benefitIcon(b.kind)}<div><h3>${b.title}</h3><details class="menu-lore"><summary>${t('Detalhes','Details')}</summary><p>${b.detail}</p></details><span class="vip-benefit-state ${active?'enabled':''}">${active?'✓ '+t('Disponível','Available'):'◇ '+t('Ative o VIP','Activate VIP')}</span></div></article>`).join('')}</div>
     <footer class="vip-footer"><span>✦ ${progress.vipDiamonds} ${t('diamantes disponíveis','diamonds available')}</span><button data-hub="collection">${t('Explorar a Coleção','Explore Collection')} →</button><button data-hub="pass">${t('Abrir Passe de Batalha','Open Battle Pass')} →</button></footer></div>`;
 }

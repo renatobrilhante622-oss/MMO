@@ -1,3 +1,4 @@
+import {updateActorVisibility} from './ActorVisibility';
 import {
   ACESFilmicToneMapping, AdditiveBlending, AmbientLight, BufferGeometry, Color,
   DepthTexture, Float32BufferAttribute, FogExp2, Group, HalfFloatType, HemisphereLight, Mesh,
@@ -293,7 +294,7 @@ export class Engine {
     this.hub = new AdventureHub(this.container,this);
     this.phase2UI=new Phase2UI(this.container,this);
     const phase2Shortcut=document.createElement('button');
-    phase2Shortcut.className='pr15-shortcut';phase2Shortcut.textContent='⚔ FASE 2';
+    phase2Shortcut.className='pr15-shortcut';phase2Shortcut.textContent='⚔ Arena';
     phase2Shortcut.setAttribute('aria-label','Arena local, runas, recompensas e mercado');
     phase2Shortcut.onclick=()=>this.phase2UI.open('arena');
     this.hud.registerShortcut(phase2Shortcut);this.disposers.push(()=>phase2Shortcut.remove());
@@ -494,6 +495,7 @@ export class Engine {
     this.phase2Weather.update(dt,this.hero.position);
     this.recentCombat=Math.max(0,this.recentCombat-dt);
     this.updateJourney(dt,active,input);
+    updateActorVisibility(this.scene,this.camera);
     this.npcs.update(dt,this.camera,this.hero.position,active);
     this.portals.update(dt,this.camera,this.hero.position,active);
     this.quests.refreshDaily();
@@ -1193,7 +1195,9 @@ export class Engine {
 
   private updateHUD(): void {
     const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive && enemy.home.distanceTo(this.terrain.portalPosition)<25) : undefined;
+    const worldThreat=this.dungeon.active?undefined:this.enemies.enemies.find(enemy=>enemy.boss&&enemy.alive&&enemy.position.distanceTo(this.hero.position)<45);
     this.hud.update({
+      worldThreat:worldThreat?{distance:worldThreat.position.distanceTo(this.hero.position)}:undefined,
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,
       regionName:this.mapInstances.regionId==='dungeon'?'MASMORRA — '+this.dungeon.definition.name[0]:REGIONS.find(region=>region.id===this.mapInstances.regionId)!.name[this.progress.language==='pt'?0:1],

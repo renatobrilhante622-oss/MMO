@@ -1,6 +1,7 @@
 import { CapsuleGeometry, ConeGeometry, CylinderGeometry, Group, MathUtils, Mesh, MeshStandardMaterial, Object3D, RingGeometry, SphereGeometry, TorusGeometry, Vector3, AdditiveBlending, Box3, Raycaster, Color } from 'three';
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {loadSharedModel} from '../assets/ModelResources';
+import {actorIsVisible,registerActor} from '../core/ActorVisibility';
 import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
 import {WingsSystem} from './WingsSystem';
 import { RarityAura } from './RarityAura';
@@ -14,7 +15,8 @@ export function companionAssetFor(id:string,riding:boolean):ModelName {
     if(id==='eternalhorse')return 'Creature_dragon';
     if(['nighthorse','fenrir','obsidianwolf'].includes(id))return 'Creature_wolf';
     if(['sunhorse','magmahorse'].includes(id))return 'Creature_warhorse';
-    if(id==='nightmare')return 'Horse';
+    if(['frosthorse','lunarhorse'].includes(id))return 'Creature_whitehorse';
+    if(id==='nightmare')return 'Creature_horse';
     return 'Creature_horse';
   }
   if(['phoenix','frostphoenix'].includes(id))return 'Parrot';
@@ -27,7 +29,7 @@ export function companionAssetFor(id:string,riding:boolean):ModelName {
 interface Leg { hip:Group; knee:Group; ankle:Group; rear:boolean; side:number; }
 /** Anatomical horse/wolf rig. Lower joints absorb each planted stance instead of rotating rigid poles. */
 export class CompanionRig {
-  private static readonly decorLoader=new GLTFLoader();
+  private unregisterVisibility?:()=>void;
   readonly root=new Group();
   /** Stable socket for an independently animated rider. Coordinates follow the horse's scaled root. */
   readonly saddle=new Group();
@@ -142,7 +144,7 @@ export class CompanionRig {
       this.root.add(this.flight.root);
     }
     this.wings.visible=false;this.armor.visible=false;
-    this.particles=new RarityAura(horse?.8:.5);this.root.add(this.particles);
+    this.particles=new RarityAura(horse?.8:.5);this.root.add(this.particles);this.unregisterVisibility=registerActor(this.root,horse?3.5:1.9);
     this.aura=new Mesh(new RingGeometry(.7,.75,48),new MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.3,transparent:true,opacity:.35,depthWrite:false,blending:AdditiveBlending,side:2}));
     this.aura.rotation.x=-Math.PI/2;this.aura.position.y=.06;this.root.add(this.aura);this.aura.visible=false;
   }
@@ -180,6 +182,9 @@ export class CompanionRig {
     this.coat.color.setHex(hell||c.id==='nightmare'?0x18131c:c.id==='dracolich'?0xa7b6ac:c.color);this.glow.color.setHex(c.color);this.glow.emissive.setHex(c.color);this.glow.emissiveIntensity=.3+this.rarity*.5;
     (this.aura.material as MeshStandardMaterial).emissive.setHex(c.color);this.aura.visible=this.rarity>=2;
     this.flight.configure(bird?(c.id==='frostphoenix'?'glacial':'celestial'):dragon?(['wyvern','ashdrake'].includes(c.id)?'magma':'necrotic'):null,Math.min(10,3+this.rarity));
+    // Imported birds/dragons already have rigged wings. Do not layer a second
+    // cosmetic wing set beneath their belly or spend its transparent passes.
+    this.flight.root.visible=typeof document==='undefined';
     if(typeof document==='undefined'){
     if(stag)for(const side of [-1,1]){this.between(this.ornaments,new Vector3(side*.13,.2,-.1),new Vector3(side*.43,.9,-.25),.025,this.glow);for(let i=0;i<4;i++)this.between(this.ornaments,new Vector3(side*(.21+i*.08),.4+i*.17,-.16),new Vector3(side*(.37+i*.09),.58+i*.17,.02),.015,this.glow);}
     if(bird){const beak=this.mesh(this.ornaments,new ConeGeometry(.1,.35,8),this.glow,0,-.06,.42);beak.rotation.x=Math.PI/2;for(let i=0;i<5;i++){const feather=this.mesh(this.morph,new CapsuleGeometry(.045,.7,4,8),this.glow,(i-2)*.1,-.05,-.6);feather.rotation.x=-.6;feather.rotation.z=(i-2)*.2;}}
@@ -224,7 +229,7 @@ export class CompanionRig {
         extras.push({file:shield,xyz:[sign*.38,1.12,-.20],scale:.42,rot:sign*Math.PI/2,tint:c.id==='nightmare'?0x3b254f:0xd2d6e1});
         extras.push({file:shield,xyz:[sign*.32,1.55,-.45],scale:.21,rot:sign*Math.PI/2,tint:c.color});
       }
-      extras.push({file:helmet,xyz:[0,2.0,.68],scale:.40,tint:c.color});
+
     }
     if(this.horse&&crystal){
       for(const sign of [-1,1]){
@@ -240,9 +245,8 @@ export class CompanionRig {
     }
     // Materials are cloned, but the authored GLB triangle geometry is shared
     // through the loader cache. No proxy shapes are rendered over real actors.
-    const loader=CompanionRig.decorLoader;
     for(const spec of extras){
-      void loader.loadAsync(import.meta.env.BASE_URL+spec.file).then(gltf=>{
+      void loadSharedModel(spec.file).then(gltf=>{
         if(this.propRevision!==token)return;
         const model=gltf.scene.clone(true);
         const bounds=new Box3().setFromObject(model);
@@ -303,6 +307,7 @@ export class CompanionRig {
     this.root.userData.saddleMeasured=true;
   }
   update(dt:number,speed:number,time:number,attack=false):void {
+    if(!actorIsVisible(this.root))return;
     this.imported?.update(dt,Math.min(1,speed/7));this.particles.update(time);this.flight.update(dt,time,speed*.1);
     // Animated wolf clips play through the model mixer. For static meshes,
     // give a restrained breathing/gallop/flight sway; rigid sub-limb gaits
@@ -338,5 +343,5 @@ export class CompanionRig {
     this.batch?.sync();
     this.aura.rotation.z=time*(.3+this.rarity*.1);this.aura.scale.setScalar((this.horse?1.3:.7)*(1+Math.sin(time*2)*.045));
   }
-  dispose():void {this.clearImportedProps();this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
+  dispose():void {this.unregisterVisibility?.();this.clearImportedProps();this.batch?.dispose();this.imported?.dispose();this.flight.dispose();this.particles.dispose();const geometries=new Set<unknown>();this.root.traverse(o=>{if(o instanceof Mesh){if(!geometries.has(o.geometry)&&!o.geometry.userData.sharedActorGeometry){o.geometry.dispose();geometries.add(o.geometry);}if(o===this.aura)(o.material as MeshStandardMaterial).dispose();}});this.materials.forEach(m=>m.dispose());this.root.removeFromParent();}
 }

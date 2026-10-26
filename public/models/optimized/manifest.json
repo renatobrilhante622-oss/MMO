@@ -1,0 +1,4516 @@
+{
+  "generator": "scripts/optimize-actors.mjs",
+  "policy": {
+    "ratio": 0.6,
+    "maxRelativeError": 0.001,
+    "maxTextureSize": 512,
+    "compression": "EXT_meshopt_compression + lossless EXT_texture_webp",
+    "note": "WebP reduces download size. Decoded GPU textures are RGBA with mipmaps, not GPU block compressed. Originals and upstream license manifests are retained."
+  },
+  "assets": [
+    {
+      "original": "models/Horse.glb",
+      "file": "models/optimized/Horse.glb",
+      "sourceSha256": "bebaa4a60ba373317e25bf20f049f26ad0f5c86d4731ab67d46eb8c93c920947",
+      "sha256": "8dd81b139a5bdcd0cb64defee0475a28dd36f78a6a90d6123849f7e0a5ab0875",
+      "before": {
+        "bytes": 181808,
+        "triangles": 984,
+        "vertices": 796,
+        "clips": [
+          "horse_A_"
+        ],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 130172,
+        "triangles": 946,
+        "vertices": 769,
+        "clips": [
+          "horse_A_"
+        ],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/KayKit_Barbarian.glb",
+      "file": "models/optimized/KayKit_Barbarian.glb",
+      "sourceSha256": "cefc311a0e10c7858b6141f5ada7e33268727564fb8ac1347aab97d000669cc6",
+      "sha256": "63db1384eb44220fadfba8ae5bbeedc5d5f1f89eab5a032e53adbe203b14b754",
+      "before": {
+        "bytes": 3613268,
+        "triangles": 6543,
+        "vertices": 5922,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2050696,
+        "triangles": 6007,
+        "vertices": 5448,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Knight.glb",
+      "file": "models/optimized/KayKit_Knight.glb",
+      "sourceSha256": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+      "sha256": "9fb82bd769a07a7578a94d4c484a4e5e6e6a2c207b620868d32fec914efc8676",
+      "before": {
+        "bytes": 3659532,
+        "triangles": 6952,
+        "vertices": 7024,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2070532,
+        "triangles": 6272,
+        "vertices": 6418,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Mage.glb",
+      "file": "models/optimized/KayKit_Mage.glb",
+      "sourceSha256": "cf898585da33fab50c724d31605fb931eb2912e6d2280092141e98ca81ad507d",
+      "sha256": "6a4f98c512e21b6d22c53f4e4d119ad296851450241dd4ac7ae3afe438f76211",
+      "before": {
+        "bytes": 3589240,
+        "triangles": 5683,
+        "vertices": 5279,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2039776,
+        "triangles": 5389,
+        "vertices": 5099,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Rogue.glb",
+      "file": "models/optimized/KayKit_Rogue.glb",
+      "sourceSha256": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+      "sha256": "85b9689ad9e87f1e442157f7ce7843fb204f9bc595f84b0c8448760db8284353",
+      "before": {
+        "bytes": 3616284,
+        "triangles": 6377,
+        "vertices": 5901,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2044720,
+        "triangles": 5863,
+        "vertices": 5471,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Rogue_Hooded.glb",
+      "file": "models/optimized/KayKit_Rogue_Hooded.glb",
+      "sourceSha256": "93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545",
+      "sha256": "040f4b1ebe838629f79c3a4baece92c9fc41106fb32cb3cda1ca3bccdb83b9fe",
+      "before": {
+        "bytes": 3597652,
+        "triangles": 6035,
+        "vertices": 5586,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2038908,
+        "triangles": 5523,
+        "vertices": 5158,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcasting",
+          "T-Pose",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Skeleton_Minion.glb",
+      "file": "models/optimized/KayKit_Skeleton_Minion.glb",
+      "sourceSha256": "6ffc003f895bed0b074791e0e490846210a2e2f8fc7da300aba53cc185f95968",
+      "sha256": "c284c8ac1e3c0e4899c0c33a5d4ea5dbcac05ee96ef4edef7274373b507113d7",
+      "before": {
+        "bytes": 4814296,
+        "triangles": 5288,
+        "vertices": 4858,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Jump_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Death_C_Pose",
+          "Death_C_Skeletons",
+          "Death_C_Skeletons_Resurrect",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Idle_B",
+          "Idle_Combat",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_C",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Skeleton_Inactive_Standing_Pose",
+          "Skeletons_Awaken_Floor",
+          "Skeletons_Awaken_Floor_Long",
+          "Skeletons_Awaken_Standing",
+          "Skeletons_Inactive_Floor_Pose",
+          "Spawn_Air",
+          "Spawn_Ground",
+          "Spawn_Ground_Skeletons",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcast_Summon",
+          "Spellcasting",
+          "T-Pose",
+          "Taunt",
+          "Taunt_Longer",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C",
+          "Walking_D_Skeletons"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2648220,
+        "triangles": 5164,
+        "vertices": 4793,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Jump_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Death_C_Pose",
+          "Death_C_Skeletons",
+          "Death_C_Skeletons_Resurrect",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Idle_B",
+          "Idle_Combat",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_C",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Skeleton_Inactive_Standing_Pose",
+          "Skeletons_Awaken_Floor",
+          "Skeletons_Awaken_Floor_Long",
+          "Skeletons_Awaken_Standing",
+          "Skeletons_Inactive_Floor_Pose",
+          "Spawn_Air",
+          "Spawn_Ground",
+          "Spawn_Ground_Skeletons",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcast_Summon",
+          "Spellcasting",
+          "T-Pose",
+          "Taunt",
+          "Taunt_Longer",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C",
+          "Walking_D_Skeletons"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Skeleton_Warrior.glb",
+      "file": "models/optimized/KayKit_Skeleton_Warrior.glb",
+      "sourceSha256": "178b6fda810b814c250d8a2010c24dfd9b458b9006dd323353e620b7ff118bbe",
+      "sha256": "84aa078c89c9343e0975cd226b991080e37d4e58211ab3efc15fb5841950c0f4",
+      "before": {
+        "bytes": 4863620,
+        "triangles": 5934,
+        "vertices": 6117,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Jump_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Death_C_Pose",
+          "Death_C_Skeletons",
+          "Death_C_Skeletons_Resurrect",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Idle_B",
+          "Idle_Combat",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_C",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Skeleton_Inactive_Standing_Pose",
+          "Skeletons_Awaken_Floor",
+          "Skeletons_Awaken_Floor_Long",
+          "Skeletons_Awaken_Standing",
+          "Skeletons_Inactive_Floor_Pose",
+          "Spawn_Air",
+          "Spawn_Ground",
+          "Spawn_Ground_Skeletons",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcast_Summon",
+          "Spellcasting",
+          "T-Pose",
+          "Taunt",
+          "Taunt_Longer",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C",
+          "Walking_D_Skeletons"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 2671364,
+        "triangles": 5814,
+        "vertices": 6047,
+        "clips": [
+          "1H_Melee_Attack_Chop",
+          "1H_Melee_Attack_Jump_Chop",
+          "1H_Melee_Attack_Slice_Diagonal",
+          "1H_Melee_Attack_Slice_Horizontal",
+          "1H_Melee_Attack_Stab",
+          "1H_Ranged_Aiming",
+          "1H_Ranged_Reload",
+          "1H_Ranged_Shoot",
+          "1H_Ranged_Shooting",
+          "2H_Melee_Attack_Chop",
+          "2H_Melee_Attack_Slice",
+          "2H_Melee_Attack_Spin",
+          "2H_Melee_Attack_Spinning",
+          "2H_Melee_Attack_Stab",
+          "2H_Melee_Idle",
+          "2H_Ranged_Aiming",
+          "2H_Ranged_Reload",
+          "2H_Ranged_Shoot",
+          "2H_Ranged_Shooting",
+          "Block",
+          "Block_Attack",
+          "Block_Hit",
+          "Blocking",
+          "Cheer",
+          "Death_A",
+          "Death_A_Pose",
+          "Death_B",
+          "Death_B_Pose",
+          "Death_C_Pose",
+          "Death_C_Skeletons",
+          "Death_C_Skeletons_Resurrect",
+          "Dodge_Backward",
+          "Dodge_Forward",
+          "Dodge_Left",
+          "Dodge_Right",
+          "Dualwield_Melee_Attack_Chop",
+          "Dualwield_Melee_Attack_Slice",
+          "Dualwield_Melee_Attack_Stab",
+          "Hit_A",
+          "Hit_B",
+          "Idle",
+          "Idle_B",
+          "Idle_Combat",
+          "Interact",
+          "Jump_Full_Long",
+          "Jump_Full_Short",
+          "Jump_Idle",
+          "Jump_Land",
+          "Jump_Start",
+          "Lie_Down",
+          "Lie_Idle",
+          "Lie_Pose",
+          "Lie_StandUp",
+          "PickUp",
+          "Running_A",
+          "Running_B",
+          "Running_C",
+          "Running_Strafe_Left",
+          "Running_Strafe_Right",
+          "Sit_Chair_Down",
+          "Sit_Chair_Idle",
+          "Sit_Chair_Pose",
+          "Sit_Chair_StandUp",
+          "Sit_Floor_Down",
+          "Sit_Floor_Idle",
+          "Sit_Floor_Pose",
+          "Sit_Floor_StandUp",
+          "Skeleton_Inactive_Standing_Pose",
+          "Skeletons_Awaken_Floor",
+          "Skeletons_Awaken_Floor_Long",
+          "Skeletons_Awaken_Standing",
+          "Skeletons_Inactive_Floor_Pose",
+          "Spawn_Air",
+          "Spawn_Ground",
+          "Spawn_Ground_Skeletons",
+          "Spellcast_Long",
+          "Spellcast_Raise",
+          "Spellcast_Shoot",
+          "Spellcast_Summon",
+          "Spellcasting",
+          "T-Pose",
+          "Taunt",
+          "Taunt_Longer",
+          "Throw",
+          "Unarmed_Idle",
+          "Unarmed_Melee_Attack_Kick",
+          "Unarmed_Melee_Attack_Punch_A",
+          "Unarmed_Melee_Attack_Punch_B",
+          "Unarmed_Pose",
+          "Use_Item",
+          "Walking_A",
+          "Walking_B",
+          "Walking_Backwards",
+          "Walking_C",
+          "Walking_D_Skeletons"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_axe_1handed.glb",
+      "file": "models/optimized/KayKit_Weapon_axe_1handed.glb",
+      "sourceSha256": "0ef311af0bd85d43f94c7d625fd878638049180a6b34fbf894a06039e2ebcc86",
+      "sha256": "21c4df39a2a04a4c00c04171363a1075fb19c1d7e0e1b4943958929608e3d021",
+      "before": {
+        "bytes": 29028,
+        "triangles": 274,
+        "vertices": 340,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 18072,
+        "triangles": 274,
+        "vertices": 340,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_axe_2handed.glb",
+      "file": "models/optimized/KayKit_Weapon_axe_2handed.glb",
+      "sourceSha256": "11ddb02fd5a8f55094d8208e2499a45f08cccbc72d72908b86645a27e04c0ac4",
+      "sha256": "2e244882f2a44b8aa33cb6f7878ac621417f541b578113720fc314f966abaddc",
+      "before": {
+        "bytes": 38460,
+        "triangles": 508,
+        "vertices": 591,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 22856,
+        "triangles": 508,
+        "vertices": 591,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_crossbow_2handed.glb",
+      "file": "models/optimized/KayKit_Weapon_crossbow_2handed.glb",
+      "sourceSha256": "1803aedabdbc0dbbd6fe078f2c776116a73469d680addb9d697cd4328b86e4c8",
+      "sha256": "820d277540340b559d024f4c13e293c66c47e859a9e809bad40b9577a67d1542",
+      "before": {
+        "bytes": 52976,
+        "triangles": 792,
+        "vertices": 942,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 29040,
+        "triangles": 780,
+        "vertices": 930,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_dagger.glb",
+      "file": "models/optimized/KayKit_Weapon_dagger.glb",
+      "sourceSha256": "d20dc04632dfdf09de944d759146ac26dd5ba21fc7e922845e3868ac01761803",
+      "sha256": "a4463ea96150173748473d8f36f41631c6d994105a194c3455a94f170b8ec240",
+      "before": {
+        "bytes": 25728,
+        "triangles": 172,
+        "vertices": 207,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 16408,
+        "triangles": 172,
+        "vertices": 207,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_quiver.glb",
+      "file": "models/optimized/KayKit_Weapon_quiver.glb",
+      "sourceSha256": "bb66a9b5287448865a5c211fea9e7068aed45445298c596f3e1d73729aef1e5c",
+      "sha256": "518d44be2ee8a4f6d29c884cdf91811bdc48e9692097ea5809d13310107bc92c",
+      "before": {
+        "bytes": 31956,
+        "triangles": 255,
+        "vertices": 386,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 19484,
+        "triangles": 251,
+        "vertices": 384,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_shield_round.glb",
+      "file": "models/optimized/KayKit_Weapon_shield_round.glb",
+      "sourceSha256": "46009242d7ec3920c4bd337ba6ad552e1923bddd37df4277393382c233c3595d",
+      "sha256": "127b9ba1a049a3f6958b1937d42d5e83a3f8f794246a07069ea333469cc42aa1",
+      "before": {
+        "bytes": 27588,
+        "triangles": 284,
+        "vertices": 322,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 16652,
+        "triangles": 284,
+        "vertices": 322,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_spellbook_closed.glb",
+      "file": "models/optimized/KayKit_Weapon_spellbook_closed.glb",
+      "sourceSha256": "1a4a9b1456de04a4fde4bab73abddc611644e76d6b00a00bbd445072d74326b0",
+      "sha256": "496c82dc2cfe4bb58b23d1c8b7be311da26a08522eeb0581c8f04b971bfd1627",
+      "before": {
+        "bytes": 32240,
+        "triangles": 292,
+        "vertices": 399,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 18820,
+        "triangles": 292,
+        "vertices": 399,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_spellbook_open.glb",
+      "file": "models/optimized/KayKit_Weapon_spellbook_open.glb",
+      "sourceSha256": "8b3dfe1bcd086a849081c34dff031d2a4e9b015c2b821d1bfad66fde95c1d1d5",
+      "sha256": "d3cec6bd3ccf9ec5ea0cb196dbed8e3d6b9b70e46ebc2245cdda70b228cc2fd5",
+      "before": {
+        "bytes": 32844,
+        "triangles": 292,
+        "vertices": 418,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 19492,
+        "triangles": 292,
+        "vertices": 418,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_staff.glb",
+      "file": "models/optimized/KayKit_Weapon_staff.glb",
+      "sourceSha256": "15d0887adf3dde3ff946386826e2c040f3896a49a706c94e5ea130548dd11528",
+      "sha256": "06a0cd71a771213b815942402f2e69581d62fa8419698b072d58b79aca1c1b3a",
+      "before": {
+        "bytes": 36284,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21568,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_sword_1handed.glb",
+      "file": "models/optimized/KayKit_Weapon_sword_1handed.glb",
+      "sourceSha256": "f14e75d632c8d1447608745bb427726e41e9dd15a2f51fbc2d1c493f310188e1",
+      "sha256": "bbd86ed47787bcf641b3954d055cbac5818d10468e3fa6a419dac2886766345d",
+      "before": {
+        "bytes": 28832,
+        "triangles": 300,
+        "vertices": 358,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 17144,
+        "triangles": 298,
+        "vertices": 356,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_sword_2handed.glb",
+      "file": "models/optimized/KayKit_Weapon_sword_2handed.glb",
+      "sourceSha256": "005f251d7d3e23176c774bb2f98abb8000efdf75c652d8620a7faecd3c1b6e20",
+      "sha256": "f949362f9e8f49f62a6bf9e7a30dc3143efe815118493217972ca9626d89b1b8",
+      "before": {
+        "bytes": 35492,
+        "triangles": 412,
+        "vertices": 545,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 20572,
+        "triangles": 412,
+        "vertices": 545,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/KayKit_Weapon_wand.glb",
+      "file": "models/optimized/KayKit_Weapon_wand.glb",
+      "sourceSha256": "a6764660ab4f8a34f254df7b4a834ca866cfd457a919e85e3da6b231166815a5",
+      "sha256": "1802f25afa405a455ae5d10135d4f649be68f5faf56fd3e204a56df1f6a2f87c",
+      "before": {
+        "bytes": 23664,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15432,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/Parrot.glb",
+      "file": "models/optimized/Parrot.glb",
+      "sourceSha256": "adcc5dae04d0b16957ce20b7bebb84d41c3bff1c01bf5ab1cf56d06345bc5170",
+      "sha256": "b62ba86ab963a60c8bd6d5494856e8d597eb5b68bb2ceb3b713a6a7c96e8b812",
+      "before": {
+        "bytes": 97024,
+        "triangles": 626,
+        "vertices": 497,
+        "clips": [
+          "parrot_A_"
+        ],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 58644,
+        "triangles": 602,
+        "vertices": 485,
+        "clips": [
+          "parrot_A_"
+        ],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/Soldier.glb",
+      "file": "models/optimized/Soldier.glb",
+      "sourceSha256": "dfb230fc1f942f259dd00281a1186953ad602fc5d69067ce63e24b2aa439736b",
+      "sha256": "cb6453eea2bd4ad9ebbc4f9cc478a6c0f2b914afa7f0af19206210024ed02c65",
+      "before": {
+        "bytes": 2160468,
+        "triangles": 11376,
+        "vertices": 7434,
+        "clips": [
+          "Idle",
+          "Run",
+          "TPose",
+          "Walk"
+        ],
+        "skins": 2,
+        "textures": [
+          {
+            "mime": "image/jpeg",
+            "size": [
+              1024,
+              1024
+            ]
+          },
+          {
+            "mime": "image/jpeg",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 1013560,
+        "triangles": 8058,
+        "vertices": 5505,
+        "clips": [
+          "Idle",
+          "Run",
+          "TPose",
+          "Walk"
+        ],
+        "skins": 2,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          },
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/creatures/Creature_dragon.glb",
+      "file": "models/optimized/creatures/Creature_dragon.glb",
+      "sourceSha256": "d8a12f3f819e86518f5a44984db611ffaaa800895da33928d66519e629615705",
+      "sha256": "311b873eca332753664a6e7fdda53d64691c565b9c8a8222339f5ffe46fd48dc",
+      "before": {
+        "bytes": 251540,
+        "triangles": 4562,
+        "vertices": 2740,
+        "clips": [
+          "CharacterArmature|Death",
+          "CharacterArmature|Fast_Flying",
+          "CharacterArmature|Flying_Idle",
+          "CharacterArmature|Headbutt",
+          "CharacterArmature|HitReact",
+          "CharacterArmature|No",
+          "CharacterArmature|Punch",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 93552,
+        "triangles": 3414,
+        "vertices": 2158,
+        "clips": [
+          "CharacterArmature|Death",
+          "CharacterArmature|Fast_Flying",
+          "CharacterArmature|Flying_Idle",
+          "CharacterArmature|Headbutt",
+          "CharacterArmature|HitReact",
+          "CharacterArmature|No",
+          "CharacterArmature|Punch",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_golem.glb",
+      "file": "models/optimized/creatures/Creature_golem.glb",
+      "sourceSha256": "1d2576717163cc088b398fb80e6fb57a79c4a961268c77a402b72616269253b9",
+      "sha256": "0ff7c761bf8e940f3b15a93003979acb7ff061833696adca09398167c5acadf5",
+      "before": {
+        "bytes": 166076,
+        "triangles": 896,
+        "vertices": 2688,
+        "clips": [
+          "Idle",
+          "Walk",
+          "Run",
+          "Gallop",
+          "Attack",
+          "Death"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 65756,
+        "triangles": 896,
+        "vertices": 2272,
+        "clips": [
+          "Idle",
+          "Walk",
+          "Run",
+          "Gallop",
+          "Attack",
+          "Death"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_horse.glb",
+      "file": "models/optimized/creatures/Creature_horse.glb",
+      "sourceSha256": "a884a881525346c888db2ee3f7899e2c8de73859ec797bc0a72ad337b3bd3207",
+      "sha256": "7ac2b5d9067c59272e627c4a3c2e72ed5bf90c12fb7b09b0aef80fe7521bbcd5",
+      "before": {
+        "bytes": 133828,
+        "triangles": 704,
+        "vertices": 2112,
+        "clips": [
+          "Idle",
+          "Walk",
+          "Run",
+          "Gallop",
+          "Attack",
+          "Death"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 48084,
+        "triangles": 704,
+        "vertices": 1803,
+        "clips": [
+          "Idle",
+          "Walk",
+          "Run",
+          "Gallop",
+          "Attack",
+          "Death"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_pet_babygolem.glb",
+      "file": "models/optimized/creatures/Creature_pet_babygolem.glb",
+      "sourceSha256": "21198479ed920fbf9415ba86691a671f0fc165845bf5740a042c544504a40f66",
+      "sha256": "706cc490f107b524af637a129234025292c52e61895fc5c5435775b9822900bb",
+      "before": {
+        "bytes": 95168,
+        "triangles": 3696,
+        "vertices": 2238,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 23992,
+        "triangles": 2518,
+        "vertices": 1595,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_pet_dracolich.glb",
+      "file": "models/optimized/creatures/Creature_pet_dracolich.glb",
+      "sourceSha256": "e0aa5d98031e4001fa336071666c1d859e1a746553aff513ec164320faf300f8",
+      "sha256": "6603c84dada8178a94d34d9513411457f4344a0214dae9260ebdea17a79a5ae6",
+      "before": {
+        "bytes": 425224,
+        "triangles": 1592,
+        "vertices": 1402,
+        "clips": [
+          "Bite_Front",
+          "Death",
+          "Flying",
+          "HitRecieve"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 234832,
+        "triangles": 1514,
+        "vertices": 1339,
+        "clips": [
+          "Bite_Front",
+          "Death",
+          "Flying",
+          "HitRecieve"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/creatures/Creature_pet_fairy.glb",
+      "file": "models/optimized/creatures/Creature_pet_fairy.glb",
+      "sourceSha256": "7073582ccf5407dfd090657d7878349527ddf1b8e92b18e498081fbaf16911fb",
+      "sha256": "4f4ff468e654208564ef0f9dce4903b2ed8a15c1d1664772469f767349ae00e1",
+      "before": {
+        "bytes": 77672,
+        "triangles": 3192,
+        "vertices": 1786,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 23404,
+        "triangles": 2666,
+        "vertices": 1508,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_pet_fox.glb",
+      "file": "models/optimized/creatures/Creature_pet_fox.glb",
+      "sourceSha256": "4a63251836ad840ae0b5c8f0eefff8e5215f149678cee7d3fa6eed93eda40cc0",
+      "sha256": "852b303a3515b25433ef80e6dded8247534dcde965605891373e97cc391d83a5",
+      "before": {
+        "bytes": 52492,
+        "triangles": 1772,
+        "vertices": 1265,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 18324,
+        "triangles": 1620,
+        "vertices": 1160,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_pet_hellhound.glb",
+      "file": "models/optimized/creatures/Creature_pet_hellhound.glb",
+      "sourceSha256": "96a5c4f88f2de5b4aed641d9282ace7a8aea0175ad281b686309263de09c7e56",
+      "sha256": "7173892b7bc144bd73722c2745f12a908a9299991f27aa322db32562a066a20f",
+      "before": {
+        "bytes": 36732,
+        "triangles": 1392,
+        "vertices": 844,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 13360,
+        "triangles": 1282,
+        "vertices": 777,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_slime.glb",
+      "file": "models/optimized/creatures/Creature_slime.glb",
+      "sourceSha256": "34bb111a7931bb957f992e127d71fac321aaeea1bdcc7da56fa5aba55c83d783",
+      "sha256": "a830a28c5dc8ca61be43f0e187535d4a063b63b0be86eedd4c324f356d33755d",
+      "before": {
+        "bytes": 62652,
+        "triangles": 1030,
+        "vertices": 581,
+        "clips": [
+          "CharacterArmature|Bite_Front",
+          "CharacterArmature|Dance",
+          "CharacterArmature|Death",
+          "CharacterArmature|HitRecieve",
+          "CharacterArmature|Idle",
+          "CharacterArmature|Jump",
+          "CharacterArmature|No",
+          "CharacterArmature|Walk",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 2,
+        "textures": []
+      },
+      "after": {
+        "bytes": 34252,
+        "triangles": 1028,
+        "vertices": 580,
+        "clips": [
+          "CharacterArmature|Bite_Front",
+          "CharacterArmature|Dance",
+          "CharacterArmature|Death",
+          "CharacterArmature|HitRecieve",
+          "CharacterArmature|Idle",
+          "CharacterArmature|Jump",
+          "CharacterArmature|No",
+          "CharacterArmature|Walk",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_stag.glb",
+      "file": "models/optimized/creatures/Creature_stag.glb",
+      "sourceSha256": "17ef7eab305cbe9f0476fd6506573c802c12dd6eb10e7d3d91340f561a475a3d",
+      "sha256": "2674c3065c60fcbecf37b7829f1248b70ad129eccc6cb4b6dbfd56dafa64358f",
+      "before": {
+        "bytes": 368296,
+        "triangles": 1180,
+        "vertices": 1088,
+        "clips": [
+          "Bite_Front",
+          "Bite_InPlace",
+          "Dance",
+          "Death",
+          "HitRecieve",
+          "Idle",
+          "Jump",
+          "No",
+          "Walk",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 217216,
+        "triangles": 1180,
+        "vertices": 1088,
+        "clips": [
+          "Bite_Front",
+          "Bite_InPlace",
+          "Dance",
+          "Death",
+          "HitRecieve",
+          "Idle",
+          "Jump",
+          "No",
+          "Walk",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/creatures/Creature_warhorse.glb",
+      "file": "models/optimized/creatures/Creature_warhorse.glb",
+      "sourceSha256": "435ab4a1e3b338faa7515a9e58918f3b4ab89af2f501d9b1aadc35220b287fbf",
+      "sha256": "3962f2e70c789fedee1a76871660dc84535e6aec7cf5b77be30bb9c9a92396f2",
+      "before": {
+        "bytes": 39904,
+        "triangles": 690,
+        "vertices": 1408,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 19136,
+        "triangles": 688,
+        "vertices": 1406,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_wolf.glb",
+      "file": "models/optimized/creatures/Creature_wolf.glb",
+      "sourceSha256": "16ac96339d06f7def9af20d5d9b27622d61e53580dab43970c9edb1bffbe8f84",
+      "sha256": "f831e7ed8a19b45c818f852b56f31af087cc4bcd6326cf8e92298921954fb787",
+      "before": {
+        "bytes": 986712,
+        "triangles": 1962,
+        "vertices": 3994,
+        "clips": [
+          "Attack",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle_HitReact_Left",
+          "Idle_HitReact_Right",
+          "Jump_ToIdle",
+          "Walk",
+          "Idle_2_HeadLow",
+          "Idle_2",
+          "Idle",
+          "AnimalArmature|Attack",
+          "AnimalArmature|Death",
+          "AnimalArmature|Eating",
+          "AnimalArmature|Gallop",
+          "AnimalArmature|Gallop_Jump",
+          "AnimalArmature|Idle",
+          "AnimalArmature|Idle_2",
+          "AnimalArmature|Idle_2_HeadLow",
+          "AnimalArmature|Idle_HitReact_Left",
+          "AnimalArmature|Idle_HitReact_Right",
+          "AnimalArmature|Jump_ToIdle",
+          "AnimalArmature|Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 368604,
+        "triangles": 1962,
+        "vertices": 3994,
+        "clips": [
+          "Attack",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle_HitReact_Left",
+          "Idle_HitReact_Right",
+          "Jump_ToIdle",
+          "Walk",
+          "Idle_2_HeadLow",
+          "Idle_2",
+          "Idle",
+          "AnimalArmature|Attack",
+          "AnimalArmature|Death",
+          "AnimalArmature|Eating",
+          "AnimalArmature|Gallop",
+          "AnimalArmature|Gallop_Jump",
+          "AnimalArmature|Idle",
+          "AnimalArmature|Idle_2",
+          "AnimalArmature|Idle_2_HeadLow",
+          "AnimalArmature|Idle_HitReact_Left",
+          "AnimalArmature|Idle_HitReact_Right",
+          "AnimalArmature|Jump_ToIdle",
+          "AnimalArmature|Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/creatures/Creature_wyvern.glb",
+      "file": "models/optimized/creatures/Creature_wyvern.glb",
+      "sourceSha256": "f660d8f48be4ea3f39639f6206a0181127e7fe7503cb4bad8d07d27d80528f3a",
+      "sha256": "64c69dd7b0a73bf5d4e6c26df2255a66d9b892863573a8fcca11067b5c577369",
+      "before": {
+        "bytes": 436000,
+        "triangles": 7438,
+        "vertices": 4350,
+        "clips": [
+          "CharacterArmature|Death",
+          "CharacterArmature|Fast_Flying",
+          "CharacterArmature|Flying_Idle",
+          "CharacterArmature|Headbutt",
+          "CharacterArmature|HitReact",
+          "CharacterArmature|No",
+          "CharacterArmature|Punch",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 160316,
+        "triangles": 4860,
+        "vertices": 3011,
+        "clips": [
+          "CharacterArmature|Death",
+          "CharacterArmature|Fast_Flying",
+          "CharacterArmature|Flying_Idle",
+          "CharacterArmature|Headbutt",
+          "CharacterArmature|HitReact",
+          "CharacterArmature|No",
+          "CharacterArmature|Punch",
+          "CharacterArmature|Yes"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/environment/Quaternius_bat.glb",
+      "file": "models/optimized/environment/Quaternius_bat.glb",
+      "sourceSha256": "31a98ca03f60e5d702e654b3471c0948cb17a7358ce744849fe14e3b410fe1fc",
+      "sha256": "9831b6f6b1df41cff8cd39f2bd0306bfd690d4c016ebbea84259550354251809",
+      "before": {
+        "bytes": 244064,
+        "triangles": 1038,
+        "vertices": 2294,
+        "clips": [
+          "BatArmature|BatArmature|Bat_Attack",
+          "BatArmature|BatArmature|Bat_Attack2",
+          "BatArmature|BatArmature|Bat_Death",
+          "BatArmature|BatArmature|Bat_Flying",
+          "BatArmature|BatArmature|Bat_Hit"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              32,
+              4
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 165276,
+        "triangles": 1032,
+        "vertices": 2288,
+        "clips": [
+          "BatArmature|BatArmature|Bat_Attack",
+          "BatArmature|BatArmature|Bat_Attack2",
+          "BatArmature|BatArmature|Bat_Death",
+          "BatArmature|BatArmature|Bat_Flying",
+          "BatArmature|BatArmature|Bat_Hit"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              32,
+              4
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/environment/Quaternius_demon.glb",
+      "file": "models/optimized/environment/Quaternius_demon.glb",
+      "sourceSha256": "3ed33ef522b40b3dcee0a5d6790cc243779b573ed1d79134ad834bf92e0f9487",
+      "sha256": "55a822b2da982a1fde256d86e5c641040e37121127c263a4bfa70d6b2868b359",
+      "before": {
+        "bytes": 554308,
+        "triangles": 6334,
+        "vertices": 4059,
+        "clips": [
+          "Death",
+          "Duck",
+          "HitReact",
+          "Idle",
+          "Jump",
+          "Jump_Idle",
+          "Jump_Land",
+          "No",
+          "Punch",
+          "Run",
+          "Walk",
+          "Wave",
+          "Weapon",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 317976,
+        "triangles": 4384,
+        "vertices": 2929,
+        "clips": [
+          "Death",
+          "Duck",
+          "HitReact",
+          "Idle",
+          "Jump",
+          "Jump_Idle",
+          "Jump_Land",
+          "No",
+          "Punch",
+          "Run",
+          "Walk",
+          "Wave",
+          "Weapon",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/environment/Quaternius_ghost.glb",
+      "file": "models/optimized/environment/Quaternius_ghost.glb",
+      "sourceSha256": "430fb42e7b1c0af455ff89cd5bfdf490d133658e844935d5ffe44e9d9912ffd4",
+      "sha256": "11b7cd84b4c8bea0e343e64dca0a4025208ac2a2d9c6bfbcf6cdd6cc4aff75aa",
+      "before": {
+        "bytes": 288500,
+        "triangles": 2934,
+        "vertices": 2275,
+        "clips": [
+          "Death",
+          "Fast_Flying",
+          "Flying_Idle",
+          "Headbutt",
+          "HitReact",
+          "No",
+          "Punch",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              32,
+              32
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 166188,
+        "triangles": 2118,
+        "vertices": 1764,
+        "clips": [
+          "Death",
+          "Fast_Flying",
+          "Flying_Idle",
+          "Headbutt",
+          "HitReact",
+          "No",
+          "Punch",
+          "Yes"
+        ],
+        "skins": 1,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              32,
+              32
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/equipment/CC0_crystal_gems.glb",
+      "file": "models/optimized/equipment/CC0_crystal_gems.glb",
+      "sourceSha256": "a11a86d8d4311e4e35dc085926c9f5e158b6b6f84a03ff127ff96604d4e0f19b",
+      "sha256": "6ffd8d9f3ed069117af6d69ca921097fcf0fa638c0a5b96a041cba6bdb760dd0",
+      "before": {
+        "bytes": 44512,
+        "triangles": 428,
+        "vertices": 907,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              128,
+              128
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 29616,
+        "triangles": 428,
+        "vertices": 907,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              128,
+              128
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/equipment/CC0_knight_helmet.glb",
+      "file": "models/optimized/equipment/CC0_knight_helmet.glb",
+      "sourceSha256": "ad5be9b463bd8be611dcb92b70016e3bababc6dd7057586d87f374db810c3ec6",
+      "sha256": "d2a6a4564ee6b67c15d30f7c6b65504f4da45a057fdd84f96f11c6081db747ed",
+      "before": {
+        "bytes": 65144,
+        "triangles": 991,
+        "vertices": 1919,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              128,
+              128
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 34176,
+        "triangles": 983,
+        "vertices": 1911,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              128,
+              128
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/equipment/CC0_longbow.glb",
+      "file": "models/optimized/equipment/CC0_longbow.glb",
+      "sourceSha256": "093e834c1edf85b4e2d2ee18490e21230088ba98022dad18a799b66ee8bea689",
+      "sha256": "8c868de64d0cb06a03ad260cccd448061b52c01333076281d6c12644ce6ea50c",
+      "before": {
+        "bytes": 8508,
+        "triangles": 80,
+        "vertices": 136,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 7344,
+        "triangles": 80,
+        "vertices": 122,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/pr17-source/ImperialHorse.glb",
+      "file": "models/optimized/pr17-source/ImperialHorse.glb",
+      "sourceSha256": "c28783e739a97411fe597d0de8ef1d1260c622f39aea4f0912132d83a9d5aee5",
+      "sha256": "1b0d80616a395f957bc18aae410e6b9d91dc2b22ee53ef3e9e09346c0508c73c",
+      "before": {
+        "bytes": 2252024,
+        "triangles": 2182,
+        "vertices": 4400,
+        "clips": [
+          "Attack_Headbutt",
+          "Attack_Kick",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle",
+          "Idle_2",
+          "Idle_Headlow",
+          "Idle_HitReact1",
+          "Idle_HitReact2",
+          "Jump_toIdle",
+          "Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 557408,
+        "triangles": 2180,
+        "vertices": 4398,
+        "clips": [
+          "Attack_Headbutt",
+          "Attack_Kick",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle",
+          "Idle_2",
+          "Idle_Headlow",
+          "Idle_HitReact1",
+          "Idle_HitReact2",
+          "Jump_toIdle",
+          "Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/pr17-source/ImperialHorseWhite.glb",
+      "file": "models/optimized/pr17-source/ImperialHorseWhite.glb",
+      "sourceSha256": "d20750f7e178fe1ad0b33c55a5078050326d3a7d714fd19157dbc380a79940f4",
+      "sha256": "a19dab5dcdadbd072d619c3c7a0c0e9cabc580b28ff96ea553ced15cd7760a5a",
+      "before": {
+        "bytes": 2250744,
+        "triangles": 2182,
+        "vertices": 4400,
+        "clips": [
+          "Attack_Headbutt",
+          "Attack_Kick",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle",
+          "Idle_2",
+          "Idle_Headlow",
+          "Idle_HitReact1",
+          "Idle_HitReact2",
+          "Jump_toIdle",
+          "Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      },
+      "after": {
+        "bytes": 555024,
+        "triangles": 2180,
+        "vertices": 4398,
+        "clips": [
+          "Attack_Headbutt",
+          "Attack_Kick",
+          "Death",
+          "Eating",
+          "Gallop",
+          "Gallop_Jump",
+          "Idle",
+          "Idle_2",
+          "Idle_Headlow",
+          "Idle_HitReact1",
+          "Idle_HitReact2",
+          "Jump_toIdle",
+          "Walk"
+        ],
+        "skins": 1,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapon-packs/Kenney_dungeon_shield_rectangle.glb",
+      "file": "models/optimized/weapon-packs/Kenney_dungeon_shield_rectangle.glb",
+      "sourceSha256": "bb71b6c6d42166f146d837e1525a3b82a940c3e647058c0dfb891b32455cfe2d",
+      "sha256": "95afe5eae3d9ee985be0318c2b030c8c7a9b256b8ec19227581b8021c87fc05c",
+      "before": {
+        "bytes": 24068,
+        "triangles": 134,
+        "vertices": 228,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 8732,
+        "triangles": 134,
+        "vertices": 204,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapon-packs/Kenney_dungeon_shield_round.glb",
+      "file": "models/optimized/weapon-packs/Kenney_dungeon_shield_round.glb",
+      "sourceSha256": "35a10a80b7478a66be8bc1847b6376e09064a2745e1acf53eb031ac5ce649400",
+      "sha256": "5e7b75e76247f8cb5a8110fa65e3d5c96f99b444bc98981c0e94967f31463e97",
+      "before": {
+        "bytes": 26380,
+        "triangles": 160,
+        "vertices": 264,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 10152,
+        "triangles": 160,
+        "vertices": 255,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapon-packs/Kenney_dungeon_sword.glb",
+      "file": "models/optimized/weapon-packs/Kenney_dungeon_sword.glb",
+      "sourceSha256": "17ce43897fe2bbe0cdc22ecf0abfc3a9d213bb2893b626675fa116326512547a",
+      "sha256": "163eac6fa2cc059b1f6468a6e3b21c83ef6e42eb67f24e4bd994b83e0a317f95",
+      "before": {
+        "bytes": 20156,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 8304,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapon-packs/Kenney_prototype_sword.glb",
+      "file": "models/optimized/weapon-packs/Kenney_prototype_sword.glb",
+      "sourceSha256": "a2c25155fc61180d13c02b14fcd685e7ffe6e592b91cb60f7a93e5183d1ecfce",
+      "sha256": "844c4fbe34e49e867ffffdde8c189dbf3edf4a3026cfc9edec7d39c76a2e0e86",
+      "before": {
+        "bytes": 15068,
+        "triangles": 48,
+        "vertices": 92,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 10828,
+        "triangles": 48,
+        "vertices": 90,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-assassin-0.glb",
+      "file": "models/optimized/weapons/armory-assassin-0.glb",
+      "sourceSha256": "c09f2b57ce8d8c819a5847e27a877d47ec96bdd1b8f23aae5cc993c547bcd0f3",
+      "sha256": "c56289149165fbd8d3bd08b18e69e3381074d2a3af509ffda44fba2cd77d237c",
+      "before": {
+        "bytes": 35664,
+        "triangles": 726,
+        "vertices": 1123,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 18996,
+        "triangles": 618,
+        "vertices": 1059,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-assassin-1.glb",
+      "file": "models/optimized/weapons/armory-assassin-1.glb",
+      "sourceSha256": "4748f19a08b0ae4a49de4f0ea3f266e91bc90fc85970021257d04037bbeae793",
+      "sha256": "4ddf4bfb82d8f59e2cd0b3a4bff6d3f528b4193e6d901131a217be2d2c4d0e07",
+      "before": {
+        "bytes": 36352,
+        "triangles": 736,
+        "vertices": 1149,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 19324,
+        "triangles": 632,
+        "vertices": 1092,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-assassin-2.glb",
+      "file": "models/optimized/weapons/armory-assassin-2.glb",
+      "sourceSha256": "d20dc04632dfdf09de944d759146ac26dd5ba21fc7e922845e3868ac01761803",
+      "sha256": "a4463ea96150173748473d8f36f41631c6d994105a194c3455a94f170b8ec240",
+      "before": {
+        "bytes": 25728,
+        "triangles": 172,
+        "vertices": 207,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 16408,
+        "triangles": 172,
+        "vertices": 207,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-assassin-3.glb",
+      "file": "models/optimized/weapons/armory-assassin-3.glb",
+      "sourceSha256": "40aa76e8066019357cf0bdd549be847269f671a911b0f744061493b0824058c8",
+      "sha256": "9d4552524cda605017ec4dd65e3e53817afbc1e32491931ae0699b32a24fae58",
+      "before": {
+        "bytes": 35816,
+        "triangles": 726,
+        "vertices": 1123,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 19700,
+        "triangles": 618,
+        "vertices": 1059,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-assassin-4.glb",
+      "file": "models/optimized/weapons/armory-assassin-4.glb",
+      "sourceSha256": "eb544fa7f36da3899b4a0039e04dddbd1a6a4c685e515b86600b6a5a32d5328c",
+      "sha256": "99183723c4e197f1fc7392fddbfaf83c39cf5034ee8d56403ab2aa6e8585dc62",
+      "before": {
+        "bytes": 36496,
+        "triangles": 736,
+        "vertices": 1149,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 20064,
+        "triangles": 632,
+        "vertices": 1092,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-berserker-0.glb",
+      "file": "models/optimized/weapons/armory-berserker-0.glb",
+      "sourceSha256": "012e5517176465cf844ceffea253dc7ca331536f133aef90f46ee74fb3a6e5de",
+      "sha256": "80eb19d946740f753a5231cbbca966e10832b4e81e6dec9586c09ef9c66db74e",
+      "before": {
+        "bytes": 55412,
+        "triangles": 1130,
+        "vertices": 1878,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 25532,
+        "triangles": 948,
+        "vertices": 1780,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-berserker-1.glb",
+      "file": "models/optimized/weapons/armory-berserker-1.glb",
+      "sourceSha256": "b18a00b02fadf22df825f65000af5e65dc9cbadd791546b8bd4bbffc9eb6baf8",
+      "sha256": "42eaeb552b68577b0fd57fcf6149b45abd67062a17c0df0f9c84ab4b32e5cabd",
+      "before": {
+        "bytes": 87452,
+        "triangles": 1892,
+        "vertices": 3022,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 36276,
+        "triangles": 1584,
+        "vertices": 2867,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-berserker-2.glb",
+      "file": "models/optimized/weapons/armory-berserker-2.glb",
+      "sourceSha256": "c8bd5c0acc60d3dfe6b76aa143b3721b1a0755a85bf8cec5a954743f76bf3dde",
+      "sha256": "1027a0427867bf2448a1e069e33ede9d051129c40610285fd4a302630c45454c",
+      "before": {
+        "bytes": 282020,
+        "triangles": 1556,
+        "vertices": 2346,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1000,
+              1000
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 69808,
+        "triangles": 1248,
+        "vertices": 2191,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-berserker-3.glb",
+      "file": "models/optimized/weapons/armory-berserker-3.glb",
+      "sourceSha256": "af98be37be82bb0f4e8e4b4f619077a663bfcc33e4bf2671fa375975fdd2614f",
+      "sha256": "e1dfa28bfd54e7d673d83d76435aa2fa9314e5d751427f88590fdcac39965604",
+      "before": {
+        "bytes": 43716,
+        "triangles": 830,
+        "vertices": 1432,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 22808,
+        "triangles": 758,
+        "vertices": 1388,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-berserker-4.glb",
+      "file": "models/optimized/weapons/armory-berserker-4.glb",
+      "sourceSha256": "2fba10cd333742c2b6466f31d2b32a063e3148102c2ab20cff18f8dd4e021a62",
+      "sha256": "7ef7f93d3b3efa312f86ad7b98ce2926530a24d615e13dff4406da5e0805aea6",
+      "before": {
+        "bytes": 47260,
+        "triangles": 1033,
+        "vertices": 1529,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 22552,
+        "triangles": 857,
+        "vertices": 1426,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-elementalist-0.glb",
+      "file": "models/optimized/weapons/armory-elementalist-0.glb",
+      "sourceSha256": "15d0887adf3dde3ff946386826e2c040f3896a49a706c94e5ea130548dd11528",
+      "sha256": "06a0cd71a771213b815942402f2e69581d62fa8419698b072d58b79aca1c1b3a",
+      "before": {
+        "bytes": 36284,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21568,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-elementalist-1.glb",
+      "file": "models/optimized/weapons/armory-elementalist-1.glb",
+      "sourceSha256": "a6764660ab4f8a34f254df7b4a834ca866cfd457a919e85e3da6b231166815a5",
+      "sha256": "1802f25afa405a455ae5d10135d4f649be68f5faf56fd3e204a56df1f6a2f87c",
+      "before": {
+        "bytes": 23664,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15432,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-elementalist-2.glb",
+      "file": "models/optimized/weapons/armory-elementalist-2.glb",
+      "sourceSha256": "0714d14b2a1342ee2d6f83560a1108dfd570e55440933c813d4ba562c422f365",
+      "sha256": "83ea8921fc575b193895d3f25739d60d6d63f2a901704a833e2f5f6c817d9410",
+      "before": {
+        "bytes": 36488,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21864,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-elementalist-3.glb",
+      "file": "models/optimized/weapons/armory-elementalist-3.glb",
+      "sourceSha256": "b99e0a21ee7bdef736d7f7cba16fc036fce7fc73d7c860cea0438922931b09da",
+      "sha256": "28e1a76c1bf115c5268354545c3d33f78d4a4a17dd2b283321b9933aa1f086cf",
+      "before": {
+        "bytes": 23868,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15620,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-elementalist-4.glb",
+      "file": "models/optimized/weapons/armory-elementalist-4.glb",
+      "sourceSha256": "ed431788deb04bb6d69abb4c28f47f0a8a9a6ea80499a43322180aa8179cc47d",
+      "sha256": "e0b59571e72108fee8dfb367d3bf78448212016486d4f3b815aa3a0f3def470b",
+      "before": {
+        "bytes": 36476,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21828,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-lanceman-0.glb",
+      "file": "models/optimized/weapons/armory-lanceman-0.glb",
+      "sourceSha256": "1fd57d33b40d8a259bb87ba7961d34c7f4d2e09c56927b22de9895807c163057",
+      "sha256": "bcde67af26ff1e3a54d07456193f9b2ec02255922f9a2dea9bee3958ae2da15c",
+      "before": {
+        "bytes": 67744,
+        "triangles": 1202,
+        "vertices": 2374,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 33340,
+        "triangles": 1194,
+        "vertices": 2366,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-lanceman-1.glb",
+      "file": "models/optimized/weapons/armory-lanceman-1.glb",
+      "sourceSha256": "22a9d07d0abcf7bd72c9e464f023367a6b449de0ccffd929f724b341f4fab7ac",
+      "sha256": "02ce659339ca9a29a30693bf96e10023eb2b18b207a2c77ce21784611065f529",
+      "before": {
+        "bytes": 18020,
+        "triangles": 58,
+        "vertices": 108,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 7168,
+        "triangles": 58,
+        "vertices": 102,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-lanceman-2.glb",
+      "file": "models/optimized/weapons/armory-lanceman-2.glb",
+      "sourceSha256": "8b7780890280b456c88f8bd17bbbfff319854d99b937a80ec88830f4b34600e2",
+      "sha256": "c821fd1059126e761707d852a802a7e02e4052d54a8b7ff711e54f1e7ec010c2",
+      "before": {
+        "bytes": 67896,
+        "triangles": 1202,
+        "vertices": 2374,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 33304,
+        "triangles": 1194,
+        "vertices": 2366,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-lanceman-3.glb",
+      "file": "models/optimized/weapons/armory-lanceman-3.glb",
+      "sourceSha256": "e1de9f1d6ec097bae90e55733feff3d1356348fb792feafd750d1e9e605b44f2",
+      "sha256": "492f462547ea22356cb8aa9edde08b74909a1b7d1c7d1f6a438ac5f08a374bc2",
+      "before": {
+        "bytes": 18188,
+        "triangles": 58,
+        "vertices": 108,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 7544,
+        "triangles": 58,
+        "vertices": 102,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-lanceman-4.glb",
+      "file": "models/optimized/weapons/armory-lanceman-4.glb",
+      "sourceSha256": "b6c94f6ce04c60a79611aae1c46eb4bf1bd033bf990e312febabab8266b74f84",
+      "sha256": "7763da8f0752d28c9eb1021af232774e599e77fff731abeb4bda638a2abb3260",
+      "before": {
+        "bytes": 67892,
+        "triangles": 1202,
+        "vertices": 2374,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 33356,
+        "triangles": 1194,
+        "vertices": 2366,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-monk-0.glb",
+      "file": "models/optimized/weapons/armory-monk-0.glb",
+      "sourceSha256": "db696e116872625bc62bd477d4f045fd6f3d4fae5f9207266604ccf84fba357f",
+      "sha256": "0aa0db899f2c6fc0d394702f325ce1deeaaefdaa72c65b77055b32e3d0d30774",
+      "before": {
+        "bytes": 36464,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21840,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-monk-1.glb",
+      "file": "models/optimized/weapons/armory-monk-1.glb",
+      "sourceSha256": "79daf3e70000f219fc9968dab29b9b06f0fed36f00be028d267df6ec1b257452",
+      "sha256": "1db14f674ab9904d63271521aad55fde88e1c7643e54ac5b9f5f592ce037f537",
+      "before": {
+        "bytes": 36480,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21864,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-monk-2.glb",
+      "file": "models/optimized/weapons/armory-monk-2.glb",
+      "sourceSha256": "51b3d0204934551430f9f10467f43c283b0ec97ba6aa62eca6bece08b9b1f5a9",
+      "sha256": "b51cb79fcbffac4318e8d377b99938e28cf6690362f8aa4e28c1b2bd0fd6b127",
+      "before": {
+        "bytes": 36484,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21832,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-monk-3.glb",
+      "file": "models/optimized/weapons/armory-monk-3.glb",
+      "sourceSha256": "e4aadc94afe8cad3d90a8542c409bb756029c1fcd710c28a0a673bad114b88e5",
+      "sha256": "7ab85826ae919669afb1e47cc3b94141af179742fcf0ee71a4288341938d58e0",
+      "before": {
+        "bytes": 36492,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21852,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-monk-4.glb",
+      "file": "models/optimized/weapons/armory-monk-4.glb",
+      "sourceSha256": "bcdfb097c041715aabdb1acd6b8aeeb97f4e9f872dc9b6cd5935e738351334a4",
+      "sha256": "254f25cb877a6074aef0429e3ba9ca17f799990cf7cad99b2cb2cf609619b893",
+      "before": {
+        "bytes": 36468,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21848,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-necromancer-0.glb",
+      "file": "models/optimized/weapons/armory-necromancer-0.glb",
+      "sourceSha256": "0bb29ccfa3b9073779c2c01f9dc38cee4dd5102b271c8f567b35083dac1e5a76",
+      "sha256": "73a72239b5c1a6e69c38717e60731f9114f986f5f4f03a275efeabb21c2cfe0a",
+      "before": {
+        "bytes": 68280,
+        "triangles": 1310,
+        "vertices": 2369,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32356,
+        "triangles": 1222,
+        "vertices": 2322,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-necromancer-1.glb",
+      "file": "models/optimized/weapons/armory-necromancer-1.glb",
+      "sourceSha256": "37c126232a82283325fff5a527a042895783d8dfb8fd59894656471e73c498f5",
+      "sha256": "652a4550b61031e5a2cfb1c4b750cc28df515787ed57774552903e80d0678a62",
+      "before": {
+        "bytes": 68420,
+        "triangles": 1310,
+        "vertices": 2369,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32512,
+        "triangles": 1222,
+        "vertices": 2320,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-necromancer-2.glb",
+      "file": "models/optimized/weapons/armory-necromancer-2.glb",
+      "sourceSha256": "ee3d4cfa95f793f5e6c19e030401f3334527a768d209817507b4a86a945d33a9",
+      "sha256": "c26c6059baa6839ae05fd85b21ffa77e4443772ccbedb639c7290a887a635d8a",
+      "before": {
+        "bytes": 68428,
+        "triangles": 1310,
+        "vertices": 2369,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32544,
+        "triangles": 1222,
+        "vertices": 2319,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-necromancer-3.glb",
+      "file": "models/optimized/weapons/armory-necromancer-3.glb",
+      "sourceSha256": "13bab76a273428c83f33ff7e3f7881255483b9b55703bfc16de4731748d191d4",
+      "sha256": "7ae86c357dfe6d8a555c75ec7a50785f9092852061ee5b73e2446cce3147e0e7",
+      "before": {
+        "bytes": 68420,
+        "triangles": 1310,
+        "vertices": 2369,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32600,
+        "triangles": 1222,
+        "vertices": 2319,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-necromancer-4.glb",
+      "file": "models/optimized/weapons/armory-necromancer-4.glb",
+      "sourceSha256": "ac7b2776682bd0f3e1b4b61bdea8fe0c668eb86616dd5387ef0733a114aa44d4",
+      "sha256": "19a03ca8bef25df495e11ed45db0b91216bb17de80b3184b9718814e99ac805b",
+      "before": {
+        "bytes": 68420,
+        "triangles": 1310,
+        "vertices": 2369,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32596,
+        "triangles": 1222,
+        "vertices": 2319,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-paladin-0.glb",
+      "file": "models/optimized/weapons/armory-paladin-0.glb",
+      "sourceSha256": "8f6be44663c5068fa7b96c77bb489dd92840259dde6c184b2cea87e0ff6f7ba4",
+      "sha256": "2ae7947dc5dcebb3e14b56dcc6bb317094e6702de06e515ed20ab4387b9fd182",
+      "before": {
+        "bytes": 42288,
+        "triangles": 872,
+        "vertices": 1363,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 21256,
+        "triangles": 742,
+        "vertices": 1283,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-paladin-1.glb",
+      "file": "models/optimized/weapons/armory-paladin-1.glb",
+      "sourceSha256": "ace27210091717d5ea687946f51d9d75cf5078858dcb362ce1acaf0a05b6e5b5",
+      "sha256": "0365b64e135a68580215a37469093dec23a8c4eb2808414240ab1e151b175d0c",
+      "before": {
+        "bytes": 44408,
+        "triangles": 942,
+        "vertices": 1433,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 22364,
+        "triangles": 800,
+        "vertices": 1351,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-paladin-2.glb",
+      "file": "models/optimized/weapons/armory-paladin-2.glb",
+      "sourceSha256": "6a16c7da27d779e9e8447c65d0bf9fa99bf26e6dc8926ca0a51ab7d911413b28",
+      "sha256": "1b402a90b71b354c189c943b302cf039c42dee7416d6d3682e9199dedc6b4ee3",
+      "before": {
+        "bytes": 47268,
+        "triangles": 1006,
+        "vertices": 1536,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 22500,
+        "triangles": 830,
+        "vertices": 1430,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-paladin-3.glb",
+      "file": "models/optimized/weapons/armory-paladin-3.glb",
+      "sourceSha256": "17ce43897fe2bbe0cdc22ecf0abfc3a9d213bb2893b626675fa116326512547a",
+      "sha256": "163eac6fa2cc059b1f6468a6e3b21c83ef6e42eb67f24e4bd994b83e0a317f95",
+      "before": {
+        "bytes": 20156,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 8304,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-paladin-4.glb",
+      "file": "models/optimized/weapons/armory-paladin-4.glb",
+      "sourceSha256": "a2c25155fc61180d13c02b14fcd685e7ffe6e592b91cb60f7a93e5183d1ecfce",
+      "sha256": "844c4fbe34e49e867ffffdde8c189dbf3edf4a3026cfc9edec7d39c76a2e0e86",
+      "before": {
+        "bytes": 15068,
+        "triangles": 48,
+        "vertices": 92,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 10828,
+        "triangles": 48,
+        "vertices": 90,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-ranger-0.glb",
+      "file": "models/optimized/weapons/armory-ranger-0.glb",
+      "sourceSha256": "96eaee4f2db382fde156388e7899f30416c95d70615d25f9a1e96db376565a38",
+      "sha256": "e0893f441395b33f0dea7da10520bd069afcaff0c432f65d921d9122dd16ba2c",
+      "before": {
+        "bytes": 40444,
+        "triangles": 728,
+        "vertices": 1388,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 19956,
+        "triangles": 696,
+        "vertices": 1358,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-ranger-1.glb",
+      "file": "models/optimized/weapons/armory-ranger-1.glb",
+      "sourceSha256": "724dfe5c70b10600a09f470e6417a0ffd6c09bef5c8df94e9c1b42c2b54394e4",
+      "sha256": "069a0212b0353ba13e6366009d2c8565d4e487b1c4355949ebb0b1101f51c782",
+      "before": {
+        "bytes": 36032,
+        "triangles": 664,
+        "vertices": 1220,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 17708,
+        "triangles": 598,
+        "vertices": 1156,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-ranger-2.glb",
+      "file": "models/optimized/weapons/armory-ranger-2.glb",
+      "sourceSha256": "48becc7355a27dab08d4942539f43e74ab882bed40bee6691370a1e2f9b46660",
+      "sha256": "d7b745e07282756b82def2821f5abffa62bab5c09f918de43cdf4c619e720c7c",
+      "before": {
+        "bytes": 43464,
+        "triangles": 776,
+        "vertices": 1502,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 21524,
+        "triangles": 762,
+        "vertices": 1488,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-ranger-3.glb",
+      "file": "models/optimized/weapons/armory-ranger-3.glb",
+      "sourceSha256": "ecdb00ef12b250b24a8f5471462c0f773e94ffe1dcdf23df1ff9d3198b7034f4",
+      "sha256": "184adab74c123388dac14d009522cbd8d32a008bd4aa451d6b54f3f4d31fb668",
+      "before": {
+        "bytes": 42812,
+        "triangles": 772,
+        "vertices": 1476,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 20940,
+        "triangles": 738,
+        "vertices": 1444,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/armory-ranger-4.glb",
+      "file": "models/optimized/weapons/armory-ranger-4.glb",
+      "sourceSha256": "093e834c1edf85b4e2d2ee18490e21230088ba98022dad18a799b66ee8bea689",
+      "sha256": "8c868de64d0cb06a03ad260cccd448061b52c01333076281d6c12644ce6ea50c",
+      "before": {
+        "bytes": 8508,
+        "triangles": 80,
+        "vertices": 136,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 7344,
+        "triangles": 80,
+        "vertices": 122,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-warlock-0.glb",
+      "file": "models/optimized/weapons/armory-warlock-0.glb",
+      "sourceSha256": "23026f7323bf2a52567df15f345a7531da5b4da2ff0fc34a33bdabc38b04ab34",
+      "sha256": "c3ffc75d7325d25254ffa2da63d4de8f28414ffccc4002ce96daba5b5a2dc696",
+      "before": {
+        "bytes": 23844,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15616,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-warlock-1.glb",
+      "file": "models/optimized/weapons/armory-warlock-1.glb",
+      "sourceSha256": "691c6d47c12b5cc597485fa74b8d3c3e56da58f82fef2803b26e203b2903b009",
+      "sha256": "035b52b9e8d3097ff097f44f63db4023f34ddfc274558ce33ab97fca0f529c6c",
+      "before": {
+        "bytes": 36500,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21856,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-warlock-2.glb",
+      "file": "models/optimized/weapons/armory-warlock-2.glb",
+      "sourceSha256": "98935db7bd5eb6aa04b0d9a674006e1738ad7bd3d3fc839d05969d459ee9adf9",
+      "sha256": "3728f231e61f231d4bad449830faee8d3088021f9f6c65f351a2c2c83e359591",
+      "before": {
+        "bytes": 23876,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15644,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-warlock-3.glb",
+      "file": "models/optimized/weapons/armory-warlock-3.glb",
+      "sourceSha256": "6d0b256160902444922bd26c791c8380041b193e5c5623b75eeaaafb443c0aa1",
+      "sha256": "a776a8f6eb281dc6992496bc8129e9a0ddf8c38753d486570e3cef89856fa7cb",
+      "before": {
+        "bytes": 36496,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 21860,
+        "triangles": 440,
+        "vertices": 498,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/armory-warlock-4.glb",
+      "file": "models/optimized/weapons/armory-warlock-4.glb",
+      "sourceSha256": "9efe1267218ddf6efe45cf1a7bd7470d94bfc69295bb86ae8b805741c53fe979",
+      "sha256": "8c655296d3eab35a2192e9dfb848a89c0acdfc61589d7aa4f855fa8e2cac8dcf",
+      "before": {
+        "bytes": 23852,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              1024,
+              1024
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 15604,
+        "triangles": 150,
+        "vertices": 158,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/gladiator-blade.glb",
+      "file": "models/optimized/weapons/gladiator-blade.glb",
+      "sourceSha256": "bd3851eefa3ec7c1be666fedc06ed112a306eedfdf2a887901a83006528b62b5",
+      "sha256": "fc49c86cc78477b454332b231e9443f84d1261a5c853b7945b653cf23ff14bd0",
+      "before": {
+        "bytes": 20360,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      },
+      "after": {
+        "bytes": 8604,
+        "triangles": 80,
+        "vertices": 150,
+        "clips": [],
+        "skins": 0,
+        "textures": [
+          {
+            "mime": "image/webp",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "original": "models/weapons/paladin-shield-0.glb",
+      "file": "models/optimized/weapons/paladin-shield-0.glb",
+      "sourceSha256": "5d81c416d87c21ae033b2c6b30c558a4de0c720ca1c3b234ac704b728be271ba",
+      "sha256": "b56c5c8552149e1a83e567c1795ff4a52019f42759fd4aa70d3ff701401727ea",
+      "before": {
+        "bytes": 54040,
+        "triangles": 1056,
+        "vertices": 1842,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 23392,
+        "triangles": 972,
+        "vertices": 1758,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/paladin-shield-1.glb",
+      "file": "models/optimized/weapons/paladin-shield-1.glb",
+      "sourceSha256": "1732100b12539f249a1556c9568d506ddf66d3a5d536717e8b57b30f1471afab",
+      "sha256": "ae91c50feb7fa7275b7a340f157bcc4971db12f0620a8d51121d6a58facbfb72",
+      "before": {
+        "bytes": 61776,
+        "triangles": 1204,
+        "vertices": 2094,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 27304,
+        "triangles": 1100,
+        "vertices": 1990,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/paladin-shield-2.glb",
+      "file": "models/optimized/weapons/paladin-shield-2.glb",
+      "sourceSha256": "4a2c85647070cd09d564a9f9b15880ad4b14bc8bdfdc7561075249438ac25907",
+      "sha256": "fa4e00bfa1be429a8fda91753589c0e2b08e1e54adb9a17dcd0795f4dd4a5007",
+      "before": {
+        "bytes": 94332,
+        "triangles": 1968,
+        "vertices": 3290,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 32628,
+        "triangles": 1736,
+        "vertices": 2862,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/paladin-shield-3.glb",
+      "file": "models/optimized/weapons/paladin-shield-3.glb",
+      "sourceSha256": "6bfc0bb581e960f7bc8177955306ff573c184bc7327e6c123127427c8083887e",
+      "sha256": "fab9c8982797341dc66928dee280afbf804ffd06c4e43e8ae70c5e83881e0e4e",
+      "before": {
+        "bytes": 64360,
+        "triangles": 1292,
+        "vertices": 2210,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 24868,
+        "triangles": 1264,
+        "vertices": 1902,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    },
+    {
+      "original": "models/weapons/paladin-shield-4.glb",
+      "file": "models/optimized/weapons/paladin-shield-4.glb",
+      "sourceSha256": "2472ab122072d4fe9f1471daa426ffa6b7ef39d3d2c07ead0f106549674aea9c",
+      "sha256": "c5a4c41f82344e9787bea8b279b0b2186ea5474f200def2a39a089846c138fca",
+      "before": {
+        "bytes": 43404,
+        "triangles": 832,
+        "vertices": 1452,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      },
+      "after": {
+        "bytes": 20992,
+        "triangles": 732,
+        "vertices": 1360,
+        "clips": [],
+        "skins": 0,
+        "textures": []
+      }
+    }
+  ]
+}

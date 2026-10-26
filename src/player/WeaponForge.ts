@@ -34,11 +34,12 @@ export class WeaponForge {
     this.glow.emissiveIntensity = 2.7;
     this.right.name = `${definition.weapon}-right-grip`;
     this.left.name = `${definition.weapon}-left-grip`;
-    this.build();this.right.add(this.variant);
+    if(typeof document==='undefined')this.build();this.right.add(this.variant);
   }
 
   skin(id:string):void {
     if(this.skinId===id)return;this.skinId=id;this.variant.traverse(o=>{if(o instanceof Mesh)o.geometry.dispose();});this.variant.clear();
+    if(typeof document!=='undefined')return;
     const tier=Math.max(0,['ironweapon','forestweapon','frostweapon','voidweapon','sunweapon','eternalweapon'].indexOf(id));
     for(let i=0;i<tier;i++)for(const side of [-1,1]){
       const curve=new CatmullRomCurve3([new Vector3(side*.04,.2+i*.12,0),new Vector3(side*(.15+i*.015),.3+i*.12,.015),new Vector3(side*.07,.48+i*.12,0)]);

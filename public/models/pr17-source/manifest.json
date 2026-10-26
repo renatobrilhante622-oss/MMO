@@ -1,0 +1,50 @@
+{
+  "license": "CC0-1.0",
+  "sourceLicense": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/LICENSE",
+  "assets": [
+    {
+      "id": "ImperialHorse",
+      "file": "models/pr17-source/ImperialHorse.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimateanimatedanimals/models/horse/horse.glb",
+      "license": "CC0-1.0",
+      "sha256": "c28783e739a97411fe597d0de8ef1d1260c622f39aea4f0912132d83a9d5aee5",
+      "animationClips": [
+        "Attack_Headbutt",
+        "Attack_Kick",
+        "Death",
+        "Eating",
+        "Gallop",
+        "Gallop_Jump",
+        "Idle",
+        "Idle_2",
+        "Idle_Headlow",
+        "Idle_HitReact1",
+        "Idle_HitReact2",
+        "Jump_toIdle",
+        "Walk"
+      ]
+    },
+    {
+      "id": "ImperialHorseWhite",
+      "file": "models/pr17-source/ImperialHorseWhite.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-ultimateanimatedanimals/models/horse_white/horse_white.glb",
+      "license": "CC0-1.0",
+      "sha256": "d20750f7e178fe1ad0b33c55a5078050326d3a7d714fd19157dbc380a79940f4",
+      "animationClips": [
+        "Attack_Headbutt",
+        "Attack_Kick",
+        "Death",
+        "Eating",
+        "Gallop",
+        "Gallop_Jump",
+        "Idle",
+        "Idle_2",
+        "Idle_Headlow",
+        "Idle_HitReact1",
+        "Idle_HitReact2",
+        "Jump_toIdle",
+        "Walk"
+      ]
+    }
+  ]
+}

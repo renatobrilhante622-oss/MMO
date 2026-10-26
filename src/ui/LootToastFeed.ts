@@ -30,17 +30,18 @@ export class LootToastFeed {
   private readonly list=document.createElement('div');
   private readonly button=document.createElement('button');
   private readonly timers=new Set<ReturnType<typeof setTimeout>>();
-  private collapsed=false;
+  private collapsed=true;
 
   constructor(container:HTMLElement) {
-    this.root.className='journey-widgets drop-toast-widget';
+    this.root.className='journey-widgets drop-toast-widget is-collapsed';
+    this.list.hidden=true;
     this.root.setAttribute('aria-label','Últimas recompensas coletadas');
     this.root.hidden=true;
     this.button.type='button';
     this.button.className='drop-toast-toggle';
     this.button.innerHTML=menuIcon('rewards')+'<b>DROPS</b><span class="drop-toggle-chevron" aria-hidden="true">'+menuIcon('chevron')+'</span>';
-    this.button.setAttribute('aria-expanded','true');
-    this.button.setAttribute('aria-label','Recolher histórico rápido de drops');
+    this.button.setAttribute('aria-expanded','false');
+    this.button.setAttribute('aria-label','Expandir histórico rápido de drops');
     this.list.className='drop-toast-list';
     this.list.setAttribute('aria-live','polite');
     this.list.setAttribute('aria-relevant','additions');
