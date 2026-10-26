@@ -1,0 +1,29 @@
+{
+  "viewport": "844x390",
+  "loaded": {
+    "map": "arena",
+    "oldDetached": true,
+    "oldBodiesRemoved": true,
+    "fighters": 6,
+    "botCount": 5,
+    "rendererCount": 1,
+    "heroBodyRetained": true,
+    "architecture": true
+  },
+  "controls": {
+    "before": 0,
+    "after": 1.509112350693337,
+    "cooldown": 4.533333333333335
+  },
+  "return": {
+    "map": "aurora",
+    "exact": true,
+    "ore": 13,
+    "stats": true,
+    "arenaDetached": true,
+    "savedMap": "aurora",
+    "overlayHidden": true
+  },
+  "errors": [],
+  "note": "Local AI simulation, manual renderer frame; no device FPS claim."
+}

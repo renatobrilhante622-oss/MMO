@@ -1,9 +1,11 @@
+import {PvPMatchmaking} from '../src/combat/PvPMatchmaking';
+import type {ClassId} from '../src/core/GameTypes';
 import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 export type Role='leader'|'officer'|'veteran'|'elite'|'member';
 export interface OnlineItem { id:string; name:string; rarity:number; }
 export interface Player {
   id:string; name:string; token:string; level:number; wins:number; losses:number; rating:number;
-  coins:number; items:OnlineItem[]; clan:string|null; classId?:string; bossAttackAt:number; rewardedWeek:string; clanMarks?:number;
+  coins:number; items:OnlineItem[]; clan:string|null; classId?:string; bossAttackAt:number; rewardedWeek:string; clanMarks?:number; practiceRating?:number; practiceHonor?:number;
 }
 interface Queue { id:string; size:1|2|3; since:number; }
 export interface Fighter { id:string; team:number; hp:number; maxHp:number; energy:number; guardUntil:number; nextAction:number;tactical?:boolean; }
@@ -21,9 +23,11 @@ export class GameService {
   readonly clans=new Map<string,Clan>();
   readonly listings=new Map<string,Listing>();
   readonly matches=new Map<string,Match>();
+  readonly pvp:PvPMatchmaking;
   private queue:Queue[]=[];
   private seen=new Map<string,number>();
   constructor(private readonly now:()=>number=Date.now,store?:Store){
+    this.pvp=new PvPMatchmaking(now,(id,r)=>{const p=this.player(id);if(r.ranked){p.rating=Math.max(100,p.rating+r.rating);p.coins+=r.honor;if(r.rating>0)p.wins++;else if(r.rating<0)p.losses++;p.level=1+Math.floor(p.wins/3);}else{p.practiceRating=Math.max(100,(p.practiceRating??1000)+r.rating);p.practiceHonor=(p.practiceHonor??0)+r.honor;}});
     if(store){for(const p of store.players??[])this.players.set(p.id,p);for(const c of store.clans??[])this.clans.set(c.id,c);for(const l of store.listings??[])this.listings.set(l.id,l);}
   }
   create(name:unknown,classId:unknown='berserker'):Player {
@@ -44,8 +48,12 @@ export class GameService {
   activeMatch(id:string):Match|undefined {return [...this.matches.values()].find(m=>!m.ended&&m.fighters.some(f=>f.id===id));}
   enqueue(p:Player,size:unknown):void {
     if(![1,2,3].includes(size as number))throw new GameError('Choose 1v1, 2v2 or 3v3.');
-    if(this.activeMatch(p.id))throw new GameError('Finish your current match.');
+    if(this.pvp.busy(p.id)||this.activeMatch(p.id))throw new GameError('Finish your current match.');
     this.queue=this.queue.filter(q=>q.id!==p.id);this.queue.push({id:p.id,size:size as 1|2|3,since:this.now()});this.pair();
+  }
+  enqueuePvP(p:Player,size:unknown):void {
+    if(this.activeMatch(p.id))throw new GameError('Finish your current match.');this.cancel(p);
+    try{this.pvp.enqueue({id:p.id,name:p.name,classId:(p.classId??'berserker') as ClassId,level:p.level,cp:500+p.level*35+p.items.reduce((n,i)=>n+i.rarity*25,0),rating:p.rating,bot:false},size);}catch(e){throw new GameError(e instanceof Error?e.message:'Queue unavailable.');}
   }
   cancel(p:Player):void {this.queue=this.queue.filter(q=>q.id!==p.id);}
   private pair():void {
@@ -82,7 +90,7 @@ export class GameService {
     m.log.push(`${p.name}: ${kind} → ${this.player(target.id).name} (${damage})`);m.log=m.log.slice(-30);this.finishMatch(m);
   }
   tick():void {
-    this.pair();
+    this.pvp.tick();this.pair();
     for(const m of this.matches.values()){
       this.finishMatch(m);if(m.ended)continue;
       for(const fighter of m.fighters){if(!fighter.tactical||fighter.hp<=0||fighter.nextAction>this.now())continue;
@@ -151,13 +159,14 @@ export class GameService {
     p.coins-=l.price;this.player(l.seller).coins+=Math.floor(l.price*.95);p.items.push(l.item);this.listings.delete(l.id);
   }
   cancelListing(p:Player,id:unknown):void {const l=this.listings.get(String(id));if(!l||l.seller!==p.id)throw new GameError('Listing not owned.');p.items.push(l.item);this.listings.delete(l.id);}
+  realtimeView(p:Player):unknown {const pvp=this.pvp.view(p.id),{token,...self}=p;return {self,pvp,serverTime:this.now()};}
   view(p:Player):unknown {
     this.pair();for(const m of this.matches.values())this.finishMatch(m);
     for(const [id,m]of this.matches)if(m.ended&&this.now()-m.ended>600000)this.matches.delete(id);
     const recent=[...this.matches.values()].reverse().find(m=>m.fighters.some(f=>f.id===p.id));
     const c=p.clan?this.clans.get(p.clan):null;if(c)this.resetWeek(c);
     const {token,...self}=p;
-    return {self,queue:this.queue.find(q=>q.id===p.id)??null,waiting:[1,2,3].map(size=>({size,count:this.queue.filter(q=>q.size===size).length})),
+    return {self,pvp:this.pvp.view(p.id),queue:this.queue.find(q=>q.id===p.id)??null,waiting:[1,2,3].map(size=>({size,count:this.queue.filter(q=>q.size===size).length})),
       match:recent?{...recent,fighters:recent.fighters.map(f=>({...f,name:this.player(f.id).name,classId:this.player(f.id).classId}))}:null,
       clans:[...this.clans.values()].map(c=>({id:c.id,name:c.name,count:Object.keys(c.members).length})),
       clan:c?{...c,members:Object.entries(c.members).map(([id,role])=>({id,name:this.player(id).name,level:this.player(id).level,role}))}:null,

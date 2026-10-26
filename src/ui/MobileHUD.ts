@@ -340,6 +340,7 @@ export class MobileHUD {
     zone.addEventListener('lostpointercapture', release, opts);
   }
 
+  closeMenus():void {this.setDrawerOpen(false);this.closePanel();this.clearInput();}
   resetInput():void {this.clearInput();}
   private clearInput(): void {
     this.keys.clear();

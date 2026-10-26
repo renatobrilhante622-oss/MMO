@@ -57,7 +57,7 @@ export class OpenWorldGenerator {
 
   constructor(private readonly scene: THREE.Scene, private readonly seed = 61857,
     readonly regionId = 'aurora',readonly dungeonId='tombs') {
-    this.terrainSize=regionId==='dungeon'?320:mapDefinition(regionId).size;
+    this.terrainSize=regionId==='arena'?64:regionId==='dungeon'?320:mapDefinition(regionId).size;
     this.waterLevel=regionId==='aurora'?1.2:regionId==='eclipse'?-200:-20;
     this.randomState = seed >>> 0;
     this.life = new WorldLife((x, z) => this.heightAt(x, z));
@@ -91,7 +91,7 @@ export class OpenWorldGenerator {
 
   private rawHeight(x: number, z: number): number {
     // Hidden, planar Cannon support under authored indoor GLB floor tiles.
-    if(this.regionId==='dungeon')return 3.4;
+    if(this.regionId==='dungeon'||this.regionId==='arena')return 3.4;
     return regionalHeight(this.regionId,x,z,(a,b)=>this.noise(a,b));
   }
 
@@ -112,9 +112,10 @@ export class OpenWorldGenerator {
     if (this.generated) return;
     this.generated = true;
     this.scene.add(this.root);
-    if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
+    if(this.regionId!=='arena'&&typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
     if(this.regionId==='aurora')for(const [x,z] of [[-18,28],[18,30],[-18,0],[18,0]])this.colliders.push({position:new THREE.Vector3(x,this.heightAt(x,z)+3.5,z),size:new THREE.Vector3(11,7,11),type:'solid'});
+    if(this.regionId==='arena'){const ground=this.root.getObjectByName('Triangulated terrain');if(ground)ground.visible=false;return;}
     this.surface=new BiomeSurface(this.regionId,this.terrainSize);this.root.add(this.surface.root);
     if(this.regionId!=='dungeon'){
       this.details=new GroundDetail((x,z)=>this.heightAt(x,z),this.regionId,this.seed);

@@ -27,6 +27,7 @@ export class Phase2UI{
    if(!button)return;
    const action=button.dataset.phase2!;
    if(action==='close'){this.close();return;}
+   if(action==='tab'&&button.dataset.tab==='arena'){this.close();this.game.openPvP();return;}
    if(action==='tab'){this.tab=button.dataset.tab as Tab;this.arenaFullscreen=false;this.lastResult='';this.render();return;}
    if(action==='arena-back'){this.arenaFullscreen=false;this.render();this.root.querySelector<HTMLElement>('[data-phase2=enter-arena],[data-phase2=challenge]')?.focus();return;}
    if(action==='enter-arena'){this.arenaFullscreen=true;this.render();this.root.querySelector<HTMLElement>('[data-phase2=arena-back]')?.focus();return;}
@@ -70,9 +71,11 @@ export class Phase2UI{
  get blocking():boolean{return this.visible;}
  get isArenaOpen():boolean{return this.visible&&this.tab==='arena';}
  open(tab:Tab='arena'):void{
+  if(this.game.arenaUI?.activeMap)return;
+  if(tab==='arena'){this.close();this.game.openPvP();return;}
   if(this.game.hub.blocking)this.game.hub.close();
   if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
-  this.tab=tab;this.arenaFullscreen=tab==='arena'&&!!this.game.phase2Arena.duel&&!this.game.phase2Arena.duel.ended;this.visible=true;this.root.hidden=false;this.render();
+  this.tab=tab;this.arenaFullscreen=false;this.visible=true;this.root.hidden=false;this.render();
   clearInterval(this.timer);this.timer=window.setInterval(()=>{if(this.visible&&this.tab==='arena')this.paintArena();},300);
  }
  close():void{this.visible=false;this.root.hidden=true;clearInterval(this.timer);this.timer=0;this.arenaView.hide();this.game.save();this.priorFocus?.focus();}

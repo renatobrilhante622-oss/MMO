@@ -1,3 +1,5 @@
+import {Vector3} from 'three';
+import {arenaObstacles} from '../combat/PvPTypes';
 import type {Scene} from 'three';
 import type {PhysicsWorld} from '../physics/PhysicsWorld';
 import {OpenWorldGenerator} from './OpenWorldGenerator';
@@ -15,12 +17,13 @@ export class SceneManager {
  selectDungeon(id:string):void{this.dungeonId=id;}
  unloadCurrentMap():void{this.physics.clearTerrain();this.world?.dispose();this.world=null;}
  activate(id:string):OpenWorldGenerator{
-  if(!REGIONS.some(r=>r.id===id)&&id!=='dungeon')throw Error('Unknown map: '+id);
+  if(!REGIONS.some(r=>r.id===id)&&id!=='dungeon'&&id!=='arena')throw Error('Unknown map: '+id);
   if(id===this.id&&this.world&&id!=='dungeon')return this.world;
   const previous=this.id;this.unloadCurrentMap();
   try{
    const next=this.factory(id,id==='dungeon'?91631:mapDefinition(id).seed,this.dungeonId);
    this.world=next;next.generate();if(id==='dungeon')next.colliders.push(...dungeonColliders((x,z)=>next.heightAt(x,z),this.dungeonId));
+   if(id==='arena')for(const o of arenaObstacles())next.colliders.push({position:new Vector3(o.x,5.2,o.z),size:new Vector3(o.radius*2,3.6,o.radius*2),type:'solid'});
    this.physics.switchTerrain(next);this.id=id;this.generation++;return next;
   }catch(error){
    this.world?.dispose();const restored=this.factory(previous,mapDefinition(previous).seed,this.dungeonId);this.world=restored;restored.generate();this.physics.switchTerrain(restored);this.id=previous;throw error;

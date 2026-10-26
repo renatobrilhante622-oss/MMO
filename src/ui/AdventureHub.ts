@@ -119,6 +119,8 @@ export class AdventureHub {
   private t(pt:string,en:string):string{return this.game.progress.language==='pt'?pt:en;}
   private label(value:readonly[string,string]):string{return value[this.game.progress.language==='pt'?0:1];}
   open(tab:Tab='talents'):void {
+    if(tab==='arena'){this.game.openPvP();return;}
+    if(this.game.arenaUI?.activeMap)return;
     if(tab==='base')tab='inventory';
     setScreenPhase(this.root.parentElement!,tab==='classes'?'class-selection':'modal');
     if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;

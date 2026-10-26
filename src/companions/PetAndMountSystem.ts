@@ -76,6 +76,8 @@ export class PetAndMountSystem {
     }
   }
 
+  dismount():void {this.hero.mounted=false;this.mount.visible=false;this.syncRider();}
+
   toggleMount(): void {
     if (!this.hero.alive) return;
     if (!this.hero.mounted && ['climb', 'swim', 'dive', 'slide'].includes(this.hero.machine.state)) {
