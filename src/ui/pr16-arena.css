@@ -1,0 +1,72 @@
+/* The duel is a viewport scene, with interface anchored to the safe screen edges. */
+.pr15-overlay.is-arena-immersive{padding:0;backdrop-filter:none;background:#10121e;overflow:hidden}
+.pr15-overlay .pr16-arena-fullscreen{position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;overflow:hidden;border:0;border-radius:0;background:#10121e;isolation:isolate}
+.pr16-arena-background,.pr16-arena-stage,.pr16-arena-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;display:block;border-radius:0!important;background:transparent!important}
+.pr16-arena-background{z-index:0}
+.pr16-arena-fullscreen:after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,#040812d9,transparent 32%,transparent 65%,#030710b3),radial-gradient(ellipse at center,transparent 35%,#070a1644)}
+.pr16-arena-topbar{position:absolute;inset:max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) auto max(10px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.pr16-arena-topbar>div{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;text-align:center}
+.pr16-arena-topbar strong{font:15px Georgia,serif;letter-spacing:3px;color:#f1d8a3;text-shadow:0 2px 8px #000}
+.pr16-arena-topbar small{font-size:8px;letter-spacing:.5px;color:#bdb5b7}
+.pr15-overlay .pr16-arena-topbar>button{display:flex;align-items:center;justify-content:center;gap:5px;pointer-events:auto;min-height:36px;padding:5px 10px;background:#0c1624c9;border:1px solid #b39a685c;border-radius:5px;font-size:10px;font-weight:500;backdrop-filter:blur(7px)}
+.pr16-arena-topbar .menu-icon{width:17px;height:17px}
+.pr15-overlay .pr16-arena-vitals{position:absolute;top:max(63px,calc(env(safe-area-inset-top) + 59px));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));display:flex;justify-content:space-between;gap:60px;margin:0;pointer-events:none}
+.pr16-arena-vitals>div{width:min(35%,350px);padding:8px 10px;border:1px solid #cbb17b66;border-radius:5px;background:linear-gradient(100deg,#132336db,#0b1321b3);box-shadow:0 3px 15px #0005}
+.pr16-arena-vitals>div:last-child{text-align:right;border-color:#c68c8866;background:linear-gradient(260deg,#321d2cdb,#0b1321b3)}
+.pr16-arena-vitals strong{display:block;color:#e5d5af;font:12px Georgia,serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px}
+.pr15-overlay .pr16-arena-vitals progress{display:block;width:100%;height:8px;margin:0 0 3px;accent-color:#7cc7c4;background:#08101a;border:0;border-radius:2px;overflow:hidden}
+.pr16-arena-vitals progress::-webkit-progress-bar{background:#08101a}
+.pr16-arena-vitals progress::-webkit-progress-value{background:linear-gradient(90deg,#2e6e78,#86d4c5);transition:width .2s}
+.pr16-arena-vitals>div:last-child progress::-webkit-progress-value{background:linear-gradient(90deg,#792f4c,#e18b84)}
+.pr16-arena-vitals small{font-size:8px;font-weight:400;color:#c0c1c6}
+.pr15-overlay .pr16-duel-controls{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:stretch;width:min(530px,calc(100% - 24px));gap:7px;padding:8px;border:1px solid #bda2704d;border-radius:8px;background:linear-gradient(135deg,#132237cf,#080d18dc);box-shadow:0 7px 30px #0006;backdrop-filter:blur(8px)}
+.pr16-duel-skills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.pr16-duel-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.pr15-overlay .pr16-duel-controls button{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-height:39px;min-width:0;margin:0;padding:5px 6px;border-radius:5px;border:1px solid #bba06c66;background:linear-gradient(135deg,#473b32,#182738);font-size:9px;font-weight:500;overflow:hidden}
+.pr16-duel-controls button .menu-icon{width:21px;height:21px;flex:0 0 21px;color:#ddc691}
+.pr16-duel-controls button>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.pr16-duel-controls button>small{position:absolute;inset:0;display:grid;place-items:center;font:700 14px system-ui;color:#fff1c9;pointer-events:none;background:#07101bc9}
+.pr16-duel-controls button>small:empty{display:none}
+.pr15-overlay .pr16-duel-actions [data-cmd=strike]{background:linear-gradient(135deg,#94733c,#5c3e26);border-color:#e1bc74}
+.pr15-overlay .pr16-duel-log{position:absolute;left:max(15px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;width:min(240px,calc(100vw - 590px));max-height:76px;overflow:hidden;list-style:none;padding:7px 9px;margin:0;border-left:1px solid #d5b87966;background:linear-gradient(90deg,#09121eb3,transparent);pointer-events:none;box-sizing:border-box}
+.pr16-duel-log li{font-size:9px;line-height:1.4;color:#c1c1be;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr16-arena-feedback{position:absolute;left:50%;top:128px;transform:translateX(-50%);margin:0!important;font-size:9px!important;line-height:1.3!important;color:#d4c49e!important;pointer-events:none;text-shadow:0 2px 5px #000;white-space:nowrap}
+.pr16-arena-result{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(360px,76vw);text-align:center;padding:22px 24px;border:1px solid #d1ae69c9;border-radius:8px;background:radial-gradient(ellipse at top,#665131b8,#111c2bed 75%);box-shadow:0 0 80px #0008,inset 0 0 0 4px #141c2b}
+.pr16-arena-result>span>.menu-icon{width:55px;height:55px;color:#f0cf8e;filter:drop-shadow(0 0 15px #d9b35d66)}
+.pr15-overlay .pr16-arena-result h3{font:28px Georgia,serif;letter-spacing:6px;color:#f0d4a1;margin:9px 0}
+.pr16-arena-result p{font-size:10px;color:#c6bba7;margin:6px 0 16px}
+.pr15-overlay .pr16-arena-result button{display:inline-flex;align-items:center;gap:7px;font-size:10px;border-radius:5px}
+.pr16-arena-result button .menu-icon{width:17px;height:17px}
+.pr15-overlay .pr16-resume-arena{display:inline-flex;align-items:center;gap:8px;margin:8px 0 0;border-color:#e0bf78;background:linear-gradient(130deg,#6f5630,#1d2c3c)}
+.pr15-overlay .pr15-heading h2{display:flex;align-items:center;gap:10px}
+.pr15-heading h2>.menu-icon{width:29px;height:29px}
+.pr15-overlay .pr15-tabs>button,.pr15-shell>header>button{display:flex;align-items:center;justify-content:center;gap:6px}
+.pr15-tabs>button>.menu-icon{width:20px;height:20px;flex:0 0 20px}.pr15-shell>header>button>.menu-icon{width:17px;height:17px}
+@media(max-width:700px){
+ .pr16-arena-topbar strong{font-size:12px;letter-spacing:1.4px}.pr16-arena-topbar small{font-size:7px}
+ .pr16-arena-vitals>div{width:44%;padding:7px 8px}.pr15-overlay .pr16-arena-vitals{gap:22px;left:10px;right:10px}
+ .pr16-arena-vitals strong{font-size:11px}
+ .pr15-overlay .pr16-duel-log{display:none}
+ .pr16-arena-feedback{top:130px;max-width:85%;white-space:normal;text-align:center}
+ .pr15-overlay .pr16-duel-controls{width:calc(100% - 16px);right:8px;bottom:max(8px,env(safe-area-inset-bottom));padding:6px;gap:5px}
+ .pr15-overlay .pr16-duel-controls button{flex-direction:column;gap:3px;min-height:50px;padding:4px 2px;font-size:7px}
+ .pr16-duel-controls button .menu-icon{width:21px;height:21px;flex-basis:21px}
+ .pr16-arena-topbar>button>span{font-size:8px}
+}
+@media(max-height:480px) and (min-width:701px){
+ .pr16-arena-topbar strong{font-size:12px;letter-spacing:2px}.pr16-arena-topbar small{font-size:7px}
+ .pr15-overlay .pr16-arena-topbar>button{min-height:29px;padding:4px 7px}
+ .pr15-overlay .pr16-arena-vitals{top:48px}.pr16-arena-vitals>div{padding:5px 8px}.pr16-arena-vitals strong{font-size:11px;margin-bottom:4px}
+ .pr16-arena-feedback{top:103px;font-size:8px!important}
+ .pr15-overlay .pr16-duel-controls{width:min(500px,calc(100% - 24px));gap:4px;padding:6px}
+ .pr15-overlay .pr16-duel-controls button{min-height:31px;font-size:8px}
+ .pr16-duel-controls button .menu-icon{width:18px;height:18px;flex-basis:18px}
+ .pr15-overlay .pr16-duel-log{width:calc(100vw - 555px);max-height:62px}
+ .pr16-arena-result{padding:10px 18px;top:44%;width:300px}.pr16-arena-result>span>.menu-icon{width:35px;height:35px}.pr15-overlay .pr16-arena-result h3{font-size:22px;margin:3px 0}.pr16-arena-result p{margin:4px 0 9px}
+}
+
+.pr16-arena-topbar,.pr16-arena-vitals,.pr16-duel-controls,.pr16-duel-log,.pr16-arena-feedback{z-index:2}.pr16-arena-result{z-index:3}
+
+.pr15-overlay [data-phase2=challenge]{display:inline-flex;align-items:center;justify-content:center;gap:7px}.pr15-overlay [data-phase2=challenge]>.menu-icon,.pr15-overlay .pr16-resume-arena>.menu-icon{width:19px;height:19px;flex:0 0 19px}
+
+.pr15-content h2{display:flex;align-items:center;gap:9px}.pr15-content h2>.menu-icon{width:27px;height:27px;flex:0 0 27px}.pr15-content h3>.menu-icon{width:20px;height:20px;vertical-align:middle}.pr15-overlay [data-phase2]> .menu-icon{width:19px;height:19px;flex-shrink:0}.pr15-content [data-phase2]{display:inline-flex;align-items:center;justify-content:center;gap:6px}

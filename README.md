@@ -200,3 +200,13 @@ O Mercador usa cartas ilustradas de suprimentos/joias; o Santuário usa banners 
 O ícone oficial em `public/assets/icon.png` (1024×1024) retrata um mago monstruoso de capuz texturizado e olhos verdes, com partículas/runa. Os mipmaps Android, ícones adaptativos, favicon e referência do splash nativo usam a mesma identidade. `scripts/generate-app-icon.cjs` permite regenerar os recursos usando Sharp, sem compilar Android. Nenhum APK foi gerado ou atualizado no ambiente para esta entrega.
 
 A Coleção apresenta um pedestal 3D gravado, iluminação em foco e partículas ascendentes em um único draw call. Cartas Épicas, Lendárias e Míticas recebem brilho animado respeitando movimento reduzido. A Forja centraliza o item, o próximo refino, a bigorna e os encaixes. A fortaleza do clã usa pedra texturizada, tochas e névoa; os três módulos mostram membros, vida/recarga do chefe e bônus conforme o estado real do servidor.
+
+## PR16 — acabamento visual e Coliseu em tela cheia
+
+Os menus compartilham materiais de vidro fumê, gradientes profundos, contornos metálicos chanfrados e ícones SVG próprios em `MenuIcons.ts`. A gaveta da HUD calcula o espaço disponível acima/abaixo do botão e mantém rolagem interna para continuar recolhível em paisagem e em layouts personalizados.
+
+Ao selecionar **Duelar**, a Arena local passa a ocupar o viewport completo. `ArenaScene` também apresenta os jogadores das partidas online com o mesmo cenário CC0, câmera ajustada à proporção da tela, colunas, tochas e controles nas bordas. Os adaptadores continuam lendo `ArenaSystem` e os snapshots do servidor; combate, economia, atributos e recompensas mantêm suas regras. O duelo contra IA continua identificado como local.
+
+Os nove fundos de Masmorras/Portais/Mapa são renders de 1280×640 dos GLBs Kenney e texturas ambientCG já distribuídos no jogo. Estão em `public/assets/landscapes/`, com fontes, hashes e licença CC0 no manifesto. `scripts/render-landscape-art.py` reproduz a captura usando Three.js e Chromium. O detalhe de chão usa plantas e pedras GLB instanciadas, com proveniência em `public/models/ground-cover/manifest.json`; os materiais preservam os mapas/cores originais e corrigem superfícies orgânicas indevidamente metálicas ou sem albedo.
+
+As câmeras de apresentação usam ACES, sombras PCF e bloom em HDR antes do OutputPass. A Arena reprojeta os UVs dos pisos GLB para os mapas PBR reais, evitando que UVs de paleta amostrem um único pixel e produzam um chão liso. A qualidade leve do mundo continua disponível.

@@ -2,6 +2,7 @@ import {
   Box3,DoubleSide,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3
 } from 'three';
 import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {organicMaterial} from './FoliageAppearance';
 
 export type SceneAsset='tree-oak'|'tree-cone'|'tree-default-dark'|'tree-detailed'
  |'rock-largea'|'rock-talla'|'cliff-rock'
@@ -93,8 +94,9 @@ export class EnvironmentGLB {
         const sources=Array.isArray(object.material)?object.material:[object.material];
         const visual=sources.map(source=>{
           if(!(source instanceof MeshStandardMaterial))return source;
-          const material=source.clone();
           const vegetation=entry.file.includes('tree-')||entry.file.includes('bush');
+          const surfaceName=(source.name+' '+object.name).toLowerCase();
+          const material=organicMaterial(source,vegetation?(/bark|wood|trunk|branch|stem/.test(surfaceName)?'bark':'foliage'):'stone',object.geometry.hasAttribute('color'));
           material.side=DoubleSide;
           if(vegetation){
             // Real PBR foliage is never metallic, even on low-end Android GPUs.
@@ -104,7 +106,7 @@ export class EnvironmentGLB {
             // material slots. Never wash out authored vertex colors or textures.
             const label=(source.name+' '+object.name).toLowerCase();
             const bark=/bark|wood|trunk|branch|stem/.test(label);
-            const foliage=/leaf|foliage|canopy|crown|green/.test(label);
+            const foliage=/leaf|foliage|canopy|crown|green|defaultmat/.test(label);
             if(!source.map&&!object.geometry.hasAttribute('color')){
               if(bark)material.color.set('#5c3a21');
               else if(foliage)material.color.set(index%2?'#3b8046':'#2d6a3e');

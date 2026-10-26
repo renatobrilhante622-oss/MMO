@@ -1,0 +1,179 @@
+/* Eterna UI: shared material, type and interaction tokens. Layout belongs to each screen. */
+:root{
+  --eterna-ui-ink:#e9e3d6;
+  --eterna-ui-muted:#a9b8bd;
+  --eterna-ui-gold:#dfc28a;
+  --eterna-ui-bronze:#957348;
+  --eterna-ui-line:#c4a66b66;
+  --eterna-ui-glass:linear-gradient(132deg,#18303bd9 0%,#0b1628e8 48%,#1b1730e6 100%);
+  --eterna-ui-inset:inset 0 1px #f8dba326,inset 0 -1px #03050bc7,inset 0 0 35px #02081338;
+  --eterna-ui-focus:#a8e8e8;
+  --eterna-ui-cut:9px;
+}
+.menu-icon{display:inline-block;flex:0 0 auto;width:1.35em;height:1.35em;vertical-align:middle;overflow:visible;color:inherit;pointer-events:none;filter:drop-shadow(0 1px 1px #0008)}
+/* Inline emblems have one consistent visual weight, including fonts without emoji support. */
+.nav-symbol>.menu-icon{display:block;width:19px;height:19px;margin:auto}
+.pr15-tabs button{display:flex;align-items:center;justify-content:center;gap:7px}
+.pr15-tabs button>.menu-icon{width:22px;height:22px;color:#d8bb83}
+.pr15-tabs button.selected>.menu-icon{color:#fff0bd;filter:drop-shadow(0 0 5px #d9ad5a55)}
+.pr15-skillrow button>.menu-icon{width:18px;height:18px}
+
+/* Broad smoked glass lets the current world remain perceptible beneath a menu. */
+.adventure-layer,.pr15-overlay,.expansion-modal,.region-travel-overlay,.eterna-dungeon-overlay{
+  color:var(--eterna-ui-ink);
+  background-color:#03091294;
+  backdrop-filter:blur(12px) saturate(.82);
+  -webkit-backdrop-filter:blur(12px) saturate(.82);
+}
+.adventure-layer .adventure-window,
+.pr15-overlay .pr15-shell,
+.expansion-modal .expansion-window,
+.region-travel-overlay .region-travel-dialog,
+.eterna-dungeon-overlay .eterna-dungeon-modal{
+  position:relative;
+  border:1px solid var(--eterna-ui-line);
+  border-radius:4px;
+  background:radial-gradient(ellipse at 4% 0%,#5084851f,transparent 48%),var(--eterna-ui-glass);
+  box-shadow:var(--eterna-ui-inset),0 18px 80px #000b,0 0 0 3px #090d16a6;
+  /* An inset metallic outline supplies a bevel without obscuring scrollbars or controls. */
+  outline:1px solid #ddbb7824;
+  outline-offset:-5px;
+  clip-path:polygon(var(--eterna-ui-cut) 0,calc(100% - var(--eterna-ui-cut)) 0,100% var(--eterna-ui-cut),100% calc(100% - var(--eterna-ui-cut)),calc(100% - var(--eterna-ui-cut)) 100%,var(--eterna-ui-cut) 100%,0 calc(100% - var(--eterna-ui-cut)),0 var(--eterna-ui-cut));
+}
+.adventure-layer .adventure-window:before,
+.pr15-overlay .pr15-shell:before,
+.region-travel-overlay .region-travel-dialog:before,
+.eterna-dungeon-overlay .eterna-dungeon-modal:before{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(135deg,var(--eterna-ui-gold) 0 1px,transparent 2px) top left/var(--eterna-ui-cut) var(--eterna-ui-cut) no-repeat,
+    linear-gradient(225deg,var(--eterna-ui-gold) 0 1px,transparent 2px) top right/var(--eterna-ui-cut) var(--eterna-ui-cut) no-repeat,
+    linear-gradient(45deg,var(--eterna-ui-gold) 0 1px,transparent 2px) bottom left/var(--eterna-ui-cut) var(--eterna-ui-cut) no-repeat,
+    linear-gradient(315deg,var(--eterna-ui-gold) 0 1px,transparent 2px) bottom right/var(--eterna-ui-cut) var(--eterna-ui-cut) no-repeat;
+}
+.adventure-layer .adventure-nav{
+  background:linear-gradient(90deg,#060e19cf,#0f1b2dc2);
+  border-right-color:#c7a46b40;
+}
+.adventure-layer .adventure-brand{color:#e8cca0;text-shadow:0 2px 9px #0007;letter-spacing:.17em}
+.adventure-layer .adventure-nav>small{color:#91a6ad;font-size:9px;letter-spacing:.14em}
+.adventure-layer .adventure-nav button{
+  border-radius:3px;color:#c5cccf;position:relative;isolation:isolate;
+  transition:background-color .18s,border-color .18s,color .18s;
+}
+.adventure-layer .adventure-nav button.selected{
+  background:linear-gradient(100deg,#a8853a38,#94764f0d);
+  color:#ffe5ae;border-color:#d9b87a88;box-shadow:inset 2px 0 #eccd8c,inset 0 1px #ead6ae12;
+}
+.adventure-layer .compact-menu-bar,
+.pr15-shell>header,
+.expansion-window>header,
+.region-travel-header,
+.eterna-dungeon-modal>header{
+  background:linear-gradient(100deg,#152636f0,#101627bf 65%,#282132c9);
+  border-bottom:1px solid #c8a76b4d;
+  box-shadow:0 2px 10px #03061044;
+}
+.adventure-layer .compact-menu-bar h1{color:#eadcc0;text-shadow:0 2px 3px #0008;letter-spacing:.015em}
+.adventure-layer .compact-wallet{color:#d9bf89;gap:10px}
+.adventure-layer .adventure-feedback:empty,.pr15-status:empty{min-height:0}
+.pr15-shell>header>strong{font-family:Georgia,serif;color:#ead6ac;font-weight:500;letter-spacing:.14em}
+
+/* The frame is restrained; rarity and earned states provide the brightest accents. */
+.adventure-layer .adventure-card,
+.adventure-layer .online-lobby-banner,
+.adventure-layer .guild-roster-plate,
+.adventure-layer .arena-fighter-plate,
+.pr15-overlay .pr15-card,
+.pr15-overlay .pr15-market-bar,
+.pr15-overlay .pr15-star,
+.expansion-modal .profile-hero,
+.expansion-modal .evolution-gallery>article{
+  border-color:#b49a644f;
+  border-radius:4px;
+  background:var(--panel-art,none),radial-gradient(ellipse at 0 0,#59828a17,transparent 65%),linear-gradient(140deg,#18303db8,#0b1424ce 60%,#211a31b8);
+  background-size:cover,auto,auto;
+  background-position:center;
+  box-shadow:inset 0 1px #f3dda81c,inset 0 -1px #01050a80,0 4px 12px #0003;
+}
+.adventure-layer .adventure-card.active,.pr15-overlay .pr15-card.active{
+  border-color:#dfc287;box-shadow:inset 0 1px #fff0b944,inset 0 0 24px #b88a2414,0 0 13px #cead571c;
+}
+.adventure-content h2,.adventure-content h3,.pr15-content h2,.pr15-content h3,.expansion-body h2,.expansion-body h3{
+  color:#ead8b4;text-shadow:0 2px 4px #0008;
+}
+.adventure-layer .adventure-content p,.pr15-overlay .pr15-content p{color:#aebfc8}
+.adventure-layer .shop-section-heading{border-bottom-color:#c9aa6e4d}
+.adventure-layer .shop-item-card{
+  border-radius:5px;border-color:color-mix(in srgb,var(--rarity) 42%,#64533e);
+  background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--rarity) 15%,transparent),transparent 66%),linear-gradient(145deg,#172d3ed9,#091322e6);
+  box-shadow:inset 0 1px #f4d9a025,inset 0 0 20px #0106113d,0 6px 16px #0003;
+}
+.adventure-layer .shop-card-art{background:radial-gradient(ellipse at 50% 75%,color-mix(in srgb,var(--rarity) 15%,transparent),transparent 69%)}
+.adventure-layer .paperdoll-panel{border-color:#c4a66b59;background:radial-gradient(ellipse at 50% 10%,#63507a21,transparent 65%),linear-gradient(130deg,#142b3ad1,#0b1324e0);box-shadow:inset 0 1px #eddaa321,inset 0 0 25px #0205114a}
+.adventure-layer .rpg-bag-panel{border-color:#bca16c59;background:linear-gradient(135deg,#1c3340b8,#0c192bd4);box-shadow:inset 0 1px #eddaa321}
+.adventure-layer .summon-showcase{
+  border-radius:5px;border-color:#c4a76c80;
+  background:radial-gradient(ellipse at 16% 42%,#8257b345,transparent 56%),linear-gradient(125deg,#182b3be0,#11142ce3);
+  box-shadow:inset 0 0 0 4px #11152577,inset 0 0 38px #04051273;
+}
+.adventure-layer .atlas-frame,.adventure-layer .map-teleport-bar,.adventure-layer .map-sheet{
+  border-color:#bc9e6266;border-radius:4px;
+  box-shadow:inset 0 1px #f8d88a22,0 5px 18px #0004;
+}
+.adventure-layer .map-teleport-bar{background:linear-gradient(140deg,#19283bd6,#0d1627db)}
+.adventure-layer .map-teleport-slot{background:linear-gradient(100deg,#3142524a,#18233457);border-color:#ad965c40;border-radius:3px}
+.adventure-layer .atlas-toolbar{color:#dfcca8}
+.adventure-layer .atlas-legend{color:#b8bec0}
+.adventure-layer .settings-form{padding:12px 15px;border:1px solid #b89d613b;background:linear-gradient(140deg,#1f344137,#0a122843);border-radius:4px}
+.adventure-layer .settings-form label{color:#c6d1d4}
+
+/* All input controls expose focus clearly and keep minimum touch heights from their layouts. */
+.adventure-layer button,.pr15-overlay button,.expansion-modal button,.region-travel-dialog button,.eterna-dungeon-modal button{
+  border-radius:4px;
+  border-color:#b99b626e;
+  background:linear-gradient(160deg,#44545f61,#15263cba 65%,#2b263cb3);
+  color:#e5d6b6;
+  box-shadow:inset 0 1px #f0d29a1c,inset 0 -1px #02071155;
+  text-shadow:0 1px 2px #0007;
+}
+.adventure-layer button:hover:not(:disabled),.pr15-overlay button:hover:not(:disabled),.expansion-modal button:hover:not(:disabled){
+  border-color:#e1c58a;background-color:#b88c2b19;color:#fff0cb;
+}
+.adventure-layer button:active:not(:disabled),.pr15-overlay button:active:not(:disabled){filter:brightness(1.12)}
+.adventure-layer button:focus-visible,.pr15-overlay button:focus-visible,.expansion-modal button:focus-visible,
+.adventure-layer input:focus-visible,.adventure-layer select:focus-visible,.pr15-overlay input:focus-visible,.pr15-overlay select:focus-visible{
+  outline:2px solid var(--eterna-ui-focus);outline-offset:2px;box-shadow:0 0 0 4px #62b5bd22;
+}
+.adventure-layer select,.adventure-layer input:not([type=range]),.pr15-overlay select,.pr15-overlay input{
+  color:#e4e5df;background:#071224a6;border-color:#a7915c59;border-radius:3px;
+}
+.adventure-layer input[type=range],.pr15-overlay input[type=range]{accent-color:#d4b781}
+.adventure-layer progress,.pr15-overlay progress{accent-color:#d0ad6e}
+.adventure-layer ::-webkit-scrollbar,.pr15-overlay ::-webkit-scrollbar,.expansion-modal ::-webkit-scrollbar{width:5px;height:5px}
+.adventure-layer ::-webkit-scrollbar-thumb,.pr15-overlay ::-webkit-scrollbar-thumb,.expansion-modal ::-webkit-scrollbar-thumb{background:#baa27466;border-radius:5px}
+.adventure-layer ::-webkit-scrollbar-track,.pr15-overlay ::-webkit-scrollbar-track,.expansion-modal ::-webkit-scrollbar-track{background:#070f193d}
+
+/* The main HUD remains at the edges, with the same editable control footprints. */
+.eterna-hud .hero-card{border-color:#b39a6252;background:linear-gradient(115deg,#182a36b5,#0712228f);box-shadow:inset 0 1px #dec78b17,0 3px 15px #0002}
+.eterna-hud .map-card{border-color:#c5a86b70;background:#0c1b2ac7;box-shadow:inset 0 1px #ffe3a825,0 4px 16px #0004}
+.eterna-hud .menu-dock{border-color:#d2b16b70;border-radius:5px;background:linear-gradient(145deg,#233d4bd9,#101829e8);box-shadow:inset 0 1px #eed4a32b,0 3px 13px #0006}
+.eterna-hud .hud-drawer{border-radius:5px;border-color:#d4b67b9c;background:radial-gradient(ellipse at top,#42616a22,transparent 65%),linear-gradient(125deg,#1a2e3ce8,#0b1426f3);box-shadow:inset 0 0 0 3px #101c2d,0 12px 40px #000b,inset 0 1px #f3d39b40}
+.eterna-hud .hud-drawer-primary>button{border-radius:3px;background:linear-gradient(105deg,#aa8a4a1f,#19334222);border-color:#bea06a40}
+.eterna-hud .hud-drawer-primary>button>.menu-icon{width:27px;height:27px;color:#e1c18a;justify-self:center}
+.eterna-hud .hud-drawer-secondary>button>.menu-icon{width:20px;height:20px;color:#c7c2ac}
+.eterna-hud .menu-dock>button>.menu-icon{width:22px;height:22px}
+.eterna-hud [data-drawer-close]>.menu-icon,.eterna-hud [data-close]>.menu-icon{width:17px;height:17px}
+.drop-toast-widget .drop-toast-toggle{border-color:#c4a76c4d;background:linear-gradient(100deg,#1a2f3bb3,#0a17267a);color:#ddc79d}
+.drop-toast-widget .drop-toast-toggle>.menu-icon{width:15px;height:15px}
+.drop-toast-widget .drop-toggle-chevron>.menu-icon{width:11px;height:11px;transform:rotate(90deg)}
+.drop-toast-widget .drop-toast-entry{background:linear-gradient(95deg,#0d1c2ad9,#0b17265c);box-shadow:inset 0 1px #d2b77a12}
+
+@media(max-height:500px){
+  .pr15-tabs button>.menu-icon{width:18px;height:18px}
+  .adventure-layer .settings-form{padding:8px 11px}
+  .adventure-layer,.pr15-overlay,.expansion-modal,.region-travel-overlay,.eterna-dungeon-overlay{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+}
+@media(prefers-reduced-transparency:reduce){
+  .adventure-layer,.pr15-overlay,.expansion-modal,.region-travel-overlay,.eterna-dungeon-overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background-color:#060d19ed}
+  .adventure-layer .adventure-window,.pr15-overlay .pr15-shell,.expansion-modal .expansion-window{background:#0c1929}
+}

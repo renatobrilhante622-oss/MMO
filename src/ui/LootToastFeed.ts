@@ -1,5 +1,6 @@
 import type {EquipmentSlot,LootDrop,Rarity} from '../core/GameTypes';
 import {ICON_COLORS,itemIcon,type IconKind} from './ItemIconRenderer';
+import {menuIcon} from './MenuIcons';
 
 export interface LootToastEntry {
   title: string;
@@ -37,7 +38,7 @@ export class LootToastFeed {
     this.root.hidden=true;
     this.button.type='button';
     this.button.className='drop-toast-toggle';
-    this.button.innerHTML='<span aria-hidden="true">◈</span><b>DROPS</b><span class="drop-toggle-chevron">▾</span>';
+    this.button.innerHTML=menuIcon('rewards')+'<b>DROPS</b><span class="drop-toggle-chevron" aria-hidden="true">'+menuIcon('chevron')+'</span>';
     this.button.setAttribute('aria-expanded','true');
     this.button.setAttribute('aria-label','Recolher histórico rápido de drops');
     this.list.className='drop-toast-list';

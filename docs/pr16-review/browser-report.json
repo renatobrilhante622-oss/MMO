@@ -1,0 +1,344 @@
+{
+  "landscape": {
+    "viewport": [
+      844,
+      390
+    ],
+    "drawer": {
+      "x": 450,
+      "y": 63,
+      "width": 256,
+      "height": 320
+    },
+    "drawerSvgCount": 13,
+    "drawerClosedByToggle": true,
+    "lobby": {
+      "x": 12,
+      "y": 9.75,
+      "width": 820,
+      "height": 370.5
+    },
+    "tabSvgCount": 6,
+    "tabTexts": [
+      "Arena",
+      "Runas",
+      "Coleta",
+      "Login",
+      "Leilão",
+      "Títulos"
+    ],
+    "arenaScene": {
+      "architecture": [
+        "CC0 coliseum floor",
+        "CC0 coliseum floor-detail",
+        "CC0 coliseum column",
+        "CC0 coliseum wall",
+        "CC0 coliseum fire-basket",
+        "CC0 coliseum gate"
+      ],
+      "instances": [
+        {
+          "name": "CC0 coliseum floor",
+          "count": 89
+        },
+        {
+          "name": "CC0 coliseum floor-detail",
+          "count": 1
+        },
+        {
+          "name": "CC0 coliseum column",
+          "count": 11
+        },
+        {
+          "name": "CC0 coliseum wall",
+          "count": 21
+        },
+        {
+          "name": "CC0 coliseum fire-basket",
+          "count": 4
+        },
+        {
+          "name": "CC0 coliseum gate",
+          "count": 1
+        }
+      ],
+      "actors": 2,
+      "drawCalls": 1,
+      "toneMapping": 4,
+      "shadowMap": true
+    },
+    "arenaRoot": {
+      "x": 0,
+      "y": 0,
+      "width": 844,
+      "height": 390
+    },
+    "arenaCanvas": {
+      "x": 0,
+      "y": 0,
+      "width": 844,
+      "height": 390
+    },
+    "offlineLabel": "Salão\nCOLISEU DE ASTER\nDuelo local contra IA · Bronze\nSair\nWarlock\n1293 / 1293 HP\nValquíria de Aster\n1189 / 1189 HP\nRaio do Vazio\nChama Infernal\nPacto Vital\nSingularidade\nAtacar\nDash\nEsquiva\nDefesa\nPoção\n⚔️ O Coliseu abriu seus portões.\n\n✓ Ação concluída",
+    "combatBefore": {
+      "hp": 1189,
+      "hero": 1292.32
+    },
+    "combatAfter": {
+      "hp": 1114,
+      "hero": 1292.32
+    },
+    "bodyOverflow": {
+      "x": false,
+      "y": false
+    },
+    "dungeonCovers": [
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-crypt.webp\")",
+        "rect": {
+          "x": 25,
+          "y": 67,
+          "width": 206.4375,
+          "height": 148.796875,
+          "top": 67,
+          "right": 231.4375,
+          "bottom": 215.796875,
+          "left": 25
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-highlands.webp\")",
+        "rect": {
+          "x": 238.4375,
+          "y": 67,
+          "width": 206.4375,
+          "height": 148.796875,
+          "top": 67,
+          "right": 444.875,
+          "bottom": 215.796875,
+          "left": 238.4375
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-rift.webp\")",
+        "rect": {
+          "x": 25,
+          "y": 222.796875,
+          "width": 206.4375,
+          "height": 148.796875,
+          "top": 222.796875,
+          "right": 231.4375,
+          "bottom": 371.59375,
+          "left": 25
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-eclipse.webp\")",
+        "rect": {
+          "x": 238.4375,
+          "y": 222.796875,
+          "width": 206.4375,
+          "height": 148.796875,
+          "top": 222.796875,
+          "right": 444.875,
+          "bottom": 371.59375,
+          "left": 238.4375
+        }
+      }
+    ],
+    "regionBanners": [
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/aurora.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/crypt.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/highlands.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/rift.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/eclipse.webp\")"
+    ],
+    "merchant": {
+      "x": 0,
+      "y": 0,
+      "width": 844,
+      "height": 390
+    },
+    "merchantStyle": {
+      "background": "radial-gradient(at 4% 0%, rgba(80, 132, 133, 0.12), rgba(0, 0, 0, 0) 48%), linear-gradient(132deg, rgba(24, 48, 59, 0.85) 0%, rgba(11, 22, 40, 0.91) 48%, rgba(27, 23, 48, 0.9) 100%)",
+      "border": "rgba(196, 166, 107, 0.4)",
+      "clip": "polygon(9px 0px, calc(100% - 9px) 0px, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0px calc(100% - 9px), 0px 9px)"
+    },
+    "errors": [],
+    "warnings": [
+      "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+    ],
+    "cameraFacingArcClear": true
+  },
+  "portrait": {
+    "viewport": [
+      390,
+      844
+    ],
+    "drawer": {
+      "x": 141,
+      "y": 164,
+      "width": 240,
+      "height": 523
+    },
+    "drawerSvgCount": 13,
+    "drawerClosedByToggle": true,
+    "lobby": {
+      "x": 12,
+      "y": 126.609375,
+      "width": 366,
+      "height": 590.78125
+    },
+    "tabSvgCount": 6,
+    "tabTexts": [
+      "Arena",
+      "Runas",
+      "Coleta",
+      "Login",
+      "Leilão",
+      "Títulos"
+    ],
+    "arenaScene": {
+      "architecture": [
+        "CC0 coliseum column",
+        "CC0 coliseum floor-detail",
+        "CC0 coliseum floor",
+        "CC0 coliseum wall",
+        "CC0 coliseum fire-basket",
+        "CC0 coliseum gate"
+      ],
+      "instances": [
+        {
+          "name": "CC0 coliseum column",
+          "count": 11
+        },
+        {
+          "name": "CC0 coliseum floor-detail",
+          "count": 1
+        },
+        {
+          "name": "CC0 coliseum floor",
+          "count": 89
+        },
+        {
+          "name": "CC0 coliseum wall",
+          "count": 21
+        },
+        {
+          "name": "CC0 coliseum fire-basket",
+          "count": 4
+        },
+        {
+          "name": "CC0 coliseum gate",
+          "count": 1
+        }
+      ],
+      "actors": 2,
+      "drawCalls": 1,
+      "toneMapping": 4,
+      "shadowMap": true
+    },
+    "arenaRoot": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "arenaCanvas": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "offlineLabel": "Salão\nCOLISEU DE ASTER\nDuelo local contra IA · Bronze\nSair\nWarlock\n1293 / 1293 HP\nValquíria de Aster\n1189 / 1189 HP\nRaio do Vazio\nChama Infernal\nPacto Vital\nSingularidade\nAtacar\nDash\nEsquiva\nDefesa\nPoção\n\n✓ Ação concluída",
+    "combatBefore": {
+      "hp": 1189,
+      "hero": 1292.32
+    },
+    "combatAfter": {
+      "hp": 1114,
+      "hero": 1292.32
+    },
+    "bodyOverflow": {
+      "x": false,
+      "y": false
+    },
+    "dungeonCovers": [
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-crypt.webp\")",
+        "rect": {
+          "x": 15,
+          "y": 67.875,
+          "width": 176.5,
+          "height": 161.4375,
+          "top": 67.875,
+          "right": 191.5,
+          "bottom": 229.3125,
+          "left": 15
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-highlands.webp\")",
+        "rect": {
+          "x": 198.5,
+          "y": 67.875,
+          "width": 176.5,
+          "height": 161.4375,
+          "top": 67.875,
+          "right": 375,
+          "bottom": 229.3125,
+          "left": 198.5
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-rift.webp\")",
+        "rect": {
+          "x": 15,
+          "y": 236.3125,
+          "width": 176.5,
+          "height": 161.4375,
+          "top": 236.3125,
+          "right": 191.5,
+          "bottom": 397.75,
+          "left": 15
+        }
+      },
+      {
+        "image": "linear-gradient(rgba(10, 20, 39, 0.165), rgba(10, 20, 39, 0.867)), url(\"http://127.0.0.1:5173/assets/landscapes/dungeon-eclipse.webp\")",
+        "rect": {
+          "x": 198.5,
+          "y": 236.3125,
+          "width": 176.5,
+          "height": 161.4375,
+          "top": 236.3125,
+          "right": 375,
+          "bottom": 397.75,
+          "left": 198.5
+        }
+      }
+    ],
+    "regionBanners": [
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/aurora.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/crypt.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/highlands.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/rift.webp\")",
+      "linear-gradient(0deg, rgba(7, 18, 32, 0.933), rgba(7, 18, 32, 0.086)), url(\"http://127.0.0.1:5173/assets/landscapes/eclipse.webp\")"
+    ],
+    "merchant": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "merchantStyle": {
+      "background": "radial-gradient(at 4% 0%, rgba(80, 132, 133, 0.12), rgba(0, 0, 0, 0) 48%), linear-gradient(132deg, rgba(24, 48, 59, 0.85) 0%, rgba(11, 22, 40, 0.91) 48%, rgba(27, 23, 48, 0.9) 100%)",
+      "border": "rgba(196, 166, 107, 0.4)",
+      "clip": "polygon(9px 0px, calc(100% - 9px) 0px, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0px calc(100% - 9px), 0px 9px)"
+    },
+    "errors": [],
+    "warnings": [
+      "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+    ],
+    "cameraFacingArcClear": true
+  }
+}

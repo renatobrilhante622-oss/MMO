@@ -1,14 +1,12 @@
 import { REGIONS } from '../world/Regions';
+import {regionArtwork} from './CardArtwork';
+import {menuIcon} from './MenuIcons';
 import { REGION_REWARDS, travelPermission, type RegionTravelState } from '../world/RegionTravel';
 
 const PT_MONSTERS:Record<string,string>={
   slime:'Slime Verde',wolf:'Lobo Cinzento',
   skeleton:'Esqueleto Guerreiro',wraith:'Espectro Sombrio',
   golem:'Golem de Gelo',boss:'Chefe Ancestral'
-};
-const BANNERS:Record<string,string>={
-  aurora:'Grass004',crypt:'PavingStones046',highlands:'Snow010A',
-  rift:'Ground093C',eclipse:'Ground071'
 };
 export function translatedMonster(kind:string,language:'pt'|'en'):string {
   return language==='pt'?(PT_MONSTERS[kind]??kind):kind[0].toUpperCase()+kind.slice(1);
@@ -25,7 +23,7 @@ export class RegionTravelUI {
               private readonly language:()=> 'pt'|'en'){
     this.trigger.type='button';
     this.trigger.className='region-travel-trigger';
-    this.trigger.textContent='🌀 PORTAIS';
+    this.trigger.innerHTML=menuIcon('portal')+'<span>PORTAIS</span>';
     this.trigger.setAttribute('aria-label','Abrir destinos do mapa-múndi');
     this.trigger.addEventListener('click',()=>this.open());
     this.root.className='region-travel-overlay';
@@ -56,7 +54,7 @@ export class RegionTravelUI {
     const title=document.createElement('h2');
     title.textContent=lang===0?'PORTAIS DE ETERNA':'PORTALS OF ETERNA';
     const close=document.createElement('button');
-    close.type='button';close.textContent='✕';close.setAttribute('aria-label','Fechar');
+    close.type='button';close.innerHTML=menuIcon('close');close.setAttribute('aria-label','Fechar');
     close.onclick=()=>this.close();
     header.append(title,close);
     this.dialog.append(header);
@@ -73,9 +71,10 @@ export class RegionTravelUI {
       card.style.setProperty('--region-color',region.color);
       const banner=document.createElement('div');banner.className='region-travel-banner';
       // Photography-derived CC0 PBR imagery replaces the previously empty gradients.
-      const image=import.meta.env.BASE_URL+'textures/real-pbr/'+BANNERS[region.id]+'_1K-JPG_Color.webp';
+      const image=regionArtwork(region.id);
       banner.style.backgroundImage='linear-gradient(0deg,#071220ee,#07122016),url("'+image+'")';
       banner.style.backgroundSize='cover';banner.style.backgroundPosition='center';
+      banner.dataset.landscape=region.id;
       const label=document.createElement('span');label.textContent='LV. '+region.minLevel+'–'+region.maxLevel;
       const name=document.createElement('h3');name.textContent=region.name[lang];
       banner.append(label,name);

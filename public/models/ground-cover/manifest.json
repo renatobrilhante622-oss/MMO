@@ -1,0 +1,30 @@
+{
+  "license": "CC0-1.0",
+  "licenseSource": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/LICENSE",
+  "assets": [
+    {
+      "file": "Kenney_grass.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/grass.glb",
+      "author": "Kenney",
+      "license": "CC0-1.0",
+      "sha256": "260e41d3e5f2472492ed7b475c5b92a30b13ce2bad408535b5ff50574d4575e7",
+      "bytes": 11496
+    },
+    {
+      "file": "Kenney_grass-leafslarge.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/grass-leafslarge.glb",
+      "author": "Kenney",
+      "license": "CC0-1.0",
+      "sha256": "a68b9b3d9639afaeb4ace840d5a8e3f21ffc4e8afc1eab15566500fbb2bee3e3",
+      "bytes": 13988
+    },
+    {
+      "file": "Kenney_flower-purplea.glb",
+      "source": "https://raw.githubusercontent.com/Hidencod/tge-assets/7be9b573bc74f32ed766b44b3f46550d02ca83b5/packs/nature-kit/flower-purplea.glb",
+      "author": "Kenney",
+      "license": "CC0-1.0",
+      "sha256": "f6fc34c96a03420a74fe36d4c2d0ec88f15204fcad99cd1416c3c4ecb22e48c4",
+      "bytes": 7112
+    }
+  ]
+}

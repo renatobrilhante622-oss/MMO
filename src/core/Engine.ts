@@ -13,6 +13,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import {configureShadow} from './Renderer';
 import {FrameBudget,cappedPixelRatio,withinActorRadius} from './RenderBudget';
 import { AtmospherePass } from './AtmospherePass';
 import { AtmosphericSky } from './AtmosphericSky';
@@ -260,7 +261,7 @@ export class Engine {
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.atmosphere = new AtmospherePass(this.camera);
     this.composer.addPass(this.atmosphere);
-    this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.38, 0.5, 1.15);
+    this.bloom = new UnrealBloomPass(new Vector2(1, 1), 0.3, 0.45, 1.35);
     this.composer.addPass(this.bloom);
     // Three r186 SMAA operates on linear HDR, before the output transform.
     this.smaa = new SMAAPass();
@@ -1220,9 +1221,10 @@ export class Engine {
     this.terrain.setQuality(quality);
     this.combat.particles.setQuality(quality);
     this.csm.lights.forEach(light => {
-      light.castShadow = true;
       const size = quality === 'high' ? 2048 : 1024;
-      if (light.shadow.mapSize.x !== size) { light.shadow.mapSize.set(size, size); light.shadow.map?.dispose(); light.shadow.map = null; }
+      const changed=light.shadow.mapSize.x!==size;
+      configureShadow(light,size);
+      if(changed){light.shadow.map?.dispose();light.shadow.map=null;}
     });
     this.resize();
   }
