@@ -1,3 +1,4 @@
+import {avatarSvg} from './AvatarRenderer';
 import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
 import { emptyInput, type ClassId, type EquipmentSlot, type HeroInput, type HeroState, type Item } from '../core/GameTypes';
 import { classIcon, skillIcon } from './IconAtlas';
@@ -13,6 +14,7 @@ export interface HUDModel {
   hp: number; maxHp: number; mana: number; maxMana: number; xp: number; xpToNext: number;
   level: number; classId: ClassId; state: HeroState; gold: number; crystals: number;
   regionName?:string;
+  worldThreat?:{distance:number};
   items: Item[]; equipment: Partial<Record<EquipmentSlot, string>>;
   buildings: Array<{ id: string; name: string; description: string; level: number; maxLevel: number; cost: { gold: number; crystals: number } }>;
   codex: Array<{ id: string; name: string; description: string; kills: number; required: number; bonus: string }>;
@@ -101,6 +103,7 @@ export class MobileHUD {
       <header class="hud-top"><div class="hero-card"><div class="hero-crest" data-ref="crest"><div data-ref="classIcon">${classIcon('berserker')}</div><span data-ref="level">1</span></div><div class="hero-vitals"><div class="hero-name"><span data-ref="className">Berserker</span><small data-ref="state">Na vila</small></div><div class="vital-bar hp" data-ref="hpTrack" aria-label="Vida"><b class="vital-residual" data-ref="hpResidual"></b><i data-ref="hpFill"></i><span data-ref="hpText"></span></div><div class="vital-bar mana" data-ref="manaTrack" aria-label="Mana"><b class="vital-residual" data-ref="manaResidual"></b><i data-ref="manaFill"></i><span data-ref="manaText"></span></div><div class="xp-bar"><i data-ref="xpFill"></i></div></div></div>
       <div class="world-banner"><span class="overline">ETERNA</span><strong data-ref="regionBanner">Vale de Aster</strong><span data-ref="worldTime">AMANHECER</span></div>
       <div class="map-card"><div class="map-heading"><span data-ref="regionMap">VALE DE ASTER</span><span class="map-north">N</span></div><canvas data-ref="minimap" width="260" height="220" aria-label="Minimapa em tempo real"></canvas><div class="map-footer"><span data-ref="coordinates">0, 18</span><span data-ref="fps">60 FPS</span></div></div></header>
+      <aside class="world-threat" data-ref="worldThreat" role="status" hidden>${menuIcon('dungeons')}<span data-ref="worldThreatText"></span></aside>
       <section class="boss-hud" data-ref="bossPanel" hidden aria-label="Vida do chefe da masmorra"><div class="boss-title"><span class="boss-flourish" aria-hidden="true">◇</span><div><span class="boss-overline">GUARDIÃO ANCESTRAL</span><strong data-ref="bossName"></strong></div><span class="boss-flourish" aria-hidden="true">◇</span></div><div class="boss-health-track" data-ref="bossTrack" aria-label="Vida do chefe"><b class="vital-residual" data-ref="bossResidual"></b><i data-ref="bossFill"></i><div class="boss-segments" aria-hidden="true"></div></div><div class="boss-status"><span data-ref="bossPhase"></span><div class="boss-phase-marks" data-ref="bossPips" aria-hidden="true"><i></i><i></i><i></i></div><span data-ref="bossHealth"></span></div></section>
       <button class="sound-toggle" data-sound aria-label="Silenciar áudio" aria-pressed="false" title="Áudio procedural"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m4 9 4 0 5-4v14l-5-4H4V9Z"/><path class="sound-waves" d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-slash" d="m16 9 6 6m0-6-6 6"/></svg><span data-ref="soundLabel">SOM</span></button>
       <aside class="quest-card"><div class="quest-label"><span class="quest-diamond"></span> A JORNADA COMEÇA</div><strong data-ref="questTitle">Além dos portões</strong><p data-ref="questText">Explore o vale. Derrote criaturas e encontre o portal ao norte.</p><div class="quest-progress" data-ref="dungeonStatus"></div></aside>
@@ -112,9 +115,9 @@ export class MobileHUD {
         <section class="hud-drawer" id="adventurer-drawer" aria-label="Atalhos do aventureiro" hidden>
           <header><span data-hud-pt="SEU AVENTUREIRO" data-hud-en="YOUR ADVENTURER">SEU AVENTUREIRO</span><button data-drawer-close aria-label="Fechar menu / Close menu">${menuIcon('close')}</button></header>
           <div class="hud-drawer-primary">
-            <button data-panel="inventory">${itemIcon('chest','legendary')}<span data-hud-pt="Bolsa / Inventário" data-hud-en="Bag / Inventory">Bolsa / Inventário</span><kbd>I</kbd></button>
-            <button data-drawer-action="forge">${itemIcon('axe','legendary')}<span data-hud-pt="Ferreiro / Forja & Sockets" data-hud-en="Blacksmith / Forge & Sockets">Ferreiro / Forja & Sockets</span></button>
-            <button data-drawer-action="collection">${itemIcon('skin','epic')}<span data-hud-pt="Asas & Coleção" data-hud-en="Wings & Collection">Asas & Coleção</span></button>
+            <button data-panel="inventory">${itemIcon('chest','legendary')}<span data-hud-pt="Bolsa" data-hud-en="Bag">Bolsa</span><kbd>I</kbd></button>
+            <button data-drawer-action="forge">${itemIcon('axe','legendary')}<span data-hud-pt="Forja" data-hud-en="Forge">Forja</span></button>
+            <button data-drawer-action="collection">${itemIcon('skin','epic')}<span data-hud-pt="Coleção" data-hud-en="Collection">Coleção</span></button>
           </div>
           <div class="hud-drawer-secondary">
             <button data-panel="classes">${icon('classes')}<span data-hud-pt="Classes" data-hud-en="Classes">Classes</span><kbd>C</kbd></button>
@@ -377,10 +380,12 @@ export class MobileHUD {
     setText('className', className);
     setText('level', `${model.level}`);
     setText('state', translateText(stateNames[model.state],this.language));
+    this.el.worldThreat.hidden=!model.worldThreat;
+    if(model.worldThreat)this.el.worldThreatText.textContent=(this.language==='pt'?'Chefe próximo · ':'Boss nearby · ')+Math.round(model.worldThreat.distance)+' m';
     this.el.crest.style.setProperty('--class-color', `#${definition.color.toString(16).padStart(6, '0')}`);
     if (model.classId !== this.lastClass) {
       this.lastClass = model.classId;
-      this.el.classIcon.innerHTML = classIcon(model.classId);
+      this.el.classIcon.innerHTML = avatarSvg(({elementalist:'archmage',warlock:'archmage',necromancer:'lich',lanceman:'paladin',monk:'berserker'} as Partial<Record<ClassId,string>>)[model.classId]??model.classId);
       definition.skills.forEach((skill, index) => {
         this.el[`skillIcon${index}`].innerHTML = skillIcon(skill.id);
         this.el[`skill${index}`].dataset.skillTooltip=translateText(skill.name,this.language);

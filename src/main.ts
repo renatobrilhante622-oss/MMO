@@ -21,6 +21,7 @@ import './ui/pr15-systems.css';
 import './ui/pr16-design.css';
 import './ui/pr16-banners.css';
 import './ui/pr16-arena.css';
+import './ui/pr17-hud.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');

@@ -2,7 +2,7 @@ import {
   AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshStandardMaterial,
   Object3D, Vector3,
 } from 'three';
-import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { createFootPivot, disableCharacterCulling } from '../player/PlayerRenderer';
 import type { ClassDefinition } from '../core/GameTypes';
@@ -16,24 +16,20 @@ export type ModelName =
   | 'Quaternius_ghost' | 'Quaternius_demon' | 'Quaternius_bat'
   | 'Creature_wyvern' | 'Creature_horse' | 'Creature_wolf'
   | 'Creature_slime' | 'Creature_golem' | 'Creature_dragon'
-  | 'Creature_stag' | 'Creature_warhorse'
+  | 'Creature_stag' | 'Creature_warhorse' | 'Creature_whitehorse'
   | 'Creature_pet_fox' | 'Creature_pet_hellhound' | 'Creature_pet_fairy'
   | 'Creature_pet_babygolem' | 'Creature_pet_dracolich';
 
-const loader = new GLTFLoader();
-const cache = new Map<string, Promise<GLTF>>();
+import {loadSharedModel,actorClonePool,resetPooledActor} from './ModelResources';
+import {registerActor,actorIsVisible} from '../core/ActorVisibility';
 const normalize = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export function loadModel(name: ModelName): Promise<GLTF> {
   const folder=name.startsWith('Quaternius_')?'models/environment/':name.startsWith('Creature_')?'models/creatures/':'models/';
-  const url = import.meta.env.BASE_URL + folder + name + '.glb';
-  let request = cache.get(url);
-  if (!request) {
-    request = loader.loadAsync(url);
-    cache.set(url, request);
-    void request.catch(() => cache.delete(url));
-  }
-  return request;
+  // Retire both the retrofitted 704-triangle horse and the unrigged farm horse.
+  const replacement=['Creature_horse','Creature_warhorse','Horse'].includes(name)
+    ?'models/pr17-source/ImperialHorse.glb':name==='Creature_whitehorse'?'models/pr17-source/ImperialHorseWhite.glb':null;
+  return loadSharedModel(replacement??folder + name + '.glb');
 }
 
 /**
@@ -51,6 +47,10 @@ export class AnimatedGLB {
   private activeKey = '';
   private materials: Array<{ material: MeshStandardMaterial; original: Color; originalEmissive: Color; originalEmissiveIntensity: number }> = [];
   private disposed = false;
+  private unregister?:()=>void;
+  private readonly attachments=new Set<Object3D>();
+  private readonly sourceMaterials=new Map<Mesh,Mesh['material']>();
+  private poolKey='';
   private attackTime = 0;
   private model?: Object3D;
   private readonly creaturePhase={value:0};
@@ -86,17 +86,19 @@ export class AnimatedGLB {
     try {
       gltf = await loadModel(name);
     } catch (error) {
-      if (name === 'Soldier' || this.disposed) {
-        console.error('Cannot load 3D actor asset:', name, error);
-        return;
+      if(this.disposed)return;
+      // A missing pet/mount must never turn into an unrelated human soldier.
+      // The shared cache drops rejected requests; retry the same authored asset.
+      console.warn('Retrying authored 3D actor:',name,error);
+      try{gltf=await loadModel(name);}catch(retryError){
+        console.error('Cannot load 3D actor asset:',name,retryError);return;
       }
-      // Existing local real GLB is a visual safety fallback, never a generated dummy.
-      console.warn('Falling back to local Soldier GLB for:', name);
-      try { gltf = await loadModel('Soldier'); }
-      catch { return; }
     }
     if (this.disposed) return;
-    const model = this.model = clone(gltf.scene);
+    this.poolKey=gltf.scene.uuid;
+    const model = this.model = actorClonePool.acquire(this.poolKey)??clone(gltf.scene);
+    resetPooledActor(model);
+    this.unregister=registerActor(this.root,this.height);
     if(name.startsWith('KayKit_'))clearWeaponSlots(model);
     const pivot = createFootPivot(model, this.height, name === 'Soldier' ? Math.PI : 0);
     model.traverse(object => {
@@ -146,6 +148,7 @@ export class AnimatedGLB {
         }
         return material;
       };
+      this.sourceMaterials.set(object,object.material);
       object.material = Array.isArray(object.material)
         ? object.material.map(material => isolated(material as MeshStandardMaterial))
         : isolated(object.material as MeshStandardMaterial);
@@ -241,7 +244,7 @@ export class AnimatedGLB {
     );
     const authored = (object.userData.authoredScale as Vector3 | undefined) ?? object.scale.clone();
     object.userData.authoredScale = authored;
-    socket.add(object);
+    socket.add(object);this.attachments.add(object);
     object.position.copy(offset).multiply(inverse);
     object.scale.copy(authored).multiply(inverse);
     disableCharacterCulling(object);
@@ -296,7 +299,7 @@ export class AnimatedGLB {
   setClassPalette(color:number):void{this.classPalette.setHex(color);this.tint(this.baseColor.getHex(),this.accent.getHex());}
   setCosmeticPalette(color:number,rarity:number):void{
     this.cosmeticTint.setHex(color);
-    this.cosmeticStrength=Math.min(.76,Math.max(0,rarity)*.16);
+    this.cosmeticStrength=Math.min(.76,Math.max(0,rarity)*.055);
     this.tint(this.baseColor.getHex(),this.accent.getHex());
   }
 
@@ -355,7 +358,7 @@ export class AnimatedGLB {
   }
 
   update(dt: number, speed: number, riding = false, locomotion?: string): void {
-    if (!this.ready || !this.root.visible) return;
+    if (!this.ready || !actorIsVisible(this.root)) return;
     const step = Math.min(.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
     this.creatureTime.value+=step;
     this.creatureStride.value=Math.min(1,Math.max(0,speed));
@@ -375,9 +378,14 @@ export class AnimatedGLB {
   }
 
   dispose(): void {
-    this.disposed = true;
+    if(this.disposed)return;
+    this.disposed = true;this.unregister?.();
+    for(const object of this.attachments)object.removeFromParent();this.attachments.clear();
     this.mixer?.stopAllAction();
     if (this.model) this.mixer?.uncacheRoot(this.model);
+    for(const [mesh,material] of this.sourceMaterials)mesh.material=material;
+    this.sourceMaterials.clear();
+    if(this.model){this.model.removeFromParent();actorClonePool.release(this.poolKey,this.model);this.model=undefined;}
     this.materials.forEach(({ material }) => material.dispose());
     this.materials.length = 0;
     this.actions.clear();

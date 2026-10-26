@@ -1,5 +1,6 @@
 import { Box3, Mesh, Object3D, Vector3 } from 'three';
-import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {loadSharedModel} from './ModelResources';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { ClassId } from '../core/GameTypes';
 
@@ -35,16 +36,15 @@ export const CLASS_EQUIPMENT_MODELS: Record<ClassId, readonly EquipmentVisual[]>
   necromancer: [{model:'staff',bone:'righthand'}, {model:'spellbook_closed',bone:'lefthand'}],
   monk: [],
   lanceman: [{model:'spear',bone:'righthand'}],
-  warlock: [{model:'wand',bone:'righthand'}, {model:'staff',bone:'lefthand'}],
+  warlock: [{model:'staff',bone:'righthand'}, {model:'spellbook_closed',bone:'lefthand'}],
 };
 
-const loader = new GLTFLoader();
 const models = new Map<WeaponModelId, Promise<GLTF>>();
 
 export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
-    const url=import.meta.env.BASE_URL+((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
+    const url=((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
       ?'models/weapons/'+name+'.glb'
       :name==='spear'
       ?'models/environment/Kenney_mini-dungeon_weapon-spear.glb'
@@ -52,7 +52,7 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
       :name.startsWith('dungeon_')||name.startsWith('prototype_')
        ?'models/weapon-packs/Kenney_'+name+'.glb'
       :'models/KayKit_Weapon_'+name+'.glb');
-    promise=loader.loadAsync(url);
+    promise=loadSharedModel(url);
     models.set(name,promise);
     void promise.catch(()=>models.delete(name));
   }

@@ -11,7 +11,7 @@ export class QuestTrackerHUD{
   private readonly meter=document.createElement('i');
   private readonly button=document.createElement('button');
   private readonly content=document.createElement('div');
-  private collapsed=false;
+  private collapsed=true;
   constructor(private readonly host:HTMLElement,private readonly quests:QuestSystem,
       private readonly callbacks:TrackerCallbacks){
     this.root.className='eterna-quest-tracker';
@@ -19,9 +19,10 @@ export class QuestTrackerHUD{
     this.heading.className='quest-tracker-heading';
     this.collapse.type='button';
     this.collapse.className='quest-tracker-collapse';
-    this.collapse.textContent='▾';
-    this.collapse.setAttribute('aria-label','Recolher painel de missão');
-    this.collapse.setAttribute('aria-expanded','true');
+    this.root.classList.add('is-collapsed');this.content.hidden=true;
+    this.collapse.textContent='▸';
+    this.collapse.setAttribute('aria-label','Expandir painel de missão');
+    this.collapse.setAttribute('aria-expanded','false');
     this.collapse.onclick=()=>{
       this.collapsed=!this.collapsed;
       this.content.hidden=this.collapsed;

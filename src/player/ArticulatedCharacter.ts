@@ -1,3 +1,6 @@
+import {loadSharedModel} from '../assets/ModelResources';
+import {actorIsVisible,registerActor} from '../core/ActorVisibility';
+import {SKIN_IDENTITIES} from './SkinIdentity';
 import {
   BufferGeometry, Box3, CapsuleGeometry, ConeGeometry, Color, DoubleSide,
   Group, LatheGeometry, MathUtils, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, SphereGeometry, Vector2,
@@ -5,7 +8,6 @@ import {
 } from 'three';
 import type { ClassDefinition, HeroState } from '../core/GameTypes';
 import { AnimatedGLB, type ModelName } from '../assets/AnimatedGLB';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CLASS_EQUIPMENT_MODELS, loadWeaponModel } from '../assets/WeaponGLB';
 import {CLASS_IDENTITIES} from './ClassVisualIdentity';
 import {weaponPackForClass} from '../rpg/WeaponPacks';
@@ -168,7 +170,7 @@ export class ArticulatedCharacter {
   private readonly importedSkinParts:Object3D[]=[];
   private readonly importedSkinMaterials=new Set<MeshStandardMaterial>();
   private skinVisualVersion=0;
-  private readonly skinLoader=new GLTFLoader();
+  private unregisterVisibility?:()=>void;
   private readonly skinAura=new RarityAura(.6);
   private skinKey='';
   private weaponPackId='ironweapon';
@@ -197,6 +199,7 @@ export class ArticulatedCharacter {
   constructor(definition: ClassDefinition) {
     this.definition = definition;
     this.root.name = 'articulated-character';
+    this.unregisterVisibility=registerActor(this.root,1.9);
     this.armor = this.material(0x263944, .78, .31);
     this.accent = this.material(definition.color, .45, .42);
     this.accent.emissive.setHex(definition.color);
@@ -209,6 +212,16 @@ export class ArticulatedCharacter {
     this.eye = this.material(0xe0faff, .05, .26);
     this.eye.emissive.setHex(definition.color);
     this.eye.emissiveIntensity = 2.4;
+    if(typeof document!=='undefined'){
+      // Runtime needs socket groups and one optional cloth, not an invisible second
+      // character with hundreds of generated meshes underneath every authored GLB.
+      const emptyLimb=():Limb=>({upper:new Group(),lower:new Group(),end:new Group()});
+      this.leftArm=emptyLimb();this.rightArm=emptyLimb();this.leftLeg=emptyLimb();this.rightLeg=emptyLimb();
+      this.cape=new CapeCloth(definition.color);this.torso.add(this.cape.mesh);
+      this.weapons=new WeaponForge(definition);this.pelvis.add(this.torso);this.pelvis.visible=false;
+      this.root.add(this.pelvis,this.wings.root,this.skinAura);
+      this.replaceImportedModel(definition);return;
+    }
     this.root.add(this.pelvis);
     this.pelvis.position.y = .86;
     this.pelvis.name = 'pelvis';
@@ -435,7 +448,7 @@ export class ArticulatedCharacter {
       this.wings.root.position.set(0,.14,-.19);
       this.wings.root.scale.setScalar(1.16);
     }
-    this.skinAura.position.y=1.3;
+    this.skinAura.position.y=.04;
     this.updateImportedSkin(actor);
     actor.clearWeaponSlots();
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
@@ -451,6 +464,9 @@ export class ArticulatedCharacter {
       void loadWeaponModel(gear.model).then(model=>{
         if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
         const offset=gear.offset??[0,0,0];
+        // KayKit hand sockets point down at rest; reverse the staff's long
+        // axis so its focus is above the grip instead of buried in the ground.
+        if(gear.model==='staff'||gear.model==='wand')model.rotation.z+=Math.PI;
         if(equipped){
           model.scale.multiplyScalar(1+equipped.tier*.035);
           model.traverse(object=>{
@@ -491,6 +507,7 @@ export class ArticulatedCharacter {
     if(this.skinKey==='traveler')return;
     const revision=this.skinVisualVersion;
     const rarity=this.skinTier;
+    const identity=SKIN_IDENTITIES[this.definition.id];
     const tint=new Color(this.skinTone);
     // The existing Verlet cloth now follows the authored GLB spine rather than
     // a hidden procedural torso. Its physics and shadows remain active.
@@ -513,8 +530,8 @@ export class ArticulatedCharacter {
         const mats=Array.isArray(child.material)?child.material:[child.material];
         const clones=mats.map(m=>{
           if(!(m instanceof MeshStandardMaterial))return m;
-          const mat=m.clone();mat.color.lerp(tint,Math.min(.75,.28+rarity*.09));
-          mat.metalness=Math.max(.43,mat.metalness);mat.roughness=Math.min(.48,mat.roughness);
+          const mat=m.clone();mat.color.lerp(tint,Math.min(.32,.10+rarity*.035));
+          mat.metalness=identity.metallic?.55:.06;mat.roughness=identity.metallic?.46:.88;
           mat.emissive.copy(tint);mat.emissiveIntensity=.08+rarity*.045;
           this.importedSkinMaterials.add(mat);return mat;
         });
@@ -525,17 +542,21 @@ export class ArticulatedCharacter {
       }
       this.importedSkinParts.push(parent);
     };
-    const url=import.meta.env.BASE_URL+'models/equipment/CC0_knight_helmet.glb';
-    void this.skinLoader.loadAsync(url).then(gltf=>{
+    const url='models/equipment/CC0_knight_helmet.glb';
+    if(identity.helmet)void loadSharedModel(url).then(gltf=>{
       attach(gltf.scene.clone(true),'head',new Vector3(0,.13,.015),.46+rarity*.028,0);
     }).catch(error=>console.warn('No authored helmet:',error));
-    for(const side of [-1,1]){
+    if(identity.pauldrons)for(const side of [-1,1]){
       void loadWeaponModel('dungeon_shield_round').then(piece=>{
         attach(piece,'spine2',new Vector3(side*.44,.14,-.02),.39+rarity*.018,side*.55);
       }).catch(error=>console.warn('No authored pauldron:',error));
     }
   }
   private styleSilhouette(definition:ClassDefinition):void {
+    if(typeof document!=='undefined'){
+      this.imported?.setClassPalette(CLASS_IDENTITIES[definition.id].tint);
+      this.imported?.tint(0xffffff,definition.color);return;
+    }
     const caster=['warlock','necromancer','elementalist'].includes(definition.id);this.casterOrbs.visible=caster;this.casterRobe.visible=caster;this.hood.visible=caster;const face=this.head.getObjectByName('Human face') as Mesh|undefined;if(face)face.material=caster?this.shadowFace:this.skin;this.eye.emissiveIntensity=caster?4:1.5;const helmet=this.importedHelmet??this.head.getObjectByName('Metal helmet');if(helmet)helmet.visible=!caster;
     this.casterRobe.material.color.setHex(definition.id==='necromancer'?0x253d36:definition.id==='elementalist'?0x254359:0x3b294b);
     if(typeof document!=='undefined'){
@@ -798,9 +819,17 @@ export class ArticulatedCharacter {
   }
 
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
+    if(!actorIsVisible(this.root))return;
     dt = MathUtils.clamp(dt, 0, .05);
     this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted',state);
     this.imported?.setHitFlash(hurt>0?Math.min(1,hurt*4):0);
+    // Browser actors use authored clip animation. Do not simulate ~100 hidden
+    // legacy joints/cloth constraints when no visible cloth is attached.
+    if(typeof document!=='undefined'){
+      if(this.cape.mesh.parent!==this.torso)this.cape.update(dt,time,movement,this.turning,state==='swim'||state==='dive');
+      this.attackClock=Math.max(0,this.attackClock-dt);
+      this.wings.update(dt,time,movement);this.skinAura.update(time);return;
+    }
     const angularDelta = Math.atan2(Math.sin(heading - this.lastHeading), Math.cos(heading - this.lastHeading));
     this.lastHeading = heading;
     this.turning = MathUtils.damp(this.turning, angularDelta / Math.max(dt, .001), 5, dt);
@@ -830,6 +859,7 @@ export class ArticulatedCharacter {
   }
 
   dispose(): void {
+    this.unregisterVisibility?.();
     this.clearImportedSkin();
     this.clearGlbWeapons();
     this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
@@ -837,7 +867,7 @@ export class ArticulatedCharacter {
     const geometries = new Set<BufferGeometry>();
     this.root.traverse(object => {
       if (object instanceof Mesh) {
-        geometries.add(object.geometry);
+        if(!object.geometry.userData.sharedActorGeometry)geometries.add(object.geometry);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
           this.materials.add(material as MeshStandardMaterial);
         }

@@ -58,7 +58,7 @@ export class CharacterPreview {
     c.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.5,Math.min(2.7,this.zoom*(e.deltaY>0?.90:1.10)));this.needsFit=true;this.draw(0);},{passive:false});
   }
   mount(host:HTMLElement,id:ClassId,color:number,refine:number,cosmetic?:Cosmetic,weaponVisualId?:string):void {
-    const key=id+':'+(cosmetic?.id??'hero');
+    const key=id+':'+(cosmetic&&(cosmetic.type==='mount'||cosmetic.type==='pet')?cosmetic.type+':'+cosmetic.id:'hero');
     if(key!==this.key){this.rig?.dispose();this.animal?.dispose();this.rig=undefined;this.animal=undefined;this.key=key;this.revision=-1;
       if(cosmetic&&(cosmetic.type==='pet'||cosmetic.type==='mount')){this.animal=new CompanionRig(cosmetic.type==='mount');this.animal.appearance(cosmetic);this.scene.add(this.animal.root);}
       else{this.rig=new ArticulatedCharacter(CLASS_DEFINITIONS[id]);this.scene.add(this.rig.root);}
