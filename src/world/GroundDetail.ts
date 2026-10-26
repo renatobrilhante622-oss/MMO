@@ -1,3 +1,4 @@
+import {mapDefinition} from './maps/MapDefinitions';
 import {Box3,BufferGeometry,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Object3D,StaticDrawUsage,Vector3} from 'three';
 import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {organicMaterial,type OrganicSurface} from './FoliageAppearance';
@@ -50,7 +51,7 @@ export class GroundDetail {
       for(let i=0;i<entry.count;i++){
         let x=0,z=0,y=0,valid=false;
         for(let attempt=0;attempt<16;attempt++){
-          x=(this.rand()-.5)*275;z=(this.rand()-.5)*275;y=this.heightAt(x,z);
+          x=(this.rand()-.5)*(mapDefinition(this.region).size-40);z=(this.rand()-.5)*(mapDefinition(this.region).size-40);y=this.heightAt(x,z);
           if(Math.hypot(x,z-18)>=24&&Math.hypot(x,z+70)>=13&&y>=2.4&&y<=21){valid=true;break;}
         }
         if(!valid)continue;

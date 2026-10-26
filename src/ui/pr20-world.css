@@ -1,0 +1,11 @@
+/* Preserve the same joystick DOM node/pointer capture while menus are open. */
+#app.live-menu>.eterna-hud{z-index:850;pointer-events:none;background:transparent}
+#app.live-menu>.eterna-hud:before{display:none}
+#app.live-menu>.eterna-hud>:not(.move-zone){visibility:hidden!important;pointer-events:none!important}
+#app.live-menu>.eterna-hud>:not(.move-zone) *{pointer-events:none!important}
+#app.live-menu>.eterna-hud>.move-zone{display:block!important;visibility:visible!important;pointer-events:auto!important;position:absolute!important;left:12px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;top:auto!important;right:auto!important;width:108px!important;height:108px!important;scale:1!important;opacity:.55!important;z-index:1;touch-action:none}
+#app.live-menu>.eterna-hud>.move-zone .joystick{width:94px;height:94px}
+#app.live-menu .adventure-nav{padding-bottom:120px}
+.explicit-pause-screen{position:absolute;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;background:#070e20b8;backdrop-filter:blur(6px);color:#f1d59d;font:700 24px Georgia;pointer-events:auto}
+.explicit-pause-screen[hidden]{display:none}.explicit-pause-screen button{background:linear-gradient(#9a7539,#3c2a1c);color:#fff0c2;border:1px solid #e5bc6b;border-radius:10px;padding:14px 32px;font-size:16px;cursor:pointer}
+#app.explicitly-paused>.eterna-hud{pointer-events:none}

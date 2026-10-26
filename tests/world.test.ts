@@ -16,7 +16,7 @@ describe('procedural world preserves terrain and shoreline physics', () => {
     const centre = new Vector3();
     const corner = new Vector3();
     // Test both triangle orientations across every region, including the lake and mountains.
-    for (let cell = 0; cell < 16384; cell += 137) {
+    for (let cell = 0; cell < world.terrainSegments**2; cell += 137) {
       for (let half = 0; half < 2; half++) {
         centre.set(0,0,0);
         for (let cornerIndex = 0; cornerIndex < 3; cornerIndex++) {
@@ -60,8 +60,9 @@ describe('procedural world preserves terrain and shoreline physics', () => {
     });
     expect(waterMaterial).toBeDefined();
     const image = waterMaterial!.uniforms.heightMap.value.image;
-    expect(image.width).toBe(129);
-    expect(image.height).toBe(129);
+    expect(image.width).toBe(world.terrainSegments+1);
+    expect(image.height).toBe(world.terrainSegments+1);
+    expect(waterMaterial!.uniforms.terrainSegments.value).toBe(world.terrainSegments);
     const terrain = scene.getObjectByName('Triangulated terrain') as Mesh;
     const positions = terrain.geometry.getAttribute('position');
     for(let i=0;i<image.data.length;i++) {

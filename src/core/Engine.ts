@@ -1,3 +1,4 @@
+import {simulationRunning} from './GameLoop';
 import {ArenaMapScene} from '../world/ArenaMapScene';
 import {RealtimeArenaUI} from '../ui/ArenaUI';
 import type {PvPMatch} from '../combat/PvPTypes';
@@ -174,6 +175,8 @@ export class Engine {
   private shadowTimer=0;
   private shadowInstallTimer=0;
   private playing = false;
+  private paused=false;
+  private readonly pauseScreen=document.createElement('section');
   private openingProgress:number|null=null;
   private openingDragon?:AnimatedGLB;
   private running = false;
@@ -352,6 +355,8 @@ export class Engine {
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
     this.arenaUI=new RealtimeArenaUI(this.container,this);
+    const pause=document.createElement('button');pause.textContent='Ⅱ Pausa';pause.setAttribute('aria-label','Pausar jogo / Pause game');pause.onclick=()=>this.setPaused(true);this.hud.registerShortcut(pause);
+    this.pauseScreen.className='explicit-pause-screen';this.pauseScreen.hidden=true;this.pauseScreen.innerHTML='<strong>ETERNA · PAUSA</strong><button type="button">▶ Continuar / Resume</button>';this.pauseScreen.querySelector('button')!.onclick=()=>this.setPaused(false);this.container.append(this.pauseScreen);this.disposers.push(()=>{pause.remove();this.pauseScreen.remove();});
     this.applyPreferences();
     this.phase2Changed();
     if(this.progress.waypoint)this.setWaypoint(this.progress.waypoint);
@@ -494,24 +499,27 @@ export class Engine {
     this.lastTime = now;
     const dt = Math.min(0.05, Math.max(0.001, rawDt));
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
-    this.elapsed += dt;
+    if(!this.paused&&!this.mapLoading&&!this.dungeonLoading)this.elapsed += dt;
     const input = this.hud.readInput();
     if(this.arenaMap){this.tickArena(dt,input);return;}
-    const active = this.playing && !this.arenaUI.blocking && !this.mapLoading && !this.phase2UI.blocking && !this.hud.blocking && !this.hub.blocking && !this.hudEditor.active && !this.admin.blocking && !this.gacha.blocking && !this.journal.blocking && !this.dungeonUI.blocking && !this.dungeonLoading && !this.npcs.blocking && !document.hidden;
+    const active=simulationRunning({playing:this.playing,characterChosen:this.progress.chosen,loading:this.mapLoading||this.dungeonLoading,paused:this.paused});
+    const menuOpen=this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking||this.dungeonUI.blocking||this.npcs.blocking;
+    this.container.classList.toggle('live-menu',active&&menuOpen&&!this.hudEditor.active);
+    if(this.hudEditor.active)Object.assign(input,emptyInput());
     if(!active)this.hud.resetInput();
-    if(this.channel)this.portalVfx.update(dt,this.channel.remaining);
-    this.progress.tick(document.hidden?0:dt);
+    if(this.channel)this.portalVfx.update(active?dt:0,this.channel.remaining);
+    this.progress.tick(active?dt:0);
     this.phase2Rewards.tick(dt,active);
     if(this.phase2UI.isArenaOpen)this.phase2Arena.tick(dt);
     if(active)this.phase2Market.tick(dt);
-    this.phase2Gathering.update(dt,this.hero.position,active&&!this.dungeon.active);
+    this.phase2Gathering.update(active?dt:0,this.hero.position,active&&!this.dungeon.active);
     this.phase2Gathering.tickBuffs(active?dt:0);
-    this.phase2Weather.update(dt,this.hero.position);
-    this.recentCombat=Math.max(0,this.recentCombat-dt);
+    this.phase2Weather.update(active?dt:0,this.hero.position);
+    this.recentCombat=Math.max(0,this.recentCombat-(active?dt:0));
     this.updateJourney(dt,active,input);
     updateActorVisibility(this.scene,this.camera);
-    this.npcs.update(dt,this.camera,this.hero.position,active);
-    this.portals.update(dt,this.camera,this.hero.position,active);
+    this.npcs.update(active?dt:0,this.camera,this.hero.position,active);
+    this.portals.update(active?dt:0,this.camera,this.hero.position,active);
     this.quests.refreshDaily();
     this.quests.updateMilestones(
       this.inventory.level,
@@ -591,8 +599,8 @@ export class Engine {
       inWater: this.hero.machine.state === 'swim' || this.hero.machine.state === 'dive',
       boss: active && !!boss,
     });
-    // Opaque menus and the summon canvas do not need a second live 3D scene underneath.
-    if(this.playing&&(this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking)){this.updateHUD();return;}
+    // Menus no longer short-circuit rendering or any simulation subsystem.
+    if(this.playing&&!active){this.updateHUD();return;}
     this.shadowInstallTimer+=dt;if(this.shadowInstallTimer>2){disableCharacterCulling(this.hero.model);this.installShadows();this.shadowInstallTimer=0;}
     if(matchMedia('(pointer:coarse)').matches&&active){const ratio=this.frameBudget.update(rawDt,this.renderer.getPixelRatio());if(ratio!==this.renderer.getPixelRatio()){this.renderer.setPixelRatio(ratio);this.composer.setPixelRatio(ratio);this.resize();}}
     this.shadowTimer+=dt;if(this.shadowTimer>=1/30){this.renderer.shadowMap.needsUpdate=true;this.shadowTimer=0;}
@@ -643,6 +651,10 @@ export class Engine {
     this.camera.position.sub(this.scratch);
   };
 
+  setPaused(paused:boolean):void {
+    if(this.arenaMap){this.hud.notify('O PvP online continua em tempo real.','info');return;}
+    this.paused=paused;this.pauseScreen.hidden=!paused;this.hud.resetInput();this.container.classList.toggle('explicitly-paused',paused);
+  }
   openPvP():void {if(!this.playing||!this.progress.chosen)return;this.arenaUI.open();}
   captureArenaReturn():boolean {
     if(this.mapLoading||this.dungeon.active||this.dungeonLoading||this.arenaMap||!this.hero.alive)return false;
@@ -653,6 +665,7 @@ export class Engine {
     if(!this.arenaReturn)throw Error('Ponto de retorno indisponível.');
     const self=match.fighters.find(f=>f.id===selfId);if(!self)throw Error('Combatente ausente.');
     Object.assign(this.arenaReturn,{stats:{...this.hero.stats},hp:this.hero.hp,mana:this.hero.mana,classId:this.classId,godMode:this.hero.godMode});
+    this.setPaused(false);this.container.classList.remove('live-menu');
     this.hub.close();this.phase2UI.close();this.hud.closeMenus();this.dungeonUI.close();this.admin.close();
     this.progress.autoFarm=false;this.autoButton.hidden=true;this.channel=null;this.portalVfx.root.visible=false;this.farmController.reset();
     this.hud.resetInput();this.mapLoading=true;this.mapLoadingScreen.show('COLISEU IMPERIAL · '+match.size+'×'+match.size);
@@ -739,7 +752,7 @@ export class Engine {
     switch(action){
       case 'admin-open':this.hub.close();this.admin.open();ok=true;break;
       case 'evolution-open':this.hub.close();this.journal.open('wings');ok=true;break;
-      case 'gacha10':case 'gacha':{this.hud.resetInput();return this.gacha.open(action==='gacha10'?10:1,p.banner)?'Invocação iniciada / Summoning started':(p.language==='pt'?'Tickets insuficientes ou mochila cheia':'Not enough tickets or inventory full');}
+      case 'gacha10':case 'gacha':{return this.gacha.open(action==='gacha10'?10:1,p.banner)?'Invocação iniciada / Summoning started':(p.language==='pt'?'Tickets insuficientes ou mochila cheia':'Not enough tickets or inventory full');}
       case 'edit-hud':this.hub.close();this.hud.resetInput();this.hudEditor.enter();ok=true;break;
       case 'class':
         if (!(data.id in CLASS_DEFINITIONS))break;
@@ -921,7 +934,7 @@ export class Engine {
       const node=this.phase2Gathering.nodes.find(n=>n.cooldown>=0);if(node)destination={x:node.x,z:node.z};
     }else if(quest.goal==='kill'){
       const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target).sort((a,b)=>a.position.distanceToSquared(this.hero.position)-b.position.distanceToSquared(this.hero.position))[0];
-      if(target)destination={x:target.position.x,z:target.position.z};
+      if(target)destination={x:target.position.x,z:target.position.z};else{const spot=this.enemies.zones.map(z=>z.spot).filter(s=>s.kind===quest.target).sort((a,b)=>Math.hypot(a.x-this.hero.position.x,a.z-this.hero.position.z)-Math.hypot(b.x-this.hero.position.x,b.z-this.hero.position.z))[0];if(spot)destination={x:spot.x,z:spot.z};}
     }
     if(quest.goal==='level'||quest.goal==='refine'||quest.goal==='wing'||quest.goal==='mount'){
       this.hub.open('talents');return;
@@ -1089,10 +1102,9 @@ export class Engine {
       level:this.inventory.level,unlocked:this.progress.unlockedRegions,adminOverride:this.hero.godMode,
       inCombat:this.recentCombat>0,inDungeon:this.dungeon.active,channeling:this.mapLoading,
     },this.quests);
-    if(!permission.ok){this.hud.notify('Portal selado: conclua as missões locais e alcance o nível necessário.','warning');return;}
-    const gate=mapDefinition(this.mapInstances.regionId).exit;
-    const back={x:-9,z:23};
-    if(Math.min(Math.hypot(this.hero.position.x-gate.x,this.hero.position.z-gate.z),Math.hypot(this.hero.position.x-back.x,this.hero.position.z-back.z))>2)return;
+    if(!permission.ok){this.hud.notify('Portal selado: conclua as missões principais desta região.','warning');return;}
+    if(!this.portals.touching(id,this.hero.position))return;
+    for(const quest of this.quests.all().filter(q=>q.category==='story'&&q.region===this.mapInstances.regionId)){const state=this.quests.progressOf(quest);if(state.ready&&!state.claimed)this.claimQuest(quest.id);}
     void this.transitionToMap(id);
   }
 
@@ -1229,7 +1241,7 @@ export class Engine {
       if (!(object instanceof Mesh)) return;
       let parent=object.parent,hero=false;while(parent){if(parent===this.hero.model||parent===this.hero.rig.root){hero=true;break;}parent=parent.parent;}
       const building=object.name==='Batched village architecture'||object.userData.majorBuilding===true;
-      const authoredEnvironment=object.name.startsWith('Instanced ')||object.userData.worldDecoration===true;
+      const authoredEnvironment=object.name.startsWith('Instanced ')&&!object.name.includes('tree-')||object.userData.worldDecoration===true;
       // Respect casts from imported mounts, NPCs, bosses and portal arches.
       // Imported trees are InstancedMesh and receive CSM via setupMaterial.
       object.castShadow=object.castShadow||authoredEnvironment||(hero&&!object.name.includes('alpha wing'))||building;
@@ -1304,6 +1316,7 @@ export class Engine {
     const boss = this.dungeon.active ? this.enemies.enemies.find(enemy => enemy.boss && enemy.alive) : undefined;
     const worldThreat=this.dungeon.active?undefined:this.enemies.enemies.find(enemy=>enemy.boss&&enemy.alive&&enemy.position.distanceTo(this.hero.position)<45);
     this.hud.update({
+      regionExit:mapDefinition(this.mapInstances.regionId).exit,
       worldThreat:worldThreat?{distance:worldThreat.position.distanceTo(this.hero.position)}:undefined,
       hp: this.hero.hp, maxHp: this.hero.maxHp, mana: this.hero.mana, maxMana: this.hero.stats.maxMana,
       level: this.inventory.level, xp: this.inventory.xp, xpToNext: this.inventory.xpToNext,

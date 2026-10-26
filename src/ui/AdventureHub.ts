@@ -122,10 +122,10 @@ export class AdventureHub {
     if(tab==='arena'){this.game.openPvP();return;}
     if(this.game.arenaUI?.activeMap)return;
     if(tab==='base')tab='inventory';
-    setScreenPhase(this.root.parentElement!,tab==='classes'?'class-selection':'modal');
+    setScreenPhase(this.root.parentElement!,tab==='classes'&&!this.game.progress.chosen?'class-selection':'modal');
     if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
     if(this.tab!==tab){this.lastResult='';this.resetScroll=true;}
-    this.navOpen=false;this.visible=true;this.tab=tab;this.root.hidden=false;this.game.progress.autoFarm=false;this.render();this.root.querySelector<HTMLElement>('[data-do=close]')?.focus();
+    this.navOpen=false;this.visible=true;this.tab=tab;this.root.hidden=false;this.render();this.root.querySelector<HTMLElement>('[data-do=close]')?.focus();
     if(['arena','clan','market'].includes(tab))void this.poll();
   }
   openForge():void {this.forgeExpanded=true;this.forgeTab='refine';this.open('inventory');}

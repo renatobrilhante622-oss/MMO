@@ -1,3 +1,4 @@
+import {mapDefinition} from './maps/MapDefinitions';
 import {Box3,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3} from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 export type GatherKind='ore'|'herb'|'chest';
@@ -39,12 +40,12 @@ export class GatheringSystem{
    const r=rng(9147+regionId.split('').reduce((v,c)=>v+c.charCodeAt(0),0)*33);
    for(let i=0;i<(regionId==='dungeon'?0:27);i++){
     const kind:GatherKind=i%9===0?'chest':i%2===0?'ore':'herb';
-    const x=(r()-.5)*232,z=(r()-.5)*232;
+    const x=(r()-.5)*(mapDefinition(regionId).size-60),z=(r()-.5)*(mapDefinition(regionId).size-60);
     if(Math.hypot(x,z-18)<19||this.heightAt(x,z)<2)continue;
     this.nodes.push({id:regionId+'-'+i,kind,x,z,cooldown:kind==='chest'?360:140});
    }
    if(regionId!=='dungeon')for(let i=0;i<9;i++){
-    const z=-24-i*12,x=Math.sin(z*.028)*4+2;
+    const z=i<3?-24-i*12:-24-(i-2)*Math.abs(mapDefinition(regionId).exit.z)*.12,x=Math.sin(z*.028)*4+2;
     this.nodes.push({id:regionId+'-campaign-'+i,kind:i%2?'ore':'herb',x,z,cooldown:140});
    }
    this.label.className='gather-context';this.label.hidden=true;
