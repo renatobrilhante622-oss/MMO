@@ -465,6 +465,10 @@ export class ParticleSystem3D {
     return { capacity: this.capacity, spawned: this.cursor, rings: this.rings.length, trails: this.trails.length };
   }
 
+  clear():void {
+    while(this.rings.length)this.removeRing(0);while(this.trails.length)this.removeTrail(0);
+    this.timing.fill(0);this.geometry.getAttribute('timing').needsUpdate=true;this.cursor=0;
+  }
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;

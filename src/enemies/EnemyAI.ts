@@ -1,3 +1,5 @@
+import {mapDefinition} from '../world/maps/MapDefinitions';
+import type {ModelName} from '../assets/AnimatedGLB';
 import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, Scene, SphereGeometry, Vector3 } from 'three';
 import type { Body } from 'cannon-es';
 import type { Combatant } from '../core/GameTypes';
@@ -101,6 +103,7 @@ export class Enemy implements Combatant {
     return dealt;
   }
 
+  setBossPresentation(model:ModelName,color:number):void{this.rig.setBossModel(model,color);}
   setActive(active:boolean):void {
     this.model.visible=active;if(active&&this.dormant){this.body.collisionResponse=true;this.body.wakeUp();this.dormant=false;}
     else if(!active&&!this.dormant){this.body.velocity.setZero();this.body.sleep();this.body.collisionResponse=false;this.telegraph.visible=false;this.attackWindup=-1;this.dormant=true;}
@@ -193,7 +196,7 @@ export class EnemyAI {
   private levelAtPosition(x:number,z:number){
     const region=this.regionAtPosition(x,z);
     if(!this.activeRegionId)return regionalLevel(x,z);
-    const distance=Math.min(1,Math.hypot(x,z-18)/63);
+    const distance=Math.min(1,Math.hypot(x,z-18)/Math.abs(mapDefinition(this.activeRegionId).exit.z));
     return Math.round(region.minLevel+(region.maxLevel-region.minLevel)*distance);
   }
   /** No cross-map actors survive after a successful region swap. */
@@ -208,11 +211,12 @@ export class EnemyAI {
     // Position mobs around authored regional spots, never inside the safe camp.
     for(let index=0;index<24;index++){
       const angle=index*2.399963;
-      const radius=34+(index%5)*6;
-      const x=Math.cos(angle)*radius;
-      const z=18+Math.sin(angle)*radius;
+      const path=mapDefinition(regionId);
+      const stage=(index+1)/25;
+      const x=Math.cos(angle)*(12+(index%5)*4);
+      const z=-18+(path.exit.z+35)*stage;
       const height=this.physics.terrainHeight(x,z);
-      if(height<=this.physics.waterLevel+.5)continue;
+      if(height<=this.physics.waterLevel+.5||regionId==='eclipse'&&height<2)continue;
       this.spawn(region.kinds[index%region.kinds.length],
         new Vector3(x,height+1.4,z),
         Math.round(region.minLevel+(region.maxLevel-region.minLevel)*(index%6)/5));
@@ -246,13 +250,15 @@ export class EnemyAI {
       if (!enemy.alive && enemy.deathTime > 1.1) { enemy.dispose(); this.enemies.splice(i, 1); }
     }
     for (const region of (this.dungeonMode?[]:this.activeRegionId?REGIONS.filter(region=>region.id===this.activeRegionId):REGIONS)) {
-      const bossX=this.activeRegionId?region.boss.x-region.center.x:region.boss.x;
-      const bossZ=this.activeRegionId?18+region.boss.z-region.center.z:region.boss.z;
+      const bossX=this.activeRegionId?mapDefinition(this.activeRegionId).boss.x:region.boss.x;
+      const bossZ=this.activeRegionId?mapDefinition(this.activeRegionId).boss.z:region.boss.z;
       this.bossRespawn[region.id] = Math.max(0,(this.bossRespawn[region.id] ?? 0)-dt);
       if (hero.position.distanceTo(new Vector3(bossX,hero.position.y,bossZ)) < 55 && this.bossRespawn[region.id] === 0 && !this.enemies.some(e=>e.boss&&e.alive&&Math.hypot(e.home.x-bossX,e.home.z-bossZ)<5)) {
         this.bossRespawn[region.id]=300;
         const x=bossX,z=bossZ;
-        this.spawn('boss', new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);
+        const boss=this.spawn('boss',new Vector3(x,this.physics.terrainHeight(x,z)+2,z),region.maxLevel,true);
+        const forms:Record<string,ModelName>={aurora:'Creature_wolf',crypt:'KayKit_Skeleton_Warrior',highlands:'Creature_golem',rift:'Quaternius_demon',eclipse:'Creature_dragon'};
+        boss.setBossPresentation(forms[region.id],Number.parseInt(region.color.slice(1),16));
       }
     }
     this.spawnTimer -= dt;
@@ -262,7 +268,7 @@ export class EnemyAI {
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;
       const y = this.physics.terrainHeight(x, z);
-      if (Math.abs(x) < 135 && Math.abs(z) < 135 && y > this.physics.waterLevel + .5 && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(this.regionAtPosition(x,z).kinds[this.spawnIndex % this.regionAtPosition(x,z).kinds.length], new Vector3(x, y + 1.5, z), this.levelAtPosition(x,z));
+      if (Math.abs(x) < this.physics.terrainExtent && Math.abs(z) < this.physics.terrainExtent && y > this.physics.waterLevel + .5 && (this.activeRegionId!=='eclipse'||y>2) && Math.hypot(x, z - 18) > 28 && Math.hypot(x, z + 70) > 23) this.spawn(this.regionAtPosition(x,z).kinds[this.spawnIndex % this.regionAtPosition(x,z).kinds.length], new Vector3(x, y + 1.5, z), this.levelAtPosition(x,z));
     }
   }
 

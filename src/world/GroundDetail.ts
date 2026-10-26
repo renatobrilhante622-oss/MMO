@@ -36,6 +36,7 @@ export class GroundDetail {
     ];
     for(const entry of cover){
       if(this.disposed)return;
+      if(this.region!=='aurora'&&entry.surface!=='stone')continue;
       let gltf:GLTF;
       try{gltf=await authoredModel(entry.file);}catch(error){console.warn('CC0 ground cover unavailable:',entry.file,error);continue;}
       if(this.disposed)return;

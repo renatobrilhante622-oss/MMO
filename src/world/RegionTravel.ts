@@ -29,18 +29,14 @@ export function travelPermission(id:string,state:RegionTravelState):RegionTravel
   if(state.channeling)return {ok:false,reason:'busy'};
   if(state.inCombat)return {ok:false,reason:'combat'};
   if(!state.adminOverride&&state.level<region.minLevel)return {ok:false,reason:'level'};
-  // Character level is the access gate; story unlocks never deadlock a restored level-100 save.
+  if(!state.adminOverride&&!state.unlocked.includes(id))return {ok:false,reason:'locked'};
   return {ok:true,region};
 }
 /** Every region has a deterministic safe spawn inside the existing navigation bounds. */
 export function regionArrival(id:string):{x:number;z:number}|null{
   const region=REGIONS.find(r=>r.id===id);
   if(!region)return null;
-  const arrivals:Record<string,{x:number;z:number}>={
-    aurora:{x:0,z:18},crypt:{x:-58,z:-35},highlands:{x:96,z:-78},
-    rift:{x:0,z:-71},eclipse:{x:-89,z:89}
-  };
-  return {...arrivals[id]};
+  return {x:0,z:18};
 }
 export function nextRegion(id:string):Region|undefined {
   const index=REGIONS.findIndex(r=>r.id===id);

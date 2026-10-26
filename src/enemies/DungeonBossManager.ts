@@ -1,3 +1,4 @@
+import {dungeonMap} from '../world/dungeons/DungeonMaps';
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, RingGeometry, Scene, Vector3 } from 'three';
 import type { Combatant } from '../core/GameTypes';
 import { EventBus } from '../core/GameTypes';
@@ -106,7 +107,7 @@ export class DungeonBossManager {
         this.events.emit('message', { text: `Guardião · Fase ${phase}${phase === 3 ? ' — Fúria do vazio!' : ''}`, tone: 'warning' });
         this.bossTimer = 1.4;
       }
-      this.status = `Guardião do Vazio · Fase ${phase} · ${Math.ceil(this.boss.hp)} / ${this.boss.maxHp} HP`;
+      this.status = `${this.definition.bossName[0]} · Fase ${phase} · ${Math.ceil(this.boss.hp)} / ${this.boss.maxHp} HP`;
       this.bossTimer -= dt;
       if (this.bossTimer <= 0) {
         this.bossTimer = phase === 1 ? 4.2 : phase === 2 ? 3.2 : 2.3;
@@ -125,12 +126,13 @@ export class DungeonBossManager {
     if (this.wave === this.definition.waves + 1) {
       const position = (this.roomAtWave?.(this.wave,this.definition.waves)??this.portalPosition).clone().add(new Vector3(0,3,0));
       this.boss = this.enemies.spawn('boss', position, this.definition.level + 2 + (this.floor-1)*3, true);
+      const profile=dungeonMap(this.definition.id);this.boss.setBossPresentation(profile.bossModel,profile.accent);
       this.waveEnemies.push(this.boss); this.bossTimer = 2;
-      this.events.emit('message', { text: 'O Guardião do Vazio despertou. Saia das áreas vermelhas!', tone: 'warning' });
+      this.events.emit('message', { text: this.definition.bossName[0]+' despertou. Saia das áreas vermelhas!', tone: 'warning' });
       return;
     }
     const roomCenter=this.roomAtWave?.(this.wave,this.definition.waves)??this.portalPosition;
-    const kinds = this.wave === 1 ? ['slime', 'wolf'] : this.wave === 2 ? ['skeleton', 'wolf', 'wraith'] : ['golem', 'wraith', 'skeleton'];
+    const kinds = this.definition.id==='tombs'?['skeleton','wraith']:this.definition.id==='titan'?['golem','wolf']:this.definition.id==='void'?['golem','wraith']:['wraith','skeleton'];
     const count = Math.min(12, 3 + this.wave * 2);
     for (let i = 0; i < count; i++) {
       const angle = i * Math.PI * 2 / count + this.wave;

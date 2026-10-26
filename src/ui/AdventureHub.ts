@@ -1,3 +1,4 @@
+import {mapDefinition} from '../world/maps/MapDefinitions';
 import {CLASS_IDENTITIES} from '../player/ClassVisualIdentity';
 import {skinDisplayName} from '../player/SkinIdentity';
 import type { Engine } from '../core/Engine';
@@ -8,7 +9,7 @@ import {forgeUpgradeButton,forgeComparisonHtml,forgeGemWorkbench} from './ForgeU
 import { EPIGRAPHS } from '../rpg/ClassEpigraphSystem';
 import { CLASS_DEFINITIONS, CLASS_IDS } from '../combat/ClassSystem';
 import { ATTRIBUTES, COSMETICS, SLOT_COSTS, type Language } from '../progression/AdventureProgress';
-import { DUNGEONS, REGIONS, regionAt, DUNGEON_DIFFICULTIES, dungeonVariant } from '../world/Regions';
+import { DUNGEONS, REGIONS, DUNGEON_DIFFICULTIES, dungeonVariant } from '../world/Regions';
 import {renderClanVisualHub} from './ClanVisualHub';
 import { itemIcon, type IconKind } from './ItemIconRenderer';
 import { CharacterPreview } from './CharacterPreview';
@@ -104,20 +105,21 @@ export class AdventureHub {
     this.root.addEventListener('click',event=>{
       if(!(event.target as HTMLElement).matches('canvas[data-world-map]'))return;
       const canvas=event.target as HTMLCanvasElement,rect=canvas.getBoundingClientRect();
-      const mouse=event as MouseEvent,x=((mouse.clientX-rect.left)/rect.width)*280-140,z=((mouse.clientY-rect.top)/rect.height)*280-140;
+      const mouse=event as MouseEvent,extent=this.game.terrain.terrainSize,x=((mouse.clientX-rect.left)/rect.width)*extent-extent/2,z=((mouse.clientY-rect.top)/rect.height)*extent-extent/2;
       this.mapPin={x,z};this.render();
     },{signal:this.abort.signal});
     document.addEventListener('keydown',event=>{
       if(event.code==='Escape'&&this.visible){event.preventDefault();this.close();}
       if(event.code==='Tab'&&this.visible){const controls=[...this.root.querySelectorAll<HTMLElement>('button:not([disabled]),input,select,[tabindex="0"]')];const first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
     },{signal:this.abort.signal});
-    this.productionTimer=window.setInterval(()=>this.paintProduction(),120);
+
     this.timer=window.setInterval(()=>{if(this.visible&&['arena','clan','market'].includes(this.tab))void this.poll();},1500);
   }
   get blocking():boolean{return this.visible;}
   private t(pt:string,en:string):string{return this.game.progress.language==='pt'?pt:en;}
   private label(value:readonly[string,string]):string{return value[this.game.progress.language==='pt'?0:1];}
   open(tab:Tab='talents'):void {
+    if(tab==='base')tab='inventory';
     setScreenPhase(this.root.parentElement!,tab==='classes'?'class-selection':'modal');
     if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
     if(this.tab!==tab){this.lastResult='';this.resetScroll=true;}
@@ -151,7 +153,7 @@ export class AdventureHub {
     const scroll=this.resetScroll?0:(this.root.querySelector<HTMLElement>('.adventure-content')?.scrollTop??0);this.resetScroll=false;
     const p=this.game.progress,inv=this.game.inventory;
     const groups:Array<[string,Array<[Tab,string,string]>]>=[
-      [this.t('PERSONAGEM','CHARACTER'),[['talents','Epígrafo','Epigraph'],['classes','Trocar classe','Switch class'],['inventory','Inventário e forja','Inventory & forge'],['collection','Coleção','Collection'],['base','Construções','Buildings'],['codex','Bestiário','Bestiary']]],
+      [this.t('PERSONAGEM','CHARACTER'),[['talents','Epígrafo','Epigraph'],['classes','Trocar classe','Switch class'],['inventory','Inventário e forja','Inventory & forge'],['collection','Coleção','Collection'],['codex','Bestiário','Bestiary']]],
       [this.t('AVENTURA','ADVENTURE'),[['dungeons','Masmorras','Dungeons']]],
       [this.t('RECOMPENSAS','REWARDS'),[['shop','Mercador da Aurora','Dawn Merchant'],['summon','Santuário de Invocação','Summoning Sanctuary'],['vip','Privilégios VIP','VIP Privileges'],['pass','Passe de Batalha','Battle Pass']]],
       [this.t('ONLINE LOCAL','LOCAL ONLINE'),[['arena','Arena PvP','PvP Arena'],['clan','Clã','Clan'],['market','Mercado','Market']]],
@@ -172,7 +174,7 @@ export class AdventureHub {
       case 'dungeons':content=this.dungeons();break;
       case 'pass':content=this.pass();break;
       case 'settings':content=this.settings();break;
-      case 'base':content=this.buildings();break;
+
       case 'codex':content=this.bestiary();break;
       default:content=this.onlinePanel();
     }
@@ -185,14 +187,6 @@ export class AdventureHub {
     if(stage&&this.online.view){this.arenaStage??=new ArenaStage();this.arenaStage.mount(stage,this.online.view);}else this.arenaStage?.hide();
   }
   private navIcon(tab:Tab):string {return menuIcon(tab);}
-  private paintProduction():void {
-    if(!this.visible||this.tab!=='base')return;
-    this.root.querySelectorAll<HTMLElement>('[data-production]').forEach(el=>{const state=this.game.base.production(el.dataset.production!);const fill=el.querySelector<HTMLElement>('i');if(fill)fill.style.width=Math.round(state.fraction*100)+'%';const text=el.querySelector('span');if(text)text.textContent=state.resource==='passive'?this.t('Bônus permanente','Permanent bonus'):Math.ceil(state.seconds)+'s';});
-  }
-  private buildings():string {
-    const names:Record<string,[string,string]>={forge:['Forja da Aurora','Dawn Forge'],alchemy:['Torre de Alquimia','Alchemy Tower'],stable:['Estábulo dos Guardiões','Guardian Stables'],mine:['Mina de Âmbar','Amber Mine']};
-    return `<div class="building-settlement">${this.game.base.buildings.map(b=>{const cost=this.game.base.cost(b.id),state=this.game.base.production(b.id);return `<section class="building-diorama">${buildingArt(b.id)}<div class="building-caption"><h2>${this.label(names[b.id])}</h2><div class="building-level"><i style="width:${b.level*10}%"></i><span>${b.level} / ${b.maxLevel}</span></div><details class="menu-lore"><summary>${this.t('Benefícios','Benefits')}</summary><p>${this.game.translate(b.description)}</p></details><div class="building-production" data-production="${b.id}"><i style="width:${state.fraction*100}%"></i><span>${state.resource==='passive'?this.t('Bônus permanente','Permanent bonus'):Math.ceil(state.seconds)+'s'}</span></div>${this.button('building',`${this.t('Melhorar','Upgrade')} · ${Number.isFinite(cost.gold)?cost.gold:'MAX'} ◈ · ${Number.isFinite(cost.crystals)?cost.crystals:0} ◇`,`data-id="${b.id}"`,b.level>=b.maxLevel)}</div></section>`;}).join('')}</div>`;
-  }
   private bestiary():string {
     return `<div class="bestiary-gallery">${this.game.codex.entries.map(e=>`<section class="bestiary-specimen">${beastArt(e.id)}<div><h2>${this.game.translate(e.name)}</h2><details class="menu-lore"><summary>${this.t('História','Lore')}</summary><p>${this.game.translate(e.description)}</p></details><div class="beast-research"><i style="width:${Math.min(100,e.kills/e.required*100)}%"></i><span>${e.kills} / ${e.required}</span></div><small>${this.game.translate(e.bonus)}</small></div></section>`).join('')}</div>`;
   }
@@ -228,11 +222,11 @@ export class AdventureHub {
   }
   private map():string {
     const p=this.game.progress;
-    return `<div class="expanded-map-grid"><section class="map-sheet">${this.mapSheet()}<div class="gps-confirm">${this.button('gps-apply',this.t('⌖ Marcar GPS','⌖ Set GPS'),'',!this.mapPin)}<span>${this.mapPin?`${Math.round(this.mapPin.x)}, ${Math.round(this.mapPin.z)}`:this.t('Toque no mapa para escolher um destino','Tap the map to choose a destination')}</span></div></section><aside class="map-teleport-bar"><h2>◇ ${this.t('Teleportes','Teleports')} <small>10</small></h2><input name="bookmark" maxlength="30" placeholder="${this.t('Nome do local','Location name')}" aria-label="${this.t('Nome do local','Location name')}"><div class="map-teleport-slots">${p.bookmarks.map((b,i)=>`<div class="map-teleport-slot ${p.slotUnlocked(i)?'unlocked':'locked'}"><span class="teleport-slot-number">${i+1}</span><div><b>${b?esc(b.name):this.t('Vazio','Empty')}</b><small>${i<4?this.t('Grátis','Free'):i<8?this.t('Moedas','Coins'):'VIP'}${b?' · '+Math.round(b.x)+', '+Math.round(b.z):''}</small></div><button data-do="teleport-record" data-index="${i}" aria-label="${this.t('Gravar slot','Save slot')} ${i+1}" title="${this.t('Gravar local atual','Save current location')}" ${p.slotUnlocked(i)?'':'disabled'}>⊕</button><button data-do="teleport" data-index="${i}" aria-label="${this.t('Viajar slot','Travel slot')} ${i+1}" ${!p.slotUnlocked(i)||!b||p.teleportCooldown>0?'disabled':''}>${p.teleportCooldown>0?Math.ceil(p.teleportCooldown)+'s':'➤'}</button></div>`).join('')}</div>${p.purchasedSlots<4?this.button('slot-buy','+ '+this.t('Slot','Slot')+' · '+SLOT_COSTS[p.purchasedSlots]+' ◈'):''}<small class="teleport-map-rule">${this.t('4 grátis · 4 moedas · 2 VIP · CD 45s','4 free · 4 coins · 2 VIP · 45s CD')}</small></aside></div>`;
+    return `<div class="expanded-map-grid"><section class="map-sheet">${this.mapSheet()}<div class="gps-confirm">${this.button('gps-apply',this.t('⌖ Marcar GPS','⌖ Set GPS'),'',!this.mapPin)}<span>${this.mapPin?`${Math.round(this.mapPin.x)}, ${Math.round(this.mapPin.z)}`:this.t('Toque no mapa para escolher um destino','Tap the map to choose a destination')}</span></div></section><aside class="map-teleport-bar"><h2>◇ ${this.t('Teleportes','Teleports')} <small>10</small></h2><input name="bookmark" maxlength="30" placeholder="${this.t('Nome do local','Location name')}" aria-label="${this.t('Nome do local','Location name')}"><div class="map-teleport-slots">${p.bookmarks.map((b,i)=>`<div class="map-teleport-slot ${p.slotUnlocked(i)?'unlocked':'locked'}"><span class="teleport-slot-number">${i+1}</span><div><b>${b?esc(b.name):this.t('Vazio','Empty')}</b><small>${i<4?this.t('Grátis','Free'):i<8?this.t('Moedas','Coins'):'VIP'}${b?' · '+Math.round(b.x)+', '+Math.round(b.z):''}</small></div><button data-do="teleport-record" data-index="${i}" aria-label="${this.t('Gravar slot','Save slot')} ${i+1}" title="${this.t('Gravar local atual','Save current location')}" ${p.slotUnlocked(i)?'':'disabled'}>⊕</button><button data-do="teleport" data-index="${i}" aria-label="${this.t('Viajar slot','Travel slot')} ${i+1}" ${!p.slotUnlocked(i)||!b||b.region!==this.game.mapInstances.regionId||p.teleportCooldown>0?'disabled':''}>${p.teleportCooldown>0?Math.ceil(p.teleportCooldown)+'s':'➤'}</button></div>`).join('')}</div>${p.purchasedSlots<4?this.button('slot-buy','+ '+this.t('Slot','Slot')+' · '+SLOT_COSTS[p.purchasedSlots]+' ◈'):''}<small class="teleport-map-rule">${this.t('4 grátis · 4 moedas · 2 VIP · Somente neste mapa · CD 45s','4 free · 4 coins · 2 VIP · Current map only · 45s CD')}</small></aside></div>`;
   }
   private mapSheet():string {
-    const pos=this.game.hero.position,p=this.game.progress,r=regionAt(pos.x,pos.z),distance=p.waypoint?Math.round(Math.hypot(pos.x-p.waypoint.x,pos.z-p.waypoint.z)):0;
-    return `<div class="atlas-toolbar"><div><span class="rpg-eyebrow">${this.t('ATLAS DE ASTER','ASTER ATLAS')}</span><h2>${this.label(r.name)}</h2></div><span>Lv. ${r.minLevel}–${r.maxLevel}</span></div><div class="atlas-frame" style="--atlas-landscape:url('${regionArtwork(r.id)}')"><canvas class="world-map" data-world-map width="1120" height="1120" aria-label="${this.t('Mapa mundi: clique para marcar GPS','World atlas: click to set GPS')}"></canvas><div class="atlas-player-pulse" style="left:${(pos.x+140)/2.8}%;top:${(pos.z+140)/2.8}%"></div>${this.mapPin?`<span class="map-pending-pin" style="left:${(this.mapPin.x+140)/2.8}%;top:${(this.mapPin.z+140)/2.8}%">⌖</span>`:''}<div class="atlas-caption">${this.t('OS REINOS DE ASTER','THE REALMS OF ASTER')} <span>✦</span></div></div><div class="atlas-legend"><span>♛ ${this.t('Chefe mundial','World boss')}</span><span>◇ ${this.t('Teleporte salvo','Saved teleport')}</span><span>↑ ${this.t('Sua posição','Your position')}</span><span class="gps-gold">┄ ${this.t('Rota GPS','GPS route')}</span></div><div class="atlas-toolbar"><span>${p.waypoint?`GPS · ${distance} m · ${this.game.gpsRoute.length?this.t('Rota segura','Safe route'):this.t('Sem caminho seguro','No safe route')}`:this.t('Clique no atlas para marcar um destino.','Click the atlas to mark a destination.')}</span>${this.button('waypoint-clear',this.t('Limpar GPS','Clear GPS'))}</div><div class="atlas-destinations">${REGIONS.map(r=>`<button data-do="gps-region" data-id="${r.id}" style="--region:${r.color}"><img src="${regionArtwork(r.id)}" alt="" loading="lazy" decoding="async"><span>${this.label(r.name)}</span><small>${r.minLevel}–${r.maxLevel}</small></button>`).join('')}</div><div class="atlas-monsters">${this.game.enemies.enemies.filter(e=>e.alive&&e.position.distanceTo(this.game.hero.position)<55).map(e=>this.button('gps-monster',`${this.game.translate(e.kind)} · Lv.${e.level}`,`data-id="${e.id}"`)).join('')}</div>`;
+    const pos=this.game.hero.position,p=this.game.progress,r=REGIONS.find(r=>r.id===this.game.mapInstances.regionId)??REGIONS[0],distance=p.waypoint?Math.round(Math.hypot(pos.x-p.waypoint.x,pos.z-p.waypoint.z)):0;
+    return `<div class="atlas-toolbar"><div><span class="rpg-eyebrow">${this.t('ATLAS DE ASTER','ASTER ATLAS')}</span><h2>${this.label(r.name)}</h2></div><span>Lv. ${r.minLevel}–${r.maxLevel}</span></div><div class="atlas-frame" style="--atlas-landscape:url('${regionArtwork(r.id)}')"><canvas class="world-map" data-world-map width="1120" height="1120" aria-label="${this.t('Mapa mundi: clique para marcar GPS','World atlas: click to set GPS')}"></canvas><div class="atlas-player-pulse" style="left:${(pos.x+this.game.terrain.terrainSize/2)/this.game.terrain.terrainSize*100}%;top:${(pos.z+this.game.terrain.terrainSize/2)/this.game.terrain.terrainSize*100}%"></div>${this.mapPin?`<span class="map-pending-pin" style="left:${(this.mapPin.x+this.game.terrain.terrainSize/2)/this.game.terrain.terrainSize*100}%;top:${(this.mapPin.z+this.game.terrain.terrainSize/2)/this.game.terrain.terrainSize*100}%">⌖</span>`:''}<div class="atlas-caption">${this.t('OS REINOS DE ASTER','THE REALMS OF ASTER')} <span>✦</span></div></div><div class="atlas-legend"><span>♛ ${this.t('Chefe mundial','World boss')}</span><span>◇ ${this.t('Teleporte salvo','Saved teleport')}</span><span>↑ ${this.t('Sua posição','Your position')}</span><span class="gps-gold">┄ ${this.t('Rota GPS','GPS route')}</span></div><div class="atlas-toolbar"><span>${p.waypoint?`GPS · ${distance} m · ${this.game.gpsRoute.length?this.t('Rota segura','Safe route'):this.t('Sem caminho seguro','No safe route')}`:this.t('Clique no atlas para marcar um destino.','Click the atlas to mark a destination.')}</span>${this.button('waypoint-clear',this.t('Limpar GPS','Clear GPS'))}</div><div class="atlas-destinations">${REGIONS.filter(r=>r.id===this.game.mapInstances.regionId).map(r=>`<button data-do="gps-region" data-id="${r.id}" style="--region:${r.color}"><img src="${regionArtwork(r.id)}" alt="" loading="lazy" decoding="async"><span>${this.label(r.name)}</span><small>${r.minLevel}–${r.maxLevel}</small></button>`).join('')}</div><div class="atlas-monsters">${this.game.enemies.enemies.filter(e=>e.alive&&e.position.distanceTo(this.game.hero.position)<55).map(e=>this.button('gps-monster',`${this.game.translate(e.kind)} · Lv.${e.level}`,`data-id="${e.id}"`)).join('')}</div>`;
   }
   private drawMap():void {
     const c=this.root.querySelector<HTMLCanvasElement>('canvas[data-world-map]');if(!c)return;

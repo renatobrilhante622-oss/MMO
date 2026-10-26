@@ -1,4 +1,4 @@
-import {DUNGEONS} from '../world/Regions';
+import {DUNGEONS,dungeonVariant} from '../world/Regions';
 import {dungeonArtwork} from './CardArtwork';
 import {menuIcon} from './MenuIcons';
 export type DungeonDifficulty='normal'|'elite'|'nightmare'|'abyssal';
@@ -12,8 +12,8 @@ export const DUNGEON_TIERS:readonly DungeonTier[]=[
 export const DUNGEON_SHOWCASE:readonly {id:string;name:string;subtitle:string;texture:string}[]=[
   {id:'tombs',name:'Catacumbas do Rei Ossudo',subtitle:'Catacumba esquecida',texture:'PavingStones046'},
   {id:'titan',name:'Templo do Cristal Corrompido',subtitle:'Ruínas arcanas',texture:'Snow010A'},
-  {id:'void',name:'Câmara de Magma',subtitle:'Forja subterrânea',texture:'Ground093C'},
-  {id:'eclipse',name:'Trono do Abismo',subtitle:'Confronto final',texture:'Ground071'},
+  {id:'void',name:'Fornalha do Titã de Magma',subtitle:'Forja subterrânea',texture:'Ground093C'},
+  {id:'eclipse',name:'Cidadela do Vazio Abissal',subtitle:'Confronto final',texture:'Ground071'},
 ];
 export class DungeonUI {
  readonly trigger=document.createElement('button');
@@ -34,7 +34,7 @@ export class DungeonUI {
  }
  constructor(private readonly host:HTMLElement,private readonly level:()=>number,
    private readonly onEnter:(id:string,difficulty:DungeonDifficulty)=>boolean,
-   private readonly onExit:()=>void){
+   private readonly onExit:()=>void,private readonly region?:()=>string){
    this.trigger.type='button';this.trigger.className='eterna-dungeon-trigger';
    this.trigger.innerHTML=menuIcon('dungeons')+'<span>MASMORRAS</span>';
    this.trigger.onclick=()=>this.open();
@@ -50,7 +50,7 @@ export class DungeonUI {
    host.append(this.trigger,this.backdrop,this.status);
  }
  get blocking():boolean{return this.openFlag;}
- open():void{this.openFlag=true;this.backdrop.hidden=false;this.render();}
+ open():void{const local=DUNGEONS.find(d=>d.region===this.region?.());if(local)this.selected=local.id;this.openFlag=true;this.backdrop.hidden=false;this.render();}
  close():void{this.openFlag=false;this.backdrop.hidden=true;}
  private render():void{
    this.body.replaceChildren();
@@ -78,8 +78,10 @@ export class DungeonUI {
    name.textContent=DUNGEON_SHOWCASE.find(d=>d.id===this.selected)!.name;
    const level=document.createElement('p');
    const selected=DUNGEON_TIERS.find(d=>d.id===this.difficulty)!;
-   const required=Math.max(selected.minLevel,DUNGEONS.find(d=>d.id===this.selected)?.level??10);
-   level.textContent='Nível recomendado: '+required+'+ • 3 salas e chefe final';
+   const base=DUNGEONS.find(d=>d.id===this.selected)!;
+   const native=!this.region||base.region===this.region();
+   const required=Math.max(selected.minLevel,dungeonVariant(base,this.difficulty).level);
+   level.textContent='Nível recomendado: '+required+'+ • 3 salas e Sala do Trono';
    const tiers=document.createElement('div');tiers.className='dungeon-tiers';
    for(const tier of DUNGEON_TIERS){
      const button=document.createElement('button');button.type='button';
@@ -94,8 +96,8 @@ export class DungeonUI {
    reward.textContent='✦ DROPS • '+selected.rarity+'  |  🟡 Ouro  |  💎 Cristais';
    const start=document.createElement('button');start.type='button';
    start.className='dungeon-accept';
-   start.disabled=this.level()<required;
-   start.textContent=start.disabled?'🔒 REQUER LV. '+required:'⚔ ENTRAR NA MASMORRA';
+   start.disabled=this.level()<required||!native;
+   start.textContent=!native?'🔒 VIAJE ATÉ A REGIÃO DESTA MASMORRA':start.disabled?'🔒 REQUER LV. '+required:'⚔ ENTRAR NA MASMORRA';
    start.onclick=()=>{if(this.onEnter(this.selected,this.difficulty))this.close();};
    details.append(name,level,tiers,reward,start);
    panel.append(gallery,details);this.body.append(panel);

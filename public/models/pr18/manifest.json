@@ -1,0 +1,126 @@
+{
+  "license": "CC0-1.0",
+  "sourceLicense": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/LICENSE",
+  "assets": [
+    {
+      "id": "Bridge",
+      "file": "models/pr18/Bridge.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-nature-kit/models/bridge_stone/bridge_stone.glb",
+      "license": "CC0-1.0",
+      "bytes": 17708,
+      "sha256": "b8b311f525ad616fcdebb6463db8b0c7710af58eb45308b54c08bcb290a2315e"
+    },
+    {
+      "id": "Village",
+      "file": "models/pr18/Village.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/quaternius-medievalvillage/models/blacksmith/blacksmith.glb",
+      "license": "CC0-1.0",
+      "bytes": 462392,
+      "sha256": "0e68c056d6634913557f3aaaa4363a9ab71b366cefa558b8dcceb95e46496e94"
+    },
+    {
+      "id": "MossRuins",
+      "file": "models/pr18/MossRuins.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-graveyard-kit/models/crypt_small/crypt_small.glb",
+      "license": "CC0-1.0",
+      "bytes": 47836,
+      "sha256": "92a4629cf7bca31418787987a77e6b4f8cb7bcc125d161ad54578923d0f63d11"
+    },
+    {
+      "id": "Crypt",
+      "file": "models/pr18/Crypt.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kaykit-halloween-bits/models/crypt/crypt.glb",
+      "license": "CC0-1.0",
+      "bytes": 75100,
+      "sha256": "a9f1ebc03e2e23531861754faf1de6e245efea9f5276085b4b95fdde7c1e7edb"
+    },
+    {
+      "id": "Coffin",
+      "file": "models/pr18/Coffin.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kaykit-halloween-bits/models/coffin_decorated/coffin_decorated.glb",
+      "license": "CC0-1.0",
+      "bytes": 96560,
+      "sha256": "367ab6d3f8894adc1bbd0d4152704ce46405a525cab4ec7a7e78331e3d9e147e"
+    },
+    {
+      "id": "Skull",
+      "file": "models/pr18/Skull.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kaykit-halloween-bits/models/skull/skull.glb",
+      "license": "CC0-1.0",
+      "bytes": 29184,
+      "sha256": "a93f6b27a027f71bafe0a57ab33efd88be0fc17d47072534f7d36bd27db9202f"
+    },
+    {
+      "id": "SnowPine",
+      "file": "models/pr18/SnowPine.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-holiday-kit/models/tree_snow_a/tree_snow_a.glb",
+      "license": "CC0-1.0",
+      "bytes": 47256,
+      "sha256": "e59a7a25409003f229b35cfb7fe3d4b494a3db1ee837418acf582ea121f94e3f"
+    },
+    {
+      "id": "BlueCrystal",
+      "file": "models/pr18/BlueCrystal.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-space-kit/models/rock_crystals_large_a/rock_crystals_large_a.glb",
+      "license": "CC0-1.0",
+      "bytes": 26160,
+      "sha256": "cfe8f339f6be4a321e5f3822237002b6a70f9c5d03596a7c347adabd5247fbd9"
+    },
+    {
+      "id": "Anvil",
+      "file": "models/pr18/Anvil.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/the-base-mesh/models/anvil/anvil.glb",
+      "license": "CC0-1.0",
+      "bytes": 27964,
+      "sha256": "25cc907df994883431672b43f61f3cc5c5dc4ac2b2cfa176c772684e872e047a"
+    },
+    {
+      "id": "IronBridge",
+      "file": "models/pr18/IronBridge.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-castle-kit/models/bridge_straight/bridge_straight.glb",
+      "license": "CC0-1.0",
+      "bytes": 24360,
+      "sha256": "708739f66d77c95b53353a14ead0656f48381aa38e371cd5f9e6f09018aaf4c5"
+    },
+    {
+      "id": "Chain",
+      "file": "models/pr18/Chain.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/the-base-mesh/models/chain_link/chain_link.glb",
+      "license": "CC0-1.0",
+      "bytes": 18992,
+      "sha256": "2ddada3551c45cb18e9e9de219a32f915122bb66998687b539820ea76de8db50"
+    },
+    {
+      "id": "Obelisk",
+      "file": "models/pr18/Obelisk.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-graveyard-kit/models/pillar_obelisk/pillar_obelisk.glb",
+      "license": "CC0-1.0",
+      "bytes": 19520,
+      "sha256": "f50857bbd490efb72b855b20ab484ad624aaf3ed1492ff46252b760a80559b63"
+    },
+    {
+      "id": "VoidArch",
+      "file": "models/pr18/VoidArch.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-graveyard-kit/models/crypt_large_door/crypt_large_door.glb",
+      "license": "CC0-1.0",
+      "bytes": 32676,
+      "sha256": "733540467611cedf1c36e264e996f31d0c58741ce4dea046d3f8ea8a553046c5"
+    },
+    {
+      "id": "Throne",
+      "file": "models/pr18/Throne.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kaykit-dungeon-remastered/models/chair/chair.glb",
+      "license": "CC0-1.0",
+      "bytes": 36252,
+      "sha256": "5f133281686d398304c0a458c4d407dd483eeea8aba67220b585ceb89366efa2"
+    },
+    {
+      "id": "DeadTree",
+      "file": "models/pr18/DeadTree.glb",
+      "source": "https://raw.githubusercontent.com/Papyszoo/CC0-Public-Domain-Models/77343cac874f06b73d16ad0063339df7c9ca254c/packs/kenney-graveyard-kit/models/trunk_long/trunk_long.glb",
+      "license": "CC0-1.0",
+      "bytes": 41796,
+      "sha256": "6ffb86705aa4851480073657f0060582e6e3dd287b89cc521b6baf2504b94e98"
+    }
+  ]
+}

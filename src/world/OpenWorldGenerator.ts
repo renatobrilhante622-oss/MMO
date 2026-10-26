@@ -1,3 +1,6 @@
+import {BiomeSurface} from './maps/BiomeSurface';
+import {mapDefinition,regionalHeight} from './maps/MapDefinitions';
+import {RegionalScenery} from './maps/RegionalScenery';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { TERRAIN_GLSL, WATER_VERTEX_GLSL, WATER_FRAGMENT_GLSL, PORTAL_VERTEX_GLSL, PORTAL_FRAGMENT_GLSL } from './WorldShaders';
@@ -23,12 +26,17 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /** A seeded landscape: the mesh and physics sample this same triangulated height map. */
 export class OpenWorldGenerator {
-  readonly waterLevel = 1.2;
+  readonly waterLevel:number;
+  readonly terrainSize:number;
+  ready:Promise<void>=Promise.resolve();
+  private scenery?:RegionalScenery;
+  private surface?:BiomeSurface;
+  private disposed=false;
   readonly spawnPoint = new THREE.Vector3(0, 6.1, 18);
   readonly portalPosition = new THREE.Vector3(0, 6.1, -70);
   readonly colliders: WorldCollider[] = [];
   readonly markers: MapMarker[] = [];
-  readonly terrainSize = SIZE;
+
   readonly terrainSegments = SEGMENTS;
   private readonly root = new THREE.Group();
   private readonly grid: Float32Array;
@@ -48,17 +56,20 @@ export class OpenWorldGenerator {
   private readonly textures = new Set<THREE.Texture>();
 
   constructor(private readonly scene: THREE.Scene, private readonly seed = 61857,
-    readonly regionId = 'aurora') {
+    readonly regionId = 'aurora',readonly dungeonId='tombs') {
+    this.terrainSize=regionId==='dungeon'?320:mapDefinition(regionId).size;
+    this.waterLevel=regionId==='aurora'?1.2:regionId==='eclipse'?-200:-20;
     this.randomState = seed >>> 0;
     this.life = new WorldLife((x, z) => this.heightAt(x, z));
     this.grid = new Float32Array((SEGMENTS + 1) * (SEGMENTS + 1));
     for (let x = 0; x <= SEGMENTS; x++) {
       for (let z = 0; z <= SEGMENTS; z++) {
-        this.grid[x * (SEGMENTS + 1) + z] = this.rawHeight(-SIZE / 2 + x * STEP, SIZE / 2 - z * STEP);
+        this.grid[x * (SEGMENTS + 1) + z] = this.rawHeight(-this.terrainSize / 2 + x * this.terrainSize/SEGMENTS, this.terrainSize / 2 - z * this.terrainSize/SEGMENTS);
       }
     }
     this.spawnPoint.y = this.heightAt(this.spawnPoint.x, this.spawnPoint.z) + 1.1;
-    this.portalPosition.y = this.heightAt(0, -70);
+    if(regionId!=='dungeon')this.portalPosition.set(30,0,-42);
+    this.portalPosition.y = this.heightAt(this.portalPosition.x,this.portalPosition.z);
     this.root.name = 'ETERNA map instance: '+this.regionId;
   }
 
@@ -81,44 +92,12 @@ export class OpenWorldGenerator {
   private rawHeight(x: number, z: number): number {
     // Hidden, planar Cannon support under authored indoor GLB floor tiles.
     if(this.regionId==='dungeon')return 3.4;
-    if(this.regionId!=='aurora'){
-      // Separate terrain instance; every regional scene samples its own
-      // immutable height field through the exact same Cannon triangle split.
-      const params:Record<string,{base:number;ridge:number;frequency:number}>={
-        crypt:{base:3.6,ridge:3.7,frequency:.026},
-        highlands:{base:8.2,ridge:12,frequency:.022},
-        rift:{base:6.1,ridge:8.5,frequency:.037},
-        eclipse:{base:9,ridge:13,frequency:.018}
-      };
-      const p=params[this.regionId]??params.crypt;
-      const seedOffset={crypt:115,highlands:361,rift:597,eclipse:827}[this.regionId]??115;
-      let h=p.base+this.noise(x*p.frequency+seedOffset,z*p.frequency)*p.ridge
-        +(this.noise(x*.081+seedOffset,z*.081)-.5)*2.2;
-      // Fixed safe village and portal landings, with native slope continuity.
-      const camp=Math.hypot(x,z-18);
-      h=lerp(h,p.base+2.2,1-smooth(THREE.MathUtils.clamp((camp-12)/18,0,1)));
-      const gate=Math.hypot(x,z+70);
-      h=lerp(h,p.base+1.5,1-smooth(THREE.MathUtils.clamp((gate-9)/12,0,1)));
-      h+=Math.pow(THREE.MathUtils.clamp((Math.max(Math.abs(x),Math.abs(z))-125)/35,0,1),2)*22;
-      return h;
-    }
-    let h = 2.5 + this.noise(x * .016, z * .016) * 12
-      + (this.noise(x * .052, z * .052) - .5) * 5
-      + (this.noise(x * .12, z * .12) - .5) * 1.5;
-    const lakeDistance = Math.hypot((x - 47) * .91, z + 3);
-    h = lerp(h, -3.4 + this.noise(x * .1, z * .1) * .7, 1 - smooth(THREE.MathUtils.clamp((lakeDistance - 15) / 16, 0, 1)));
-    const villageDistance = Math.hypot(x, z - 18);
-    h = lerp(h, 5, 1 - smooth(THREE.MathUtils.clamp((villageDistance - 21) / 13, 0, 1)));
-    const portalDistance = Math.hypot(x, z + 70);
-    h = lerp(h, 6, 1 - smooth(THREE.MathUtils.clamp((portalDistance - 13) / 12, 0, 1)));
-    // Raise the outer boundary as a natural mountain wall rather than an invisible edge.
-    h += Math.pow(THREE.MathUtils.clamp((Math.max(Math.abs(x), Math.abs(z)) - 125) / 35, 0, 1), 2) * 22;
-    return h;
+    return regionalHeight(this.regionId,x,z,(a,b)=>this.noise(a,b));
   }
 
   heightAt(x: number, z: number): number {
-    const gx = THREE.MathUtils.clamp((x + SIZE / 2) / STEP, 0, SEGMENTS - .00001);
-    const gz = THREE.MathUtils.clamp((SIZE / 2 - z) / STEP, 0, SEGMENTS - .00001);
+    const gx = THREE.MathUtils.clamp((x + this.terrainSize / 2) / (this.terrainSize/SEGMENTS), 0, SEGMENTS - .00001);
+    const gz = THREE.MathUtils.clamp((this.terrainSize / 2 - z) / (this.terrainSize/SEGMENTS), 0, SEGMENTS - .00001);
     const ix = Math.floor(gx), iz = Math.floor(gz), tx = gx - ix, tz = gz - iz;
     const h00 = this.grid[ix * (SEGMENTS + 1) + iz];
     const h10 = this.grid[(ix + 1) * (SEGMENTS + 1) + iz];
@@ -128,12 +107,15 @@ export class OpenWorldGenerator {
       : h11 + (1 - tx) * (h01 - h11) + (1 - tz) * (h10 - h11);
   }
 
+  isWalkable(x:number,z:number):boolean {return this.heightAt(x,z)>this.waterLevel+.3&&(!['eclipse','rift'].includes(this.regionId)||this.heightAt(x,z)>2);}
   generate(): void {
     if (this.generated) return;
     this.generated = true;
     this.scene.add(this.root);
     if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
+    if(this.regionId==='aurora')for(const [x,z] of [[-18,28],[18,30],[-18,0],[18,0]])this.colliders.push({position:new THREE.Vector3(x,this.heightAt(x,z)+3.5,z),size:new THREE.Vector3(11,7,11),type:'solid'});
+    this.surface=new BiomeSurface(this.regionId,this.terrainSize);this.root.add(this.surface.root);
     if(this.regionId!=='dungeon'){
       this.details=new GroundDetail((x,z)=>this.heightAt(x,z),this.regionId,this.seed);
       this.root.add(this.details.root);
@@ -145,12 +127,19 @@ export class OpenWorldGenerator {
     if(this.regionId==='aurora')this.createWater();
     // Authored CC0 GLBs replace procedural tree and regional building primitives.
     this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId);
-    if(this.regionId==='aurora')for(const site of WORLD_SITES)this.markers.push({x:site.x,z:site.z,label:site.name,color:site.type==='cemetery'?'#b58ccc':'#c8b78e'});
-    if(this.regionId!=='dungeon')this.createPortal();
+
+    if(this.regionId!=='dungeon'){
+      this.scenery=new RegionalScenery(this.scene,this.regionId,(x,z)=>this.heightAt(x,z));
+      if(this.regionId!=='aurora')this.markers.push({x:30,z:-42,label:'Entrada da Masmorra',color:'#b394fa'});
+      const def=mapDefinition(this.regionId);
+      this.markers.push({...def.boss,label:'Chefe da Região',color:'#ff6650'});
+      if(this.regionId!=='eclipse')this.markers.push({...def.exit,label:'Portal Ancestral',color:'#ba99ff'});
+      this.ready=Promise.all([this.scenery.ready,this.environment.ready,this.details?.ready??Promise.resolve()]).then(()=>{});
+    }
     this.root.add(this.life.root);
     // Interactive KayKit NPCs replace geometric village mannequins.
-    if(this.regionId!=='dungeon')this.life.createAmbient();
-    this.life.createVortex(this.portalPosition);
+    if(this.regionId==='aurora')this.life.createAmbient();
+
     this.life.createFire();
     this.markers.push({x:0,z:18,label:({
       aurora:'Vila de Aster',crypt:'Acampamento da Cripta',
@@ -180,8 +169,8 @@ export class OpenWorldGenerator {
   }
 
   private terrainMaterial(): THREE.MeshStandardMaterial {
-    const material = this.material({ color: 0xffffff, roughness: .96 });
-    if(this.ground){material.normalMap=this.ground.grass.normalMap;material.normalMap.repeat.set(80,80);material.normalScale.set(.3,.3);material.roughnessMap=this.ground.grass.roughnessMap;material.roughnessMap.repeat.set(80,80);}
+    const material = this.material({ color: 0xffffff, roughness: this.regionId==='highlands'?.25:.96 });
+    if(this.ground){material.normalMap=(this.regionId==='highlands'?this.ground.snow:this.regionId==='rift'?this.ground.scorched:this.ground.grass).normalMap;material.normalMap.repeat.set(80,80);material.normalScale.set(.3,.3);material.roughnessMap=this.ground.grass.roughnessMap;material.roughnessMap.repeat.set(80,80);}
     material.name = 'Scanned CC0 PBR grass, soil, stone, snow and scorched ground';
     material.onBeforeCompile = shader => {
       shader.uniforms.terrainWaterLevel = { value: this.waterLevel };
@@ -200,6 +189,7 @@ export class OpenWorldGenerator {
         #include <common>
         ${TERRAIN_GLSL}
       `).replace('#include <map_fragment>', `
+        ${this.regionId==='eclipse'?'if(vTerrainPosition.y < -5.) discard;':''}
         diffuseColor.rgb *= terrainAlbedo(vTerrainPosition, normalize(vTerrainNormal));
       `).replace('#include <roughnessmap_fragment>', `
         #include <roughnessmap_fragment>
@@ -229,7 +219,7 @@ export class OpenWorldGenerator {
     for (let i = 0; i <= SEGMENTS; i++) {
       for (let j = 0; j <= SEGMENTS; j++) {
         const index = i * (SEGMENTS + 1) + j;
-        const x = -SIZE / 2 + i * STEP, z = SIZE / 2 - j * STEP, h = this.grid[index];
+        const x = -this.terrainSize / 2 + i * (this.terrainSize/SEGMENTS), z = this.terrainSize / 2 - j * (this.terrainSize/SEGMENTS), h = this.grid[index];
         positions.set([x, h, z], index * 3);
         uvs.set([i / SEGMENTS, j / SEGMENTS], index * 2);
         const slope = Math.abs(this.heightAt(x + 1, z) - this.heightAt(x - 1, z))
@@ -267,6 +257,7 @@ export class OpenWorldGenerator {
         time: { value: 0 }, day: { value: 1 },
         waterLevel: { value: this.waterLevel },
         heightMap: { value: this.makeHeightTexture() },
+        terrainExtent:{value:this.terrainSize},
         waterColor: { value: new THREE.Color('#237b8b') },
         skyColor: { value: new THREE.Color('#b5d9dd') },
         sunDirection: { value: new THREE.Vector3(.2,.8,-.45).normalize() },
@@ -720,7 +711,7 @@ export class OpenWorldGenerator {
   }
 
   update(dt: number, timeOfDay: number,camera?:THREE.Vector3): void {
-    this.elapsed += dt;
+    this.elapsed += dt;this.surface?.update(this.elapsed);
     this.wind.value=this.elapsed;
     this.life.update(dt, timeOfDay,camera);
     const brightness = .18 + Math.max(0, Math.sin(timeOfDay * Math.PI * 2)) * .82;
@@ -749,6 +740,8 @@ export class OpenWorldGenerator {
   }
 
   dispose(): void {
+    if(this.disposed)return;this.disposed=true;
+    this.surface?.dispose();this.scenery?.dispose();
     this.environment?.dispose();
     this.details?.dispose();
     this.life.dispose();

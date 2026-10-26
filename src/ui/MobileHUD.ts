@@ -121,7 +121,6 @@ export class MobileHUD {
           </div>
           <div class="hud-drawer-secondary">
             <button data-panel="classes">${icon('classes')}<span data-hud-pt="Classes" data-hud-en="Classes">Classes</span><kbd>C</kbd></button>
-            <button data-panel="base">${icon('base')}<span data-hud-pt="Construções" data-hud-en="Buildings">Construções</span><kbd>B</kbd></button>
             <button data-panel="codex">${icon('codex')}<span>Codex</span><kbd>K</kbd></button>
             <button data-panel="help">${icon('help')}<span data-hud-pt="Configurações" data-hud-en="Settings">Configurações</span></button>
           </div>
@@ -245,7 +244,7 @@ export class MobileHUD {
       }
       if (this.activePanel && code === 'Tab') { this.trapFocus(event); return; }
       if (!this.started) return;
-      const panels: Record<string, Panel> = { KeyI: 'inventory', KeyC: 'classes', KeyB: 'base', KeyK: 'codex', KeyH: 'help' };
+      const panels: Record<string, Panel> = { KeyI: 'inventory', KeyC: 'classes', KeyK: 'codex', KeyH: 'help' };
       if (panels[code] && !event.repeat) { this.activePanel === panels[code] ? this.closePanel() : this.openPanel(panels[code]); return; }
       if (this.drawerOpen) return;
       if (this.activePanel) {
@@ -532,6 +531,7 @@ export class MobileHUD {
   }
 
   openPanel(panel: Panel): void {
+    if(panel==='base'){this.openPanel('inventory');return;}
     this.setDrawerOpen(false);
     if(this.callbacks.onOpenProgression) {
       this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':panel==='help'?'settings':panel);return;
@@ -575,7 +575,6 @@ export class MobileHUD {
     if (!m && panel !== 'help' && panel !== 'classes') { this.el.modalBody.innerHTML = '<p class="empty-state">Inicie sua jornada para acessar seu aventureiro.</p>'; return; }
     if (panel === 'classes') this.renderClasses(m);
     else if (panel === 'inventory' && m) this.renderInventory(m);
-    else if (panel === 'base' && m) this.renderBase(m);
     else if (panel === 'codex' && m) this.renderCodex(m);
     else this.renderHelp();
     this.root.querySelectorAll<HTMLSelectElement>('[data-quality]').forEach(select => select.value = this.quality);
@@ -598,14 +597,6 @@ export class MobileHUD {
     }).join('') : '<p class="empty-state">Derrote criaturas para encontrar seus primeiros equipamentos.</p>'}</div>`;
   }
 
-  private renderBase(model: HUDModel): void {
-    this.el.modalBody.innerHTML = `<div class="panel-summary"><span>Melhorias permanentes</span><span class="gold-text">${Math.floor(model.gold).toLocaleString('pt-BR')} ouro</span><span class="crystal-text">${Math.floor(model.crystals)} cristais</span></div><p class="panel-intro">Invista na vila para produzir recursos enquanto joga e fortalecer seu herói. A produção para quando o jogo está fechado.</p><div class="building-grid">${model.buildings.map(b => {
-      const maxed = b.level >= b.maxLevel;
-      const affordable = model.gold >= b.cost.gold && model.crystals >= b.cost.crystals;
-      return `<article class="building-card"><div class="building-art">${icon(b.id === 'stable' ? 'mount' : b.id === 'forge' ? 'sword' : 'base')}<span>${b.level}</span></div><div><span class="overline">NÍVEL ${b.level} / ${b.maxLevel}</span><h2>${esc(b.name)}</h2><p>${esc(b.description)}</p><div class="building-levels">${Array.from({ length: b.maxLevel }, (_, i) => `<i class="${i < b.level ? 'built' : ''}"></i>`).join('')}</div><button class="outline-button" data-building="${esc(b.id)}" ${maxed || !affordable ? 'disabled' : ''}>${maxed ? 'Nível máximo' : `Melhorar · ${b.cost.gold} ouro${b.cost.crystals ? ` + ${b.cost.crystals} cristais` : ''}`}</button>${!maxed && !affordable ? '<small class="cost-hint">Recursos insuficientes</small>' : ''}</div></article>`;
-    }).join('')}</div>`;
-  }
-
   private renderCodex(model: HUDModel): void {
     const completed = model.codex.filter(e => e.kills >= e.required).length;
     this.el.modalBody.innerHTML = `<div class="panel-summary"><span>${completed} / ${model.codex.length} coleções completas</span><span>O conhecimento é poder</span></div><p class="panel-intro">Cada criatura derrotada fica registrada. Complete coleções para receber bônus permanentes de atributos.</p><div class="codex-grid">${model.codex.map(e => {
@@ -615,7 +606,7 @@ export class MobileHUD {
   }
 
   private renderHelp(): void {
-    this.el.modalBody.innerHTML = `<div class="help-layout"><div><h2>O vale está à sua espera</h2><p class="panel-intro">Saia da vila e siga ao norte para encontrar criaturas, equipamentos e o Portal Ancestral. Seu companheiro luta ao seu lado e recolhe tesouros automaticamente.</p><dl class="control-list"><div><dt>Mover</dt><dd><kbd>W A S D</kbd> ou joystick esquerdo</dd></div><div><dt>Câmera</dt><dd>Arraste no lado direito da tela</dd></div><div><dt>Atacar / combo</dt><dd><kbd>J</kbd> ou segure Atacar</dd></div><div><dt>Habilidades</dt><dd><kbd>1 2 3 4</kbd> ou os quatro símbolos</dd></div><div><dt>Pulo / duplo pulo</dt><dd><kbd>Espaço</kbd> · toque novamente no ar</dd></div><div><dt>Deslizar / esquiva</dt><dd><kbd>Shift</kbd> · breve invulnerabilidade</dd></div><div><dt>Montaria</dt><dd><kbd>M</kbd> · invoque ou desmonte</dd></div><div><dt>Portal / interagir</dt><dd><kbd>E</kbd> ao se aproximar</dd></div><div><dt>Mergulhar</dt><dd><kbd>Ctrl</kbd> na água · pulo para subir</dd></div><div><dt>Escalar</dt><dd>Mova em direção a uma parede escalável</dd></div><div><dt>Menus</dt><dd><kbd>I</kbd> Itens · <kbd>C</kbd> Classes · <kbd>B</kbd> Base · <kbd>K</kbd> Codex</dd></div></dl></div><aside class="help-tips"><h2>Antes de partir</h2><p>Equipar itens, melhorar a base e completar o Codex aumenta seus atributos de combate.</p><p>As habilidades consomem mana e têm recargas independentes. Ela se recupera com o tempo.</p><p>Evite áreas vermelhas no chão durante o desafio do Guardião. Use esquivas para atravessar o perigo.</p><p>Seu progresso é salvo automaticamente apenas neste dispositivo e navegador. Não há conexão com outros jogadores.</p><label class="setting-row">Qualidade gráfica<select data-quality><option value="high">Alta · efeitos completos</option><option value="low">Leve · celular</option></select></label>${this.callbacks.onResetSave ? '<button class="danger-button" data-reset>Reiniciar progresso local</button>' : ''}</aside></div>`;
+    this.el.modalBody.innerHTML = `<div class="help-layout"><div><h2>O vale está à sua espera</h2><p class="panel-intro">Saia da vila e siga ao norte para encontrar criaturas, equipamentos e o Portal Ancestral. Seu companheiro luta ao seu lado e recolhe tesouros automaticamente.</p><dl class="control-list"><div><dt>Mover</dt><dd><kbd>W A S D</kbd> ou joystick esquerdo</dd></div><div><dt>Câmera</dt><dd>Arraste no lado direito da tela</dd></div><div><dt>Atacar / combo</dt><dd><kbd>J</kbd> ou segure Atacar</dd></div><div><dt>Habilidades</dt><dd><kbd>1 2 3 4</kbd> ou os quatro símbolos</dd></div><div><dt>Pulo / duplo pulo</dt><dd><kbd>Espaço</kbd> · toque novamente no ar</dd></div><div><dt>Deslizar / esquiva</dt><dd><kbd>Shift</kbd> · breve invulnerabilidade</dd></div><div><dt>Montaria</dt><dd><kbd>M</kbd> · invoque ou desmonte</dd></div><div><dt>Portal / interagir</dt><dd><kbd>E</kbd> ao se aproximar</dd></div><div><dt>Mergulhar</dt><dd><kbd>Ctrl</kbd> na água · pulo para subir</dd></div><div><dt>Escalar</dt><dd>Mova em direção a uma parede escalável</dd></div><div><dt>Menus</dt><dd><kbd>I</kbd> Itens · <kbd>C</kbd> Classes · <kbd>K</kbd> Codex</dd></div></dl></div><aside class="help-tips"><h2>Antes de partir</h2><p>Equipar itens e completar o Codex aumenta seus atributos de combate.</p><p>As habilidades consomem mana e têm recargas independentes. Ela se recupera com o tempo.</p><p>Evite áreas vermelhas no chão durante o desafio do Guardião. Use esquivas para atravessar o perigo.</p><p>Seu progresso é salvo automaticamente apenas neste dispositivo e navegador. Não há conexão com outros jogadores.</p><label class="setting-row">Qualidade gráfica<select data-quality><option value="high">Alta · efeitos completos</option><option value="low">Leve · celular</option></select></label>${this.callbacks.onResetSave ? '<button class="danger-button" data-reset>Reiniciar progresso local</button>' : ''}</aside></div>`;
   }
 
   private showResetConfirmation(): void {

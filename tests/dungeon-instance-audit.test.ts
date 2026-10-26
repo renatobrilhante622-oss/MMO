@@ -27,7 +27,7 @@ describe('independent dungeon instance and GLB assets',()=>{
    expect(DUNGEON_SHOWCASE).toHaveLength(4);
    expect(new Set(DUNGEON_SHOWCASE.map(x=>x.id)).size).toBe(4);
    expect(DUNGEON_TIERS.map(x=>x.minLevel)).toEqual([10,30,60,85]);
-   expect(DUNGEON_ROOMS.map(x=>x.id)).toEqual(['guardians','crystals','boss']);
+   expect(DUNGEON_ROOMS.map(x=>x.id)).toEqual(['guardians','crystals','sentinels','boss']);
  });
  it('supports a physically separate indoor flat heightfield and physical walls',()=>{
    const scene=new Scene(),valley=new OpenWorldGenerator(scene,713),physics=new PhysicsWorld(valley);
@@ -49,7 +49,7 @@ describe('independent dungeon instance and GLB assets',()=>{
    const instance=new DungeonInstance(scene,world);
    expect(instance.crystalsRemaining).toBe(3);
    expect(instance.strikeCrystal(new Vector3(99,3,-50))).toBe(false);
-   const at=new Vector3(-7,3,-50);
+   const at=new Vector3(-7,3,-44);
    expect(instance.strikeCrystal(at,50)).toBe(true);
    expect(instance.strikeCrystal(at,50)).toBe(false);
    instance.update(.5,3,4,false);
@@ -57,7 +57,7 @@ describe('independent dungeon instance and GLB assets',()=>{
    expect(instance.crystalsRemaining).toBe(2);
    for(const x of [0,7]){
      instance.update(.5,3,4,false);
-     expect(instance.strikeCrystal(new Vector3(x,3,-50),100)).toBe(true);
+     expect(instance.strikeCrystal(new Vector3(x,3,-44),100)).toBe(true);
    }
    expect(instance.crystalsRemaining).toBe(0);
    expect(instance.crystalsDestroyed).toBe(3);

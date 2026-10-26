@@ -1,211 +1,77 @@
-import {
-  Box3,Group,Mesh,MeshStandardMaterial,PointLight,Scene,Vector3,InstancedMesh,Matrix4,Quaternion
-} from 'three';
-import {GLTFLoader,type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {DungeonAtmosphere} from './dungeons/DungeonAtmosphere';
+import {BiomeSurface} from './maps/BiomeSurface';
+import {Box3,BufferGeometry,Color,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,PointLight,Quaternion,Scene,Vector3} from 'three';
+import {loadSharedModel} from '../assets/ModelResources';
 import type {OpenWorldGenerator,WorldCollider} from './OpenWorldGenerator';
-
-export type DungeonRoom='guardians'|'crystals'|'boss';
-export const DUNGEON_ROOMS:readonly {id:DungeonRoom;name:string;x:number;z:number}[]=[
-  {id:'guardians',name:'Sala 1/3: Elimine os Guardiões',x:0,z:-30},
-  {id:'crystals',name:'Sala 2/3: Destrua os Cristais',x:0,z:-50},
-  {id:'boss',name:'Sala 3/3: CHEFE DA MASMORRA',x:0,z:-70},
-];
-interface ModelPlan {
- name:string;
- spots:readonly {x:number;z:number;rotation?:number;height:number}[];
-}
-const at=(x:number,z:number,height:number,rotation=0)=>({x,z,height,rotation});
-const PLAN:readonly ModelPlan[]=[
- {name:'floor',spots:[
-   ...[-15,-5,5,15].flatMap(x=>[-30,-50,-70].map(z=>at(x,z,9))),
-   ...[-16,-8,0,8,16].flatMap(x=>[-78,-70,-62].map(z=>at(x,z,7))),
- ]},
- {name:'floor-detail',spots:[at(0,-30,9),at(0,-50,9),at(0,-70,10)]},
- {name:'wall',spots:[
-   ...[-17,17].flatMap(x=>[-80,-70,-60,-50,-40,-30,-20].map(z=>at(x,z,5,Math.PI/2))),
-   ...[-16,-8,0,8,16].flatMap(x=>[-85,-17].map(z=>at(x,z,5))),
- ]},
- {name:'column',spots:[...[-13,13].flatMap(x=>[-78,-65,-52,-33].map(z=>at(x,z,5)))]},
- {name:'gate',spots:[at(0,-43,5),at(0,-62,5)]},
- {name:'wall-opening',spots:[at(-7,-43,4),at(7,-43,4),at(-7,-62,4),at(7,-62,4)]},
- {name:'trap',spots:[at(-5,-48,3),at(5,-51,3)]},
- {name:'stairs',spots:[at(0,-38,4),at(0,-57,4)]},
- {name:'fire-basket',spots:[at(-12,-30,1.7),at(12,-30,1.7),at(-12,-50,1.7),at(12,-50,1.7),at(-12,-70,1.7),at(12,-70,1.7)]},
- {name:'chest',spots:[at(0,-82,3)]},
-];
-const loader=new GLTFLoader();
-const loaded=new Map<string,Promise<GLTF>>();
-function load(name:string):Promise<GLTF>{
- let task=loaded.get(name);
- if(!task){
-  task=loader.loadAsync(import.meta.env.BASE_URL+'models/dungeon/Kenney_Dungeon_'+name+'.glb');
-  loaded.set(name,task);
-  void task.catch(()=>loaded.delete(name));
+import {dungeonMap,dungeonWalkable,roomForWave,type DungeonMapPlan} from './dungeons/DungeonMaps';
+import {createGroundTextures,type PBRTextureSet} from './ProceduralTextures';
+export type DungeonRoom='guardians'|'crystals'|'sentinels'|'boss';
+export const DUNGEON_ROOMS=dungeonMap('tombs').rooms;
+/** Trace the actual room/corridor silhouette into solid boundary cells. */
+export function dungeonColliders(height:(x:number,z:number)=>number,id='tombs'):WorldCollider[]{
+ const plan=dungeonMap(id),result:WorldCollider[]=[];
+ for(let x=-38;x<=38;x+=2)for(let z=-98;z<=-16;z+=2){
+  if(dungeonWalkable(plan,x,z))continue;
+  if([[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dz])=>dungeonWalkable(plan,x+dx,z+dz)))result.push({position:new Vector3(x,height(x,z)+3,z),size:new Vector3(2.1,6,2.1),type:'solid'});
  }
- return task;
-}
-
-/** Physical collision walls are installed with the separate Cannon heightfield. */
-export function dungeonColliders(height:(x:number,z:number)=>number):WorldCollider[]{
- const result:WorldCollider[]=[];
- for(const x of [-18,18]){
-  const z=-51;
-  result.push({position:new Vector3(x,height(x,z)+3,z),size:new Vector3(2,6,72),type:'solid'});
- }
- for(const z of [-86,-17]){
-  result.push({position:new Vector3(0,height(0,z)+3,z),size:new Vector3(38,6,2),type:'solid'});
- }
- for(const z of [-43,-62]){
-   result.push({position:new Vector3(0,height(0,z)+2.6,z),
-     size:new Vector3(35,5.2,1.6),type:'gate'});
- }
+ // Gates match the passage entering each subsequent room; opening affects physics and visuals.
+ for(let i=1;i<4;i++){const a=plan.rooms[i-1],b=plan.rooms[i];result.push({position:new Vector3((a.x+b.x)/2,height(0,b.z)+2.5,(a.z+b.z)/2),size:new Vector3(Math.max(7,Math.abs(b.x-a.x)+7),5,1.1),type:'gate'});}
  return result;
 }
-/** A bespoke, fully owned indoor scene graph using only source-authored GLB props. */
 export class DungeonInstance {
- readonly root=new Group();
- private readonly visualMeshes:InstancedMesh[]=[];
- private readonly materials=new Set<MeshStandardMaterial>();
- private readonly lights:PointLight[]=[];
- private disposed=false;
- private readonly gateNodes:Group[]=[];
- private readonly gateBatches:InstancedMesh[]=[];
- private readonly originalGateMatrices=new Map<InstancedMesh,Matrix4[]>();
- private lastGateState='';
- private chest?:Group;
- private readonly crystalStates=[-7,0,7].map(x=>({
-   position:new Vector3(x,3.4,-50),hp:100,model:undefined as Group|undefined,
- }));
- private strikeCooldown=0;
- get crystalsRemaining():number{return this.crystalStates.filter(crystal=>crystal.hp>0).length;}
- get crystalsDestroyed():number{return this.crystalStates.length-this.crystalsRemaining;}
- /** Accepted strikes damage only active crystals at actual melee distance. */
- strikeCrystal(hero:Vector3,damage=50):boolean{
-   if(this.strikeCooldown>0)return false;
-   const crystal=this.crystalStates.find(c=>c.hp>0&&Math.hypot(hero.x-c.position.x,hero.z-c.position.z)<3.1);
-   if(!crystal)return false;
-   crystal.hp=Math.max(0,crystal.hp-Math.max(0,Math.min(100,damage)));
-   this.strikeCooldown=.42;
-   if(crystal.hp<=0&&crystal.model)crystal.model.visible=false;
-   return true;
- }
- readonly ready:Promise<void>;
- readonly startedAt=performance.now();
- private elapsed=0;
- constructor(private readonly scene:Scene,private readonly terrain:OpenWorldGenerator){
-  this.root.name='Loaded indoor dungeon instance';
-  scene.add(this.root);
+ readonly root=new Group();readonly ready:Promise<void>;readonly startedAt=performance.now();readonly plan:DungeonMapPlan;
+ private disposed=false;private elapsed=0;private cooldown=0;private floor=1;
+ private readonly materials=new Set<MeshStandardMaterial>();private readonly ownedGeometry=new Set<BufferGeometry>();private readonly batches:InstancedMesh[]=[];private readonly lights:PointLight[]=[];private readonly gates:Group[]=[];
+ private atmosphere?:DungeonAtmosphere;private surface?:BiomeSurface;private ground?:PBRTextureSet;private chest?:Group;
+ private readonly crystalStates:Array<{position:Vector3;hp:number;model?:Group}>;
+ get crystalsRemaining():number{return this.crystalStates.filter(c=>c.hp>0).length;}
+ get crystalsDestroyed():number{return 3-this.crystalsRemaining;}
+ constructor(scene:Scene,private readonly terrain:OpenWorldGenerator,id='tombs'){
+  this.plan=dungeonMap(id);const room=this.plan.rooms[1];
+  this.crystalStates=[-7,0,7].map(x=>({position:new Vector3(room.x+x,3.4,room.z),hp:100}));
+  this.root.name='Loaded indoor dungeon instance';this.root.userData.dungeonId=this.plan.id;scene.add(this.root);
   this.ready=typeof document==='undefined'?Promise.resolve():this.build();
  }
- roomForWave(wave:number,waves:number):number{
-  if(wave>waves)return 2;
-  if(wave<=Math.ceil(waves/2))return 0;
-  return 1;
- }
- roomPoint(wave:number,waves:number):Vector3{
-  const room=DUNGEON_ROOMS[this.roomForWave(wave,waves)];
-  return new Vector3(room.x,this.terrain.heightAt(room.x,room.z)+1.2,room.z);
+ roomForWave(wave:number,waves:number):number{return roomForWave(wave,waves);}
+ roomPoint(wave:number,waves:number):Vector3{const r=this.plan.rooms[this.roomForWave(wave,waves)];return new Vector3(r.x,this.terrain.heightAt(r.x,r.z)+1.2,r.z);}
+ gateOpen(index:number,wave:number,waves:number,completed=false):boolean{return completed||(index===0?wave>Math.ceil(waves/3):index===1?wave>Math.ceil(waves*2/3)&&this.crystalsRemaining===0:wave>waves&&this.crystalsRemaining===0);}
+ resetFloor(floor:number):void{if(this.floor===floor)return;this.floor=floor;for(const c of this.crystalStates){c.hp=100;if(c.model)c.model.visible=true;}}
+ strikeCrystal(hero:Vector3,damage=50):boolean{if(this.cooldown>0||!Number.isFinite(damage)||damage<=0)return false;const c=this.crystalStates.find(c=>c.hp>0&&Math.hypot(hero.x-c.position.x,hero.z-c.position.z)<3.1);if(!c)return false;c.hp=Math.max(0,c.hp-Math.min(100,damage));this.cooldown=.42;if(!c.hp&&c.model)c.model.visible=false;return true;}
+ private async batch(asset:string,spots:readonly {x:number;z:number;w:number;h:number;d:number;elevation?:number;turn?:number}[],floor=false):Promise<Group>{
+  const group=new Group();group.name='Dungeon '+this.plan.id+' '+asset;
+  const path=asset.startsWith('native:')?'models/pr18/'+asset.slice(7)+'.glb':'models/dungeon/Kenney_Dungeon_'+asset+'.glb';
+  const gltf=await loadSharedModel(path);if(this.disposed)return group;
+  gltf.scene.updateMatrixWorld(true);const bounds=new Box3().setFromObject(gltf.scene),size=bounds.getSize(new Vector3()),center=bounds.getCenter(new Vector3());
+  gltf.scene.traverse(part=>{if(!(part instanceof Mesh))return;
+   const sources=Array.isArray(part.material)?part.material:[part.material];
+   const copies=sources.map(m=>{const copy=m instanceof MeshStandardMaterial?m.clone():new MeshStandardMaterial();copy.roughness=this.plan.roughness;copy.metalness=this.plan.metalness;copy.color.lerp(new Color(this.plan.accent),.15);if(floor)copy.color.setHex(this.plan.id==='void'?0x26232d:this.plan.id==='eclipse'?0x20132f:this.plan.id==='titan'?0xb5deef:0x8292aa);copy.emissive.setHex(this.plan.accent);copy.emissiveIntensity=floor?.025:.08;if(floor&&this.ground){copy.map=this.ground.map;copy.normalMap=this.ground.normalMap;copy.roughnessMap=this.ground.roughnessMap;}this.materials.add(copy);return copy;});
+   let geometry=part.geometry.clone();this.ownedGeometry.add(geometry);
+   if(floor){const p=geometry.attributes.position,uv=geometry.attributes.uv;if(uv)for(let i=0;i<uv.count;i++)uv.setXY(i,p.getX(i)*2,p.getZ(i)*2);this.ownedGeometry.add(geometry);}
+   const mesh=new InstancedMesh(geometry,Array.isArray(part.material)?copies:copies[0],spots.length);mesh.name='Real GLB '+asset;mesh.receiveShadow=true;mesh.castShadow=!floor&&spots.length<12;
+   spots.forEach((s,i)=>{const scale=asset.startsWith('native:')?new Vector3().setScalar(s.w/Math.max(.01,size.x,size.y,size.z)):new Vector3(s.w/Math.max(.01,size.x),s.h/Math.max(.01,size.y),s.d/Math.max(.01,size.z));const m=new Matrix4().compose(new Vector3(s.x,this.terrain.heightAt(s.x,s.z)+(s.elevation??0),s.z),new Quaternion().setFromAxisAngle(new Vector3(0,1,0),s.turn??0),scale);m.multiply(new Matrix4().makeTranslation(-center.x,-bounds.min.y,-center.z));mesh.setMatrixAt(i,m.multiply(part.matrixWorld));});mesh.computeBoundingSphere();group.add(mesh);this.batches.push(mesh);
+  });this.root.add(group);return group;
  }
  private async build():Promise<void>{
-  for(const plan of PLAN){
-   if(this.disposed)return;
-   let gltf:GLTF;
-   try{gltf=await load(plan.name);}
-   catch(error){console.error('Missing CC0 indoor dungeon art:',plan.name,error);continue;}
-   if(this.disposed)return;
-   const model=gltf.scene;model.updateMatrixWorld(true);
-   const bounds=new Box3().setFromObject(model);
-   if(bounds.isEmpty())continue;
-   const heightSource=Math.max(.001,bounds.max.y-bounds.min.y);
-   const materials=new Map<MeshStandardMaterial,MeshStandardMaterial>();
-   const placements=plan.spots.map(spot=>{
-    const scale=spot.height/heightSource;
-    const pos=new Vector3(spot.x,this.terrain.heightAt(spot.x,spot.z),spot.z);
-    const rotation=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),spot.rotation??0);
-    const transform=new Matrix4().compose(pos,rotation,new Vector3(scale,scale,scale));
-    return transform.multiply(new Matrix4().makeTranslation(-bounds.getCenter(new Vector3()).x,-bounds.min.y,-bounds.getCenter(new Vector3()).z));
-   });
-   const group=new Group();group.name='Dungeon set: '+plan.name;
-   model.traverse(object=>{
-    if(!(object instanceof Mesh))return;
-    const originals=Array.isArray(object.material)?object.material:[object.material];
-    const copies=originals.map(source=>{
-      if(!(source instanceof MeshStandardMaterial))return source;
-      let copy=materials.get(source);
-      if(!copy){
-       copy=source.clone();
-       copy.emissive.setRGB(.10,.08,.07);
-       copy.emissiveIntensity=.28;
-       materials.set(source,copy);
-       this.materials.add(copy);
-      }
-      return copy;
-    });
-    const batch=new InstancedMesh(object.geometry,Array.isArray(object.material)?copies:copies[0],placements.length);
-    batch.name='Real GLB '+plan.name+'/'+object.name;
-    batch.castShadow=false;batch.receiveShadow=false;
-    for(let i=0;i<placements.length;i++)batch.setMatrixAt(i,placements[i].clone().multiply(object.matrixWorld));
-    batch.instanceMatrix.needsUpdate=true;
-    batch.computeBoundingSphere();
-    group.add(batch);this.visualMeshes.push(batch);
-    if(plan.name==='gate'){
-      this.gateBatches.push(batch);
-      this.originalGateMatrices.set(batch,placements.map(matrix=>matrix.clone().multiply(object.matrixWorld)));
-    }
-   });
-   this.root.add(group);
-   if(plan.name==='gate')this.gateNodes.push(group);
-   if(plan.name==='chest'){this.chest=group;group.visible=false;}
+  this.atmosphere=new DungeonAtmosphere(this.plan.id);this.root.add(this.atmosphere.root);
+  this.surface=new BiomeSurface(this.plan.id,160,true);this.root.add(this.surface.root);
+  this.ground=createGroundTextures(this.plan.floor as 'cobble');
+  const floorSpots:Array<{x:number;z:number;w:number;h:number;d:number}>=[],walls:typeof floorSpots=[];
+  for(let x=-36;x<=36;x+=4)for(let z=-94;z<=-18;z+=4){if(dungeonWalkable(this.plan,x,z))floorSpots.push({x,z,w:4.1,h:.35,d:4.1});}
+  const boundary=dungeonColliders(()=>3.4,this.plan.id).filter(c=>c.type==='solid');
+  for(const c of boundary)walls.push({x:c.position.x,z:c.position.z,w:2.1,h:4.8,d:2.1});
+  await Promise.all([this.batch('floor',floorSpots,true),this.batch('wall',walls),...this.plan.props.map(p=>this.batch('native:'+p.asset,p.asset==='Chain'?Array.from({length:10},(_,i)=>({x:p.x,z:p.z,w:1.6,h:1.6,d:1.6,elevation:6+i*1.05,turn:i%2*Math.PI/2})):[{x:p.x,z:p.z,w:p.size,h:p.size,d:p.size}]))]);
+  if(this.disposed)return;
+  for(let i=1;i<4;i++){
+   const a=this.plan.rooms[i-1],b=this.plan.rooms[i];this.gates.push(await this.batch('gate',[{x:(a.x+b.x)/2,z:(a.z+b.z)/2,w:7,h:5,d:1}]));
   }
-  try{
-    const crystal=await load('crystal');
-    if(this.disposed)return;
-    const source=crystal.scene;
-    const box=new Box3().setFromObject(source);
-    for(const state of this.crystalStates){
-      const object=source.clone(true);
-      const actor=new Group();
-      actor.name='Breakable CC0 crystal';
-      actor.position.copy(state.position);
-      const h=Math.max(.001,box.max.y-box.min.y);
-      object.scale.setScalar(2.4/h);
-      object.position.set(-box.getCenter(new Vector3()).x*2.4/h,
-        -box.min.y*2.4/h,-box.getCenter(new Vector3()).z*2.4/h);
-      object.traverse(o=>{if(o instanceof Mesh){o.castShadow=false;o.receiveShadow=false;}});
-      actor.add(object);state.model=actor;this.root.add(actor);
-    }
-  }catch(error){console.warn('Missing destructible CC0 crystal art:',error);}
-  for(const [x,z] of [[-12,-30],[12,-30],[-12,-50],[12,-50],[-12,-70],[12,-70]]){
-    const torch=new PointLight(0xffa54d,16,15,2);
-    torch.position.set(x,this.terrain.heightAt(x,z)+3,z);
-    this.root.add(torch);this.lights.push(torch);
-  }
+  if(this.plan.id==='void')await this.batch('wall',[{x:0,z:-76,w:28,h:1,d:1,elevation:17}]);
+  const pillars=this.plan.rooms.flatMap(r=>[-1,1].map(side=>({x:r.x+side*(r.width/2-2),z:r.z,w:2,h:this.plan.id==='eclipse'?9:6,d:2})));
+  await this.batch('column',pillars);
+  for(const state of this.crystalStates){const model=await this.batch('crystal',[{x:state.position.x,z:state.position.z,w:1.8,h:2.4,d:1.8}]);state.model=model;}
+  const boss=this.plan.rooms[3];this.chest=await this.batch('chest',[{x:boss.x,z:boss.z+6,w:2.4,h:1.6,d:1.6}]);this.chest.visible=false;
+  if(this.disposed)return;
+  for(const r of this.plan.rooms)for(const side of [-1,1]){const light=new PointLight(this.plan.accent,18,20,2);light.position.set(r.x+side*(r.width/2-3),7,r.z);this.root.add(light);this.lights.push(light);}
  }
- update(dt:number,wave:number,waves:number,completed:boolean):void{
-  this.elapsed+=Math.max(0,dt);
-  this.strikeCooldown=Math.max(0,this.strikeCooldown-Math.max(0,dt));
-  const state=(wave>Math.ceil(waves/2)||completed?'1':'0')+
-    (wave>waves&&this.crystalsRemaining===0||completed?'1':'0');
-  if(state!==this.lastGateState){
-    this.lastGateState=state;
-    for(const batch of this.gateBatches){
-      const originals=this.originalGateMatrices.get(batch)!;
-      for(let i=0;i<Math.min(2,batch.count);i++){
-        batch.setMatrixAt(i,state[i]==='1'?new Matrix4().makeScale(0,0,0):originals[i]);
-      }
-      batch.instanceMatrix.needsUpdate=true;batch.computeBoundingSphere();
-    }
-  }
-  if(this.chest)this.chest.visible=completed;
-  for(let i=0;i<this.lights.length;i++){
-    this.lights[i].intensity=13+Math.sin(this.elapsed*8+i*2)*1.8;
-  }
- }
- dispose():void{
-  this.disposed=true;
-  this.root.removeFromParent();
-  this.visualMeshes.length=0;this.lights.length=0;
-  for(const mat of this.materials)mat.dispose();
-  this.materials.clear();
- }
+ update(dt:number,wave:number,waves:number,completed:boolean):void{this.elapsed+=Math.max(0,dt);this.surface?.update(this.elapsed);this.atmosphere?.update(this.elapsed);this.cooldown=Math.max(0,this.cooldown-dt);this.gates.forEach((g,i)=>g.visible=!this.gateOpen(i,wave,waves,completed));if(this.chest)this.chest.visible=completed;this.lights.forEach((l,i)=>l.intensity=16+Math.sin(this.elapsed*6+i)*2);}
+ dispose():void{if(this.disposed)return;this.disposed=true;this.root.removeFromParent();for(const m of this.batches)m.dispose();this.batches.length=0;for(const g of this.ownedGeometry)g.dispose();for(const m of this.materials)m.dispose();this.atmosphere?.dispose();this.surface?.dispose();this.ground?.dispose();for(const l of this.lights)l.dispose();this.root.clear();}
 }

@@ -19,6 +19,8 @@ export class RegionalWeather{
    scene.add(this.root);this.setRegion('aurora');
  }
  setRegion(id:string):void{
+  this.root.visible=id!=='dungeon';
+  if(id==='dungeon'){this.points?.geometry.dispose();this.points?.material.dispose();this.points?.removeFromParent();this.points=undefined;this.lightning?.removeFromParent();this.lightning?.dispose();this.lightning=undefined;return;}
   const next=id in WEATHER_REGIONS?id as WeatherRegion:'aurora';if(this.points&&this.region===next)return;
   this.region=next;this.points?.geometry.dispose();this.points?.material.dispose();this.points?.removeFromParent();
   this.lightning?.removeFromParent();
@@ -36,7 +38,7 @@ export class RegionalWeather{
   }
  }
  update(dt:number,origin:Vector3):void{
-  if(!this.points)return;
+  if(!this.points||!this.root.visible)return;
   this.time+=dt;this.root.position.copy(origin);this.root.position.y-=2;
   const cfg=WEATHER_REGIONS[this.region],p=this.points.geometry.attributes.position;
   for(let i=0;i<p.count;i++){

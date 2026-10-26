@@ -4,8 +4,8 @@ export interface Region {
   boss: { x: number; z: number; name: [string,string] };
 }
 /**
- * Five distinct progression regions. Travel entry points remain within the
- * existing physics/height-field bounds until instanced map streaming is ready.
+ * Legacy continent coordinates identify regions in older saves. Runtime scenes
+ * use independent local terrain and entry/exit coordinates from maps/MapDefinitions.
  */
 export const REGIONS: readonly Region[] = [
   { id:'aurora',name:['Vale de Aster','Aster Vale'],center:{x:0,z:18},radius:64,minLevel:1,maxLevel:15,color:'#8fbf83',kinds:['slime','wolf'],boss:{x:-32,z:40,name:['Matriarca dos Bosques','Woodland Matriarch']} },
@@ -25,12 +25,10 @@ export function regionalLevel(x:number,z:number):number {
 }
 export interface DungeonDefinition { id:string; name:[string,string]; level:number; waves:number; bossName:[string,string]; region:string; gold:number; crystals:number; }
 export const DUNGEONS:readonly DungeonDefinition[]=[
-  {id:'roots',name:['Raízes Esquecidas','Forgotten Roots'],level:1,waves:3,bossName:['Guardião das Raízes','Root Guardian'],region:'aurora',gold:120,crystals:3},
-  {id:'tide',name:['Santuário das Marés','Tidal Sanctuary'],level:8,waves:4,bossName:['Oráculo Abissal','Abyssal Oracle'],region:'aurora',gold:380,crystals:5},
-  {id:'tombs',name:['Tumbas do Rei','Royal Tombs'],level:18,waves:4,bossName:['Rei Sepultado','Buried King'],region:'crypt',gold:800,crystals:8},
-  {id:'void',name:['Catedral do Vazio','Void Cathedral'],level:30,waves:5,bossName:['Guardião do Vazio','Void Guardian'],region:'rift',gold:1600,crystals:12},
-  {id:'titan',name:['Coração da Montanha','Mountain Heart'],level:45,waves:5,bossName:['Titã Ancestral','Ancient Titan'],region:'highlands',gold:2800,crystals:16},
-  {id:'eclipse',name:['Trono do Eclipse','Eclipse Throne'],level:65,waves:6,bossName:['Imperador do Eclipse','Eclipse Emperor'],region:'eclipse',gold:4200,crystals:20},
+  {id:'tombs',name:['Catacumbas do Rei Ossudo','Catacombs of the Bone King'],level:18,waves:4,bossName:['Rei Esqueleto — Lich','Skeleton King — Lich'],region:'crypt',gold:800,crystals:8},
+  {id:'titan',name:['Templo do Cristal Corrompido','Temple of Corrupted Crystal'],level:45,waves:5,bossName:['Colosso de Cristal','Crystal Colossus'],region:'highlands',gold:2800,crystals:16},
+  {id:'void',name:['Fornalha do Titã de Magma','Furnace of the Magma Titan'],level:60,waves:5,bossName:['Senhor da Forja Ardente','Lord of the Blazing Forge'],region:'rift',gold:1600,crystals:12},
+  {id:'eclipse',name:['Cidadela do Vazio Abissal','Citadel of the Abyssal Void'],level:85,waves:6,bossName:['Imperador Abissal','Abyssal Emperor'],region:'eclipse',gold:4200,crystals:20},
 ];
 
 export const DUNGEON_DIFFICULTIES = [
