@@ -294,7 +294,7 @@ export class HeroController implements Combatant {
       this.body.velocity.x *= Math.exp(-dt * 8);
       this.body.velocity.z *= Math.exp(-dt * 8);
     }
-    if (Math.abs(this.position.x) > 153 || Math.abs(this.position.z) > 153 || this.position.y < -25) {
+    if (Math.abs(this.position.x) > this.physics.terrainExtent+8 || Math.abs(this.position.z) > this.physics.terrainExtent+8 || this.position.y < -25) {
       this.respawn(new Vector3(0, this.physics.terrainHeight(0, 18) + 1, 18));
       this.events.emit('message', { text: 'As brumas devolvem você à vila.', tone: 'info' });
     }

@@ -17,6 +17,7 @@ export class PhysicsWorld {
   private readonly characterMaterial = new CANNON.Material('character');
   private readonly groundMaterial = new CANNON.Material('terrain');
   private readonly characters = new Set<CANNON.Body>();
+  private readonly colliderBodies=new Map<import('../world/OpenWorldGenerator').WorldCollider,CANNON.Body>();
   private readonly terrainBodies = new Set<CANNON.Body>();
   private readonly gates:CANNON.Body[]=[];
   private readonly portalBarriers=new Map<string,CANNON.Body>();
@@ -38,7 +39,7 @@ export class PhysicsWorld {
 
   clearTerrain():void {
     for(const body of this.terrainBodies)this.world.removeBody(body);
-    this.terrainBodies.clear();this.gates.length=0;this.portalBarriers.clear();
+    this.terrainBodies.clear();this.colliderBodies.clear();this.gates.length=0;this.portalBarriers.clear();
   }
   get terrainExtent():number{return this.terrain.terrainSize/2-10;}
   /** Atomically switch world colliders while preserving all live actor bodies. */
@@ -47,14 +48,14 @@ export class PhysicsWorld {
     next.generate();
     const previous=this.terrain;
     for(const body of this.terrainBodies)this.world.removeBody(body);
-    this.terrainBodies.clear();
+    this.terrainBodies.clear();this.colliderBodies.clear();
     this.portalBarriers.clear();
     this.gates.length=0;
     this.terrain=next;
     try {this.installStaticWorld();}
     catch(error){
       for(const body of this.terrainBodies)this.world.removeBody(body);
-      this.terrainBodies.clear();
+      this.terrainBodies.clear();this.colliderBodies.clear();
       this.gates.length=0;
       this.terrain=previous;
       this.installStaticWorld();
@@ -69,20 +70,26 @@ export class PhysicsWorld {
 
   private installStaticWorld():void{
     this.createHeightfield();
+    this.syncTerrainColliders();
+  }
+
+  /** GLBs resolve after the heightfield; install their fitted colliders once without duplicating bodies. */
+  syncTerrainColliders():void {
     for (const collider of this.terrain.colliders) {
+      if(this.colliderBodies.has(collider))continue;
       // Slide regions mark the underlying heightfield; they are not floating solid plates.
       if (collider.type === 'slide') continue;
       const body = new CANNON.Body({ mass: 0, material: this.groundMaterial, collisionFilterGroup: 1, collisionFilterMask: 2 });
       body.addShape(new CANNON.Box(new CANNON.Vec3(collider.size.x / 2, collider.size.y / 2, collider.size.z / 2)));
       body.position.set(collider.position.x, collider.position.y, collider.position.z);
-      this.registerStatic(body);
+      this.registerStatic(body);this.colliderBodies.set(collider,body);
       if(collider.type==='gate')this.gates.push(body);
     }
   }
-  setPortalBarrier(id:string,position:THREE.Vector3,open:boolean):void {
+  setPortalBarrier(id:string,position:THREE.Vector3,open:boolean,yaw=0):void {
     let body=this.portalBarriers.get(id);
     if(!body){body=new CANNON.Body({mass:0,material:this.groundMaterial,collisionFilterGroup:1,collisionFilterMask:2});body.addShape(new CANNON.Box(new CANNON.Vec3(1.8,2.7,.35)));body.position.set(position.x,position.y+2.7,position.z);this.portalBarriers.set(id,body);this.registerStatic(body);}
-    body.collisionResponse=!open;body.collisionFilterMask=open?0:2;body.aabbNeedsUpdate=true;
+    body.position.set(position.x,position.y+2.7,position.z);body.quaternion.setFromEuler(0,yaw,0);body.collisionResponse=!open;body.collisionFilterMask=open?0:2;body.aabbNeedsUpdate=true;
   }
   removePortalBarrier(id:string):void {const body=this.portalBarriers.get(id);if(!body)return;this.world.removeBody(body);this.terrainBodies.delete(body);this.portalBarriers.delete(id);}
   /** Opening a gate removes both physical contacts and raycast obstruction. */
@@ -105,7 +112,9 @@ export class PhysicsWorld {
     const body = new CANNON.Body({ mass: 0, material: this.groundMaterial, collisionFilterGroup: 1, collisionFilterMask: 2 });
     body.addShape(shape);
     body.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-    body.position.set(-size / 2, 0, size / 2);
+    // Cannon excludes one triangle edge in its ray barycentric test. A sub-micron
+    // horizontal offset avoids exact-grid-line misses while retaining visual/physics agreement.
+    body.position.set(-size / 2-1e-7, 0, size / 2+1e-7);
     this.registerStatic(body);
     // The outer mountain is backed by physical boundary walls for high-speed mounts.
     const edge = size / 2 - 1;
@@ -121,6 +130,10 @@ export class PhysicsWorld {
 
   get waterLevel(): number { return this.terrain.waterLevel; }
 
+  isPositionFree(x:number,z:number,radius=1):boolean {
+    if(Math.abs(x)>this.terrainExtent||Math.abs(z)>this.terrainExtent||!this.terrain.isWalkable(x,z))return false;
+    return !this.terrain.colliders.some(c=>c.type!=='slide'&&Math.abs(x-c.position.x)<c.size.x/2+radius&&Math.abs(z-c.position.z)<c.size.z/2+radius);
+  }
   terrainHeight(x: number, z: number): number { return this.terrain.heightAt(x, z); }
 
   createCharacter(position: THREE.Vector3, radius = .5): CANNON.Body {
@@ -217,7 +230,7 @@ export class PhysicsWorld {
   dispose(): void {
     for (const body of [...this.world.bodies]) this.world.removeBody(body);
     this.characters.clear();
-    this.terrainBodies.clear();
+    this.terrainBodies.clear();this.colliderBodies.clear();
     this.portalBarriers.clear();
     this.gates.length=0;
   }

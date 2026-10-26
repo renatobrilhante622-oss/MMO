@@ -1,3 +1,4 @@
+import {mapDefinition,WORLD_MAPS} from '../world/maps/MapDefinitions';
 import {avatarId} from '../ui/AvatarRenderer';
 import {EvolutionSystem} from '../rpg/EvolutionSystem';
 import {Vector3} from 'three';
@@ -150,7 +151,8 @@ export class AdventureProgress {
     this.inventory.gold-=price;this.purchasedSlots++;return true;
   }
   record(index:number,name:string,x:number,z:number,blocked:boolean,regionId?:string):boolean {
-    if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>240||Math.abs(z)>240)return false;
+    const local=regionId?REGIONS.find(r=>r.id===regionId):undefined;if(regionId&&!local)return false;const limit=local?mapDefinition(local.id).size/2-12:240;
+    if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>limit||Math.abs(z)>limit)return false;
     const region=REGIONS.find(r=>r.id===regionId)??REGIONS.reduce((best,r)=>Math.hypot(x-r.center.x,z-r.center.z)<Math.hypot(x-best.center.x,z-best.center.z)?r:best,REGIONS[0]);
     this.bookmarks[index]={name:name.trim().slice(0,30)||region.name[this.language==='pt'?0:1],x,z,region:region.id,localMap:!!regionId};return true;
   }
@@ -297,8 +299,12 @@ export class AdventureProgress {
     this.pulls=integer(raw.pulls,0,1e9);this.pity=integer(raw.pity,0,59);this.purchasedSlots=integer(raw.purchasedSlots,0,4);
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;
-    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=240&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=240)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora',localMap:b.localMap===true};}
-    if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=240&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=240)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
+    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){
+      const b=raw.bookmarks[i];if(!object(b))continue;const region=REGIONS.find(r=>r.id===b.region);const limit=b.localMap===true&&region?mapDefinition(region.id).size/2-12:240;
+      if(typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=limit&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=limit)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:region?.id??'aurora',localMap:b.localMap===true};
+    }
+    const mapLimit=Math.max(...Object.values(WORLD_MAPS).map(m=>m.size/2-12));
+    if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=mapLimit&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=mapLimit)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
     if(Array.isArray(raw.discovered))this.discovered=[...new Set(['aurora',...raw.discovered.filter((id):id is string=>REGIONS.some(r=>r.id===id))])];
     if(Array.isArray(raw.unlockedRegions))this.unlockedRegions=[...new Set(['aurora',...raw.unlockedRegions.filter((id):id is string=>typeof id==='string'&&REGIONS.some(r=>r.id===id))])];
     if(object(raw.dungeonClears))for(const [key,n] of Object.entries(raw.dungeonClears))this.dungeonClears[key]=integer(n,0,1e6);
