@@ -1,0 +1,114 @@
+{
+  "locked": {
+    "id": "aurora",
+    "complete": false,
+    "barriers": [
+      true
+    ]
+  },
+  "arrival": {
+    "id": "crypt",
+    "oldDetached": true,
+    "oldBodiesRemoved": true,
+    "heroRetained": true,
+    "gatheringRetained": true,
+    "mapCount": 1,
+    "nearGuardian": true
+  },
+  "arrivalClaim": {
+    "active": "story-crypt-hunt",
+    "duplicate": false
+  },
+  "dungeon": {
+    "key": "dungeon:tombs",
+    "oldDetached": true,
+    "npcs": 0,
+    "weatherEmpty": true,
+    "skyHidden": true,
+    "rooms": 4,
+    "heroRetained": true
+  },
+  "return": {
+    "map": "crypt",
+    "native": true,
+    "ore": 9,
+    "atEntry": true,
+    "portalRestored": true
+  },
+  "uiErrors": [],
+  "scenes": [
+    {
+      "id": "aurora",
+      "mapRoots": 1,
+      "physicsBodies": 9,
+      "drawCalls": 41,
+      "triangles": 337306,
+      "geometries": 41
+    },
+    {
+      "id": "crypt",
+      "mapRoots": 1,
+      "physicsBodies": 5,
+      "drawCalls": 21,
+      "triangles": 98978,
+      "geometries": 20
+    },
+    {
+      "id": "highlands",
+      "mapRoots": 1,
+      "physicsBodies": 5,
+      "drawCalls": 22,
+      "triangles": 65574,
+      "geometries": 21
+    },
+    {
+      "id": "rift",
+      "mapRoots": 1,
+      "physicsBodies": 5,
+      "drawCalls": 19,
+      "triangles": 71400,
+      "geometries": 18
+    },
+    {
+      "id": "eclipse",
+      "mapRoots": 1,
+      "physicsBodies": 5,
+      "drawCalls": 16,
+      "triangles": 55436,
+      "geometries": 16
+    },
+    {
+      "id": "dungeon:tombs",
+      "mapRoots": 1,
+      "physicsBodies": 136,
+      "drawCalls": 25,
+      "triangles": 37960,
+      "geometries": 26
+    },
+    {
+      "id": "dungeon:titan",
+      "mapRoots": 1,
+      "physicsBodies": 158,
+      "drawCalls": 25,
+      "triangles": 32936,
+      "geometries": 36
+    },
+    {
+      "id": "dungeon:void",
+      "mapRoots": 1,
+      "physicsBodies": 148,
+      "drawCalls": 26,
+      "triangles": 48458,
+      "geometries": 41
+    },
+    {
+      "id": "dungeon:eclipse",
+      "mapRoots": 1,
+      "physicsBodies": 146,
+      "drawCalls": 33,
+      "triangles": 34475,
+      "geometries": 48
+    }
+  ],
+  "renderErrors": []
+}

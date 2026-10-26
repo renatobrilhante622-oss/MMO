@@ -37,17 +37,21 @@ export class GatheringSystem{
    this.root.name='Five-region authored gathering nodes';
    this.scene.add(this.root);
    const r=rng(9147+regionId.split('').reduce((v,c)=>v+c.charCodeAt(0),0)*33);
-   for(let i=0;i<27;i++){
+   for(let i=0;i<(regionId==='dungeon'?0:27);i++){
     const kind:GatherKind=i%9===0?'chest':i%2===0?'ore':'herb';
     const x=(r()-.5)*232,z=(r()-.5)*232;
-    if(Math.hypot(x,z-18)<19)continue;
+    if(Math.hypot(x,z-18)<19||this.heightAt(x,z)<2)continue;
     this.nodes.push({id:regionId+'-'+i,kind,x,z,cooldown:kind==='chest'?360:140});
+   }
+   if(regionId!=='dungeon')for(let i=0;i<9;i++){
+    const z=-24-i*12,x=Math.sin(z*.028)*4+2;
+    this.nodes.push({id:regionId+'-campaign-'+i,kind:i%2?'ore':'herb',x,z,cooldown:140});
    }
    this.label.className='gather-context';this.label.hidden=true;
    this.action.type='button';this.action.className='gather-action';this.action.onclick=()=>this.start();
    this.bar.max=2;this.bar.value=0;this.subtitle.textContent='2s · mantenha-se próximo';
    this.label.append(this.action,this.bar,this.subtitle);host.append(this.label);
-   if(typeof document!=='undefined')void this.build();
+   if(typeof document!=='undefined'&&regionId!=='dungeon')void this.build();
  }
  private async build():Promise<void>{
   for(const kind of ['ore','herb','chest'] as GatherKind[]){

@@ -1,3 +1,6 @@
+import type {PhysicsWorld} from '../physics/PhysicsWorld';
+import {PortalTrigger,portalPermission,type StoryGate} from './PortalTrigger';
+import {mapDefinition} from './maps/MapDefinitions';
 import {
   AdditiveBlending,Box3,DoubleSide,Group,Mesh,PerspectiveCamera,PlaneGeometry,
   ShaderMaterial,Vector3,type Object3D,type Scene
@@ -8,14 +11,11 @@ import {travelPermission,type RegionTravelState} from './RegionTravel';
 
 export interface PortalSite {id:string;destId:string;x:number;z:number;}
 export function portalSites(currentId:string):PortalSite[]{
-  if(currentId==='aurora')return REGIONS.filter(r=>r.id!=='aurora').map((r,i)=>({
-    id:'portal-'+r.id,destId:r.id,
-    x:[-17,17,-17,17][i],z:[8,8,32,32][i]
-  }));
-  const index=REGIONS.findIndex(r=>r.id===currentId);
+  const index=REGIONS.findIndex(r=>r.id===currentId);if(index<0)return [];
+  const def=mapDefinition(currentId);
   return [
-    {id:'portal-return',destId:'aurora',x:10,z:18},
-    ...(REGIONS[index+1]?[{id:'portal-next',destId:REGIONS[index+1].id,x:-14,z:18}]:[]),
+    ...(index>0?[{id:'portal-return',destId:REGIONS[index-1].id,x:-9,z:23}]:[]),
+    ...(REGIONS[index+1]?[{id:'portal-next',destId:REGIONS[index+1].id,...def.exit}]:[]),
   ];
 }
 const loader=new GLTFLoader();
@@ -29,7 +29,7 @@ function sharedArch(){
 }
 interface PortalVisual {
   site:PortalSite;root:Group;label:HTMLDivElement;
-  vortex:ShaderMaterial;arch?:Object3D;
+  vortex:ShaderMaterial;arch?:Object3D;trigger:PortalTrigger;
 }
 /**
  * Authored CC0 3D masonry surrounds a dynamic shader-only interdimensional gate.
@@ -48,7 +48,7 @@ export class WorldPortals {
     private readonly regionId:string,private readonly ground:(x:number,z:number)=>number,
     private readonly state:()=>RegionTravelState,
     private readonly onEnter:(regionId:string)=>void,
-    private readonly language:()=> 'pt'|'en'){
+    private readonly language:()=> 'pt'|'en',private readonly story:StoryGate,private readonly physics?:PhysicsWorld){
     this.root.name='Physical gates: '+regionId;
     scene.add(this.root);
     for(const site of portalSites(regionId)){
@@ -57,7 +57,7 @@ export class WorldPortals {
       root.name='Rune portal '+site.destId;
       const shader=new ShaderMaterial({
         transparent:true,depthWrite:false,side:DoubleSide,blending:AdditiveBlending,
-        uniforms:{uTime:{value:0},uOpen:{value:1}},
+        uniforms:{uTime:{value:0},uOpen:{value:0}},
         vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
         fragmentShader:`varying vec2 vUv;uniform float uTime;uniform float uOpen;
         void main(){
@@ -71,7 +71,8 @@ export class WorldPortals {
           float alpha=(1.-smoothstep(.7,.92,r))*.72 + rim*.36;
           vec3 shade=mix(vec3(.13,.025,.38),vec3(.31,.63,1.2),spiral);
           shade+=flecks*vec3(.55,.3,1.)+rim*vec3(.8,.5,1.);
-          gl_FragColor=vec4(shade*1.7,alpha*uOpen);
+          shade=mix(vec3(.55,.025,.035)+rim*.3,shade,uOpen);
+          gl_FragColor=vec4(shade*1.7,alpha*(.65+uOpen*.35));
         }`,
       });
       const vortex=new Mesh(new PlaneGeometry(3.45,4.6),shader);
@@ -84,7 +85,7 @@ export class WorldPortals {
       label.hidden=true;
       label.setAttribute('role','note');
       this.host.append(label);
-      const item:PortalVisual={root,label,site,vortex:shader};
+      const item:PortalVisual={root,label,site,vortex:shader,trigger:new PortalTrigger()};
       this.portals.push(item);
       void sharedArch().then(gltf=>{
         if(this.disposed)return;
@@ -114,7 +115,10 @@ export class WorldPortals {
     let chosen:PortalVisual|null=null;let closest=3.5;
     for(const portal of this.portals){
       const region=REGIONS.find(r=>r.id===portal.site.destId)!;
-      const permission=travelPermission(region.id,this.state());
+      const permission=portalPermission(this.regionId,region.id,this.state(),this.story);
+      portal.vortex.uniforms.uOpen.value=permission.ok?1:0;
+      this.physics?.setPortalBarrier(portal.site.id,portal.root.position,permission.ok);
+      if(portal.trigger.sample(hero,portal.site,permission.ok,active)){this.onEnter(portal.site.destId);return;}
       const distance=Math.hypot(hero.x-portal.root.position.x,hero.z-portal.root.position.z);
       if(active&&distance<closest){closest=distance;chosen=portal;}
       this.scratch.copy(portal.root.position).add(new Vector3(0,7.4,0)).project(camera);
@@ -131,7 +135,7 @@ export class WorldPortals {
       const translated=region.name[this.language()==='pt'?0:1];
       const state=permission.ok?'✓ Nível '+region.minLevel+'+':
         permission.reason==='level'?'🔒 Requer nível '+region.minLevel:
-        '⛔ Em combate / masmorra';
+        permission.reason==='locked'?'🔒 Conclua a missão principal':'⛔ Em combate / masmorra';
       portal.label.replaceChildren();
       const name=document.createElement('strong');name.textContent='🌀 '+translated;
       const requirement=document.createElement('small');requirement.textContent=state;
@@ -141,13 +145,13 @@ export class WorldPortals {
     this.button.hidden=!chosen||!active;
     if(chosen){
       const dest=REGIONS.find(r=>r.id===chosen.site.destId)!;
-      this.button.textContent='🌀 Entrar: '+dest.name[this.language()==='pt'?0:1];
+      this.button.textContent='🌀 Atravesse: '+dest.name[this.language()==='pt'?0:1];
     }
   }
   interact():boolean{
     if(this.disposed||!this.nearest)return false;
-    const permission=travelPermission(this.nearest.site.destId,this.state());
-    if(permission.ok)this.onEnter(this.nearest.site.destId);
+    const permission=portalPermission(this.regionId,this.nearest.site.destId,this.state(),this.story);
+    if(permission.ok)this.button.textContent=this.language()==='pt'?'Atravesse o vórtice para viajar':'Walk through the vortex to travel';
     else this.button.textContent=permission.reason==='level'
       ?'🔒 Requer nível '+permission.region?.minLevel
       :'⛔ Teleporte bloqueado durante combate';
@@ -156,7 +160,7 @@ export class WorldPortals {
   dispose():void{
     this.disposed=true;this.nearest=null;this.root.removeFromParent();
     for(const item of this.portals){
-      item.label.remove();
+      this.physics?.removePortalBarrier(item.site.id);item.label.remove();
       item.vortex.dispose();
       const mesh=item.root.getObjectByName('Animated gateway VFX');
       if(mesh instanceof Mesh)mesh.geometry.dispose();

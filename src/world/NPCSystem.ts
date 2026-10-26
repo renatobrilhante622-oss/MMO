@@ -23,7 +23,7 @@ const NPCS:readonly NPCDefinition[]=[
       region:region.id,icon:'🧪'},
   ]),
   {id:'blacksmith-aster',name:'Brom, o Ferreiro',role:'smith',x:8,z:20,model:'KayKit_Barbarian',region:'aurora',icon:'⚒️'},
-  {id:'teleporter-aster',name:'Astra, Guardiã dos Portais',role:'teleport',x:-8,z:16,model:'KayKit_Mage',region:'aurora',icon:'🌀'}
+
 ];
 
 interface NPCActor {definition:NPCDefinition;model:AnimatedGLB;position:Vector3;label:HTMLElement;}
@@ -42,8 +42,8 @@ export class NPCSystem {
     for(const def of NPCS){
       if(this.activeRegion&&def.region!==this.activeRegion)continue;
       const home=REGIONS.find(region=>region.id===def.region)!;
-      const x=this.activeRegion?def.x-home.center.x:def.x;
-      const z=this.activeRegion?def.z-home.center.z+18:def.z;
+      const x=this.activeRegion?(def.role==='quest'?2:def.x-home.center.x):def.x;
+      const z=this.activeRegion?(def.role==='quest'?20:def.z-home.center.z+18):def.z;
       const model=new AnimatedGLB(def.model,1.9,()=>{},true);
       const position=new Vector3(x,this.ground(x,z)+.15,z);
       model.root.position.copy(position);
@@ -85,7 +85,7 @@ export class NPCSystem {
         npc.label.style.left=((screen.x+1)*.5*rect.width)+'px';
         npc.label.style.top=((1-screen.y)*.5*rect.height)+'px';
         const ready=this.quests.all().some(q=>q.npcId===npc.definition.id&&this.quests.progressOf(q).ready);
-        npc.label.textContent=ready?'❓':npc.definition.icon;
+        npc.label.textContent=npc.definition.role==='quest'?(ready?'?':'!'):npc.definition.icon;
       }
       if(active&&distance<nearest){closest=npc;nearest=distance;}
     }
@@ -134,6 +134,7 @@ export class NPCSystem {
       button.onclick=fn;actions.append(button);
     };
     for(const quest of this.quests.all().filter(q=>q.npcId===npc.definition.id)){
+      if(quest.category==='story'&&quest.id!==this.quests.activeStory()?.id)continue;
       const progress=this.quests.progressOf(quest);
       if(progress.claimed)continue;
       actions.append(questRewardCard(quest,pt));

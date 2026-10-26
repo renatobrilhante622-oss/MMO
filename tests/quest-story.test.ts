@@ -13,11 +13,11 @@ function fixture(now=new Date('2026-10-24T12:00:00Z')){
 }
 
 describe('story quests and rewards',()=>{
- it('builds exactly three linked story objectives per region',()=>{
-   expect(QUEST_STORY).toHaveLength(15);
+ it('builds four linked story objectives per region',()=>{
+   expect(QUEST_STORY).toHaveLength(20);
    for(const region of REGIONS){
      const steps=QUEST_STORY.filter(q=>q.region===region.id);
-     expect(steps.map(q=>q.goal)).toEqual(['talk','kill','boss']);
+     expect(steps.map(q=>q.goal)).toEqual(['talk','kill','collect','boss']);
    }
  });
  it('progresses from guide through hunts and boss, unlocking the next region only when claimed',()=>{
@@ -30,6 +30,8 @@ describe('story quests and rewards',()=>{
    expect(quests.activeStory()?.id).toBe('story-aurora-hunt');
    for(let i=0;i<5;i++)quests.onKill('slime','aurora');
    expect(quests.claim('story-aurora-hunt')).toBe(true);
+   quests.onCollect('aurora',3);
+   expect(quests.claim('story-aurora-gather')).toBe(true);
    const gold=inv.gold;
    quests.onKill('boss','aurora',true);
    expect(prog.unlockedRegions).toEqual(['aurora']);

@@ -25,7 +25,7 @@ describe('five progression zones',()=>{
   });
   it('requires both level and story unlock unless developer god mode overrides',()=>{
     const state={level:100,unlocked:['aurora']};
-    expect(travelPermission('crypt',state).ok).toBe(true);
+    expect(travelPermission('crypt',state).reason).toBe('locked');
     expect(travelPermission('crypt',{level:1,unlocked:['aurora','crypt']}).reason).toBe('level');
     expect(travelPermission('crypt',{level:20,unlocked:['aurora','crypt']}).ok).toBe(true);
     expect(travelPermission('eclipse',{level:1,unlocked:[],adminOverride:true}).ok).toBe(true);

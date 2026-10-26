@@ -19,6 +19,7 @@ export class PhysicsWorld {
   private readonly characters = new Set<CANNON.Body>();
   private readonly terrainBodies = new Set<CANNON.Body>();
   private readonly gates:CANNON.Body[]=[];
+  private readonly portalBarriers=new Map<string,CANNON.Body>();
   private readonly rayResult = new CANNON.RaycastResult();
   private readonly start = new CANNON.Vec3();
   private readonly end = new CANNON.Vec3();
@@ -35,13 +36,19 @@ export class PhysicsWorld {
     this.installStaticWorld();
   }
 
+  clearTerrain():void {
+    for(const body of this.terrainBodies)this.world.removeBody(body);
+    this.terrainBodies.clear();this.gates.length=0;this.portalBarriers.clear();
+  }
+  get terrainExtent():number{return this.terrain.terrainSize/2-10;}
   /** Atomically switch world colliders while preserving all live actor bodies. */
   switchTerrain(next:OpenWorldGenerator):void{
-    if(this.terrain===next)return;
+    if(this.terrain===next&&this.terrainBodies.size)return;
     next.generate();
     const previous=this.terrain;
     for(const body of this.terrainBodies)this.world.removeBody(body);
     this.terrainBodies.clear();
+    this.portalBarriers.clear();
     this.gates.length=0;
     this.terrain=next;
     try {this.installStaticWorld();}
@@ -72,6 +79,12 @@ export class PhysicsWorld {
       if(collider.type==='gate')this.gates.push(body);
     }
   }
+  setPortalBarrier(id:string,position:THREE.Vector3,open:boolean):void {
+    let body=this.portalBarriers.get(id);
+    if(!body){body=new CANNON.Body({mass:0,material:this.groundMaterial,collisionFilterGroup:1,collisionFilterMask:2});body.addShape(new CANNON.Box(new CANNON.Vec3(1.8,2.7,.35)));body.position.set(position.x,position.y+2.7,position.z);this.portalBarriers.set(id,body);this.registerStatic(body);}
+    body.collisionResponse=!open;body.collisionFilterMask=open?0:2;body.aabbNeedsUpdate=true;
+  }
+  removePortalBarrier(id:string):void {const body=this.portalBarriers.get(id);if(!body)return;this.world.removeBody(body);this.terrainBodies.delete(body);this.portalBarriers.delete(id);}
   /** Opening a gate removes both physical contacts and raycast obstruction. */
   setDungeonGateOpen(index:number,open:boolean):void{
     const body=this.gates[index];
@@ -205,6 +218,7 @@ export class PhysicsWorld {
     for (const body of [...this.world.bodies]) this.world.removeBody(body);
     this.characters.clear();
     this.terrainBodies.clear();
+    this.portalBarriers.clear();
     this.gates.length=0;
   }
 }

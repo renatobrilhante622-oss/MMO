@@ -112,7 +112,7 @@ export class AdventureProgress {
   /** Region travel is story-gated independently from physical discovery. */
   unlockedRegions:string[]=['aurora'];
   dungeonClears:Record<string,number>={};
-  selectedDungeon='roots';
+  selectedDungeon='tombs';
   dungeonDifficulty='normal';
   season=seasonId();
   passXp=0;
@@ -150,7 +150,7 @@ export class AdventureProgress {
     this.inventory.gold-=price;this.purchasedSlots++;return true;
   }
   record(index:number,name:string,x:number,z:number,blocked:boolean,regionId?:string):boolean {
-    if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>140||Math.abs(z)>140)return false;
+    if(!this.slotUnlocked(index)||blocked||!Number.isFinite(x)||!Number.isFinite(z)||Math.abs(x)>240||Math.abs(z)>240)return false;
     const region=REGIONS.find(r=>r.id===regionId)??REGIONS.reduce((best,r)=>Math.hypot(x-r.center.x,z-r.center.z)<Math.hypot(x-best.center.x,z-best.center.z)?r:best,REGIONS[0]);
     this.bookmarks[index]={name:name.trim().slice(0,30)||region.name[this.language==='pt'?0:1],x,z,region:region.id,localMap:!!regionId};return true;
   }
@@ -297,13 +297,13 @@ export class AdventureProgress {
     this.pulls=integer(raw.pulls,0,1e9);this.pity=integer(raw.pity,0,59);this.purchasedSlots=integer(raw.purchasedSlots,0,4);
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;
-    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=140&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=140)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora',localMap:b.localMap===true};}
-    if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=140&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=140)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
+    if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){const b=raw.bookmarks[i];if(object(b)&&typeof b.name==='string'&&typeof b.x==='number'&&Number.isFinite(b.x)&&Math.abs(b.x)<=240&&typeof b.z==='number'&&Number.isFinite(b.z)&&Math.abs(b.z)<=240)this.bookmarks[i]={name:b.name.slice(0,30),x:b.x,z:b.z,region:typeof b.region==='string'?b.region:'aurora',localMap:b.localMap===true};}
+    if(object(raw.waypoint)&&typeof raw.waypoint.x==='number'&&Number.isFinite(raw.waypoint.x)&&Math.abs(raw.waypoint.x)<=240&&typeof raw.waypoint.z==='number'&&Number.isFinite(raw.waypoint.z)&&Math.abs(raw.waypoint.z)<=240)this.waypoint={x:raw.waypoint.x,z:raw.waypoint.z};
     if(Array.isArray(raw.discovered))this.discovered=[...new Set(['aurora',...raw.discovered.filter((id):id is string=>REGIONS.some(r=>r.id===id))])];
     if(Array.isArray(raw.unlockedRegions))this.unlockedRegions=[...new Set(['aurora',...raw.unlockedRegions.filter((id):id is string=>typeof id==='string'&&REGIONS.some(r=>r.id===id))])];
     if(object(raw.dungeonClears))for(const [key,n] of Object.entries(raw.dungeonClears))this.dungeonClears[key]=integer(n,0,1e6);
     if(['normal','elite','nightmare','abyssal'].includes(String(raw.dungeonDifficulty)))this.dungeonDifficulty=String(raw.dungeonDifficulty);
-    if(typeof raw.selectedDungeon==='string')this.selectedDungeon=raw.selectedDungeon;
+    if(typeof raw.selectedDungeon==='string')this.selectedDungeon=['roots','tide'].includes(raw.selectedDungeon)?'tombs':raw.selectedDungeon;
     this.season=typeof raw.season==='string'?raw.season:seasonId();this.passXp=integer(raw.passXp,0,5000);
     this.claimed=Array.isArray(raw.claimed)?[...new Set(raw.claimed.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=50))]:[];
     this.claimedPremium=Array.isArray(raw.claimedPremium)?[...new Set(raw.claimedPremium.filter((n):n is number=>Number.isInteger(n)&&n>=1&&n<=50))]:[];

@@ -1,6 +1,7 @@
 import type { ClassId } from './GameTypes';
 
 export interface SoundEnvironment {
+  region?:string;
   daylight: number;
   moving: boolean;
   inWater: boolean;
@@ -293,12 +294,13 @@ export class SoundEngine {
     this.bossPresent = environment.boss;
     const day = Math.max(0, Math.min(1, environment.daylight));
     this.ambienceFilter?.frequency.setTargetAtTime(450 + day * 500 + Math.sin(this.ambienceClock * 0.12) * 120, context.currentTime, 1.2);
+    const melody=({aurora:[73.416,110,146.832,220],crypt:[55,65.406,82.407,110],highlands:[98,146.832,196,293.665],rift:[41.203,61.735,82.407,123.47],eclipse:[51.913,77.782,103.826,155.56]} as Record<string,number[]>)[environment.region??'aurora']??[49,58.27,73.416,98];
     this.ambientGains.forEach((gain, i) => {
       const pulse = 0.7 + Math.sin(this.ambienceClock * (0.07 + i * 0.03) + i) * 0.3;
       gain.gain.setTargetAtTime((environment.boss ? 0.035 : 0.012) * pulse, context.currentTime, 0.7);
-      this.ambientOscillators[i].frequency.setTargetAtTime([73.416, 110, 146.832, 220][i] * (environment.boss ? 0.75 : 1), context.currentTime, 2);
+      this.ambientOscillators[i].frequency.setTargetAtTime(melody[i] * (environment.boss ? 0.75 : 1), context.currentTime, 2);
     });
-    if (this.birdClock <= 0 && !environment.boss) {
+    if (this.birdClock <= 0 && !environment.boss && (!environment.region||environment.region==='aurora')) {
       if (day > 0.3) {
         const pitch = 1700 + Math.random() * 800;
         this.tone(pitch, 0.11, 0.025, 'sine', pitch * 1.35, 0, Math.random() * 1.5 - 0.75);

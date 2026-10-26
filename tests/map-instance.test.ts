@@ -59,17 +59,17 @@ describe('truly separate biome scene instances',()=>{
     expect(enemies.enemies.every(e=>['golem','wolf'].includes(e.kind))).toBe(true);
     enemies.dispose();physics.dispose();world.dispose();
   });
-  it('physical portal signs respect level and provide safe access to every region',()=>{
+  it('physical portal signs link adjacent maps and enforce level and story unlocks',()=>{
     const fromVillage=portalSites('aurora');
-    expect(fromVillage).toHaveLength(4);
-    expect(new Set(fromVillage.map(p=>p.destId)).size).toBe(4);
+    expect(fromVillage).toHaveLength(1);
+    expect(fromVillage[0].destId).toBe('crypt');
     for(const region of REGIONS){
       const routes=portalSites(region.id);
-      if(region.id!=='aurora')expect(routes[0].destId).toBe('aurora');
+      if(region.id!=='aurora')expect(routes[0].destId).toBe(REGIONS[REGIONS.indexOf(region)-1].id);
       const locked=travelPermission(region.id,{level:1,unlocked:['aurora']});
       expect(locked.ok).toBe(region.minLevel===1);
       const level100=travelPermission(region.id,{level:100,unlocked:['aurora']});
-      expect(level100.ok).toBe(true);
+      expect(level100.ok).toBe(region.id==='aurora');
     }
   });
   it('localizes every supported world creature instead of exposing code IDs',()=>{

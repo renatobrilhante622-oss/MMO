@@ -1,3 +1,4 @@
+import {mapDefinition} from './maps/MapDefinitions';
 import {
   Box3,DoubleSide,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3
 } from 'three';
@@ -47,6 +48,7 @@ function random(seed:number):()=>number{
 /** Geometry/material data is authored in GLB files; only placement matrices are computed. */
 export class EnvironmentGLB {
   readonly root=new Group();
+  readonly ready:Promise<void>;
   private disposed=false;
   private readonly meshes:InstancedMesh[]=[];
   private readonly materials=new Set<MeshStandardMaterial>();
@@ -54,13 +56,14 @@ export class EnvironmentGLB {
     private readonly activeRegion?:string){
     this.root.name='CC0 authored environment — instanced GLB scenery';
     scene.add(this.root);
-    if(typeof document!=='undefined')void this.build();
+    this.ready=typeof document!=='undefined'?this.build():Promise.resolve();
   }
   private async build():Promise<void>{
     for(let index=0;index<ASSETS.length;index++){
       if(this.disposed)return;
       const entry=ASSETS[index];
       if(this.activeRegion&&entry.region!==this.activeRegion)continue;
+      if((entry.region==='crypt'||entry.region==='highlands')&&entry.file.includes('tree-'))continue;
       let gltf:GLTF;
       try{gltf=await model(entry.file);}
       catch(error){console.warn('Unable to load authored environment:',entry.file,error);continue;}
@@ -77,9 +80,9 @@ export class EnvironmentGLB {
         const angle=rng()*Math.PI*2;
         const radius=entry.count<5?13+n*3:14+Math.sqrt(rng())*28;
         const x=Math.max(-133,Math.min(133,cx+Math.cos(angle)*radius));
-        const z=Math.max(-133,Math.min(133,cz+Math.sin(angle)*radius));
+        const z=this.activeRegion?25-(mapDefinition(entry.region).size*.4)*((n+.5)/entry.count):Math.max(-133,Math.min(133,cz+Math.sin(angle)*radius));
         if(entry.region==='aurora'&&Math.hypot(x,z-18)<24)continue;
-        const y=this.heightAt(x,z);
+        const y=this.heightAt(x,z);if(entry.region==='eclipse'&&y<2)continue;
         const spin=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),rng()*Math.PI*2);
         const objectScale=scale*(.8+rng()*.38);
         const transform=new Matrix4().compose(new Vector3(x,y,z),spin,new Vector3(objectScale,objectScale,objectScale));
@@ -111,11 +114,14 @@ export class EnvironmentGLB {
               if(bark)material.color.set('#5c3a21');
               else if(foliage)material.color.set(index%2?'#3b8046':'#2d6a3e');
             }
+            if(entry.region==='crypt'){material.color.multiplyScalar(.28);material.roughness=1;}
+            if(entry.region==='highlands'&&!bark)material.color.set('#dcebf6');
             material.vertexColors=source.vertexColors;
             material.emissive.copy(source.emissive);
             material.emissiveIntensity=Math.min(.16,source.emissiveIntensity);
             material.depthWrite=true;
           }else{
+            if(entry.region==='rift')material.color.multiplyScalar(.22);
             material.metalness=Math.min(.12,material.metalness);
             material.roughness=Math.max(.78,material.roughness);
             material.emissive.setRGB(.10,.11,.10);
@@ -124,7 +130,7 @@ export class EnvironmentGLB {
           this.materials.add(material);
           return material;
         });
-        const instanced=new InstancedMesh(object.geometry,Array.isArray(object.material)?visual:visual[0],transforms.length);
+        const instanced=new InstancedMesh(object.geometry.clone(),Array.isArray(object.material)?visual:visual[0],transforms.length);
         instanced.name='Instanced '+entry.file+'/'+object.name;
         // Tiny forest foliage no longer self-occludes as a single opaque shadow.
         instanced.castShadow=true;
@@ -141,7 +147,7 @@ export class EnvironmentGLB {
   }
   dispose():void{
     this.disposed=true;
-    for(const mesh of this.meshes)mesh.removeFromParent();
+    for(const mesh of this.meshes){mesh.removeFromParent();mesh.geometry.dispose();mesh.dispose();}
     this.meshes.length=0;
     for(const material of this.materials)material.dispose();
     this.materials.clear();

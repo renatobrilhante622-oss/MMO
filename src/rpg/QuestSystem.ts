@@ -6,7 +6,7 @@ import {REGIONS} from '../world/Regions';
 import {REGION_REWARDS} from '../world/RegionTravel';
 
 export type QuestCategory='story'|'side'|'bounty'|'milestone';
-export type QuestGoal='talk'|'kill'|'boss'|'visit'|'level'|'refine'|'wing'|'mount';
+export type QuestGoal='talk'|'kill'|'boss'|'visit'|'level'|'refine'|'wing'|'mount'|'collect';
 export interface QuestDefinition {
   id:string;category:QuestCategory;region:string;
   title:string;description:string;goal:QuestGoal;target:string;required:number;
@@ -23,12 +23,16 @@ const STORY:QuestDefinition[]=REGIONS.flatMap((region,index)=>{
   const level=region.minLevel;
   const three:QuestDefinition[]=[
     {id:'story-'+region.id+'-meet',category:'story',region:region.id,
-      title:'O Chamado — '+region.name[0],description:'Converse com o guardião desta região.',
+      title:index===0?'O Chamado — '+region.name[0]:'Atravesse o Portal Ancestral e apresente-se ao Guardião — '+region.name[0],description:'Converse com o guardião desta região.',
       goal:'talk',target:npc,required:1,reward:reward(80+level*12,80+level*30,0,0,25),npcId:npc},
     {id:'story-'+region.id+'-hunt',category:'story',region:region.id,
       title:'Limpando '+region.name[0],description:'Derrote '+region.kinds[0]+' para proteger a passagem.',
       goal:'kill',target:region.kinds[0],required:Math.min(15,5+index*2),
       reward:reward(220+level*25,180+level*50,2+index,0,50),npcId:npc},
+    {id:'story-'+region.id+'-gather',category:'story',region:region.id,
+      title:'Suprimentos para a passagem',description:'Colete recursos locais para estabilizar o Portal Ancestral.',
+      goal:'collect',target:'resource',required:3+index,
+      reward:reward(180+level*22,160+level*35,2+index,0,40),npcId:npc},
     {id:'story-'+region.id+'-boss',category:'story',region:region.id,
       title:'Confronto — '+region.boss.name[0],description:'Derrote o chefe para liberar o próximo mapa.',
       goal:'boss',target:region.id,required:1,
@@ -113,6 +117,11 @@ export class QuestSystem {
       this.counters.set(quest.id,Math.min(quest.required,(this.counters.get(quest.id)??0)+count));
     }
   }
+  regionComplete(region:string):boolean{return STORY.filter(q=>q.region===region).every(q=>this.claimed.has(q.id));}
+  canEnterRegion(region:string):boolean{
+    const i=REGIONS.findIndex(r=>r.id===region);return i===0||i>0&&REGIONS.slice(0,i).every(r=>this.regionComplete(r.id));
+  }
+  onCollect(region:string,count=1):void{if(Number.isInteger(count)&&count>0)this.signal('collect','resource',region,count);}
   onTalk(id:string):void{this.signal('talk',id);}
   onKill(kind:string,region:string,boss=false):void{
     if(boss)this.signal('boss',region);
@@ -156,16 +165,22 @@ export class QuestSystem {
     return true;
   }
   snapshot():Record<string,unknown>{
-    return {storyIndex:this.storyIndex,day:this.currentDay,
+    return {schema:2,storyIndex:this.storyIndex,day:this.currentDay,
       counters:Object.fromEntries(this.counters),accepted:[...this.accepted],claimed:[...this.claimed]};
   }
   restore(data:unknown):void{
     if(!data||typeof data!=='object'||Array.isArray(data))return;
     const raw=data as Record<string,unknown>;
-    if(valid(raw.storyIndex))this.storyIndex=Math.min(STORY.length,raw.storyIndex as number);
     const ids=new Set(this.all().map(q=>q.id));
     if(Array.isArray(raw.accepted))for(const id of raw.accepted)if(typeof id==='string'&&ids.has(id))this.accepted.add(id);
     if(Array.isArray(raw.claimed))for(const id of raw.claimed)if(typeof id==='string'&&ids.has(id))this.claimed.add(id);
+    if(raw.schema!==2){
+      const oldStory=STORY.filter(q=>q.goal!=='collect');
+      const oldIndex=valid(raw.storyIndex)?Math.min(oldStory.length,Number(raw.storyIndex)):0;
+      for(const q of oldStory.slice(0,oldIndex))this.claimed.add(q.id);
+      for(const r of REGIONS)if(this.claimed.has('story-'+r.id+'-boss'))this.claimed.add('story-'+r.id+'-gather');
+    }
+    this.storyIndex=0;while(this.storyIndex<STORY.length&&this.claimed.has(STORY[this.storyIndex].id))this.storyIndex++;
     if(raw.counters&&typeof raw.counters==='object'&&!Array.isArray(raw.counters))
       for(const [id,value]of Object.entries(raw.counters))if(ids.has(id)&&valid(value))this.counters.set(id,value as number);
   }

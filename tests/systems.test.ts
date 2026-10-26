@@ -23,11 +23,11 @@ describe('dungeon floors',()=>{
  it('requires three complete floor bosses and cannot award completion twice',async()=>{
   const {Scene,Vector3}=await import('three');const {DungeonBossManager}=await import('../src/enemies/DungeonBossManager');
   const spawned:Array<{hp:number;maxHp:number;alive:boolean;position:InstanceType<typeof Vector3>}> = [];
-  const enemies={terrainHeight:()=>0,spawn:(_kind:string,position:InstanceType<typeof Vector3>)=>{const e={hp:100,maxHp:100,get alive(){return this.hp>0;},position,deathTime:0};spawned.push(e);return e;}};
+  const enemies={terrainHeight:()=>0,spawn:(_kind:string,position:InstanceType<typeof Vector3>)=>{const e={hp:100,maxHp:100,get alive(){return this.hp>0;},position,deathTime:0,setBossPresentation:()=>{}};spawned.push(e);return e;}};
   const {EnemyAI}=await import('../src/enemies/EnemyAI');
   const manager=new DungeonBossManager(new Scene(),enemies as unknown as InstanceType<typeof EnemyAI>,new EventBus(),new Vector3());
   const hero={id:'hero',position:new Vector3(),radius:.5,hp:100,maxHp:100,defense:10,alive:true,team:'hero' as const,invulnerable:false,receiveDamage:()=>0};
-  expect(manager.start(hero,DUNGEONS[0],1)).toBe(true);
+  expect(manager.start(hero,{...DUNGEONS[0],level:1},1)).toBe(true);
   const floors=new Set<number>();
   for(let i=0;i<80&&manager.active;i++){floors.add(manager.floor);spawned.forEach(e=>e.hp=0);manager.update(6,hero);}
   expect([...floors]).toEqual([1,2,3]);expect(manager.completed).toBe(true);expect(manager.clears).toBe(1);manager.update(10,hero);expect(manager.clears).toBe(1);manager.dispose();

@@ -4,7 +4,7 @@ import {
 } from 'three';
 
 import {RigidSkinBatch} from '../assets/RigidSkinBatch';
-import {AnimatedGLB} from '../assets/AnimatedGLB';
+import {AnimatedGLB,type ModelName} from '../assets/AnimatedGLB';
 
 interface CreatureLimb { shoulder: Group; elbow: Group; foot: Group; side: number; rear: boolean }
 
@@ -23,7 +23,7 @@ export class CreatureRig {
   private readonly bone: MeshStandardMaterial;
   private readonly scale: number;
   private readonly batch?:RigidSkinBatch;
-  private readonly imported?:AnimatedGLB;
+  private imported?:AnimatedGLB;
   private previousAttack=false;
   private attackBlend = 0;
   private readonly tendrils:Group[]=[];
@@ -57,6 +57,12 @@ export class CreatureRig {
     }
   }
 
+  setBossModel(model:ModelName,color:number):void {
+    if(!this.boss||typeof document==='undefined')return;
+    this.imported?.dispose();this.spine.visible=false;
+    const actor=new AnimatedGLB(model,4.4,()=>actor.setCosmeticPalette(color,3),false);
+    this.imported=actor;this.root.add(actor.root);
+  }
   private mesh(parent: Object3D, geometry: BufferGeometry, material: MeshStandardMaterial, x = 0, y = 0, z = 0): Mesh {
     const mesh = new Mesh(geometry, material);
     mesh.position.set(x, y, z);

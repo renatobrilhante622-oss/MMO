@@ -54,16 +54,12 @@ vec3 terrainAlbedo(vec3 p,vec3 n){
   if(terrainBiome>.5){
     vec3 biome=terrainBiome<1.5?mix(dirt,stone,.35):
       terrainBiome<2.5?snow:
-      terrainBiome<3.5?scorched:mix(stone,scorched,.48);
-    return mix(biome,stone,cliffs*.48);
+      terrainBiome<3.5?scorched*.20+vec3(.012,.01,.018):mix(stone,scorched,.48);
+    return terrainBiome<2.5&&terrainBiome>1.5?mix(snow,vec3(.48,.75,.88),cliffs*.55):mix(biome,stone,cliffs*.48);
   }
   vec3 color=mix(grass,stone,cliffs);
   color=mix(color,dirt,shoreline*(1.-cliffs));
   color=mix(color,stone,village);
-  color=mix(color,mix(dirt,stone,.45),crypt*.75);
-  color=mix(color,snow,frozen*(1.-cliffs*.55));
-  color=mix(color,scorched,volcanic*.9);
-  color=mix(color,mix(stone,scorched,.48),abyssal*.85);
   return color;
 }
 `;
@@ -105,12 +101,13 @@ uniform vec3 waterColor;
 uniform vec3 skyColor;
 uniform vec3 sunDirection;
 uniform sampler2D heightMap;
+uniform float terrainExtent;
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying float vCrest;
 float groundHeight(vec2 p) {
   // Match the exact piecewise triangular height interpolation used by physics.
-  vec2 grid = clamp(vec2((p.x+160.0)/2.5,(160.0-p.y)/2.5),0.0,127.99999);
+  vec2 grid = clamp(vec2((p.x+terrainExtent*.5)/(terrainExtent/128.),(terrainExtent*.5-p.y)/(terrainExtent/128.)),0.0,127.99999);
   vec2 cell = floor(grid), f = fract(grid);
   vec2 uv = (cell.yx + .5) / 129.0;
   float h00 = texture2D(heightMap,uv).r;

@@ -202,6 +202,10 @@ export class CombatSystem {
   }
 
   private removeProjectile(projectile: Projectile): void { this.scene.remove(projectile.group); }
+  clearMapEffects():void {
+    for(const projectile of this.projectiles)this.removeProjectile(projectile);
+    this.projectiles.length=0;this.particles.clear();this.hitstop=0;this.screenShake=0;this.combo=0;this.comboWindow=0;
+  }
   resetCooldowns(): void { this.cooldowns.fill(0); this.combo = 0; this.comboWindow = 0; this.attackCooldown = 0; }
   dispose(): void {
     this.particles.dispose();
