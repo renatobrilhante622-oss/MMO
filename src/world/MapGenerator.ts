@@ -1,3 +1,4 @@
+import {activityLayout,activitySitesNear} from './ActivityLayout';
 import {mapDefinition,type WorldMapId} from './maps/MapDefinitions';
 import {REGIONS} from './Regions';
 export interface HuntSpot {id:string;name:string;kind:string;x:number;z:number;radius:number;capacity:number;respawn:number;level:number;}
@@ -5,6 +6,7 @@ export interface ExplorationProp {id:string;asset:string;x:number;z:number;size:
 export interface MapPlan {props:ExplorationProp[];spots:HuntSpot[];}
 const huntName=(kind:string)=>({'slime':'Clareira dos Slimes','wolf':'Bosque dos Lobos','skeleton':'Ruínas dos Esqueletos','wraith':'Vigília dos Espectros','golem':'Pedreira dos Colossos'} as Record<string,string>)[kind]??'Área de caça';
 const cache=new Map<string,MapPlan>();
+const fieldBridges=new Map<string,ReturnType<typeof activityLayout>>();
 const foundations=new Map<string,Array<{x:number;z:number;size:number}>>();
 const native:Record<WorldMapId,string[]>={aurora:['MossRuins','DeadTree'],crypt:['Crypt','Coffin','DeadTree'],highlands:['BlueCrystal','SnowPine','MossRuins'],rift:['Anvil','Chain','MossRuins'],eclipse:['Obelisk','VoidArch','BlueCrystal']};
 /** Seeded full-map content plan shared by heightfields, navigation, GLB batches and hunting. */
@@ -27,6 +29,7 @@ export function generateMapPlan(id:string):MapPlan {
   const angle=i*2.399963+rand()*.25,radius=def.size*(.12+rand()*.29),x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;
   if(Math.hypot(x,z-18)<40||Math.abs(x)<14&&z<35&&z>def.exit.z-16||Math.hypot(x-def.exit.x,z-def.exit.z)<24||Math.hypot(x-def.boss.x,z-def.boss.z)<25||spots.some(s=>Math.hypot(x-s.x,z-s.z)<s.radius+8))continue;
   const asset=native[def.id][i%native[def.id].length],size=asset==='Chain'?6:asset==='Coffin'?3:8+rand()*9;
+  if(activityLayout(id).some(s=>Math.hypot(x-s.x,z-s.z)<size*.5+13))continue;
   if(props.some(p=>Math.max(Math.abs(p.x-x),Math.abs(p.z-z))<(p.size+size)/2+14)||def.landmarks.some(p=>Math.max(Math.abs(p.x-x),Math.abs(p.z-z))<(p.size+size)/2+14))continue;
   props.push({id:id+'-landmark-'+i,asset,x,z,size,yaw:rand()*Math.PI*2,solid:asset!=='Chain',foundation:true});
  }
@@ -42,6 +45,9 @@ export function foundationHeight(id:string,x:number,z:number,base:(x:number,z:nu
   const dx=spot.x,dz=spot.z-18,length=dx*dx+dz*dz,t=length?Math.max(0,Math.min(1,(x*dx+(z-18)*dz)/length)):0,d=Math.hypot(x-t*dx,z-18-t*dz);
   if(d<10){const blend=Math.max(0,Math.min(1,(10-d)/3));h=h*(1-blend)+15*blend;}
  }
+ if(id==='eclipse'&&!fieldBridges.has(id))fieldBridges.set(id,activityLayout(id).filter(s=>['captain','rift','defense'].includes(s.kind)||s.id.endsWith('-ruin-0')||s.id.endsWith('-ruin-1')));
+ if(id==='eclipse')for(const s of fieldBridges.get(id)??[]){const dx=s.x,dz=s.z-18,l=dx*dx+dz*dz,t=l?Math.max(0,Math.min(1,(x*dx+(z-18)*dz)/l)):0,d=Math.hypot(x-t*dx,z-18-t*dz);if(d<7){const blend=Math.min(1,(7-d)/2);h=h*(1-blend)+15*blend;}}
+ for(const s of activitySitesNear(id,x,z,22)){const radius=s.kind==='camp'?12:s.kind==='captain'||s.kind==='defense'||s.kind==='rift'?11:5,d=Math.hypot(x-s.x,z-s.z);if(d>radius+5)continue;const blend=Math.min(1,(radius+5-d)/5),anchor=Math.max(id==='eclipse'?15:id==='highlands'?12:6,base(s.x,s.z));h=h*(1-blend)+anchor*blend;}
  // Hunting clearings remain walkable even on the floating islands of the last region.
  for(const s of generateMapPlan(id).spots){const d=Math.hypot(x-s.x,z-s.z),r=s.radius+5;if(d>r+6)continue;const blend=Math.max(0,Math.min(1,(r+6-d)/6));const level=Math.max(id==='eclipse'?15:id==='highlands'?12:6,base(s.x,s.z));h=h*(1-blend)+level*blend;}
  return h;

@@ -57,6 +57,9 @@ export class CreatureRig {
     }
   }
 
+  setFieldModel(model:ModelName):void {
+    if(typeof document==='undefined')return;this.imported?.dispose();this.spine.visible=false;this.imported=new AnimatedGLB(model,1.95,()=>{},true);this.root.add(this.imported.root);
+  }
   setBossModel(model:ModelName,color:number):void {
     if(!this.boss||typeof document==='undefined')return;
     this.imported?.dispose();this.spine.visible=false;

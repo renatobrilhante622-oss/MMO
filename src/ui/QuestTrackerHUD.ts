@@ -54,7 +54,7 @@ export class QuestTrackerHUD{
     this.root.hidden=!quest;
     if(!quest)return;
     const state=this.quests.progressOf(quest);
-    this.title.textContent=quest.title;
+    this.title.textContent=(quest.act?'Ato '+quest.act+' · ':'')+quest.title;
     this.detail.textContent=quest.description+' ('+state.progress+'/'+quest.required+')';
     this.meter.style.width=(state.progress/Math.max(1,quest.required)*100)+'%';
     this.button.textContent=state.ready?'🎁 RESGATAR RECOMPENSA':'⌖ NAVEGAR PARA OBJETIVO';

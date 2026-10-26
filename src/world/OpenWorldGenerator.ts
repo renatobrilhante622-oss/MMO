@@ -17,7 +17,7 @@ export interface WorldCollider {
   type: 'solid' | 'climbable' | 'slide' | 'gate';
 }
 
-export interface MapMarker { x: number; z: number; label: string; color: string }
+export interface MapMarker { icon?:'elite'|'chest'|'shrine'|'rift'|'board'|'activity';active?:boolean;x: number; z: number; label: string; color: string }
 
 const smooth = (x: number) => x * x * (3 - 2 * x);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;

@@ -1,3 +1,4 @@
+import {satisfyObjective} from './helpers/campaign';
 import {describe,expect,it} from 'vitest';
 import {EventBus} from '../src/core/GameTypes';
 import {InventoryAndLoot} from '../src/rpg/InventoryAndLoot';
@@ -13,11 +14,11 @@ function fixture(now=new Date('2026-10-24T12:00:00Z')){
 }
 
 describe('story quests and rewards',()=>{
- it('builds four linked story objectives per region',()=>{
-   expect(QUEST_STORY).toHaveLength(20);
+ it('builds twelve linked story objectives across three acts per region',()=>{
+   expect(QUEST_STORY).toHaveLength(60);
    for(const region of REGIONS){
      const steps=QUEST_STORY.filter(q=>q.region===region.id);
-     expect(steps.map(q=>q.goal)).toEqual(['talk','kill','collect','boss']);
+     expect(steps.map(q=>q.goal)).toEqual(['talk','kill','investigate','rareCollect','collect','nest','defend','camp','elite','investigate','rift','boss']);
    }
  });
  it('progresses from guide through hunts and boss, unlocking the next region only when claimed',()=>{
@@ -30,8 +31,7 @@ describe('story quests and rewards',()=>{
    expect(quests.activeStory()?.id).toBe('story-aurora-hunt');
    for(let i=0;i<5;i++)quests.onKill('slime','aurora');
    expect(quests.claim('story-aurora-hunt')).toBe(true);
-   quests.onCollect('aurora',3);
-   expect(quests.claim('story-aurora-gather')).toBe(true);
+   while(quests.activeStory()!.goal!=='boss'){const q=quests.activeStory()!;satisfyObjective(quests,q);expect(quests.claim(q.id),q.id).toBe(true);}
    const gold=inv.gold;
    quests.onKill('boss','aurora',true);
    expect(prog.unlockedRegions).toEqual(['aurora']);

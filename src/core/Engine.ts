@@ -1,3 +1,10 @@
+import {FieldProgress,fieldReward} from '../rpg/FieldRewards';
+import {MassacreSystem} from '../combat/MassacreSystem';
+import {OpenWorldActivities} from '../world/OpenWorldActivities';
+import {FieldActivityScene} from '../world/FieldActivityScene';
+import {BountyBoardUI} from '../ui/BountyBoardUI';
+import {FieldActivityHUD} from '../ui/FieldActivityHUD';
+import {calculateDamage} from '../combat/ClassSystem';
 import {simulationRunning} from './GameLoop';
 import {ArenaMapScene} from '../world/ArenaMapScene';
 import {RealtimeArenaUI} from '../ui/ArenaUI';
@@ -117,6 +124,12 @@ export class Engine {
   private questAutoRoute:MapPoint[]=[];
   readonly lootFeed: LootToastFeed;
   readonly progress: AdventureProgress;
+  readonly fieldProgress=new FieldProgress();
+  readonly massacre=new MassacreSystem();
+  activities?:OpenWorldActivities;
+  private activityScene?:FieldActivityScene;
+  readonly bountyUI:BountyBoardUI;
+  readonly fieldHUD:FieldActivityHUD;
   readonly phase2Arena=new ArenaSystem();
   readonly phase2Runes=new TalentTreeSystem();
   readonly phase2Rewards=new DailyRewardSystem();
@@ -244,6 +257,7 @@ export class Engine {
     this.restore();
     this.quests=new QuestSystem(this.inventory,this.progress);
     this.quests.restore(this.deferredQuestSave);
+    this.quests.onReward=reward=>this.fieldProgress.grant({skinFragments:reward.skinFragments,skinChests:reward.skinChests,refinementStones:reward.refinementStones,renown:reward.refinementStones?1:0});
     if(!this.quests.canEnterRegion(this.restoredRegionId))this.restoredRegionId='aurora';
     if(this.restoredRegionId!=='aurora'){
       this.terrain=this.mapInstances.activate(this.restoredRegionId);
@@ -325,7 +339,8 @@ export class Engine {
     });
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
       this.quests,{
-        onForge:()=>this.hub.openForge(),
+        onContracts:()=>this.openContracts(),
+      onForge:()=>this.hub.openForge(),
         onShop:()=>this.hub.open('shop'),
         onTeleport:()=>this.hub.open('map'),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
@@ -354,6 +369,10 @@ export class Engine {
     this.gpsLabel.className='gps-status';this.gpsLabel.hidden=true;this.container.append(this.gpsLabel);
     this.gpsLine.frustumCulled=false;this.scene.add(this.gpsLine);
     this.disposers.push(()=>{journey.remove();this.autoButton.remove();this.gpsLabel.remove();this.gpsLine.geometry.dispose();(this.gpsLine.material as LineBasicMaterial).dispose();this.gpsLine.removeFromParent();});
+    this.bountyUI=new BountyBoardUI(this.container,this.quests,this.fieldProgress,this.inventory,this.progress,q=>this.navigateQuest(q),()=>{this.refreshStats();this.questTracker.refresh();this.save();});
+    this.fieldHUD=new FieldActivityHUD(this.container,()=>this.interactField(),point=>{this.questAutoMove=point;this.questMoveTimer=0;this.questAutoRoute=[];this.setWaypoint(point);this.hud.notify('Rota para a fenda traçada.','info');});
+    const contracts=document.createElement('button');contracts.className='hud-contracts-shortcut';contracts.innerHTML='<span data-hud-pt="Contratos" data-hud-en="Bounties">Contratos</span>';contracts.title='Contratos de Caça / Hunting Contracts';contracts.setAttribute('aria-label','Contratos de Caça / Hunting Contracts');contracts.onclick=()=>this.openContracts();this.hud.registerShortcut(contracts,'dock');this.disposers.push(()=>contracts.remove());
+    this.setupField();
     this.arenaUI=new RealtimeArenaUI(this.container,this);
     const pause=document.createElement('button');pause.textContent='Ⅱ Pausa';pause.setAttribute('aria-label','Pausar jogo / Pause game');pause.onclick=()=>this.setPaused(true);this.hud.registerShortcut(pause);
     this.pauseScreen.className='explicit-pause-screen';this.pauseScreen.hidden=true;this.pauseScreen.innerHTML='<strong>ETERNA · PAUSA</strong><button type="button">▶ Continuar / Resume</button>';this.pauseScreen.querySelector('button')!.onclick=()=>this.setPaused(false);this.container.append(this.pauseScreen);this.disposers.push(()=>{pause.remove();this.pauseScreen.remove();});
@@ -438,14 +457,19 @@ export class Engine {
         this.hud.showDamage({ x: (projected.x * 0.5 + 0.5) * this.container.clientWidth, y: (-projected.y * 0.5 + 0.5) * this.container.clientHeight }, amount, critical, team);
       }
     }));
-    this.disposers.push(this.events.on('kill', ({ kind, position, level, boss }) => {
+    this.disposers.push(this.events.on('kill', event => {
+      const {kind,position,level,boss,activityId,activityKind,elite}=event;
+      if(activityId&&!this.activities?.onKilled(event))return;
       const slainRegion=this.mapInstances.regionId;
       this.quests.onKill(kind,slainRegion,boss);
       this.questTracker.refresh();
       this.progress.earnKill(level,boss,slainRegion);
       if(boss){this.progress.profile.bossKills++;this.phase2Runes.onBoss();}
       this.codex.recordKill(kind, boss);
-      const loot = this.inventory.generateLoot(kind, level, boss);
+      const field=!!this.activities&&!this.dungeon.active;
+      if(field&&this.massacre.kill())this.activities?.spawnMassacre(this.hero);
+      const loot = field&&elite?fieldReward(this.inventory,level,'elite'):this.inventory.generateLoot(kind, level, boss,field?this.massacre.bonus:0);
+      if(field){loot.xp=Math.round(loot.xp*(1+this.massacre.bonus));if(elite||loot.gold%4===0)loot.fieldExtras={...loot.fieldExtras,abyssalCores:elite?2:1};}
       loot.xp=Math.round(loot.xp*this.phase2Gathering.multiplier('xp'));
       const exclusive=regionalMaterialForKill(slainRegion,kind,level,boss,loot.id);
       const drop: LootDrop = {...loot,position:position.clone(),
@@ -455,10 +479,14 @@ export class Engine {
       if (drop.item?.rarity === 'mythic') this.combat.particles.celebration(position, true);
       this.statClock = 1;
     }));
-    this.disposers.push(this.events.on('loot', drop => {
+    this.disposers.push(this.events.on('loot', incoming => {
+      const drop=this.drops.find(d=>d.id===incoming.id);if(!drop)return;
       this.lootFeed.push(drop);
       this.sound.coin();
       this.inventory.addLoot(drop);
+      if(drop.fieldExtras&&this.fieldProgress.collect(drop.id,drop.fieldExtras))for(let i=0;i<(drop.fieldExtras.abyssalCores??0);i++)this.quests.onActivity('core',this.mapInstances.regionId,drop.id+':core:'+i);
+      if(drop.activityResource&&drop.activityResource.region===this.mapInstances.regionId)this.quests.onActivity('rareCollect',drop.activityResource.region,drop.activityResource.source,drop.id);
+      this.bountyUI.refresh();
       // Grant regional resources only when the real world drop reaches the pickup event.
       if(drop.regionalMaterial&&!this.collectedRegionalLootIds.has(drop.id)){
         this.collectedRegionalLootIds.add(drop.id);
@@ -503,12 +531,15 @@ export class Engine {
     const input = this.hud.readInput();
     if(this.arenaMap){this.tickArena(dt,input);return;}
     const active=simulationRunning({playing:this.playing,characterChosen:this.progress.chosen,loading:this.mapLoading||this.dungeonLoading,paused:this.paused});
-    const menuOpen=this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking||this.dungeonUI.blocking||this.npcs.blocking;
+    const menuOpen=this.bountyUI.blocking||this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking||this.dungeonUI.blocking||this.npcs.blocking;
     this.container.classList.toggle('live-menu',active&&menuOpen&&!this.hudEditor.active);
     if(this.hudEditor.active)Object.assign(input,emptyInput());
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(active?dt:0,this.channel.remaining);
     this.progress.tick(active?dt:0);
+    if(active){this.fieldProgress.tick(dt);this.massacre.update(dt,this.hero.alive);this.activities?.update(dt,this.hero);}
+    this.activityScene?.update(active?dt:0,this.hero.position);
+    this.fieldHUD.update(dt,this.activities,this.massacre,this.hero,this.camera,this.enemies);
     this.phase2Rewards.tick(dt,active);
     if(this.phase2UI.isArenaOpen)this.phase2Arena.tick(dt);
     if(active)this.phase2Market.tick(dt);
@@ -556,7 +587,7 @@ export class Engine {
         for(let i=0;i<3;i++)this.physics.setDungeonGateOpen(i,this.dungeonInstance.gateOpen(i,this.dungeon.wave,this.dungeon.definition.waves,this.dungeon.completed));
       }
       if(this.dungeon.clears>clears){this.progress.complete(this.dungeon.definition);this.save();}
-      const targets = this.enemies.enemies.filter(enemy => enemy.alive);
+      const targets = [...this.enemies.enemies.filter(enemy => enemy.alive),...(this.activities?.targets??[])];
       if(input.dash&&!this.phase2DashHeld&&this.hero.alive)this.phase2Combat.onDash(this.hero.position,targets,this.hero.stats.attack);
       this.phase2DashHeld=input.dash;
       if (input.attack && this.hero.alive && this.combat.attack(this.hero, targets, this.hero.stats, this.hero.facing)) {
@@ -651,6 +682,26 @@ export class Engine {
     this.camera.position.sub(this.scratch);
   };
 
+  openContracts():void {
+    if(!this.playing||!this.progress.chosen||this.arenaMap||this.dungeon.active||this.mapLoading){this.hud.notify('Visite o quadro de contratos em um mapa aberto.','info');return;}
+    this.hub.close();this.phase2UI.close();this.bountyUI.open(this.mapInstances.regionId);
+  }
+  private interactField():boolean {const acted=this.activities?.interact(this.hero)??false;if(acted){this.questTracker.refresh();this.refreshStats();this.save();}return acted;}
+  private clearField():void {this.activities?.dispose();this.activityScene?.dispose();this.activities=undefined;this.activityScene=undefined;this.massacre.reset();this.fieldHUD?.update(0,undefined,this.massacre,this.hero,this.camera,this.enemies);}
+  private setupField():void {
+    if(!REGIONS.some(r=>r.id===this.mapInstances.regionId))return;
+    this.enemies.setRegionalBossGate(region=>this.quests.bossAvailable(region));
+    this.activities=new OpenWorldActivities(this.mapInstances.regionId,this.physics,this.enemies,this.quests,this.fieldProgress,{
+      board:()=>this.openContracts(),
+      message:text=>{this.hud.notify(text,'info');this.questTracker.refresh();this.save();},
+      reward:(kind,position,count=1,level=this.inventory.level)=>{for(let i=0;i<count;i++){const point=position.clone().add(new Vector3(Math.sin(i*2.4)*1.8,0,Math.cos(i*2.4)*1.8));const drop:LootDrop={...fieldReward(this.inventory,level,kind),position:point};if(kind==='rift'&&i>0&&drop.fieldExtras)drop.fieldExtras.skinChests=0;this.drops.push(drop);this.createDropMesh(drop);this.combat.particles.celebration(point,true);}},
+      resource:(site,token)=>{const base=this.inventory.generateLoot('slime',site.level);const drop:LootDrop={...base,item:undefined,gold:0,xp:20+site.level*4,crystals:1,position:new Vector3(site.x,this.terrain.heightAt(site.x,site.z)+.7,site.z),activityResource:{region:site.region,source:site.id},fieldExtras:{abyssalCores:1}};this.drops.push(drop);this.createDropMesh(drop);},
+      storm:targets=>{for(const enemy of targets){const damage=enemy.receiveDamage(calculateDamage(this.hero.stats.attack*.85,enemy.defense));this.combat.particles.cast(enemy.position.clone().add(new Vector3(0,7,0)),new Vector3(0,-1,0),CLASS_DEFINITIONS.elementalist.skills[2],2);this.events.emit('damage',{position:enemy.position,amount:damage,critical:false,team:'enemy',color:0x8bdfff});}this.sound.spell('elementalist',2);},
+    });
+    this.activityScene=new FieldActivityScene(this.scene,this.terrain,this.activities,this.physics);
+    void this.activityScene.ready.catch(()=>{if(!this.disposed)this.hud.notify('Não foi possível carregar alguns objetos de atividades.','warning');});
+  }
+
   setPaused(paused:boolean):void {
     if(this.arenaMap){this.hud.notify('O PvP online continua em tempo real.','info');return;}
     this.paused=paused;this.pauseScreen.hidden=!paused;this.hud.resetInput();this.container.classList.toggle('explicitly-paused',paused);
@@ -670,7 +721,7 @@ export class Engine {
     this.progress.autoFarm=false;this.autoButton.hidden=true;this.channel=null;this.portalVfx.root.visible=false;this.farmController.reset();
     this.hud.resetInput();this.mapLoading=true;this.mapLoadingScreen.show('COLISEU IMPERIAL · '+match.size+'×'+match.size);
     try{
-      this.npcs.dispose();this.portals.dispose();this.enemies.dispose();this.phase2Gathering.dispose();this.phase2Weather.setRegion('dungeon');
+      this.clearField();this.bountyUI.close();this.npcs.dispose();this.portals.dispose();this.enemies.dispose();this.phase2Gathering.dispose();this.phase2Weather.setRegion('dungeon');
       this.combat.clearMapEffects();this.questAutoMove=null;this.questAutoRoute=[];this.setWaypoint(null);
       this.drops.splice(0);for(const id of [...this.dropMeshes.keys()])this.removeDropMesh(id);
       this.companions.dismount();this.companions.pet.visible=false;
@@ -936,6 +987,7 @@ export class Engine {
       const target=this.enemies.enemies.filter(e=>e.alive&&e.kind===quest.target).sort((a,b)=>a.position.distanceToSquared(this.hero.position)-b.position.distanceToSquared(this.hero.position))[0];
       if(target)destination={x:target.position.x,z:target.position.z};else{const spot=this.enemies.zones.map(z=>z.spot).filter(s=>s.kind===quest.target).sort((a,b)=>Math.hypot(a.x-this.hero.position.x,a.z-this.hero.position.z)-Math.hypot(b.x-this.hero.position.x,b.z-this.hero.position.z))[0];if(spot)destination={x:spot.x,z:spot.z};}
     }
+    const fieldPoint=this.activities?.objectivePoint(quest,this.hero.position);if(fieldPoint)destination=fieldPoint;
     if(quest.goal==='level'||quest.goal==='refine'||quest.goal==='wing'||quest.goal==='mount'){
       this.hub.open('talents');return;
     }
@@ -968,7 +1020,7 @@ export class Engine {
     if(this.inventory.level<definition.level)return false;
     this.dungeonReturnRegion=this.mapInstances.regionId;
     try{
-      this.npcs.dispose();this.portals.dispose();this.enemies.dispose();
+      this.clearField();this.bountyUI.close();this.npcs.dispose();this.portals.dispose();this.enemies.dispose();
       const gatheringCarry=this.phase2Gathering.snapshot();this.phase2Gathering.dispose();
       this.phase2Gathering=new GatheringSystem(this.scene,this.container,'dungeon',(x,z)=>this.terrain.heightAt(x,z),()=>{});this.phase2Gathering.root.visible=false;this.phase2Gathering.restore(gatheringCarry);
       this.phase2Weather.setRegion('dungeon');this.combat.clearMapEffects();
@@ -1045,7 +1097,7 @@ export class Engine {
     await new Promise(resolve=>setTimeout(resolve,20));
     if(this.disposed)return;
     try{
-      this.activateMap(id);await this.mapInstances.loadMap(id);
+      this.activateMap(id);await Promise.all([this.mapInstances.loadMap(id),this.activityScene?.ready??Promise.resolve()]);
       if(this.disposed)return;
       this.hero.teleportTo(this.terrain.spawnPoint.clone());this.dungeon.setPortalPosition(this.terrain.portalPosition);this.quests.onVisit(id);
       if(!this.progress.discovered.includes(id))this.progress.discovered.push(id);
@@ -1060,6 +1112,7 @@ export class Engine {
   /** Replaces the entire terrain scene graph and static physics, then regional actors. */
   private activateMap(id:string,force=false):void{
     if(id===this.mapInstances.regionId&&!force)return;
+    if(this.bountyUI.blocking)this.bountyUI.close();this.clearField();
     this.npcs.dispose();
     this.portals.dispose();
     this.enemies.dispose();
@@ -1077,10 +1130,11 @@ export class Engine {
       (x,z)=>this.terrain.heightAt(x,z),kind=>{this.quests.onCollect(this.mapInstances.regionId);this.questTracker?.refresh();if(kind==='chest')this.inventory.gold+=250;if(kind==='ore')this.inventory.crystals+=2;this.hud.notify('Coleta: '+kind+' +1','success');this.save();});
     this.phase2Gathering.restore(gatheringCarry);
     this.phase2Weather.setRegion(id);
-    this.enemies.resetForRegion(id);
+    this.enemies.resetForRegion(id);this.setupField();
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
       this.quests,{
-        onForge:()=>this.hub.openForge(),
+        onContracts:()=>this.openContracts(),
+      onForge:()=>this.hub.openForge(),
         onShop:()=>this.hub.open('shop'),
         onTeleport:()=>this.hub.open('map'),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
@@ -1110,6 +1164,7 @@ export class Engine {
 
   private interact(): void {
     if(this.mapInstances.regionId==='dungeon')return;
+    if(this.interactField())return;
     if(this.portals.interact())return;
     if(this.npcs.interact(this.hero.position))return;
     const delta = this.hero.position.clone().sub(this.terrain.portalPosition); delta.y = 0;
@@ -1158,7 +1213,8 @@ export class Engine {
     if(this.companions)this.companions.powerMultiplier=1+effects.companionPower;
     this.hero.setStats({ ...base,
       maxMana:base.maxMana+talents.maxMana+evo.maxMana+(equipment.maxMana??0),
-      speed:base.speed*(1+rank.speed)*this.phase2Gathering.multiplier('speed'),
+      speed:base.speed*(1+rank.speed)*this.phase2Gathering.multiplier('speed')*(this.fieldProgress.buffActive('speed')?1.3:1),
+      critMultiplier:base.critMultiplier*(this.fieldProgress.buffActive('critical')?1.25:1),
       critChance:Math.min(.6,base.critChance+talents.critChance+evo.crit+(equipment.critChance??0)+rank.crit),
       attack: (base.attack + talents.attack + evo.attack + equipment.attack + buildings.attack + codex.attack)*(1+rank.attack+runic.attack)*this.phase2Gathering.multiplier('damage'),
       defense: base.defense + talents.defense + evo.defense + equipment.defense + buildings.defense + codex.defense,
@@ -1192,7 +1248,7 @@ export class Engine {
     const gem = new Mesh(new SphereGeometry(0.18, 6, 4), new MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.75, metalness: 0.6, roughness: 0.24 }));
     const ring = new Mesh(new TorusGeometry(0.4, 0.025, 4, 24), new MeshBasicMaterial({ color, transparent: true, opacity: 0.65 }));
     ring.rotation.x = -Math.PI / 2;
-    const beam = new Mesh(new PlaneGeometry(0.28, 1.5), new MeshBasicMaterial({ color, transparent: true, opacity: 0.2, side: 2, depthWrite: false, blending: AdditiveBlending }));
+    const beam = new Mesh(new PlaneGeometry(drop.fieldExtras?.lockedChests||drop.fieldExtras?.skinChests? .5:.28,drop.fieldExtras?4:1.5), new MeshBasicMaterial({ color, transparent: true, opacity: 0.2, side: 2, depthWrite: false, blending: AdditiveBlending }));
     beam.position.y = 0.6;
     group.add(gem, ring, beam);
     group.position.set(drop.position.x, this.terrain.heightAt(drop.position.x, drop.position.z) + 0.6, drop.position.z);
@@ -1224,7 +1280,7 @@ export class Engine {
 
   private updateRespawn(dt: number): void {
     if (this.hero.alive) { this.deadClock = 0; return; }
-    this.deadClock += dt;
+    this.massacre.reset();this.deadClock += dt;
     if (this.deadClock >= 3) {
       this.inventory.gold = Math.floor(this.inventory.gold * 0.9);
       this.hero.respawn(this.terrain.spawnPoint);
@@ -1365,7 +1421,7 @@ export class Engine {
 
   save(): void {
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, regionId:this.mapInstances.regionId==='arena'?(this.arenaReturn?.region??'aurora'):this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId, classId:this.arenaReturn&&this.arenaMap?this.arenaReturn.classId:this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot(),
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1,field:this.fieldProgress.snapshot(), regionId:this.mapInstances.regionId==='arena'?(this.arenaReturn?.region??'aurora'):this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId, classId:this.arenaReturn&&this.arenaMap?this.arenaReturn.classId:this.classId, inventory: this.inventory.snapshot(), progress:this.progress.snapshot(), base: this.base.snapshot(), codex: this.codex.snapshot(), quests:this.quests.snapshot(),
         phase2:{arena:this.phase2Arena.snapshot(),runes:this.phase2Runes.snapshot(),rewards:this.phase2Rewards.snapshot(),
           market:this.phase2Market.snapshot(),gathering:this.phase2Gathering.snapshot()} }));
     } catch {
@@ -1385,7 +1441,7 @@ export class Engine {
       this.progress.restore(save.progress);
       this.base.restore(save.base);
       this.codex.restore(save.codex);
-      this.deferredQuestSave=save.quests;
+      this.deferredQuestSave=save.quests;this.fieldProgress.restore(save.field);
       if(save.phase2&&typeof save.phase2==='object'){
         const r=save.phase2 as Record<string,unknown>;
         this.phase2Arena.restore(r.arena);this.phase2Runes.restore(r.runes,this.inventory.level);
@@ -1402,7 +1458,7 @@ export class Engine {
   }
 
   dispose(): void {
-    this.arenaUI?.dispose();this.arenaMap?.dispose();
+    this.arenaUI?.dispose();this.arenaMap?.dispose();this.clearField();this.bountyUI?.dispose();this.fieldHUD?.dispose();
     if(this.disposed)return;this.disposed=true;
     this.phase2UI.dispose();this.phase2Gathering.dispose();this.phase2Weather.dispose();
     this.phase2Title.dispose();this.phase2Combat.dispose();

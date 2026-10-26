@@ -1,3 +1,5 @@
+import {expandedCampaign} from './Campaign';
+import {makeContract} from './BountyBoard';
 import {Vector3} from 'three';
 import type {Item,Rarity} from '../core/GameTypes';
 import {COMPLETE_ITEM_CATALOG,scaleWorldItem,type InventoryAndLoot} from './InventoryAndLoot';
@@ -5,42 +7,19 @@ import type {AdventureProgress} from '../progression/AdventureProgress';
 import {REGIONS} from '../world/Regions';
 import {REGION_REWARDS} from '../world/RegionTravel';
 
-export type QuestCategory='story'|'side'|'bounty'|'milestone';
-export type QuestGoal='talk'|'kill'|'boss'|'visit'|'level'|'refine'|'wing'|'mount'|'collect';
+export type QuestCategory='story'|'side'|'bounty'|'milestone'|'contract';
+export type QuestGoal='talk'|'kill'|'boss'|'visit'|'level'|'refine'|'wing'|'mount'|'collect'|'investigate'|'rareCollect'|'defend'|'elite'|'camp'|'rift'|'nest'|'core';
 export interface QuestDefinition {
   id:string;category:QuestCategory;region:string;
   title:string;description:string;goal:QuestGoal;target:string;required:number;
-  reward:{xp:number;gold:number;crystals:number;tickets:number;passXp:number;materials?:number;itemRarity?:Rarity};
-  npcId?:string;
+  reward:{xp:number;gold:number;crystals:number;tickets:number;passXp:number;materials?:number;itemRarity?:Rarity;skinFragments?:number;skinChests?:number;refinementStones?:number};
+  npcId?:string;act?:number;actName?:string;rank?:'C'|'B'|'A'|'S'|'SS';serial?:number;
 }
 export interface QuestProgress {
   quest:QuestDefinition;progress:number;ready:boolean;claimed:boolean;accepted:boolean;
 }
 const reward=(xp:number,gold:number,crystals=0,tickets=0,passXp=0,itemRarity?:Rarity)=>({xp,gold,crystals,tickets,passXp,itemRarity});
-const STORY:QuestDefinition[]=REGIONS.flatMap((region,index)=>{
-  const npc='guide-'+region.id;
-  const previous=index>0?REGIONS[index-1].id:null;
-  const level=region.minLevel;
-  const three:QuestDefinition[]=[
-    {id:'story-'+region.id+'-meet',category:'story',region:region.id,
-      title:index===0?'O Chamado — '+region.name[0]:'Atravesse o Portal Ancestral e apresente-se ao Guardião — '+region.name[0],description:'Converse com o guardião desta região.',
-      goal:'talk',target:npc,required:1,reward:reward(80+level*12,80+level*30,0,0,25),npcId:npc},
-    {id:'story-'+region.id+'-hunt',category:'story',region:region.id,
-      title:'Limpando '+region.name[0],description:'Derrote '+region.kinds[0]+' para proteger a passagem.',
-      goal:'kill',target:region.kinds[0],required:Math.min(15,5+index*2),
-      reward:reward(220+level*25,180+level*50,2+index,0,50),npcId:npc},
-    {id:'story-'+region.id+'-gather',category:'story',region:region.id,
-      title:'Suprimentos para a passagem',description:'Colete recursos locais para estabilizar o Portal Ancestral.',
-      goal:'collect',target:'resource',required:3+index,
-      reward:reward(180+level*22,160+level*35,2+index,0,40),npcId:npc},
-    {id:'story-'+region.id+'-boss',category:'story',region:region.id,
-      title:'Confronto — '+region.boss.name[0],description:'Derrote o chefe para liberar o próximo mapa.',
-      goal:'boss',target:region.id,required:1,
-      reward:reward(600+level*50,500+level*90,5+index*4,1+index,120,REGION_REWARDS[region.id].rarity),npcId:npc}
-  ];
-  if(previous)three[0].description='Atravesse o portal e encontre o guardião de '+region.name[0]+'.';
-  return three;
-});
+const STORY:QuestDefinition[]=expandedCampaign();
 const SIDES:QuestDefinition[]=REGIONS.map((region,index)=>({
   id:'side-'+region.id,category:'side',region:region.id,
   title:'Contrato local — '+region.name[0],description:'Ajude o acampamento a controlar os monstros.',
@@ -69,6 +48,22 @@ export class QuestSystem {
   subscribe(listener:()=>void):()=>void {this.listeners.add(listener);return ()=>this.listeners.delete(listener);}
   private changed():void{for(const listener of this.listeners)listener();}
   private storyIndex=0;
+  private readonly contractSerial:Record<string,number>={};
+  private tracked='';private readonly unique=new Map<string,Set<string>>();
+  onReward:((reward:QuestDefinition['reward'])=>void)|null=null;
+  contract(region:string):QuestDefinition{return makeContract(region,this.contractSerial[region]??0);}
+  track(id:string):boolean{const q=this.get(id);if(!q||!this.isAccepted(id)||this.claimed.has(id))return false;this.tracked=id;this.changed();return true;}
+  bossAvailable(region:string):boolean{return this.regionComplete(region)||this.activeStory()?.id==='story-'+region+'-boss';}
+  activityCredited(id:string,source:string):boolean{return this.unique.get(id)?.has(source)??false;}
+  onActivity(goal:QuestGoal,region:string,source:string,occurrence=source):void {
+    if(!['investigate','rareCollect','defend','elite','camp','rift','nest','core'].includes(goal)||!source||source.length>160)return;
+    for(const q of this.all()){
+      if(q.goal!==goal||q.region!==region||!this.isAccepted(q.id)||this.claimed.has(q.id))continue;
+      if(goal==='investigate'&&q.target!==source)continue;
+      let seen=this.unique.get(q.id);if(!seen){seen=new Set();this.unique.set(q.id,seen);}const key=q.category==='story'?source:occurrence;if(seen.has(key)||seen.size>=q.required)continue;
+      seen.add(key);this.counters.set(q.id,Math.min(q.required,(this.counters.get(q.id)??0)+1));this.changed();
+    }
+  }
   private currentDay='';
   private readonly daily:QuestDefinition[]=[];
   constructor(private readonly inventory:InventoryAndLoot,private readonly progress:AdventureProgress,now=new Date()){
@@ -93,9 +88,10 @@ export class QuestSystem {
     for(const key of this.accepted)if(key.startsWith('bounty-')&&!key.includes(day))this.accepted.delete(key);
     for(const key of this.claimed)if(key.startsWith('bounty-')&&!key.includes(day))this.claimed.delete(key);
   }
-  all():readonly QuestDefinition[]{return [...STORY,...SIDES,...this.daily,...MILESTONES];}
+  all():readonly QuestDefinition[]{return [...STORY,...SIDES,...this.daily,...MILESTONES,...REGIONS.map(r=>this.contract(r.id))];}
   activeStory():QuestDefinition|undefined{return STORY[this.storyIndex];}
   active():QuestDefinition|undefined{
+    if(this.tracked){const q=this.get(this.tracked);if(q&&this.isAccepted(q.id)&&!this.claimed.has(q.id))return q;this.tracked='';}
     const story=this.activeStory();
     if(story)return story;
     return this.all().find(q=>q.category!=='story'&&this.accepted.has(q.id)&&!this.claimed.has(q.id));
@@ -105,8 +101,8 @@ export class QuestSystem {
   accept(id:string):boolean{
     const quest=this.get(id);
     if(!quest||quest.category==='story'||this.claimed.has(id))return false;
-    if(this.inventory.level<REGIONS.find(r=>r.id===quest.region)!.minLevel)return false;
-    this.accepted.add(id);return true;
+    if(quest.category==='contract'?!this.canEnterRegion(quest.region):this.inventory.level<REGIONS.find(r=>r.id===quest.region)!.minLevel)return false;
+    this.accepted.add(id);this.changed();return true;
   }
   progressOf(quest:QuestDefinition):QuestProgress{
     const accepted=this.isAccepted(quest.id);
@@ -149,6 +145,7 @@ export class QuestSystem {
     this.progress.tickets+=quest.reward.tickets;
     this.progress.passXp+=quest.reward.passXp;
     this.progress.materials+=quest.reward.materials??0;
+    this.onReward?.(quest.reward);
     if(quest.reward.itemRarity){
       const source=COMPLETE_ITEM_CATALOG.find(item=>item.rarity===quest.reward.itemRarity&&item.slot==='weapon');
       if(source){
@@ -159,34 +156,41 @@ export class QuestSystem {
       }
     }
     if(quest.category==='story'){
-      this.storyIndex++;
+      this.storyIndex++;while(this.storyIndex<STORY.length&&this.claimed.has(STORY[this.storyIndex].id))this.storyIndex++;
       if(quest.goal==='boss'){
         const index=REGIONS.findIndex(r=>r.id===quest.region);
         const next=REGIONS[index+1];
         if(next&&!this.progress.unlockedRegions.includes(next.id))this.progress.unlockedRegions.push(next.id);
       }
     }
+    if(quest.category==='contract'){
+      this.contractSerial[quest.region]=(quest.serial??0)+1;this.accepted.delete(id);this.claimed.delete(id);this.counters.delete(id);this.unique.delete(id);if(this.tracked===id)this.tracked='';
+    }
     this.changed();return true;
   }
   snapshot():Record<string,unknown>{
-    return {schema:2,storyIndex:this.storyIndex,day:this.currentDay,
+    return {schema:3,contractSerial:{...this.contractSerial},tracked:this.tracked,unique:Object.fromEntries([...this.unique].map(([id,values])=>[id,[...values]])),storyIndex:this.storyIndex,day:this.currentDay,
       counters:Object.fromEntries(this.counters),accepted:[...this.accepted],claimed:[...this.claimed]};
   }
   restore(data:unknown):void{
     if(!data||typeof data!=='object'||Array.isArray(data))return;
     const raw=data as Record<string,unknown>;
+    if(raw.contractSerial&&typeof raw.contractSerial==='object')for(const r of REGIONS){const n=(raw.contractSerial as Record<string,unknown>)[r.id];if(typeof n==='number'&&Number.isSafeInteger(n)&&n>=0&&n<=1e9)this.contractSerial[r.id]=n as number;}
     const ids=new Set(this.all().map(q=>q.id));
     if(Array.isArray(raw.accepted))for(const id of raw.accepted)if(typeof id==='string'&&ids.has(id))this.accepted.add(id);
     if(Array.isArray(raw.claimed))for(const id of raw.claimed)if(typeof id==='string'&&ids.has(id))this.claimed.add(id);
-    if(raw.schema!==2){
-      const oldStory=STORY.filter(q=>q.goal!=='collect');
+    if(raw.schema!==2&&raw.schema!==3){
+      const oldStory=STORY.filter(q=>['talk','kill','boss'].includes(q.goal));
       const oldIndex=valid(raw.storyIndex)?Math.min(oldStory.length,Number(raw.storyIndex)):0;
       for(const q of oldStory.slice(0,oldIndex))this.claimed.add(q.id);
       for(const r of REGIONS)if(this.claimed.has('story-'+r.id+'-boss'))this.claimed.add('story-'+r.id+'-gather');
     }
+    if(raw.schema!==3)for(const r of REGIONS)if(this.claimed.has('story-'+r.id+'-boss'))for(const q of STORY.filter(q=>q.region===r.id))this.claimed.add(q.id);
     this.storyIndex=0;while(this.storyIndex<STORY.length&&this.claimed.has(STORY[this.storyIndex].id))this.storyIndex++;
     if(raw.counters&&typeof raw.counters==='object'&&!Array.isArray(raw.counters))
       for(const [id,value]of Object.entries(raw.counters))if(ids.has(id)&&valid(value))this.counters.set(id,value as number);
+    if(raw.unique&&typeof raw.unique==='object')for(const q of this.all()){const list=(raw.unique as Record<string,unknown>)[q.id];if(Array.isArray(list))this.unique.set(q.id,new Set(list.filter((v):v is string=>typeof v==='string'&&v.length<=160).slice(0,q.required)));}
+    if(typeof raw.tracked==='string'&&ids.has(raw.tracked))this.tracked=raw.tracked;
     this.changed();
   }
 }

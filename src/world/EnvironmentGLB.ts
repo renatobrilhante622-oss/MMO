@@ -1,3 +1,4 @@
+import {activitySitesNear} from './ActivityLayout';
 import {groundedAssetMatrix} from './AssetPlacement';
 import {generateMapPlan} from './MapGenerator';
 import type {WorldCollider} from './OpenWorldGenerator';
@@ -85,6 +86,7 @@ export class EnvironmentGLB {
         const x=this.activeRegion?(tree&&cluster?cluster.x+Math.cos(angle)*(cluster.radius+8+rng()*15):Math.cos(angle)*radius):cx+Math.cos(angle)*radius;
         const z=this.activeRegion?(tree&&cluster?cluster.z+Math.sin(angle)*(cluster.radius+8+rng()*15):Math.sin(angle)*radius):cz+Math.sin(angle)*radius;
         if(Math.abs(x)>def.size/2-20||Math.abs(z)>def.size/2-20||Math.hypot(x,z-18)<34||Math.abs(x)<12&&z<35&&z>def.exit.z-20||Math.hypot(x-def.exit.x,z-def.exit.z)<22||Math.hypot(x-def.boss.x,z-def.boss.z)<22||spots.some(s=>Math.hypot(x-s.x,z-s.z)<s.radius+3))continue;
+        if(activitySitesNear(entry.region,x,z,17).length)continue;
         const y=this.heightAt(x,z);if(y<2)continue;
         const objectScale=scale*(.8+rng()*.38),pose={x,z,size:bounds.getSize(new Vector3()).length()*objectScale,yaw:rng()*Math.PI*2};
         // The placement helper sizes by maximum extent, not the bounding-box diagonal.

@@ -1,0 +1,43 @@
+{
+  "viewport": "844x390",
+  "camp": {
+    "guards": 6,
+    "lockedBefore": true,
+    "opened": true,
+    "noDuplicate": true,
+    "ownedLimit": true
+  },
+  "defense": {
+    "waves": 3,
+    "ready": true,
+    "mode": "cooldown"
+  },
+  "elite": {
+    "scale": 2.5,
+    "cooldown": true,
+    "rarity": "epic",
+    "fragments": 3,
+    "locked": 1
+  },
+  "massacre": {
+    "kills": 50,
+    "bonus": 0.5,
+    "chests": 1
+  },
+  "pickup": {
+    "delta": 1,
+    "removed": true
+  },
+  "rift": {
+    "wave": 4,
+    "mode": "cooldown",
+    "rewardDrops": 5,
+    "idempotent": true
+  },
+  "contract": {
+    "serial": 1,
+    "renown": 1
+  },
+  "errors": [],
+  "note": "God mode/direct damage used only in local DEV to exercise real encounter deaths. Render calls stubbed; separate GLB review renders production assets."
+}

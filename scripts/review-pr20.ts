@@ -21,7 +21,7 @@ async function load(id:string,view:'sealed'|'open'|'overview'='overview'){
  portals=new WorldPortals(scene,document.body,id,(x,z)=>world.heightAt(x,z),()=>({level:1,unlocked:['aurora'],inCombat:true}),()=>{},()=> 'pt',quests,physics);await portals.ready;
  let instantOpen=false;
  if(view==='open'){
-  for(const q of QUEST_STORY.filter(q=>q.region===id)){if(q.goal==='talk')quests.onTalk(q.target);else if(q.goal==='collect')quests.onCollect(id,q.required);else if(q.goal==='kill')for(let i=0;i<q.required;i++)quests.onKill(q.target,id);else quests.onKill('boss',id,true);if(q.goal!=='boss')quests.claim(q.id);}
+  for(const q of QUEST_STORY.filter(q=>q.region===id)){if(q.goal==='talk')quests.onTalk(q.target);else if(q.goal==='collect')quests.onCollect(id,q.required);else if(q.goal==='kill')for(let i=0;i<q.required;i++)quests.onKill(q.target,id);else if(q.goal==='boss')quests.onKill('boss',id,true);else for(let i=0;i<q.required;i++)quests.onActivity(q.goal,q.region,q.goal==='investigate'?q.target:'review-fixture-'+i);if(q.goal!=='boss')quests.claim(q.id);}
   instantOpen=!!portals.root.getObjectByName('Rune portal crypt')?.userData.open;
  }
  scene.background=new Color(def.fog);scene.fog=new FogExp2(def.fog,view==='overview'?.0015:.003);
