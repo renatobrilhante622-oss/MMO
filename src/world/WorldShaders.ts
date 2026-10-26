@@ -102,18 +102,19 @@ uniform vec3 skyColor;
 uniform vec3 sunDirection;
 uniform sampler2D heightMap;
 uniform float terrainExtent;
+uniform float terrainSegments;
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying float vCrest;
 float groundHeight(vec2 p) {
   // Match the exact piecewise triangular height interpolation used by physics.
-  vec2 grid = clamp(vec2((p.x+terrainExtent*.5)/(terrainExtent/128.),(terrainExtent*.5-p.y)/(terrainExtent/128.)),0.0,127.99999);
+  vec2 grid = clamp(vec2((p.x+terrainExtent*.5)/(terrainExtent/terrainSegments),(terrainExtent*.5-p.y)/(terrainExtent/terrainSegments)),0.0,terrainSegments-.0001);
   vec2 cell = floor(grid), f = fract(grid);
-  vec2 uv = (cell.yx + .5) / 129.0;
+  vec2 uv = (cell.yx + .5) / (terrainSegments+1.0);
   float h00 = texture2D(heightMap,uv).r;
-  float h10 = texture2D(heightMap,uv+vec2(0,1.0/129.0)).r;
-  float h01 = texture2D(heightMap,uv+vec2(1.0/129.0,0)).r;
-  float h11 = texture2D(heightMap,uv+vec2(1.0/129.0)).r;
+  float h10 = texture2D(heightMap,uv+vec2(0,1.0/(terrainSegments+1.0))).r;
+  float h01 = texture2D(heightMap,uv+vec2(1.0/(terrainSegments+1.0),0)).r;
+  float h11 = texture2D(heightMap,uv+vec2(1.0/(terrainSegments+1.0))).r;
   return f.x+f.y<=1.0 ? h00+f.x*(h10-h00)+f.y*(h01-h00)
     : h11+(1.0-f.x)*(h01-h11)+(1.0-f.y)*(h10-h11);
 }

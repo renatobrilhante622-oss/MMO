@@ -13,7 +13,7 @@ import './style.css';
 export interface HUDModel {
   hp: number; maxHp: number; mana: number; maxMana: number; xp: number; xpToNext: number;
   level: number; classId: ClassId; state: HeroState; gold: number; crystals: number;
-  regionName?:string;
+  regionName?:string;regionExit?:{x:number;z:number};
   worldThreat?:{distance:number};
   items: Item[]; equipment: Partial<Record<EquipmentSlot, string>>;
   buildings: Array<{ id: string; name: string; description: string; level: number; maxLevel: number; cost: { gold: number; crystals: number } }>;
@@ -137,8 +137,8 @@ export class MobileHUD {
     const attack=movement.querySelector<HTMLElement>('.attack-button')!;
     this.root.querySelector('.combat-controls')!.append(attack,this.root.querySelector('.combo-label')!);this.root.append(movement);
     const minimap=this.root.querySelector<HTMLElement>('.map-card')!;minimap.setAttribute('role','button');minimap.tabIndex=0;minimap.setAttribute('aria-label','Abrir mapa mundi / Open world map');
-    minimap.addEventListener('click',()=>{this.clearInput();this.callbacks.onOpenMap?.();});
-    minimap.addEventListener('keydown',event=>{if(event.code==='Enter'||event.code==='Space'){event.preventDefault();event.stopPropagation();this.clearInput();this.callbacks.onOpenMap?.();}});
+    minimap.addEventListener('click',()=>{this.callbacks.onOpenMap?.();});
+    minimap.addEventListener('keydown',event=>{if(event.code==='Enter'||event.code==='Space'){event.preventDefault();event.stopPropagation();this.callbacks.onOpenMap?.();}});
     container.append(this.root);
     this.root.querySelectorAll<HTMLElement>('[data-ref]').forEach(node => this.el[node.dataset.ref!] = node);
     this.root.querySelectorAll<HTMLSelectElement>('[data-quality]').forEach(select => select.value = this.quality);
@@ -180,7 +180,7 @@ export class MobileHUD {
       } else if (target.hasAttribute('data-drawer-toggle')) this.setDrawerOpen(!this.drawerOpen);
       else if(target.hasAttribute('data-drawer-close'))this.setDrawerOpen(false);
       else if(target.dataset.drawerAction){
-        this.setDrawerOpen(false);this.clearInput();
+        this.setDrawerOpen(false);
         const action=target.dataset.drawerAction;
         if(action==='forge')this.callbacks.onOpenForge?.();
         else if(action==='collection')this.callbacks.onOpenCollection?.();
@@ -214,7 +214,7 @@ export class MobileHUD {
     this.el.modal.addEventListener('pointerdown', event => { if (event.target === this.el.modal) this.closePanel(); }, opts);
     this.root.querySelectorAll<HTMLButtonElement>('[data-action], [data-skill]').forEach(button => {
       button.addEventListener('pointerdown', event => {
-        if (this.blocking) return;
+        if (!this.started) return;
         event.preventDefault();
         button.setPointerCapture(event.pointerId);
         button.classList.add('is-pressed');
@@ -246,11 +246,7 @@ export class MobileHUD {
       if (!this.started) return;
       const panels: Record<string, Panel> = { KeyI: 'inventory', KeyC: 'classes', KeyK: 'codex', KeyH: 'help' };
       if (panels[code] && !event.repeat) { this.activePanel === panels[code] ? this.closePanel() : this.openPanel(panels[code]); return; }
-      if (this.drawerOpen) return;
-      if (this.activePanel) {
-        if (code === 'Tab') this.trapFocus(event);
-        return;
-      }
+      // Movement key-up/down remains live under menus; text fields are filtered above.
       this.keys.add(code);
       if (event.repeat) return;
       if (code === 'Space') this.input.jump = true;
@@ -265,7 +261,7 @@ export class MobileHUD {
     this.root.addEventListener('contextmenu', event => event.preventDefault(), opts);
     document.addEventListener('pointerdown',event=>{
       if(this.drawerOpen&&!(event.target as Element).closest('.menu-dock')){
-        this.setDrawerOpen(false);event.preventDefault();event.stopPropagation();
+        this.setDrawerOpen(false);
       }
     },{capture:true,signal:this.abort.signal});
     this.root.querySelector('.hud-drawer')!.addEventListener('click',event=>{
@@ -278,7 +274,7 @@ export class MobileHUD {
     const stick = this.el.joystick;
     const opts = { signal: this.abort.signal };
     zone.addEventListener('pointerdown', event => {
-      if (this.blocking || this.movePointer !== null) return;
+      if (!this.started || this.movePointer !== null) return;
       event.preventDefault();
       zone.setPointerCapture(event.pointerId);
       this.movePointer = event.pointerId;
@@ -319,7 +315,7 @@ export class MobileHUD {
     const zone = this.el.lookZone;
     const opts = { signal: this.abort.signal };
     zone.addEventListener('pointerdown', event => {
-      if (this.blocking || this.lookPointer !== null) return;
+      if (!this.started || this.lookPointer !== null) return;
       event.preventDefault();
       zone.setPointerCapture(event.pointerId);
       this.lookPointer = event.pointerId;
@@ -340,6 +336,7 @@ export class MobileHUD {
     zone.addEventListener('lostpointercapture', release, opts);
   }
 
+  closeMenus():void {this.setDrawerOpen(false);this.closePanel();this.clearInput();}
   resetInput():void {this.clearInput();}
   private clearInput(): void {
     this.keys.clear();
@@ -353,7 +350,7 @@ export class MobileHUD {
   }
 
   readInput(): HeroInput {
-    if (this.blocking) { this.input = emptyInput(); return emptyInput(); }
+    if (!this.started) { this.input = emptyInput(); return emptyInput(); }
     const result = this.input;
     let x = this.joystick.x + Number(this.keys.has('KeyD') || this.keys.has('ArrowRight')) - Number(this.keys.has('KeyA') || this.keys.has('ArrowLeft'));
     let y = this.joystick.y + Number(this.keys.has('KeyW') || this.keys.has('ArrowUp')) - Number(this.keys.has('KeyS') || this.keys.has('ArrowDown'));
@@ -475,12 +472,13 @@ export class MobileHUD {
     const scale = 1.15;
     const project = (x: number, z: number): [number, number] => [w / 2 + (x - model.player.x) * scale, h / 2 + (z - model.player.z) * scale];
     ctx.strokeStyle = 'rgba(128,183,159,.08)'; ctx.lineWidth = 1;
-    for (let i = -160; i <= 160; i += 20) {
+    for (let i = Math.floor((model.player.x-180)/20)*20; i <= model.player.x+180; i += 20) {
       const [x, z] = project(i, i);
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.moveTo(0, z); ctx.lineTo(w, z); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
     }
+    for(let i=Math.floor((model.player.z-160)/20)*20;i<=model.player.z+160;i+=20){const y=project(0,i)[1];ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
     ctx.strokeStyle = '#355b4e'; ctx.lineWidth = 8;
-    ctx.beginPath(); let p = project(0, 30); ctx.moveTo(...p); p = project(0, -70); ctx.lineTo(...p); ctx.stroke();
+    ctx.beginPath(); let p = project(0, 30); ctx.moveTo(...p); p = project(model.regionExit?.x??0, model.regionExit?.z??-70); ctx.lineTo(...p); ctx.stroke();
     ctx.strokeStyle = '#54715a'; ctx.lineWidth = 2;
     ctx.beginPath(); p = project(-18, 18); ctx.moveTo(...p); p = project(18, 18); ctx.lineTo(...p); ctx.stroke();
     ctx.fillStyle = 'rgba(100,154,125,.08)'; p = project(0, 18); ctx.beginPath(); ctx.arc(...p, 30 * scale, 0, Math.PI * 2); ctx.fill();
@@ -515,7 +513,7 @@ export class MobileHUD {
   }
 
   private setDrawerOpen(open:boolean):void {
-    this.drawerOpen=open;this.clearInput();
+    this.drawerOpen=open;
     const drawer=this.root.querySelector<HTMLElement>('.hud-drawer')!;drawer.hidden=!open;
     this.root.querySelector('[data-drawer-toggle]')!.setAttribute('aria-expanded',String(open));
     this.root.classList.toggle('drawer-open',open);
@@ -534,9 +532,8 @@ export class MobileHUD {
     if(panel==='base'){this.openPanel('inventory');return;}
     this.setDrawerOpen(false);
     if(this.callbacks.onOpenProgression) {
-      this.clearInput();this.callbacks.onOpenProgression(panel==='classes'?'talents':panel==='help'?'settings':panel);return;
+      this.callbacks.onOpenProgression(panel==='classes'?'talents':panel==='help'?'settings':panel);return;
     }
-    this.clearInput();
     this.activePanel = panel;
     this.confirmingReset = false;
     this.panelSignature = '';
@@ -552,7 +549,6 @@ export class MobileHUD {
     this.el.modal.hidden = true;
     this.root.classList.remove('has-modal');
     this.panelSignature = '';
-    this.clearInput();
   }
 
   private trapFocus(event: KeyboardEvent): void {

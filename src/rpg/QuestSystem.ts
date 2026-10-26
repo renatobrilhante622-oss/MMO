@@ -65,6 +65,9 @@ export class QuestSystem {
   private readonly counters=new Map<string,number>();
   private readonly accepted=new Set<string>();
   private readonly claimed=new Set<string>();
+  private readonly listeners=new Set<()=>void>();
+  subscribe(listener:()=>void):()=>void {this.listeners.add(listener);return ()=>this.listeners.delete(listener);}
+  private changed():void{for(const listener of this.listeners)listener();}
   private storyIndex=0;
   private currentDay='';
   private readonly daily:QuestDefinition[]=[];
@@ -114,12 +117,13 @@ export class QuestSystem {
     for(const quest of this.all()){
       if(!this.isAccepted(quest.id)||this.claimed.has(quest.id)||quest.goal!==goal||quest.target!==target)continue;
       if(region&&quest.region!==region)continue;
-      this.counters.set(quest.id,Math.min(quest.required,(this.counters.get(quest.id)??0)+count));
+      const before=this.counters.get(quest.id)??0,next=Math.min(quest.required,before+count);this.counters.set(quest.id,next);if(before!==next)this.changed();
     }
   }
-  regionComplete(region:string):boolean{return STORY.filter(q=>q.region===region).every(q=>this.claimed.has(q.id));}
+  regionComplete(region:string):boolean{const quests=STORY.filter(q=>q.region===region);return quests.length>0&&quests.every(q=>this.claimed.has(q.id));}
+  allMainQuestsDone(region:string):boolean{const quests=STORY.filter(q=>q.region===region);return quests.length>0&&quests.every(q=>this.claimed.has(q.id)||this.progressOf(q).ready);}
   canEnterRegion(region:string):boolean{
-    const i=REGIONS.findIndex(r=>r.id===region);return i===0||i>0&&REGIONS.slice(0,i).every(r=>this.regionComplete(r.id));
+    const i=REGIONS.findIndex(r=>r.id===region);return i===0||i>0&&REGIONS.slice(0,i).every(r=>this.allMainQuestsDone(r.id));
   }
   onCollect(region:string,count=1):void{if(Number.isInteger(count)&&count>0)this.signal('collect','resource',region,count);}
   onTalk(id:string):void{this.signal('talk',id);}
@@ -162,7 +166,7 @@ export class QuestSystem {
         if(next&&!this.progress.unlockedRegions.includes(next.id))this.progress.unlockedRegions.push(next.id);
       }
     }
-    return true;
+    this.changed();return true;
   }
   snapshot():Record<string,unknown>{
     return {schema:2,storyIndex:this.storyIndex,day:this.currentDay,
@@ -183,5 +187,6 @@ export class QuestSystem {
     this.storyIndex=0;while(this.storyIndex<STORY.length&&this.claimed.has(STORY[this.storyIndex].id))this.storyIndex++;
     if(raw.counters&&typeof raw.counters==='object'&&!Array.isArray(raw.counters))
       for(const [id,value]of Object.entries(raw.counters))if(ids.has(id)&&valid(value))this.counters.set(id,value as number);
+    this.changed();
   }
 }

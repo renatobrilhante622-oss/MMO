@@ -23,6 +23,7 @@ import './ui/pr16-banners.css';
 import './ui/pr16-arena.css';
 import './ui/pr17-hud.css';
 import './ui/pr18-scenes.css';
+import './ui/pr20-world.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');

@@ -119,11 +119,13 @@ export class AdventureHub {
   private t(pt:string,en:string):string{return this.game.progress.language==='pt'?pt:en;}
   private label(value:readonly[string,string]):string{return value[this.game.progress.language==='pt'?0:1];}
   open(tab:Tab='talents'):void {
+    if(tab==='arena'){this.game.openPvP();return;}
+    if(this.game.arenaUI?.activeMap)return;
     if(tab==='base')tab='inventory';
-    setScreenPhase(this.root.parentElement!,tab==='classes'?'class-selection':'modal');
+    setScreenPhase(this.root.parentElement!,tab==='classes'&&!this.game.progress.chosen?'class-selection':'modal');
     if(!this.visible)this.priorFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
     if(this.tab!==tab){this.lastResult='';this.resetScroll=true;}
-    this.navOpen=false;this.visible=true;this.tab=tab;this.root.hidden=false;this.game.progress.autoFarm=false;this.render();this.root.querySelector<HTMLElement>('[data-do=close]')?.focus();
+    this.navOpen=false;this.visible=true;this.tab=tab;this.root.hidden=false;this.render();this.root.querySelector<HTMLElement>('[data-do=close]')?.focus();
     if(['arena','clan','market'].includes(tab))void this.poll();
   }
   openForge():void {this.forgeExpanded=true;this.forgeTab='refine';this.open('inventory');}

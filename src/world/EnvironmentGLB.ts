@@ -1,3 +1,6 @@
+import {groundedAssetMatrix} from './AssetPlacement';
+import {generateMapPlan} from './MapGenerator';
+import type {WorldCollider} from './OpenWorldGenerator';
 import {mapDefinition} from './maps/MapDefinitions';
 import {
   Box3,DoubleSide,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3
@@ -53,7 +56,7 @@ export class EnvironmentGLB {
   private readonly meshes:InstancedMesh[]=[];
   private readonly materials=new Set<MeshStandardMaterial>();
   constructor(private readonly scene:Scene,private readonly heightAt:(x:number,z:number)=>number,
-    private readonly activeRegion?:string){
+    private readonly activeRegion?:string,private readonly colliders:WorldCollider[]=[]){
     this.root.name='CC0 authored environment — instanced GLB scenery';
     scene.add(this.root);
     this.ready=typeof document!=='undefined'?this.build():Promise.resolve();
@@ -63,7 +66,6 @@ export class EnvironmentGLB {
       if(this.disposed)return;
       const entry=ASSETS[index];
       if(this.activeRegion&&entry.region!==this.activeRegion)continue;
-      if((entry.region==='crypt'||entry.region==='highlands')&&entry.file.includes('tree-'))continue;
       let gltf:GLTF;
       try{gltf=await model(entry.file);}
       catch(error){console.warn('Unable to load authored environment:',entry.file,error);continue;}
@@ -76,18 +78,21 @@ export class EnvironmentGLB {
       const [cx,cz]=this.activeRegion?[0,18]:CENTERS[entry.region];
       const rng=random(13021+index*973);
       const transforms:Matrix4[]=[];
-      for(let n=0;n<entry.count;n++){
-        const angle=rng()*Math.PI*2;
-        const radius=entry.count<5?13+n*3:14+Math.sqrt(rng())*28;
-        const x=Math.max(-133,Math.min(133,cx+Math.cos(angle)*radius));
-        const z=this.activeRegion?25-(mapDefinition(entry.region).size*.4)*((n+.5)/entry.count):Math.max(-133,Math.min(133,cz+Math.sin(angle)*radius));
-        if(entry.region==='aurora'&&Math.hypot(x,z-18)<24)continue;
-        const y=this.heightAt(x,z);if(entry.region==='eclipse'&&y<2)continue;
-        const spin=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),rng()*Math.PI*2);
-        const objectScale=scale*(.8+rng()*.38);
-        const transform=new Matrix4().compose(new Vector3(x,y,z),spin,new Vector3(objectScale,objectScale,objectScale));
-        const origin=new Matrix4().makeTranslation(-center.x,-bounds.min.y,-center.z);
-        transforms.push(transform.multiply(origin));
+      for(let n=0;n<entry.count*(this.activeRegion?4:1);n++){
+        const angle=rng()*Math.PI*2,def=mapDefinition(entry.region),spots=generateMapPlan(entry.region).spots;
+        const cluster=spots[n%Math.max(1,spots.length)],tree=entry.file.includes('tree-');
+        const radius=14+Math.sqrt(rng())*(this.activeRegion?def.size*.4:28);
+        const x=this.activeRegion?(tree&&cluster?cluster.x+Math.cos(angle)*(cluster.radius+8+rng()*15):Math.cos(angle)*radius):cx+Math.cos(angle)*radius;
+        const z=this.activeRegion?(tree&&cluster?cluster.z+Math.sin(angle)*(cluster.radius+8+rng()*15):Math.sin(angle)*radius):cz+Math.sin(angle)*radius;
+        if(Math.abs(x)>def.size/2-20||Math.abs(z)>def.size/2-20||Math.hypot(x,z-18)<34||Math.abs(x)<12&&z<35&&z>def.exit.z-20||Math.hypot(x-def.exit.x,z-def.exit.z)<22||Math.hypot(x-def.boss.x,z-def.boss.z)<22||spots.some(s=>Math.hypot(x-s.x,z-s.z)<s.radius+3))continue;
+        const y=this.heightAt(x,z);if(y<2)continue;
+        const objectScale=scale*(.8+rng()*.38),pose={x,z,size:bounds.getSize(new Vector3()).length()*objectScale,yaw:rng()*Math.PI*2};
+        // The placement helper sizes by maximum extent, not the bounding-box diagonal.
+        pose.size=Math.max(...bounds.getSize(new Vector3()).toArray())*objectScale;
+        const matrix=groundedAssetMatrix(bounds,pose,this.heightAt);transforms.push(matrix);
+        const fitted=bounds.clone().applyMatrix4(matrix),size=fitted.getSize(new Vector3()),position=fitted.getCenter(new Vector3());
+        if(tree){size.x=Math.min(1.2,size.x*.22);size.z=Math.min(1.2,size.z*.22);}
+        this.colliders.push({position,size,type:'solid'});
       }
       scene.traverse(object=>{
         if(!(object instanceof Mesh)||transforms.length===0)return;
@@ -133,7 +138,7 @@ export class EnvironmentGLB {
         const instanced=new InstancedMesh(object.geometry.clone(),Array.isArray(object.material)?visual:visual[0],transforms.length);
         instanced.name='Instanced '+entry.file+'/'+object.name;
         // Tiny forest foliage no longer self-occludes as a single opaque shadow.
-        instanced.castShadow=true;
+        instanced.castShadow=!entry.file.includes('tree-')&&entry.height>5;
         instanced.receiveShadow=false;
         for(let i=0;i<transforms.length;i++){
           instanced.setMatrixAt(i,transforms[i].clone().multiply(object.matrixWorld));

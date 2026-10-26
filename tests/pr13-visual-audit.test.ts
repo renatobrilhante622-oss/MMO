@@ -38,7 +38,7 @@ describe('PR13 mobile visual regression contracts',()=>{
     expect(code).toContain("'#2d6a3e'");
     expect(code).toContain("'#3b8046'");
     expect(code).toContain("if(!source.map&&!object.geometry.hasAttribute('color'))");
-    expect(code).toContain('instanced.castShadow=true');
+    expect(code).toContain("instanced.castShadow=!entry.file.includes('tree-')&&entry.height>5");
     expect(code).not.toContain('material.color.setRGB(Math.max(.68');
     const engine=read('src/core/Engine.ts');
     expect(engine).toContain('ACESFilmicToneMapping');

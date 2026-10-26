@@ -1,4 +1,6 @@
+import type {PvPView} from '../combat/PvPTypes';
 export interface OnlineView {
+  pvp?:PvPView;
   self:{id:string;name:string;level:number;coins:number;rating:number;wins:number;losses:number;items:Array<{id:string;name:string;rarity:number}>;clan:string|null;bossAttackAt:number;clanMarks?:number};
   queue:{size:number}|null;waiting:Array<{size:number;count:number}>;
   match:{id:string;ended:number;started:number;winner:number|null;fighters:Array<{id:string;name:string;team:number;hp:number;maxHp:number;energy:number;classId?:string;tactical?:boolean}>;log:string[]}|null;
@@ -23,6 +25,16 @@ export class OnlineClient {
   async create(name:string,classId='berserker'):Promise<void>{await this.request('/session',{name,classId},true);}
   async refresh():Promise<void>{if(!this.token)return;await this.request('/state');}
   async action(path:string,body:Record<string,unknown>={}):Promise<void>{await this.request(path,body);}
+  private arenaRequests:Promise<unknown>=Promise.resolve();
+  /** Serialized commands cannot be dropped by the legacy dashboard's busy guard. */
+  arena(path:string,body?:Record<string,unknown>):Promise<PvPView>{
+    const pending=this.arenaRequests.catch(()=>{}).then(async()=>{
+      if(!this.token)throw new Error('Conecte um perfil online primeiro.');
+      const response=await fetch(this.endpoint+'/api/pvp/'+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+this.token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(5000)});
+      const data=await response.json() as OnlineView&{error?:string};if(!response.ok)throw new Error(data.error??'Arena indisponível.');
+      if(!data.pvp)throw new Error('Atualize o servidor para o protocolo PvP #19.');this.view={...this.view!,...data};return data.pvp;
+    });this.arenaRequests=pending;return pending;
+  }
   private async request(path:string,body?:Record<string,unknown>,session=false):Promise<void>{
     if(this.busy)return;this.busy=true;this.error='';
     try{

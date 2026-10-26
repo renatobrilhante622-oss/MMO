@@ -2,7 +2,8 @@ export type ScreenPhase='cinematic'|'splash'|'loading'|'menu'|'class-selection'|
 /** Explicit entry states override saved HUD positions and inline display styles. */
 export function setScreenPhase(container:HTMLElement,phase:ScreenPhase):void {
   container.dataset.screen=phase;
-  container.classList.toggle('entry-isolated',phase!=='playing');
+  container.classList.toggle('entry-isolated',phase!=='playing'&&phase!=='modal');
+  container.classList.toggle('live-menu',phase==='modal');
   container.setAttribute('aria-busy',phase==='loading'?'true':'false');
 }
 export class MainMenu {

@@ -1,0 +1,73 @@
+{
+  "menus": [
+    {
+      "tab": "inventory",
+      "moved": true,
+      "ai": true,
+      "daylight": true,
+      "rendered": true,
+      "joystick": true,
+      "isolated": false
+    },
+    {
+      "tab": "forge",
+      "moved": true,
+      "ai": true,
+      "daylight": true,
+      "rendered": true,
+      "joystick": true,
+      "isolated": false
+    },
+    {
+      "tab": "collection",
+      "moved": true,
+      "ai": true,
+      "daylight": true,
+      "rendered": true,
+      "joystick": true,
+      "isolated": false
+    },
+    {
+      "tab": "map",
+      "moved": true,
+      "ai": true,
+      "daylight": true,
+      "rendered": true,
+      "joystick": true,
+      "isolated": false
+    },
+    {
+      "tab": "settings",
+      "moved": true,
+      "ai": true,
+      "daylight": true,
+      "rendered": true,
+      "joystick": true,
+      "isolated": false
+    }
+  ],
+  "drawerRemainsUsable": true,
+  "joystick": {
+    "moved": true,
+    "pointer": true,
+    "released": true
+  },
+  "pause": {
+    "stopped": true,
+    "resumed": true
+  },
+  "portal": {
+    "open": true,
+    "unclaimed": true,
+    "barrierOpen": true
+  },
+  "arrival": {
+    "region": "crypt",
+    "finalRewardClaimed": true,
+    "quest": "story-crypt-meet",
+    "size": 800,
+    "colliders": 246
+  },
+  "errors": [],
+  "note": "Live simulation/render calls checked with rendering stubbed; actual GLB render evidence is separate."
+}

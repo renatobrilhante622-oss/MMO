@@ -1,3 +1,4 @@
+import {generateMapPlan,type HuntSpot} from '../world/MapGenerator';
 import {mapDefinition} from '../world/maps/MapDefinitions';
 import type {ModelName} from '../assets/AnimatedGLB';
 import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RingGeometry, Scene, SphereGeometry, Vector3 } from 'three';
@@ -164,7 +165,7 @@ export class Enemy implements Combatant {
   private move(velocity: Vector3, dt: number): void {
     if (this.hitStun > 0) return;
     const aheadX = this.position.x + velocity.x * .5, aheadZ = this.position.z + velocity.z * .5;
-    if (this.physics.terrainHeight(aheadX, aheadZ) < this.physics.waterLevel + .35 || Math.abs(aheadX) > 143 || Math.abs(aheadZ) > 143) { this.body.velocity.x = 0; this.body.velocity.z = 0; return; }
+    if (this.physics.terrainHeight(aheadX, aheadZ) < this.physics.waterLevel + .35 || Math.abs(aheadX) > this.physics.terrainExtent || Math.abs(aheadZ) > this.physics.terrainExtent) { this.body.velocity.x = 0; this.body.velocity.z = 0; return; }
     const factor = 1 - Math.exp(-dt * 9);
     this.body.velocity.x += (velocity.x - this.body.velocity.x) * factor;
     this.body.velocity.z += (velocity.z - this.body.velocity.z) * factor;
@@ -188,6 +189,7 @@ export class EnemyAI {
   private kinds = ['slime', 'wolf', 'skeleton', 'golem', 'wraith'];
   private activeRegionId:string|null=null;
   private dungeonMode=false;
+  readonly zones:Array<{spot:HuntSpot;slots:Array<{enemyId:string|null;readyAt:number}>}>=[];
   setDungeonMode(enabled:boolean):void{this.dungeonMode=enabled;}
   get regionId():string|null{return this.activeRegionId;}
   private regionAtPosition(x:number,z:number){
@@ -208,19 +210,9 @@ export class EnemyAI {
     this.bossRespawn={};
     this.spawnTimer=5;
     this.spawnIndex=0;
-    // Position mobs around authored regional spots, never inside the safe camp.
-    for(let index=0;index<24;index++){
-      const angle=index*2.399963;
-      const path=mapDefinition(regionId);
-      const stage=(index+1)/25;
-      const x=Math.cos(angle)*(12+(index%5)*4);
-      const z=-18+(path.exit.z+35)*stage;
-      const height=this.physics.terrainHeight(x,z);
-      if(height<=this.physics.waterLevel+.5||regionId==='eclipse'&&height<2)continue;
-      this.spawn(region.kinds[index%region.kinds.length],
-        new Vector3(x,height+1.4,z),
-        Math.round(region.minLevel+(region.maxLevel-region.minLevel)*(index%6)/5));
-    }
+    this.dungeonMode=false;this.elapsed=0;
+    this.zones.splice(0,this.zones.length,...generateMapPlan(regionId).spots.map(spot=>({spot,slots:Array.from({length:spot.capacity},()=>({enemyId:null,readyAt:0}))})));
+    this.populateZones(new Vector3(0,this.physics.terrainHeight(0,18),18));
   }
   constructor(private scene: Scene, private physics: PhysicsWorld, private events: EventBus) {
     const locations: [number, number][] = [[-14, -8], [13, -9], [-24, -18], [22, -25], [9, -34], [-19, -43], [35, -47], [-44, -30], [28, -77], [-32, -82], [58, -52], [-60, -65], [-38, 46], [48, 45]];
@@ -241,8 +233,34 @@ export class EnemyAI {
     this.enemies.push(enemy); return enemy;
   }
 
+  /** Slot cooldowns belong to a hunting location, not to the camera or a random spawn ring. */
+  private populateZones(hero:Vector3):void {
+    if(this.dungeonMode||!this.activeRegionId)return;
+    let count=this.enemies.filter(e=>e.alive&&!e.boss).length;
+    for(const zone of this.zones){
+      for(const slot of zone.slots)if(slot.enemyId){const enemy=this.enemies.find(e=>e.id===slot.enemyId);if(!enemy||!enemy.alive){slot.enemyId=null;slot.readyAt=this.elapsed+zone.spot.respawn;}}
+      if(Math.hypot(hero.x-zone.spot.x,hero.z-zone.spot.z)>75)continue;
+      for(const [i,slot]of zone.slots.entries()){
+        if(slot.enemyId||slot.readyAt>this.elapsed||count>=54)continue;
+        for(let attempt=0;attempt<12;attempt++){
+          const a=i*2.399963+attempt*.57,r=5+(i%3)*2+attempt*.25,x=zone.spot.x+Math.cos(a)*r,z=zone.spot.z+Math.sin(a)*r;
+          if(Math.hypot(x-hero.x,z-hero.z)<5||!this.physics.isPositionFree(x,z,1))continue;
+          const enemy=this.spawn(zone.spot.kind,new Vector3(x,this.physics.terrainHeight(x,z)+1.3,z),zone.spot.level);slot.enemyId=enemy.id;count++;break;
+        }
+      }
+    }
+  }
+  private retireDistant(hero:Vector3):void {
+    if(this.dungeonMode)return;
+    for(let i=this.enemies.length-1;i>=0;i--){const e=this.enemies[i];if(e.boss||!e.alive||Math.hypot(e.position.x-hero.x,e.position.z-hero.z)<115)continue;
+      for(const zone of this.zones)for(const slot of zone.slots)if(slot.enemyId===e.id){slot.enemyId=null;slot.readyAt=this.elapsed;}
+      e.dispose();this.enemies.splice(i,1);
+    }
+  }
   update(dt: number, hero: Combatant,camera=hero.position): void {
     this.elapsed += dt;
+    this.retireDistant(hero.position);
+    this.populateZones(hero.position);
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
       if(enemy.alive){const active=withinActorRadius(enemy.position,camera);enemy.setActive(active);if(!active)continue;}
@@ -263,7 +281,7 @@ export class EnemyAI {
     }
     this.spawnTimer -= dt;
     const ambientCount = this.enemies.filter(enemy => !enemy.boss && enemy.alive).length;
-    if (!this.dungeonMode && this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
+    if (!this.activeRegionId && !this.dungeonMode && this.spawnTimer <= 0 && ambientCount < 34 && hero.alive) {
       this.spawnTimer = 8;
       const angle = this.spawnIndex++ * 2.39996;
       const x = hero.position.x + Math.cos(angle) * 28, z = hero.position.z + Math.sin(angle) * 28;
@@ -272,5 +290,5 @@ export class EnemyAI {
     }
   }
 
-  dispose(): void { this.enemies.forEach(enemy => enemy.dispose()); this.enemies.length = 0; }
+  dispose(): void { this.enemies.forEach(enemy => enemy.dispose()); this.enemies.length = 0;this.zones.length=0; }
 }

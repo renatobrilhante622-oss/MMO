@@ -1,0 +1,34 @@
+{
+  "modes": [
+    {
+      "mode": "1v1",
+      "humans": 2,
+      "movementValidated": true,
+      "forgedStatsIgnored": true,
+      "winRating": 25,
+      "rewardOnce": true
+    },
+    {
+      "mode": "2v2",
+      "humans": 4,
+      "movementValidated": true,
+      "forgedStatsIgnored": true,
+      "winRating": 25,
+      "rewardOnce": true
+    },
+    {
+      "mode": "3v3",
+      "humans": 6,
+      "movementValidated": true,
+      "forgedStatsIgnored": true,
+      "winRating": 25,
+      "rewardOnce": true
+    }
+  ],
+  "fallback": {
+    "humans": 1,
+    "bots": 5,
+    "ranked": false
+  },
+  "protocol": "30Hz authoritative simulation / HTTP input and snapshots"
+}

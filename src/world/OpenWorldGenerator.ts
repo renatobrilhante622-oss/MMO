@@ -1,3 +1,4 @@
+import {foundationHeight,generateMapPlan} from './MapGenerator';
 import {BiomeSurface} from './maps/BiomeSurface';
 import {mapDefinition,regionalHeight} from './maps/MapDefinitions';
 import {RegionalScenery} from './maps/RegionalScenery';
@@ -18,9 +19,6 @@ export interface WorldCollider {
 
 export interface MapMarker { x: number; z: number; label: string; color: string }
 
-const SIZE = 320;
-const SEGMENTS = 128;
-const STEP = SIZE / SEGMENTS;
 const smooth = (x: number) => x * x * (3 - 2 * x);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -37,7 +35,7 @@ export class OpenWorldGenerator {
   readonly colliders: WorldCollider[] = [];
   readonly markers: MapMarker[] = [];
 
-  readonly terrainSegments = SEGMENTS;
+  readonly terrainSegments:number;
   private readonly root = new THREE.Group();
   private readonly grid: Float32Array;
   private readonly life: WorldLife;
@@ -57,14 +55,15 @@ export class OpenWorldGenerator {
 
   constructor(private readonly scene: THREE.Scene, private readonly seed = 61857,
     readonly regionId = 'aurora',readonly dungeonId='tombs') {
-    this.terrainSize=regionId==='dungeon'?320:mapDefinition(regionId).size;
+    this.terrainSegments=regionId==='arena'||regionId==='dungeon'?128:256;
+    this.terrainSize=regionId==='arena'?64:regionId==='dungeon'?320:mapDefinition(regionId).size;
     this.waterLevel=regionId==='aurora'?1.2:regionId==='eclipse'?-200:-20;
     this.randomState = seed >>> 0;
     this.life = new WorldLife((x, z) => this.heightAt(x, z));
-    this.grid = new Float32Array((SEGMENTS + 1) * (SEGMENTS + 1));
-    for (let x = 0; x <= SEGMENTS; x++) {
-      for (let z = 0; z <= SEGMENTS; z++) {
-        this.grid[x * (SEGMENTS + 1) + z] = this.rawHeight(-this.terrainSize / 2 + x * this.terrainSize/SEGMENTS, this.terrainSize / 2 - z * this.terrainSize/SEGMENTS);
+    this.grid = new Float32Array((this.terrainSegments + 1) * (this.terrainSegments + 1));
+    for (let x = 0; x <= this.terrainSegments; x++) {
+      for (let z = 0; z <= this.terrainSegments; z++) {
+        this.grid[x * (this.terrainSegments + 1) + z] = this.rawHeight(-this.terrainSize / 2 + x * this.terrainSize/this.terrainSegments, this.terrainSize / 2 - z * this.terrainSize/this.terrainSegments);
       }
     }
     this.spawnPoint.y = this.heightAt(this.spawnPoint.x, this.spawnPoint.z) + 1.1;
@@ -91,18 +90,18 @@ export class OpenWorldGenerator {
 
   private rawHeight(x: number, z: number): number {
     // Hidden, planar Cannon support under authored indoor GLB floor tiles.
-    if(this.regionId==='dungeon')return 3.4;
-    return regionalHeight(this.regionId,x,z,(a,b)=>this.noise(a,b));
+    if(this.regionId==='dungeon'||this.regionId==='arena')return 3.4;
+    return foundationHeight(this.regionId,x,z,(u,v)=>regionalHeight(this.regionId,u,v,(a,b)=>this.noise(a,b)));
   }
 
   heightAt(x: number, z: number): number {
-    const gx = THREE.MathUtils.clamp((x + this.terrainSize / 2) / (this.terrainSize/SEGMENTS), 0, SEGMENTS - .00001);
-    const gz = THREE.MathUtils.clamp((this.terrainSize / 2 - z) / (this.terrainSize/SEGMENTS), 0, SEGMENTS - .00001);
+    const gx = THREE.MathUtils.clamp((x + this.terrainSize / 2) / (this.terrainSize/this.terrainSegments), 0, this.terrainSegments - .00001);
+    const gz = THREE.MathUtils.clamp((this.terrainSize / 2 - z) / (this.terrainSize/this.terrainSegments), 0, this.terrainSegments - .00001);
     const ix = Math.floor(gx), iz = Math.floor(gz), tx = gx - ix, tz = gz - iz;
-    const h00 = this.grid[ix * (SEGMENTS + 1) + iz];
-    const h10 = this.grid[(ix + 1) * (SEGMENTS + 1) + iz];
-    const h01 = this.grid[ix * (SEGMENTS + 1) + iz + 1];
-    const h11 = this.grid[(ix + 1) * (SEGMENTS + 1) + iz + 1];
+    const h00 = this.grid[ix * (this.terrainSegments + 1) + iz];
+    const h10 = this.grid[(ix + 1) * (this.terrainSegments + 1) + iz];
+    const h01 = this.grid[ix * (this.terrainSegments + 1) + iz + 1];
+    const h11 = this.grid[(ix + 1) * (this.terrainSegments + 1) + iz + 1];
     return tx + tz <= 1 ? h00 + tx * (h10 - h00) + tz * (h01 - h00)
       : h11 + (1 - tx) * (h01 - h11) + (1 - tz) * (h10 - h11);
   }
@@ -112,9 +111,10 @@ export class OpenWorldGenerator {
     if (this.generated) return;
     this.generated = true;
     this.scene.add(this.root);
-    if(typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
+    if(this.regionId!=='arena'&&typeof document!=='undefined')this.ground={grass:createGroundTextures('grass'),dirt:createGroundTextures('dirt'),cobble:createGroundTextures('cobble'),snow:createGroundTextures('snow'),scorched:createGroundTextures('scorched')};
     this.createTerrain();
-    if(this.regionId==='aurora')for(const [x,z] of [[-18,28],[18,30],[-18,0],[18,0]])this.colliders.push({position:new THREE.Vector3(x,this.heightAt(x,z)+3.5,z),size:new THREE.Vector3(11,7,11),type:'solid'});
+
+    if(this.regionId==='arena'){const ground=this.root.getObjectByName('Triangulated terrain');if(ground)ground.visible=false;return;}
     this.surface=new BiomeSurface(this.regionId,this.terrainSize);this.root.add(this.surface.root);
     if(this.regionId!=='dungeon'){
       this.details=new GroundDetail((x,z)=>this.heightAt(x,z),this.regionId,this.seed);
@@ -126,11 +126,12 @@ export class OpenWorldGenerator {
     }
     if(this.regionId==='aurora')this.createWater();
     // Authored CC0 GLBs replace procedural tree and regional building primitives.
-    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId);
+    this.environment = new EnvironmentGLB(this.scene,(x,z)=>this.heightAt(x,z),this.regionId,this.colliders);
 
     if(this.regionId!=='dungeon'){
-      this.scenery=new RegionalScenery(this.scene,this.regionId,(x,z)=>this.heightAt(x,z));
+      this.scenery=new RegionalScenery(this.scene,this.regionId,(x,z)=>this.heightAt(x,z),this.colliders);
       if(this.regionId!=='aurora')this.markers.push({x:30,z:-42,label:'Entrada da Masmorra',color:'#b394fa'});
+      for(const spot of generateMapPlan(this.regionId).spots)this.markers.push({x:spot.x,z:spot.z,label:spot.name+' · Nv. '+spot.level,color:'#d7aa65'});
       const def=mapDefinition(this.regionId);
       this.markers.push({...def.boss,label:'Chefe da Região',color:'#ff6650'});
       if(this.regionId!=='eclipse')this.markers.push({...def.exit,label:'Portal Ancestral',color:'#ba99ff'});
@@ -159,7 +160,7 @@ export class OpenWorldGenerator {
 
   /** A float height field lets the water shader query the same shore as physics. */
   private makeHeightTexture(): THREE.DataTexture {
-    const texture = new THREE.DataTexture(this.grid, SEGMENTS + 1, SEGMENTS + 1,
+    const texture = new THREE.DataTexture(this.grid, this.terrainSegments + 1, this.terrainSegments + 1,
       THREE.RedFormat, THREE.FloatType);
     texture.minFilter = texture.magFilter = THREE.NearestFilter;
     texture.generateMipmaps = false;
@@ -211,17 +212,17 @@ export class OpenWorldGenerator {
   }
 
   private createTerrain(): void {
-    const count = (SEGMENTS + 1) ** 2;
+    const count = (this.terrainSegments + 1) ** 2;
     const positions = new Float32Array(count * 3), colors = new Float32Array(count * 3), uvs = new Float32Array(count * 2);
     const indices: number[] = [];
     const color = new THREE.Color();
     const normal = new THREE.Vector3();
-    for (let i = 0; i <= SEGMENTS; i++) {
-      for (let j = 0; j <= SEGMENTS; j++) {
-        const index = i * (SEGMENTS + 1) + j;
-        const x = -this.terrainSize / 2 + i * (this.terrainSize/SEGMENTS), z = this.terrainSize / 2 - j * (this.terrainSize/SEGMENTS), h = this.grid[index];
+    for (let i = 0; i <= this.terrainSegments; i++) {
+      for (let j = 0; j <= this.terrainSegments; j++) {
+        const index = i * (this.terrainSegments + 1) + j;
+        const x = -this.terrainSize / 2 + i * (this.terrainSize/this.terrainSegments), z = this.terrainSize / 2 - j * (this.terrainSize/this.terrainSegments), h = this.grid[index];
         positions.set([x, h, z], index * 3);
-        uvs.set([i / SEGMENTS, j / SEGMENTS], index * 2);
+        uvs.set([i / this.terrainSegments, j / this.terrainSegments], index * 2);
         const slope = Math.abs(this.heightAt(x + 1, z) - this.heightAt(x - 1, z))
           + Math.abs(this.heightAt(x, z + 1) - this.heightAt(x, z - 1));
         if (h < this.waterLevel + 1.4) color.set('#adad79');
@@ -230,8 +231,8 @@ export class OpenWorldGenerator {
         normal.setScalar(.88 + this.noise(x * .11, z * .11) * .22);
         color.multiplyScalar(normal.x);
         colors.set([color.r, color.g, color.b], index * 3);
-        if (i < SEGMENTS && j < SEGMENTS) {
-          const a = index, b = (i + 1) * (SEGMENTS + 1) + j, c = index + 1, d = b + 1;
+        if (i < this.terrainSegments && j < this.terrainSegments) {
+          const a = index, b = (i + 1) * (this.terrainSegments + 1) + j, c = index + 1, d = b + 1;
           indices.push(a, b, c, b, d, c);
         }
       }
@@ -257,7 +258,7 @@ export class OpenWorldGenerator {
         time: { value: 0 }, day: { value: 1 },
         waterLevel: { value: this.waterLevel },
         heightMap: { value: this.makeHeightTexture() },
-        terrainExtent:{value:this.terrainSize},
+        terrainExtent:{value:this.terrainSize},terrainSegments:{value:this.terrainSegments},
         waterColor: { value: new THREE.Color('#237b8b') },
         skyColor: { value: new THREE.Color('#b5d9dd') },
         sunDirection: { value: new THREE.Vector3(.2,.8,-.45).normalize() },

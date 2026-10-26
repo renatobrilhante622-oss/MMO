@@ -1,3 +1,4 @@
+import type {PvPFighter} from '../combat/PvPTypes';
 import { Group, MathUtils, PerspectiveCamera, Scene, Vector3 } from 'three';
 import type { Body } from 'cannon-es';
 import { EventBus, type CharacterStats, type ClassDefinition, type Combatant, type HeroInput } from '../core/GameTypes';
@@ -181,6 +182,20 @@ export class HeroController implements Combatant {
     }
   }
 
+  arenaMovement(input:HeroInput):{x:number;z:number}{
+    return {x:Math.cos(this.cameraYaw)*input.move.x-Math.sin(this.cameraYaw)*input.move.y,z:-Math.sin(this.cameraYaw)*input.move.x-Math.cos(this.cameraYaw)*input.move.y};
+  }
+  /** Snapshot reconciliation bypasses PvE damage, regen, loot and respawn rules. */
+  updateArena(dt:number,fighter:PvPFighter,input:HeroInput):void {
+    this.time+=dt;this.cameraYaw-=input.look.x;this.cameraPitch=MathUtils.clamp(this.cameraPitch+input.look.y,.18,1.15);
+    this.hp=fighter.hp;this.mana=fighter.mana;this.stats.maxHp=fighter.maxHp;this.stats.maxMana=fighter.maxMana;
+    const target=new Vector3(fighter.x,3.9,fighter.z);
+    this.position.lerp(target,1-Math.exp(-dt*22));this.body.position.set(this.position.x,this.position.y,this.position.z);this.body.velocity.setZero();
+    this.facing.set(fighter.facingX,0,fighter.facingZ);this.mounted=false;this.machine.reset();
+    this.machine.state=fighter.hp<=0?'dead':fighter.state==='dash'?'slide':fighter.state==='run'?'run':'idle';
+    this.animate(dt,fighter.state==='run'?1:0);this.updateCamera(dt);
+  }
+
   update(dt: number, input: HeroInput): void {
     dt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
     this.time += dt;
@@ -279,7 +294,7 @@ export class HeroController implements Combatant {
       this.body.velocity.x *= Math.exp(-dt * 8);
       this.body.velocity.z *= Math.exp(-dt * 8);
     }
-    if (Math.abs(this.position.x) > 153 || Math.abs(this.position.z) > 153 || this.position.y < -25) {
+    if (Math.abs(this.position.x) > this.physics.terrainExtent+8 || Math.abs(this.position.z) > this.physics.terrainExtent+8 || this.position.y < -25) {
       this.respawn(new Vector3(0, this.physics.terrainHeight(0, 18) + 1, 18));
       this.events.emit('message', { text: 'As brumas devolvem você à vila.', tone: 'info' });
     }

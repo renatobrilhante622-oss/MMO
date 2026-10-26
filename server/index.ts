@@ -15,8 +15,8 @@ const server=createServer(async(req,res)=>{
     const allowed=(process.env.ETERNA_ALLOWED_ORIGINS??'http://localhost,https://localhost,capacitor://localhost,http://localhost:5173,http://127.0.0.1:5173').split(',');
     if(origin){if(!allowed.includes(origin))throw new GameError('Origin not allowed.',403);res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');}
     if(req.method==='OPTIONS'){res.statusCode=204;res.end();return;}
-    const ip=req.socket.remoteAddress??'local',now=Date.now(),entry=rate.get(ip);
-    if(!entry||now-entry.time>10000)rate.set(ip,{time:now,count:1});else if(++entry.count>150)throw new GameError('Too many requests.',429);
+    const ip=req.socket.remoteAddress??'local',now=Date.now(),realtime=req.url?.startsWith('/api/pvp/'),key=ip+(realtime?':pvp':':http'),entry=rate.get(key);
+    if(!entry||now-entry.time>10000)rate.set(key,{time:now,count:1});else if(++entry.count>(realtime?1500:150))throw new GameError('Too many requests.',429);
     if(rate.size>10000)for(const [key,value]of rate)if(now-value.time>60000)rate.delete(key);
     if(req.method==='GET'&&req.url==='/api/health'){res.end(JSON.stringify({ok:true,mode:'development',players:game.players.size}));return;}
     let body:Record<string,unknown>={};
@@ -30,6 +30,12 @@ const server=createServer(async(req,res)=>{
     const auth=req.headers.authorization??'';const player=game.authenticate(auth.startsWith('Bearer ')?auth.slice(7):'');
     if(req.method==='POST'){
       switch(req.url){
+        case '/api/pvp/queue':game.enqueuePvP(player,body.size);break;
+        case '/api/pvp/cancel':game.pvp.cancel(player.id);break;
+        case '/api/pvp/accept':game.pvp.accept(player.id);break;
+        case '/api/pvp/ready':game.pvp.ready(player.id);break;
+        case '/api/pvp/input':game.pvp.input(player.id,body);break;
+        case '/api/pvp/leave':game.pvp.leave(player.id);break;
         case '/api/queue':game.enqueue(player,body.size);break;
         case '/api/queue/cancel':game.cancel(player);break;
         case '/api/fight':game.fight(player,body.action,body.target);break;
@@ -45,11 +51,12 @@ const server=createServer(async(req,res)=>{
         case '/api/market/cancel':game.cancelListing(player,body.id);break;
         default:throw new GameError('Endpoint not found.',404);
       }
-    }else if(req.method!=='GET'||req.url!=='/api/state')throw new GameError('Endpoint not found.',404);
-    const view=game.view(player);save();res.end(JSON.stringify(view));
+    }else if(req.method!=='GET'||!['/api/state','/api/pvp/state'].includes(req.url??''))throw new GameError('Endpoint not found.',404);
+    const view=realtime?game.realtimeView(player):game.view(player);if(req.method==='POST'&&req.url!=='/api/pvp/input')save();res.end(JSON.stringify(view));
   }catch(error){res.statusCode=error instanceof GameError?error.status:500;res.end(JSON.stringify({error:error instanceof GameError?error.message:'Server operation failed.'}));if(!(error instanceof GameError))console.error(error);}
 });
 server.listen(Number(process.env.PORT??8787),process.env.ETERNA_SERVER_HOST??'127.0.0.1',()=>console.log('Eterna development server listening on port '+(process.env.PORT??8787)));
-const simulation=setInterval(()=>game.tick(),250);
+const simulation=setInterval(()=>game.tick(),1000/30);
 simulation.unref();
+const persistence=setInterval(save,5000);persistence.unref();
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{save();server.close(()=>process.exit(0));});
