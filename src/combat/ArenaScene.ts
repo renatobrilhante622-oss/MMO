@@ -76,7 +76,8 @@ export class ArenaScene {
  private async build():Promise<void>{
   const floor:Placement[]=[];for(let x=-5;x<=5;x++)for(let z=-5;z<=5;z++)if(Math.hypot(x*1.65,z*1.65)<8.8)floor.push({x:x*1.65,z:z*1.65,size:1.67});
   const circular=(count:number,radius:number,size:number):Placement[]=>Array.from({length:count},(_,i)=>{const a=i*Math.PI*2/count;return {x:Math.sin(a)*radius,z:Math.cos(a)*radius,size,yaw:a};});
-  const plan:Array<[StoneModel,Placement[]]>=[['floor',floor],['floor-detail',[{x:0,z:0,size:3.3}]],['wall',circular(32,9.6,2)],['column',circular(16,9.35,3.9)],['gate',[{x:0,z:-9.15,size:4.1}]],['fire-basket',circular(4,7.8,.95).map(p=>({...p,yaw:(p.yaw??0)+Math.PI/4,x:Math.sin((p.yaw??0)+Math.PI/4)*7.8,z:Math.cos((p.yaw??0)+Math.PI/4)*7.8}))]];
+  // Keep the camera-facing arc open so foreground masonry cannot obscure a duel.
+  const plan:Array<[StoneModel,Placement[]]>=[['floor',floor],['floor-detail',[{x:0,z:0,size:3.3}]],['wall',circular(32,9.6,2).filter(p=>p.z<4.2)],['column',circular(16,9.35,3.9).filter(p=>p.z<4.2)],['gate',[{x:0,z:-9.15,size:4.1}]],['fire-basket',circular(4,7.8,.95).map(p=>({...p,yaw:(p.yaw??0)+Math.PI/4,x:Math.sin((p.yaw??0)+Math.PI/4)*7.8,z:Math.cos((p.yaw??0)+Math.PI/4)*7.8}))]];
   await Promise.all(plan.map(async([name,spots])=>{
    try{
     const asset=await model(name);if(this.disposed)return;
