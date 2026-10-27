@@ -10,10 +10,10 @@ export class CinematicIntro {
  private readonly reduced=typeof matchMedia==='function'
    &&matchMedia('(prefers-reduced-motion: reduce)').matches;
  private readonly captions=[
-  'Antes dos nove caminhos, havia uma única chama.',
-  'O abismo despertou. Os portais voltaram a respirar.',
-  'Heróis serão forjados. Reinos serão lembrados.',
-  'ETERNA — A SUA LENDA COMEÇA AGORA.'
+  'A Guerra das Nove Dobras partiu um mundo em nove domínios.',
+  'Os Selos Primordiais desapareceram. Os Guardiões foram acorrentados.',
+  'Agora, a Nona Marca desperta em você.',
+  'ETERNAL NINEFOLD — OS NOVE SELOS DESPERTAM.'
  ];
  constructor(private readonly host:HTMLElement,
   private readonly onFrame:(progress:number)=>void,

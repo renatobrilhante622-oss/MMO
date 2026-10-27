@@ -1,3 +1,9 @@
+import {questText} from '../rpg/LoreSystem';
+import {VoiceSynthesisSystem} from '../audio/VoiceSynthesisSystem';
+import {LoreBookUI} from '../ui/LoreBookUI';
+import {QuestArrowRing} from '../world/QuestArrowRing';
+import {nearestSafeTrail} from '../world/Unstuck';
+import {BetterGearToast} from '../ui/BetterGearToast';
 import {resolveWeaponVisual} from '../player/WeaponSkinSystem';
 import {catalogSkin,weaponSkin,collectionBonuses,equippedPassives,cosmeticWing} from '../player/SkinCatalog';
 import {FieldProgress,fieldReward} from '../rpg/FieldRewards';
@@ -170,6 +176,13 @@ export class Engine {
   readonly drops: LootDrop[] = [];
   private readonly collectedRegionalLootIds=new Set<string>();
   readonly sound = new SoundEngine();
+  readonly voice=new VoiceSynthesisSystem(this.sound);
+  readonly lore:LoreBookUI;
+  private readonly betterGear:BetterGearToast;
+  private readonly questArrow=new QuestArrowRing();
+  private unstuckCooldown=0;
+  private questDirectionClock=0;
+  private questDirectionTarget:MapPoint|null=null;
   private readonly composer: EffectComposer;
   private readonly bloom: UnrealBloomPass;
   private readonly smaa: SMAAPass;
@@ -324,10 +337,13 @@ export class Engine {
       onSellItem: id => { if (this.inventory.sell(id)) this.save(); },
       onUpgradeBuilding: () => {},
       onQualityChange: quality => this.setQuality(quality),
-      onSoundChange: enabled => this.sound.setEnabled(enabled),
+      onSoundChange: enabled => {this.progress.audioEnabled=enabled;this.applyPreferences();},
       onResetSave: () => { localStorage.removeItem(SAVE_KEY); location.reload(); },
     });
     this.lootFeed = new LootToastFeed(this.container);
+    this.lore=new LoreBookUI(this.container,this.voice,()=>this.progress.language);
+    this.betterGear=new BetterGearToast(this.container,this.inventory,id=>{if(this.arenaMap||!this.hero.alive)return false;if(!this.inventory.equip(id))return false;this.refreshStats();this.updateHUD();this.sound.trade(true);this.save();return true;},()=>this.progress.language);
+    this.scene.add(this.questArrow.root);
     this.hub = new AdventureHub(this.container,this);
     this.phase2UI=new Phase2UI(this.container,this);
     const phase2Shortcut=document.createElement('button');
@@ -338,16 +354,18 @@ export class Engine {
     this.questTracker=new QuestTrackerHUD(this.container,this.quests,{
       navigate:quest=>this.navigateQuest(quest),
       claim:id=>this.claimQuest(id),
-    });
+    },()=>this.progress.language);
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
       this.quests,{
         onContracts:()=>this.openContracts(),
+        onLore:()=>this.openLore(),
+        onArena:()=>this.openPvP(),
       onForge:()=>this.hub.openForge(),
-        onShop:()=>this.hub.open('shop'),
+        onShop:()=>{this.sound.trade();this.hub.open('shop');},
         onTeleport:()=>this.hub.open('map'),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
         onQuestClaimed:id=>this.claimQuest(id),
-      },()=>this.progress.language,this.mapInstances.regionId);
+      },()=>this.progress.language,this.mapInstances.regionId,this.voice);
     this.scene.add(this.portalVfx.root);
     this.portals=new WorldPortals(this.scene,this.container,this.mapInstances.regionId,
       (x,z)=>this.terrain.heightAt(x,z),
@@ -450,7 +468,8 @@ export class Engine {
 
   private bindEvents(): void {
     this.disposers.push(this.events.on('damage', ({ position, amount, critical, team }) => {
-      this.sound.impact(critical);
+      this.sound.impact(critical,position);
+      if(critical&&team==='enemy')this.sound.heroEffort(this.classId,3);
       this.recentCombat=6;
       if (team==='hero') this.channel=null;
       if (team === 'hero') this.combat.particles.impact(position, 0xd84b52, critical);
@@ -487,6 +506,7 @@ export class Engine {
       this.lootFeed.push(drop);
       this.sound.coin();
       this.inventory.addLoot(drop);
+      if(drop.item)this.betterGear.offer(drop.item.id);
       if(drop.wardrobeSource)this.progress.wardrobe.earn(drop.wardrobeSource,drop.id);
       if(drop.fieldExtras&&this.fieldProgress.collect(drop.id,drop.fieldExtras))for(let i=0;i<(drop.fieldExtras.abyssalCores??0);i++)this.quests.onActivity('core',this.mapInstances.regionId,drop.id+':core:'+i);
       if(drop.activityResource&&drop.activityResource.region===this.mapInstances.regionId)this.quests.onActivity('rareCollect',drop.activityResource.region,drop.activityResource.source,drop.id);
@@ -533,14 +553,20 @@ export class Engine {
     this.fps += ((1 / Math.max(rawDt, 0.001)) - this.fps) * 0.05;
     if(!this.paused&&!this.mapLoading&&!this.dungeonLoading)this.elapsed += dt;
     const input = this.hud.readInput();
+    this.sound.setListener(this.camera.position,this.camera.matrixWorld.elements[0],this.camera.matrixWorld.elements[2]);
     if(this.arenaMap){this.tickArena(dt,input);return;}
     const active=simulationRunning({playing:this.playing,characterChosen:this.progress.chosen,loading:this.mapLoading||this.dungeonLoading,paused:this.paused});
-    const menuOpen=this.bountyUI.blocking||this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking||this.dungeonUI.blocking||this.npcs.blocking;
+    const menuOpen=this.lore.blocking||this.bountyUI.blocking||this.arenaUI.blocking||this.phase2UI.blocking||this.hub.blocking||this.admin.blocking||this.journal.blocking||this.gacha.blocking||this.dungeonUI.blocking||this.npcs.blocking;
     this.container.classList.toggle('live-menu',active&&menuOpen&&!this.hudEditor.active);
     if(this.hudEditor.active)Object.assign(input,emptyInput());
     if(!active)this.hud.resetInput();
     if(this.channel)this.portalVfx.update(active?dt:0,this.channel.remaining);
     this.progress.tick(active?dt:0);
+    this.unstuckCooldown=Math.max(0,this.unstuckCooldown-(active?dt:0));
+    this.betterGear.update(active?dt:0,active&&!menuOpen&&!this.hudEditor.active);
+    this.questDirectionClock-=dt;
+    if(active&&this.questDirectionClock<=0){const quest=this.quests.active();this.questDirectionTarget=quest?this.questObjective(quest):null;this.questDirectionClock=.75;}
+    this.questArrow.update(dt,this.hero.position,this.progress.waypoint??this.questDirectionTarget,this.terrain.heightAt(this.hero.position.x,this.hero.position.z),active&&this.hero.alive&&!this.dungeon.active&&!this.mapLoading);
     if(active){this.hero.skinCombat.update(dt);this.fieldProgress.tick(dt);this.massacre.update(dt,this.hero.alive);this.activities?.update(dt,this.hero);}
     this.activityScene?.update(active?dt:0,this.hero.position);
     this.fieldHUD.update(dt,this.activities,this.massacre,this.hero,this.camera,this.enemies);
@@ -630,10 +656,12 @@ export class Engine {
     this.previousBossPhase = bossPhase;
     this.sound.update(dt, {region:this.mapInstances.regionId==='dungeon'?'dungeon:'+this.dungeon.definition.id:this.mapInstances.regionId,
       daylight: Math.max(0, Math.sin(this.timeOfDay * Math.PI * 2)),
-      moving: active && this.hero.alive && ['run', 'swim', 'dive'].includes(this.hero.machine.state)
+      moving: active && this.hero.alive && ['run', 'swim', 'dive', 'mounted'].includes(this.hero.machine.state)
         && Math.hypot(input.move.x, input.move.y) > 0.1,
       inWater: this.hero.machine.state === 'swim' || this.hero.machine.state === 'dive',
       boss: active && !!boss,
+      mounted:this.hero.mounted,village:this.mapInstances.regionId==='aurora'&&Math.hypot(this.hero.position.x,this.hero.position.z-18)<28,
+      gathering:this.phase2Gathering.working?this.phase2Gathering.target?.kind:null,
     });
     // Menus no longer short-circuit rendering or any simulation subsystem.
     if(this.playing&&!active){this.updateHUD();return;}
@@ -725,7 +753,7 @@ export class Engine {
     this.setPaused(false);this.container.classList.remove('live-menu');
     this.hub.close();this.phase2UI.close();this.hud.closeMenus();this.dungeonUI.close();this.admin.close();
     this.progress.autoFarm=false;this.autoButton.hidden=true;this.channel=null;this.portalVfx.root.visible=false;this.farmController.reset();
-    this.hud.resetInput();this.mapLoading=true;this.mapLoadingScreen.show('COLISEU IMPERIAL · '+match.size+'×'+match.size);
+    this.hud.resetInput();this.voice.stop();this.lore.close();this.betterGear.clear();this.questArrow.root.visible=false;this.mapLoading=true;this.mapLoadingScreen.show('COLISEU IMPERIAL · '+match.size+'×'+match.size);
     try{
       this.clearField();this.bountyUI.close();this.npcs.dispose();this.portals.dispose();this.enemies.dispose();this.phase2Gathering.dispose();this.phase2Weather.setRegion('dungeon');
       this.combat.clearMapEffects();this.questAutoMove=null;this.questAutoRoute=[];this.setWaypoint(null);
@@ -763,6 +791,8 @@ export class Engine {
       if(previous&&f.lastAction!==previous.action){if(f.lastSkill===null)this.combat.particles.slash(position,facing,definition.color,1);else this.combat.particles.cast(position,facing,definition.skills[f.lastSkill],f.lastSkill);}
       this.arenaVisualState.set(f.id,{action:f.lastAction,hp:f.hp});
     }
+    this.sound.update(dt,{region:'arena',daylight:.4,moving:playable&&Math.hypot(input.move.x,input.move.y)>.1,inWater:false,boss:false,pvp:true});
+    this.questArrow.root.visible=false;this.betterGear.update(0,false);
     this.combat.particles.update(dt,this.camera.position);
     this.arenaMap!.update(dt,match,this.arenaUI.selfId);
     this.sky.visible=true;this.sky.position.copy(this.camera.position);this.stars.visible=false;
@@ -780,11 +810,28 @@ export class Engine {
     return EPIGRAPHS[this.classId][key].description[this.progress.language==='pt'?0:1];
   }
   applyPreferences():void {
+    this.sound.setMix(this.progress.audioMix);this.sound.setEnabled(this.progress.audioEnabled);
+    this.voice.configure(this.progress.language,this.progress.audioMix.voices,this.progress.audioEnabled);
+    this.questTracker?.refresh();
     this.container.style.setProperty('--hud-scale',String(this.progress.hudScale));
     this.container.style.setProperty('--controls-scale',String(this.progress.controlsScale));
     this.container.style.setProperty('--hud-opacity',String(this.progress.hudOpacity));
-    this.hud.setLanguage(this.progress.language);
+    this.hud.setLanguage(this.progress.language);this.hud.setSoundEnabled(this.progress.audioEnabled);
     this.i18n?.set(this.progress.language);this.save();
+  }
+  openLore():void {if(this.arenaMap)return;this.npcs?.close();this.hub.close();this.lore.open();}
+  setAudioPreference(channel:'voices'|'effects'|'music',value:number):void {
+    if(!Number.isFinite(value))return;this.progress.audioMix[channel]=Math.max(0,Math.min(1,value));this.applyPreferences();
+  }
+  unstuck():boolean {
+    const pt=this.progress.language==='pt';
+    if(!this.playing||!this.progress.chosen||!this.hero.alive||this.mapLoading||this.dungeonLoading||this.dungeon.active||this.arenaMap||this.channel||this.recentCombat>0||this.unstuckCooldown>0){this.hud.notify(pt?'Destravar indisponível em combate, instâncias ou recarga.':'Recovery unavailable during combat, instances or cooldown.','warning');return false;}
+    const extent=this.physics.terrainExtent,def=mapDefinition(this.mapInstances.regionId),trail:MapPoint[]=[];
+    for(let z=def.exit.z;z<=60;z+=4)trail.push({x:Math.sin((18+(z-18)/2)*.028)*8,z});
+    const point=nearestSafeTrail(this.hero.position,trail,{extent,free:(x,z)=>this.physics.isPositionFree(x,z,1),height:(x,z)=>this.terrain.heightAt(x,z)});
+    if(!point){this.hud.notify(pt?'Nenhuma trilha segura próxima.':'No safe trail nearby.','warning');return false;}
+    this.hero.teleportTo(new Vector3(point.x,this.terrain.heightAt(point.x,point.z)+1,point.z));this.progress.autoFarm=false;this.questAutoMove=null;this.questAutoRoute=[];this.autoRoute=[];this.hud.resetInput();this.unstuckCooldown=60;this.save();
+    this.hud.notify(pt?'Personagem reposicionado na trilha segura. Recarga: 60s.':'Returned to a safe trail. Cooldown: 60s.','success');return true;
   }
   configureQuality(quality:'low'|'high'):void {this.setQuality(quality);}
   setHudPreference(key:string,value:number):void {
@@ -883,6 +930,7 @@ export class Engine {
       }
     }
     this.save();
+    if(ok&&['potion-buy','crystal-buy','ticket-buy','gem-buy','sell'].includes(action))this.sound.trade(true);
     return ok?(p.language==='pt'?'Concluído.':'Done.'):(p.language==='pt'?'Indisponível: confira moedas, nível, recarga, combate e proximidade da vila/portal.':'Unavailable: check currency, level, cooldown, combat and distance to town/portal.');
   }
   private usePotion(type:'health'|'mana'):boolean {
@@ -980,12 +1028,12 @@ export class Engine {
     this.sound.levelUp();
     this.combat.particles.celebration(this.hero.position,true);
     this.questTracker.refresh();
-    this.hud.notify('🎁 Missão concluída: '+definition.title,'success');
+    this.hud.notify((this.progress.language==='pt'?'🎁 Missão concluída: ':'🎁 Quest complete: ')+questText(definition,this.progress.language).title,'success');
     this.save();
   }
-  private navigateQuest(quest:QuestDefinition):void{
+  private questObjective(quest:QuestDefinition):MapPoint|null{
     const region=REGIONS.find(r=>r.id===quest.region);
-    if(!region)return;
+    if(!region)return null;
     let destination:MapPoint={x:2,z:20};
     if(quest.region!==this.mapInstances.regionId){destination=mapDefinition(this.mapInstances.regionId).exit;}
     else if(quest.goal==='talk')destination={x:2,z:20};
@@ -997,9 +1045,15 @@ export class Engine {
       if(target)destination={x:target.position.x,z:target.position.z};else{const spot=this.enemies.zones.map(z=>z.spot).filter(s=>s.kind===quest.target).sort((a,b)=>Math.hypot(a.x-this.hero.position.x,a.z-this.hero.position.z)-Math.hypot(b.x-this.hero.position.x,b.z-this.hero.position.z))[0];if(spot)destination={x:spot.x,z:spot.z};}
     }
     const fieldPoint=this.activities?.objectivePoint(quest,this.hero.position);if(fieldPoint)destination=fieldPoint;
-    if(quest.goal==='level'||quest.goal==='refine'||quest.goal==='wing'||quest.goal==='mount'){
-      this.hub.open('talents');return;
+    if(this.quests.progressOf(quest).ready&&quest.npcId&&quest.region===this.mapInstances.regionId){
+      const npc=this.npcs.definitions.find(n=>n.id===quest.npcId),home=REGIONS.find(r=>r.id===quest.region);
+      if(npc&&home)destination=npc.id.startsWith('guide-')?{x:2,z:20}:{x:npc.x-home.center.x,z:npc.z-home.center.z+18};
     }
+    return destination;
+  }
+  private navigateQuest(quest:QuestDefinition):void{
+    if(quest.goal==='level'||quest.goal==='refine'||quest.goal==='wing'||quest.goal==='mount'){this.hub.open('talents');return;}
+    const destination=this.questObjective(quest);if(!destination)return;
     this.questAutoMove=destination;
     this.questMoveTimer=0;
     this.questAutoRoute=[];
@@ -1052,6 +1106,7 @@ export class Engine {
       // A fast device resumes immediately; slower Android GPUs never show
       // active enemy waves against temporarily invisible dungeon artwork.
       const instance=this.dungeonInstance;
+      this.voice.stop();this.lore.close();this.betterGear.clear();this.questArrow.root.visible=false;
       this.dungeonLoading=true;
       this.dungeonUI.setLoading('Carregando '+theme.name[0]);
       this.mapLoadingScreen.show(theme.name[0]);
@@ -1101,6 +1156,7 @@ export class Engine {
   private async transitionToMap(id:string):Promise<void>{
     if(this.disposed||this.mapLoading||id===this.mapInstances.regionId)return;
     const previous=this.mapInstances.regionId==='dungeon'?this.dungeonReturnRegion:this.mapInstances.regionId;
+    this.voice.stop();this.lore.close();this.betterGear.clear();this.questArrow.root.visible=false;
     this.mapLoading=true;this.channel=null;this.portalVfx.stop();this.progress.autoFarm=false;this.farmController.reset();
     this.hud.resetInput();this.mapLoadingScreen.show(REGIONS.find(r=>r.id===id)?.name[this.progress.language==='pt'?0:1]??id);
     await new Promise(resolve=>setTimeout(resolve,20));
@@ -1143,12 +1199,14 @@ export class Engine {
     this.npcs=new NPCSystem(this.scene,this.container,(x,z)=>this.terrain.heightAt(x,z),
       this.quests,{
         onContracts:()=>this.openContracts(),
+        onLore:()=>this.openLore(),
+        onArena:()=>this.openPvP(),
       onForge:()=>this.hub.openForge(),
-        onShop:()=>this.hub.open('shop'),
+        onShop:()=>{this.sound.trade();this.hub.open('shop');},
         onTeleport:()=>this.hub.open('map'),
         onQuestAccepted:()=>{this.questTracker.refresh();this.save();},
         onQuestClaimed:questId=>this.claimQuest(questId),
-      },()=>this.progress.language,id);
+      },()=>this.progress.language,id,this.voice);
     this.portals=new WorldPortals(this.scene,this.container,id,
       (x,z)=>this.terrain.heightAt(x,z),
       ()=>({level:this.inventory.level,unlocked:this.progress.unlockedRegions,
@@ -1483,6 +1541,7 @@ export class Engine {
     this.questTracker.dispose();this.npcs.dispose();this.portals.dispose();
     this.dungeonUI.dispose();this.dungeonInstance?.dispose();
     this.mapLoadingScreen.dispose();this.portalVfx.dispose();
+    this.lore.dispose();this.betterGear.dispose();this.questArrow.dispose();this.voice.dispose();
     this.sound.dispose();
     this.companions.dispose?.();
     this.dungeon.dispose(); this.enemies.dispose(); this.hero.dispose(); this.combat.dispose();

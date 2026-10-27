@@ -6,7 +6,7 @@
     "node": ">=22.12.0"
   },
   "type": "module",
-  "description": "Eterna Ninefold — action RPG 3D procedural com nove classes, mundo aberto e Android.",
+  "description": "Eternal Ninefold — action RPG 3D com nove classes, Nove Selos e narrativa sonora PT/EN.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",

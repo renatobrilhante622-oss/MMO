@@ -6,6 +6,21 @@ export interface SoundEnvironment {
   moving: boolean;
   inWater: boolean;
   boss: boolean;
+  mounted?:boolean;
+  village?:boolean;
+  pvp?:boolean;
+  gathering?:'ore'|'herb'|'chest'|null;
+}
+export interface AudioMix {voices:number;effects:number;music:number;}
+export const DEFAULT_AUDIO_MIX:Readonly<AudioMix>=Object.freeze({voices:.85,effects:.8,music:.6});
+export function spatialAudio(source:{x:number;z:number},listener:{x:number;z:number;rightX:number;rightZ:number}):{gain:number;pan:number} {
+  const x=source.x-listener.x,z=source.z-listener.z,distance=Math.hypot(x,z);
+  return {gain:distance>45?0:1/(1+distance*.045),pan:Math.max(-1,Math.min(1,(x*listener.rightX+z*listener.rightZ)/Math.max(4,distance)))};
+}
+export function sanitizeAudioMix(raw:unknown):AudioMix {
+  const record=raw&&typeof raw==='object'?raw as Record<string,unknown>:{};
+  const read=(key:keyof AudioMix)=>typeof record[key]==='number'&&Number.isFinite(record[key])?Math.max(0,Math.min(1,record[key] as number)):DEFAULT_AUDIO_MIX[key];
+  return {voices:read('voices'),effects:read('effects'),music:read('music')};
 }
 
 interface Voice {
@@ -21,6 +36,14 @@ export class SoundEngine {
   private master: GainNode | null = null;
   private effects: GainNode | null = null;
   private ambience: GainNode | null = null;
+  private voiceBus:GainNode|null=null;
+  private mix:AudioMix={...DEFAULT_AUDIO_MIX};
+  private ducked=false;
+  private effortClock=0;
+  private miningClock=0;
+  private musicClock=0;
+  private musicBeat=0;
+  private listener={x:0,z:0,rightX:1,rightZ:0};
   private ambienceFilter: BiquadFilterNode | null = null;
   private ambientOscillators: OscillatorNode[] = [];
   private ambientGains: GainNode[] = [];
@@ -53,9 +76,10 @@ export class SoundEngine {
     this.master = context.createGain();
     this.master.gain.value = this.enabled ? 0.55 : 0;
     this.effects = context.createGain();
-    this.effects.gain.value = 0.62;
+    this.effects.gain.value = this.mix.effects*.78;
     this.ambience = context.createGain();
-    this.ambience.gain.value = 0.14;
+    this.ambience.gain.value = this.mix.music*.23;
+    this.voiceBus=context.createGain();this.voiceBus.gain.value=this.mix.voices;
     const compressor = context.createDynamicsCompressor();
     compressor.threshold.value = -19;
     compressor.knee.value = 12;
@@ -64,6 +88,7 @@ export class SoundEngine {
     compressor.release.value = 0.24;
     this.effects.connect(this.master);
     this.ambience.connect(this.master);
+    this.voiceBus.connect(this.master);
     this.master.connect(compressor);
     compressor.connect(context.destination);
     this.ambientNodes.push(compressor);
@@ -90,6 +115,19 @@ export class SoundEngine {
       this.master.gain.setTargetAtTime(enabled ? 0.55 : 0, this.context.currentTime, 0.08);
     }
   }
+  setMix(raw:unknown):void {
+    this.mix=sanitizeAudioMix(raw);
+    if(!this.context)return;
+    this.effects?.gain.setTargetAtTime(this.mix.effects*.78,this.context.currentTime,.04);
+    this.voiceBus?.gain.setTargetAtTime(this.mix.voices,this.context.currentTime,.04);
+    this.ambience?.gain.setTargetAtTime(this.mix.music*.23*(this.ducked?.3:1),this.context.currentTime,.04);
+  }
+  voiceActivity(active:boolean):void {
+    this.ducked=active;
+    if(this.context)this.ambience?.gain.setTargetAtTime(this.mix.music*.23*(active?.3:1),this.context.currentTime,active?.08:.4);
+  }
+  get voiceChannel():{context:AudioContext;output:AudioNode}|null {return this.context&&this.voiceBus?{context:this.context,output:this.voiceBus}:null;}
+  setListener(position:{x:number;z:number},rightX:number,rightZ:number):void {Object.assign(this.listener,{x:position.x,z:position.z,rightX,rightZ});}
 
   private startAmbience(): void {
     if (!this.context || !this.ambience || !this.noiseBuffer) return;
@@ -157,7 +195,7 @@ export class SoundEngine {
     this.voices.delete(voice);
   }
 
-  private tone(frequency: number, duration: number, volume: number, type: Wave = 'sine', end = frequency, delay = 0, pan = 0): void {
+  private tone(frequency: number, duration: number, volume: number, type: Wave = 'sine', end = frequency, delay = 0, pan = 0, bus:'effects'|'music'='effects'): void {
     if (!this.ready()) return;
     const context = this.context!;
     const time = context.currentTime + Math.max(0, delay);
@@ -173,13 +211,13 @@ export class SoundEngine {
     panner.pan.value = Math.max(-1, Math.min(1, pan));
     oscillator.connect(envelope);
     envelope.connect(panner);
-    panner.connect(this.effects!);
+    panner.connect(bus==='music'?this.ambience!:this.effects!);
     oscillator.start(time);
     oscillator.stop(time + duration + 0.02);
     this.register([oscillator], [envelope, panner]);
   }
 
-  private noise(duration: number, frequency: number, volume: number, type: BiquadFilterType = 'bandpass', end = frequency, delay = 0): void {
+  private noise(duration: number, frequency: number, volume: number, type: BiquadFilterType = 'bandpass', end = frequency, delay = 0, pan = 0): void {
     if (!this.ready() || !this.noiseBuffer) return;
     const context = this.context!;
     const time = context.currentTime + delay;
@@ -191,15 +229,16 @@ export class SoundEngine {
     filter.frequency.exponentialRampToValueAtTime(Math.max(30, end), time + duration);
     filter.Q.value = type === 'bandpass' ? 1.5 : 0.7;
     const envelope = context.createGain();
+    const panner=context.createStereoPanner();panner.pan.value=Math.max(-1,Math.min(1,pan));
     envelope.gain.setValueAtTime(0, time);
     envelope.gain.linearRampToValueAtTime(volume, time + 0.007);
     envelope.gain.exponentialRampToValueAtTime(0.0001, time + duration);
     source.connect(filter);
     filter.connect(envelope);
-    envelope.connect(this.effects!);
+    envelope.connect(panner);panner.connect(this.effects!);
     source.start(time, Math.random() * 0.7);
     source.stop(time + duration + 0.02);
-    this.register([source], [filter, envelope]);
+    this.register([source], [filter, envelope,panner]);
   }
 
   attack(classId: ClassId, combo = 1): void {
@@ -222,11 +261,14 @@ export class SoundEngine {
       default:
         this.noise(heavy ? 0.25 : 0.15, heavy ? 1300 : 3200, 0.22 + combo * 0.02, 'bandpass', 350);
         this.tone(heavy ? 100 : 170, 0.12, 0.08, 'triangle', 65);
+        if(heavy){this.tone(43,.34,.14,'sine',27,.06);this.noise(.22,360,.12,'lowpass',90,.07);}
+        else {this.tone(1620,.08,.025,'triangle',1490,.045);this.tone(2370,.09,.018,'sine',2150,.052);}
         if (combo === 3) this.tone(66, 0.24, 0.18, 'sine', 32, 0.04);
     }
   }
 
   spell(classId: ClassId, index: number): void {
+    this.heroEffort(classId,index);
     const root = ({ berserker: 110, paladin: 293.66, assassin: 220, ranger: 392, elementalist: 329.63, necromancer: 82.4, monk: 440, lanceman: 164.81, warlock: 138.59 } as const)[classId];
     const power = 1 + index * 0.2;
     this.tone(root * 0.5, 0.5 + index * 0.12, 0.12, 'triangle', root * 0.25);
@@ -238,16 +280,22 @@ export class SoundEngine {
     if (classId === 'elementalist' && index === 2) {
       for (let i = 0; i < 5; i++) this.noise(0.045, 6000, 0.35, 'highpass', 1700, i * 0.045);
     }
+    if(classId==='elementalist'&&index===0){for(let n=0;n<6;n++)this.noise(.06,1800+n*350,.07,'highpass',600,n*.05);}
+    if(classId==='elementalist'&&index===1){for(let n=0;n<7;n++)this.tone(1300+n*290,.11,.025,'sine',2100+n*340,n*.024,(n-3)*.15);}
+    if(classId==='necromancer'||classId==='warlock'){
+      this.noise(.6,480,.12,'bandpass',170);this.tone(78,.55,.04,'sawtooth',59,.03);
+    }
     if (index === 3) {
       this.tone(55, 0.7, 0.22, 'sine', 26, 0.1);
       this.noise(0.7, 700, 0.28, 'lowpass', 80, 0.08);
     }
   }
 
-  impact(critical = false): void {
-    this.tone(critical ? 85 : 145, critical ? 0.22 : 0.1, critical ? 0.26 : 0.14, 'sine', 32);
-    this.noise(critical ? 0.2 : 0.09, 1900, critical ? 0.25 : 0.13, 'bandpass', 450);
-    if (critical) this.tone(880, 0.14, 0.06, 'triangle', 510);
+  impact(critical = false,position?:{x:number;z:number}): void {
+    const spatial=position?spatialAudio(position,this.listener):{gain:1,pan:0};if(!spatial.gain)return;
+    this.tone(critical ? 85 : 145, critical ? 0.22 : 0.1, (critical ? 0.26 : 0.14)*spatial.gain, 'sine', 32,0,spatial.pan);
+    this.noise(critical ? 0.2 : 0.09, 1900, (critical ? 0.25 : 0.13)*spatial.gain, 'bandpass', 450,0,spatial.pan);
+    if (critical) this.tone(880, 0.14, 0.06*spatial.gain, 'triangle', 510,0,spatial.pan);
   }
 
   coin(): void {
@@ -267,6 +315,22 @@ export class SoundEngine {
     this.tone(64.2, 1.1, 0.1, 'triangle', 39, 0.05);
     this.noise(1.2, 280, 0.4, 'bandpass', 110);
   }
+  /** Short formant vowels, distinct from narrated speech; routed to the voice slider. */
+  heroEffort(classId:ClassId,skill=0):void {
+    if(!this.ready()||!this.voiceBus||this.effortClock>0)return;
+    this.effortClock=.45;
+    const context=this.context!,time=context.currentTime,duration=skill===3?.33:.19;
+    const fundamental=({berserker:91,paladin:113,assassin:151,ranger:174,elementalist:186,necromancer:102,monk:142,lanceman:122,warlock:119} as const)[classId];
+    const source=context.createOscillator();source.type='sawtooth';
+    source.frequency.setValueAtTime(fundamental*1.22,time);source.frequency.exponentialRampToValueAtTime(fundamental*.77,time+duration);
+    const envelope=context.createGain();envelope.gain.setValueAtTime(0,time);envelope.gain.linearRampToValueAtTime(.4,time+.024);envelope.gain.exponentialRampToValueAtTime(.0001,time+duration);
+    const formants=[{f:skill%2?520:730,q:5,g:.7},{f:skill%2?1200:1090,q:7,g:.28},{f:2440,q:10,g:.08}];
+    const nodes:AudioNode[]=[envelope];
+    formants.forEach(({f,q,g})=>{const filter=context.createBiquadFilter();filter.type='bandpass';filter.frequency.value=f;filter.Q.value=q;const gain=context.createGain();gain.gain.value=g;source.connect(filter);filter.connect(gain);gain.connect(envelope);nodes.push(filter,gain);});
+    envelope.connect(this.voiceBus);source.start(time);source.stop(time+duration+.01);this.register([source],nodes);
+  }
+  trade(purchase=false):void {if(purchase)this.coin();else{this.noise(.11,3600,.055,'highpass',1600);this.noise(.07,2100,.03,'bandpass',400,.06);}}
+  private mining():void {this.tone(1150,.17,.065,'triangle',920);this.tone(2470,.21,.034,'sine',2260,.014);this.noise(.075,2100,.09,'highpass',650);}
 
   private footstep(inWater: boolean): void {
     if (inWater) {
@@ -283,11 +347,16 @@ export class SoundEngine {
     const step = Math.max(0, Math.min(0.1, dt));
     const context = this.context!;
     this.ambienceClock += step;
+    this.effortClock=Math.max(0,this.effortClock-step);
+    this.miningClock-=step;
+    if(environment.gathering==='ore'&&this.miningClock<=0){this.mining();this.miningClock=.48;}
+    if(!environment.gathering)this.miningClock=0;
     this.footstepClock -= step;
     this.birdClock -= step;
     if (environment.moving && this.footstepClock <= 0) {
       this.footstep(environment.inWater);
-      this.footstepClock = environment.inWater ? 0.62 : 0.31;
+      if(environment.mounted&&!environment.inWater){this.tone(78,.09,.13,'triangle',35,.08,-.25);this.tone(95,.08,.1,'triangle',42,.19,.25);}
+      this.footstepClock = environment.inWater ? 0.62 : environment.mounted?.44:.31;
     }
     if (!environment.moving) this.footstepClock = Math.min(this.footstepClock, 0.12);
     if (environment.boss && !this.bossPresent) this.bossRoar();
@@ -295,6 +364,15 @@ export class SoundEngine {
     const day = Math.max(0, Math.min(1, environment.daylight));
     this.ambienceFilter?.frequency.setTargetAtTime(450 + day * 500 + Math.sin(this.ambienceClock * 0.12) * 120, context.currentTime, 1.2);
     const melody=({aurora:[73.416,110,146.832,220],crypt:[55,65.406,82.407,110],highlands:[98,146.832,196,293.665],rift:[41.203,61.735,82.407,123.47],eclipse:[51.913,77.782,103.826,155.56]} as Record<string,number[]>)[environment.region??'aurora']??[49,58.27,73.416,98];
+    this.musicClock-=step;
+    if(this.musicClock<=0){
+      const tense=environment.boss||environment.pvp,bpm=environment.pvp?146:environment.boss?134:environment.village?68:92;
+      this.musicClock=60/bpm/2;
+      const degree=[0,2,1,3,2,1,0,1][this.musicBeat%8],root=melody[degree];
+      this.tone(root*(tense?2:4),tense?.25:.9,tense?.12:.055,'triangle',root*(tense?2:4),0,(degree-1.5)*.2,'music');
+      if(tense&&this.musicBeat%2===0)this.tone(58,.16,.26,'sine',29,0,0,'music');
+      this.musicBeat++;
+    }
     this.ambientGains.forEach((gain, i) => {
       const pulse = 0.7 + Math.sin(this.ambienceClock * (0.07 + i * 0.03) + i) * 0.3;
       gain.gain.setTargetAtTime((environment.boss ? 0.035 : 0.012) * pulse, context.currentTime, 0.7);
@@ -327,6 +405,7 @@ export class SoundEngine {
     for (const node of [...this.ambientNodes, ...this.ambientGains]) node.disconnect();
     this.effects?.disconnect();
     this.ambience?.disconnect();
+    this.voiceBus?.disconnect();
     this.master?.disconnect();
     void this.context?.close().catch(() => undefined);
     this.context = null;

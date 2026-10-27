@@ -25,6 +25,7 @@ import './ui/pr17-hud.css';
 import './ui/pr18-scenes.css';
 import './ui/pr20-world.css';
 import './ui/pr23-compact.css';
+import './ui/ninefold-voice.css';
 
 declare global {interface Window {__ETERNA__?:Engine}}
 const app=document.querySelector<HTMLElement>('#app');
