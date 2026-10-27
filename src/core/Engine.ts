@@ -1,3 +1,4 @@
+import {resolveWeaponVisual} from '../player/WeaponSkinSystem';
 import {catalogSkin,weaponSkin,collectionBonuses,equippedPassives,cosmeticWing} from '../player/SkinCatalog';
 import {FieldProgress,fieldReward} from '../rpg/FieldRewards';
 import {MassacreSystem} from '../combat/MassacreSystem';
@@ -546,7 +547,8 @@ export class Engine {
     this.phase2Rewards.tick(dt,active);
     if(this.phase2UI.isArenaOpen)this.phase2Arena.tick(dt);
     if(active)this.phase2Market.tick(dt);
-    this.phase2Gathering.update(active?dt:0,this.hero.position,active&&!this.dungeon.active);
+    this.phase2Gathering.update(active?dt:0,this.hero.position,active&&this.hero.alive&&!this.hero.mounted&&!this.dungeon.active,this.camera);
+    this.hero.gathering=this.phase2Gathering.working;
     this.phase2Gathering.tickBuffs(active?dt:0);
     this.phase2Weather.update(active?dt:0,this.hero.position);
     this.recentCombat=Math.max(0,this.recentCombat-(active?dt:0));
@@ -862,7 +864,7 @@ export class Engine {
 
       case 'redeem-vip':ok=p.redeemVip(data.id);break;
       case 'redeem':ok=p.redeem(data.id);break;
-      case 'cosmetic':{const skin=catalogSkin(data.id);ok=(!skin?.classId||skin.classId===this.classId)&&p.equipCosmetic(data.id);if(ok)this.refreshStats();break;}
+      case 'cosmetic':{const skin=catalogSkin(data.id);ok=(!skin?.classId||skin.classId===this.classId)&&p.equipCosmetic(data.id);if(ok){this.refreshStats();this.updateJourney(0,false,emptyInput());}break;}
       case 'skin-unlock':ok=p.wardrobe.unlock(data.id,p.owned);if(ok)this.refreshStats();break;
       case 'skin-forge':ok=p.wardrobe.unlock(data.id,p.owned,true);if(ok)this.refreshStats();break;
       case 'gps-monster':{const enemy=this.enemies.enemies.find(e=>e.id===data.id&&e.alive);if(enemy){this.setWaypoint(enemy.position);ok=true;}break;}
@@ -901,7 +903,7 @@ export class Engine {
     hero.rig.weapons.skin(p.equipped.weapon);
     // An explicit collection skin takes priority; otherwise use the
     // newly looted and equipped forgeable GLB item's visualId.
-    const packId=p.equipped.weapon!=='ironweapon'?p.equipped.weapon:(weapon?.visualId??'ironweapon');
+    const packId=resolveWeaponVisual(p.equipped.weapon,weapon?.visualId,this.classId,p.owned);
     hero.rig.weaponPackAppearance(packId);
     if(p.waypoint){const distance=Math.hypot(hero.position.x-p.waypoint.x,hero.position.z-p.waypoint.z),angle=Math.atan2(p.waypoint.x-hero.position.x,-(p.waypoint.z-hero.position.z));this.gpsLabel.hidden=false;this.gpsLabel.innerHTML='<span style="display:inline-block;transform:rotate('+angle+'rad)">↑</span> GPS · '+Math.round(distance)+' m';this.gpsLabel.style.setProperty('--gps-heading',angle+'rad');if(distance<3)this.setWaypoint(null);}else this.gpsLabel.hidden=true;
     if(!active)return;

@@ -1,3 +1,5 @@
+import {normalizeWeaponGrip,weaponGripProfile} from '../player/WeaponGrip';
+import {retainAppearanceAssets} from './AppearanceResources';
 import { Box3, Mesh, Object3D, Vector3 } from 'three';
 import {type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {loadSharedModel} from './ModelResources';
@@ -42,7 +44,7 @@ export const CLASS_EQUIPMENT_MODELS: Record<ClassId, readonly EquipmentVisual[]>
 
 const models = new Map<WeaponModelId, Promise<GLTF>>();
 
-export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
+export async function loadWeaponModel(name: WeaponModelId,classId?:ClassId): Promise<Object3D> {
   let promise=models.get(name);
   if(!promise){
     const url=name.startsWith('relicbase-')?'models/pr22/'+name.slice(10)+'.glb':((name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade')
@@ -58,32 +60,8 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
     void promise.catch(()=>models.delete(name));
   }
   const gltf=await promise;
-  const model=clone(gltf.scene);
+  const model=clone(gltf.scene);retainAppearanceAssets(model);
   model.name='Author-authored CC0 weapon '+name;
-  // Mini Forest bow is modeled at 0.48m. Scale it to a readable 1.56m
-  // ranger longbow before applying inverse scaling for the hand bone.
-  if(name==='longbow')model.scale.multiplyScalar(3.25);
-  // Scale author-created GLBs to a stable silhouette without generating geometry.
-  if(name.startsWith('armory-') || name.startsWith('paladin-shield-') || name==='gladiator-blade'){
-    const bounds=new Box3().setFromObject(model);
-    if(!bounds.isEmpty()){
-      const size=bounds.getSize(new Vector3());
-      const type=name==='gladiator-blade'?'paladin':name.startsWith('paladin-shield-')?'shield':name.split('-')[1];
-      const target=type==='shield'?.84:type==='assassin'?.72:type==='ranger'?1.5:type==='lanceman'?1.9
-        :type==='monk'?.92:type==='necromancer'?1.35:1.45;
-      const longest=Math.max(size.x,size.y,size.z);
-      if(longest>0.001)model.scale.multiplyScalar(Math.max(.04,Math.min(20,target/longest)));
-    }
-  }
-  if(name.startsWith('relicbase-')){
-    let bounds=new Box3().setFromObject(model),size=bounds.getSize(new Vector3());
-    if(size.z>size.y&&size.z>size.x)model.rotation.x=Math.PI/2;
-    else if(size.x>size.y)model.rotation.z=Math.PI/2;
-    model.updateMatrixWorld(true);bounds=new Box3().setFromObject(model);size=bounds.getSize(new Vector3());
-    model.scale.multiplyScalar(1.6/Math.max(.001,size.y));
-    model.updateMatrixWorld(true);bounds=new Box3().setFromObject(model);
-    const c=bounds.getCenter(new Vector3());model.position.set(-c.x,-bounds.min.y-.18,-c.z);
-  }
   model.traverse(object=>{
     if(object instanceof Mesh){
       object.frustumCulled=false;
@@ -91,5 +69,5 @@ export async function loadWeaponModel(name: WeaponModelId): Promise<Object3D> {
       object.receiveShadow=false;
     }
   });
-  return model;
+  return normalizeWeaponGrip(model,weaponGripProfile(name,classId));
 }

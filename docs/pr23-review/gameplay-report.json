@@ -1,0 +1,54 @@
+{
+  "gather": {
+    "id": "aurora-1",
+    "kind": "herb"
+  },
+  "button": {
+    "x": 759.625,
+    "y": 120,
+    "width": 74.375,
+    "height": 28
+  },
+  "head": {
+    "x": 422,
+    "y": 171.346,
+    "expectedX": 422.0000000000015,
+    "expectedY": 171.34589258244762,
+    "width": 62,
+    "height": 6
+  },
+  "completion": {
+    "working": false,
+    "delta": 1,
+    "headHidden": true
+  },
+  "weapon": {
+    "pack": "relic-warlock-3",
+    "children": 1,
+    "saved": "relic-warlock-3"
+  },
+  "mount": {
+    "mounted": true,
+    "parent": true,
+    "clips": 13,
+    "model": "Creature_horse"
+  },
+  "swappedMount": {
+    "mounted": true,
+    "parent": true,
+    "model": "Creature_stag",
+    "clips": 13
+  },
+  "notifications": [
+    {
+      "height": 22,
+      "pointer": "none"
+    },
+    {
+      "height": 22,
+      "pointer": "none"
+    }
+  ],
+  "errors": [],
+  "note": "Actual local Engine interactions, manual bounded frames and renderer stub in the loop, with single real WebGL captures of gathering. Separate preview audit renders real production GLBs for 50 swaps. No online accounts modified."
+}

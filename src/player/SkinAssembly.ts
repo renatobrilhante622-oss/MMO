@@ -1,3 +1,4 @@
+import {shareAppearanceMaterials,releaseAppearance,retainAppearanceAssets} from '../assets/AppearanceResources';
 import {AdditiveBlending,Box3,BufferGeometry,Color,Float32BufferAttribute,Group,Mesh,MeshStandardMaterial,Object3D,Points,ShaderMaterial,TorusGeometry,Vector3} from 'three';
 import {loadSharedModel} from '../assets/ModelResources';
 import {loadWeaponModel,type EquipmentVisual,type WeaponModelId} from '../assets/WeaponGLB';
@@ -41,12 +42,12 @@ export function relicEquipment(s:CatalogSkin):EquipmentVisual[]{
 /** One bounded particle draw call; motion and element-specific sprite shapes execute on the GPU. */
 export class SkinEnergy {
  readonly root=new Group();private readonly material:ShaderMaterial;private readonly points:Points;private rings:Mesh[]=[];
- constructor(readonly element:SkinElement,private power=1,halo=false){
-  const positions=new Float32Array(48*3),seeds=new Float32Array(48);for(let i=0;i<48;i++){positions[i*3]=Math.sin(i*2.399)*.2;positions[i*3+1]=i/48;positions[i*3+2]=Math.cos(i*2.399)*.2;seeds[i]=(i*.6180339)%1;}
+ constructor(readonly element:SkinElement,private power=1,halo=false,emitParticles=true){
+  const positions=new Float32Array(8*3),seeds=new Float32Array(8);for(let i=0;i<8;i++){positions[i*3]=Math.sin(i*2.399)*.2;positions[i*3+1]=i/8;positions[i*3+2]=Math.cos(i*2.399)*.2;seeds[i]=(i*.6180339)%1;}
   const geometry=new BufferGeometry();geometry.setAttribute('position',new Float32BufferAttribute(positions,3));geometry.setAttribute('seed',new Float32BufferAttribute(seeds,1));
   const mode=element==='frost'?0:element==='fire'?1:element==='storm'?2:element==='void'?3:4;
   this.material=new ShaderMaterial({transparent:true,depthWrite:false,blending:AdditiveBlending,uniforms:{time:{value:0},tint:{value:new Color(ELEMENT_COLORS[element])},mode:{value:mode},power:{value:power}},vertexShader:`attribute float seed;uniform float time;uniform float power;varying float life;void main(){float t=fract(seed+time*.23);vec3 p=position;p.y=t*1.3;p.x+=sin(time*3.+seed*40.)*.05;life=sin(t*3.14159);vec4 v=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*v;gl_PointSize=clamp((25.+power*8.)/max(.2,-v.z),1.,12.);}`,fragmentShader:`uniform vec3 tint;uniform float mode;varying float life;void main(){vec2 p=gl_PointCoord*2.-1.;float r=length(p);float a=pow(max(0.,1.-r),2.);if(mode<.5)a=max(a,exp(-abs(p.x)*26.)*exp(-abs(p.y)*5.));else if(mode<1.5)a*=1.4-gl_PointCoord.y;else if(mode<2.5)a=max(a,exp(-abs(p.x+sin(p.y*9.)*.3)*24.));else if(mode<3.5)a*=.7;gl_FragColor=vec4(tint*1.5,a*life*.8);}`});
-  this.points=new Points(geometry,this.material);this.points.frustumCulled=false;this.root.add(this.points);this.root.name='Skin energy '+element;
+  this.points=new Points(geometry,this.material);this.points.frustumCulled=false;if(emitParticles)this.root.add(this.points);this.root.name='Skin energy '+element;
   if(halo){const m=new MeshStandardMaterial({color:ELEMENT_COLORS[element],emissive:ELEMENT_COLORS[element],emissiveIntensity:2,metalness:.6,roughness:.3});for(let i=0;i<2;i++){const ring=new Mesh(new TorusGeometry(.5+i*.16,.012,5,48),m);ring.position.set(0,.9,-.28);ring.rotation.x=i*.6;this.rings.push(ring);this.root.add(ring);}}
  }
  update(time:number):void{this.material.uniforms.time.value=time;this.rings.forEach((r,i)=>{r.rotation.z=time*(i?-.4:.6);r.rotation.y=Math.sin(time*.4)*.35;});}
@@ -59,16 +60,16 @@ export function styleSkinMaterial(material:MeshStandardMaterial,element:SkinElem
  material.onBeforeCompile=shader=>{shader.uniforms.skinTint={value:new Color(color)};shader.fragmentShader='uniform vec3 skinTint;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>\nfloat seam=pow(.5+.5*sin(vViewPosition.y*42.+vViewPosition.x*28.),12.);totalEmissiveRadiance+=skinTint*seam*${element==='fire'?'1.5':'.15'};`);};material.customProgramCacheKey=()=>`pr22-${element}`;
 }
 export async function fittedSkinPart(part:SkinPart,element:SkinElement):Promise<Object3D>{
- const gltf=await loadSharedModel(part.file),mesh=gltf.scene.clone(true),box=new Box3().setFromObject(mesh),size=box.getSize(new Vector3()),center=box.getCenter(new Vector3());mesh.position.sub(center);
+ const gltf=await loadSharedModel(part.file),mesh=gltf.scene.clone(true),box=new Box3().setFromObject(mesh),size=box.getSize(new Vector3()),center=box.getCenter(new Vector3());mesh.position.sub(center);retainAppearanceAssets(mesh);
  const group=new Group();group.add(mesh);group.scale.setScalar(part.size/Math.max(.001,size.x,size.y,size.z));if(part.rotation)group.rotation.set(...part.rotation);
- mesh.traverse(n=>{if(n instanceof Mesh){n.castShadow=false;const mats=(Array.isArray(n.material)?n.material:[n.material]).map(m=>{const copy=m.clone();if(copy instanceof MeshStandardMaterial)styleSkinMaterial(copy,element,part.metal??true);return copy;});n.material=Array.isArray(n.material)?mats:mats[0];}});return group;
+ mesh.traverse(n=>{if(n instanceof Mesh){n.castShadow=false;shareAppearanceMaterials(n,'part-'+element+'-'+(part.metal??true),m=>styleSkinMaterial(m,element,part.metal??true));}});return group;
 }
-export function disposeSkinPart(part:Object3D):void{part.removeFromParent();part.traverse(n=>{if(n instanceof Mesh)for(const m of Array.isArray(n.material)?n.material:[n.material])m.dispose();});}
+export function disposeSkinPart(part:Object3D):void{releaseAppearance(part);}
 export async function decorateRelic(model:Object3D,skin:CatalogSkin):Promise<Object3D[]> {
  const tier=skin.tier??0,parts:Object3D[]=[];if(tier===0)return parts;
  const bounds=new Box3().setFromObject(model),size=bounds.getSize(new Vector3()),height=Math.max(size.x,size.y,size.z),count=tier===5?5:Math.min(3,tier);
  // The new assembly has a different solid-mesh composition at every grade.
  for(let i=0;i<count;i++){const part=await fittedSkinPart({file:tier===4&&i===0?skull:gem,bone:'',at:[0,0,0],size:.13+tier*.035},skin.element);part.position.set((i%2?-1:1)*(.09+i*.045),height*(.42+(i%3)*.11),0);part.rotation.z=(i%2?1:-1)*(.2+i*.22);model.add(part);parts.push(part);}
- if(tier===5||skin.classId==='necromancer'&&tier===1){const echo=await loadWeaponModel(skin.classId==='necromancer'?'armory-necromancer-0':`armory-${skin.classId!}-1`);echo.scale.multiplyScalar(.46);echo.position.set(.25,height*.52,-.08);echo.rotation.z=-.5;echo.traverse(n=>{if(n instanceof Mesh){const ms=(Array.isArray(n.material)?n.material:[n.material]).map(m=>{const c=m.clone();if(c instanceof MeshStandardMaterial)styleSkinMaterial(c,skin.element);return c;});n.material=Array.isArray(n.material)?ms:ms[0];}});model.add(echo);parts.push(echo);}
+ if(tier===5||skin.classId==='necromancer'&&tier===1){const echo=await loadWeaponModel(skin.classId==='necromancer'?'armory-necromancer-0':`armory-${skin.classId!}-1`);echo.scale.multiplyScalar(.46);echo.position.set(.25,height*.52,-.08);echo.rotation.z=-.5;echo.traverse(n=>{if(n instanceof Mesh){shareAppearanceMaterials(n,'echo-'+skin.element,m=>styleSkinMaterial(m,skin.element));}});model.add(echo);parts.push(echo);}
  return parts;
 }

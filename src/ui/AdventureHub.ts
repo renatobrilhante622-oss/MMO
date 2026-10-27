@@ -1,3 +1,4 @@
+import {resolveWeaponVisual} from '../player/WeaponSkinSystem';
 import {COMPLETE_SKIN_CATALOG,catalogSkin,collectionBonuses,SOURCE_NAMES,passiveText} from '../player/SkinCatalog';
 import './skin-catalog.css';
 import {mapDefinition} from '../world/maps/MapDefinitions';
@@ -189,7 +190,7 @@ export class AdventureHub {
     const scrollContainer=this.root.querySelector<HTMLElement>('.adventure-content');if(scrollContainer)scrollContainer.scrollTop=scroll;
     if(this.tab==='map')this.drawMap();
     const previewHost=this.root.querySelector<HTMLElement>('[data-character-preview]');
-    if(previewHost){this.preview??=new CharacterPreview();const equipped=this.game.inventory.items.find(i=>i.id===this.game.inventory.equipment.weapon);const skin=COSMETICS.find(c=>c.id===this.game.progress.equipped.skin)!;this.preview.mount(previewHost,this.game.currentClass,skin.color,equipped?.upgrade??0,this.tab==='collection'?COSMETICS.find(c=>c.id===this.selectedCosmetic):skin,equipped?.visualId);}else this.preview?.hide();
+    if(previewHost){this.preview??=new CharacterPreview();const equipped=this.game.inventory.items.find(i=>i.id===this.game.inventory.equipment.weapon);const skin=COSMETICS.find(c=>c.id===this.game.progress.equipped.skin)!;this.preview.mount(previewHost,this.game.currentClass,skin.color,equipped?.upgrade??0,this.tab==='collection'?COSMETICS.find(c=>c.id===this.selectedCosmetic):skin,resolveWeaponVisual(this.game.progress.equipped.weapon,equipped?.visualId,this.game.currentClass,this.game.progress.owned));}else this.preview?.hide();
     const stage=this.root.querySelector<HTMLElement>('[data-arena-stage]');
     if(stage&&this.online.view){this.arenaStage??=new ArenaStage();this.arenaStage.mount(stage,this.online.view);}else this.arenaStage?.hide();
   }

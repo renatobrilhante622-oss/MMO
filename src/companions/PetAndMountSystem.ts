@@ -25,6 +25,7 @@ export class PetAndMountSystem {
   private readonly mountRig = new CompanionRig(true);
   private readonly trail:MountTrail;
   private mountElement:import('../player/SkinCatalog').SkinElement='steel';
+  private pendingMount=false;
   private appearanceKey = '';
   readonly pet = this.petRig.root;
   readonly mount = this.mountRig.root;
@@ -50,6 +51,9 @@ export class PetAndMountSystem {
 
   setAppearances(pet: Cosmetic, mount: Cosmetic): void {
     if(this.appearanceKey===pet.id+'::'+mount.id)return;
+    const changingMount=this.appearanceKey.split('::')[1]!==mount.id,wanted=this.hero.mounted||this.pendingMount;
+    if(changingMount&&this.hero.mounted)this.dismount();
+    if(changingMount)this.pendingMount=wanted;
     this.appearanceKey=pet.id+'::'+mount.id;
     this.mountElement=catalogSkin(mount.id)?.element??(mount.rarity==='common'?'steel':mount.id.includes('frost')?'frost':mount.id.includes('magma')?'fire':'solar');
     this.petRig.appearance(pet);this.mountRig.appearance(mount);
@@ -82,7 +86,7 @@ export class PetAndMountSystem {
     }
   }
 
-  dismount():void {this.trail.clear();this.hero.mounted=false;this.mount.visible=false;this.syncRider();}
+  dismount():void {this.pendingMount=false;this.trail.clear();this.hero.mounted=false;this.mount.visible=false;this.syncRider();}
 
   toggleMount(): void {
     if (!this.hero.alive) return;
@@ -90,6 +94,8 @@ export class PetAndMountSystem {
       this.events.emit('message', { text: 'Encontre terra firme para invocar sua montaria.', tone: 'warning' });
       return;
     }
+    if(this.pendingMount){this.pendingMount=false;return;}
+    if(!this.hero.mounted&&typeof document!=='undefined'&&!this.mountRig.loadedModel){this.pendingMount=!this.mountRig.failed;this.events.emit('message',{text:this.mountRig.failed?'Montaria indisponível. Tente equipá-la novamente.':'Carregando montaria…',tone:'info'});return;}
     this.hero.mounted = !this.hero.mounted;
     this.mount.visible = this.hero.mounted;
     if(this.hero.mounted)this.hero.skinShield=Math.max(this.hero.skinShield??0,this.hero.skinCombat?.onMount(this.hero.maxHp)??0);
@@ -102,6 +108,7 @@ export class PetAndMountSystem {
 
   update(dt: number, enemies: Combatant[], drops: LootDrop[]): void {
     this.time += dt;
+    if(this.pendingMount){if(!this.hero.alive||this.mountRig.failed)this.pendingMount=false;else if(this.mountRig.loadedModel&&!['swim','dive','climb','slide'].includes(this.hero.machine.state)){this.pendingMount=false;this.toggleMount();}}
     this.trail.update(dt,this.hero.mounted&&this.hero.alive,this.hero.position,this.hero.model.rotation.y,this.mountElement,(x,z)=>this.physics.terrainHeight(x,z));
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
     this.mount.visible = this.hero.mounted && this.hero.alive;

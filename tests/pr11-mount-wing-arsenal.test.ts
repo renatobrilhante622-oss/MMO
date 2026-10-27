@@ -51,7 +51,7 @@ describe('PR11: real mount physics, safe pets, wing rigging, cosmetics and weapo
    expect(hero).toContain("actor.attachAt('spine2',this.wings.root");
    const wings=readFileSync('src/companions/WingsSystem.ts','utf8');
    expect(wings).toContain('const span=(2.9+level*.11)*shape.span');
-   expect(wings).toContain('this.aura.position.set(0,.05,-.18)');
+   expect(hero).toContain('this.skinAura.configure(');
    expect(hero).toContain('this.wings.root.scale.setScalar(1.16)');
  });
  it('bundles five class-themed persisted visual packs per each of nine classes',()=>{

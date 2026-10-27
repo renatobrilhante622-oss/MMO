@@ -10,6 +10,7 @@ import { ArticulatedCharacter } from './ArticulatedCharacter';
 export class HeroController implements Combatant {
   readonly skinCombat=new SkinCombatEffects();
   skinShield=0;
+  gathering=false;
   readonly id = 'hero';
   readonly team = 'hero' as const;
   readonly radius = 0.5;
@@ -315,6 +316,7 @@ export class HeroController implements Combatant {
     const targetRotation = Math.atan2(this.facing.x, this.facing.z);
     const delta = Math.atan2(Math.sin(targetRotation - this.model.rotation.y), Math.cos(targetRotation - this.model.rotation.y));
     this.model.rotation.y += delta * (1 - Math.exp(-dt * 16));
+    this.rig.gathering=this.gathering&&movement<.1;
     this.rig.update(dt, this.time, this.machine.state, movement, this.model.rotation.y, this.hurtTime);
   }
 

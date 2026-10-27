@@ -1,0 +1,1209 @@
+{
+  "audit": {
+    "baseline": {
+      "id": "regalia-solar",
+      "lights": 0,
+      "points": 32,
+      "meshes": 38,
+      "sockets": [
+        {
+          "name": "WeaponHandSocket",
+          "count": 1
+        }
+      ],
+      "attachments": 10,
+      "memory": {
+        "geometries": 29,
+        "textures": 13
+      },
+      "resources": {
+        "materials": 5,
+        "materialLeases": 27,
+        "assets": 29
+      },
+      "frames": 1,
+      "contexts": 1
+    },
+    "after": {
+      "id": "regalia-solar",
+      "lights": 0,
+      "points": 32,
+      "meshes": 38,
+      "sockets": [
+        {
+          "name": "WeaponHandSocket",
+          "count": 1
+        }
+      ],
+      "attachments": 10,
+      "memory": {
+        "geometries": 29,
+        "textures": 13
+      },
+      "resources": {
+        "materials": 5,
+        "materialLeases": 27,
+        "assets": 29
+      },
+      "frames": 1,
+      "contexts": 1
+    },
+    "samples": [
+      {
+        "id": "regalia-solar",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 10,
+        "memory": {
+          "geometries": 29,
+          "textures": 13
+        },
+        "resources": {
+          "materials": 5,
+          "materialLeases": 27,
+          "assets": 29
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 46,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 9,
+        "memory": {
+          "geometries": 25,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 37,
+          "assets": 26
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-4",
+        "lights": 0,
+        "points": 32,
+        "meshes": 26,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 27,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 16,
+          "assets": 24
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-dragon",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 19,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-imperial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 40,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 22,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 18
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 20,
+          "textures": 9
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 16
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-astral",
+        "lights": 0,
+        "points": 32,
+        "meshes": 42,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 7,
+        "memory": {
+          "geometries": 27,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 29,
+          "assets": 23
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-3",
+        "lights": 0,
+        "points": 32,
+        "meshes": 32,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 25,
+          "textures": 10
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 22,
+          "assets": 22
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-fenrir",
+        "lights": 0,
+        "points": 32,
+        "meshes": 36,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 18,
+          "textures": 8
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 14
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-crystal",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 18,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-solar",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 10,
+        "memory": {
+          "geometries": 29,
+          "textures": 13
+        },
+        "resources": {
+          "materials": 5,
+          "materialLeases": 27,
+          "assets": 29
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 46,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 9,
+        "memory": {
+          "geometries": 25,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 37,
+          "assets": 26
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-4",
+        "lights": 0,
+        "points": 32,
+        "meshes": 26,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 27,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 16,
+          "assets": 24
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-dragon",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 19,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-imperial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 40,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 22,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 18
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 20,
+          "textures": 9
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 16
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-astral",
+        "lights": 0,
+        "points": 32,
+        "meshes": 42,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 7,
+        "memory": {
+          "geometries": 27,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 29,
+          "assets": 23
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-3",
+        "lights": 0,
+        "points": 32,
+        "meshes": 32,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 25,
+          "textures": 10
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 22,
+          "assets": 22
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-fenrir",
+        "lights": 0,
+        "points": 32,
+        "meshes": 36,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 18,
+          "textures": 8
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 14
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-crystal",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 18,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-solar",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 10,
+        "memory": {
+          "geometries": 29,
+          "textures": 13
+        },
+        "resources": {
+          "materials": 5,
+          "materialLeases": 27,
+          "assets": 29
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 46,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 9,
+        "memory": {
+          "geometries": 25,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 37,
+          "assets": 26
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-4",
+        "lights": 0,
+        "points": 32,
+        "meshes": 26,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 27,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 16,
+          "assets": 24
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-dragon",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 19,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-imperial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 40,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 22,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 18
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 20,
+          "textures": 9
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 16
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-astral",
+        "lights": 0,
+        "points": 32,
+        "meshes": 42,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 7,
+        "memory": {
+          "geometries": 27,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 29,
+          "assets": 23
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-3",
+        "lights": 0,
+        "points": 32,
+        "meshes": 32,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 25,
+          "textures": 10
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 22,
+          "assets": 22
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-fenrir",
+        "lights": 0,
+        "points": 32,
+        "meshes": 36,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 18,
+          "textures": 8
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 14
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-crystal",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 18,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-solar",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 10,
+        "memory": {
+          "geometries": 29,
+          "textures": 13
+        },
+        "resources": {
+          "materials": 5,
+          "materialLeases": 27,
+          "assets": 29
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 46,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 9,
+        "memory": {
+          "geometries": 25,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 37,
+          "assets": 26
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-4",
+        "lights": 0,
+        "points": 32,
+        "meshes": 26,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 27,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 16,
+          "assets": 24
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-dragon",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 19,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-imperial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 40,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 22,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 18
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 20,
+          "textures": 9
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 16
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-astral",
+        "lights": 0,
+        "points": 32,
+        "meshes": 42,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 7,
+        "memory": {
+          "geometries": 27,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 29,
+          "assets": 23
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-3",
+        "lights": 0,
+        "points": 32,
+        "meshes": 32,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 25,
+          "textures": 10
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 22,
+          "assets": 22
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-fenrir",
+        "lights": 0,
+        "points": 32,
+        "meshes": 36,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 18,
+          "textures": 8
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 14
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-crystal",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 18,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-solar",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 10,
+        "memory": {
+          "geometries": 29,
+          "textures": 13
+        },
+        "resources": {
+          "materials": 5,
+          "materialLeases": 27,
+          "assets": 29
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 46,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 9,
+        "memory": {
+          "geometries": 25,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 37,
+          "assets": 26
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-4",
+        "lights": 0,
+        "points": 32,
+        "meshes": 26,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 27,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 3,
+          "materialLeases": 16,
+          "assets": 24
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-dragon",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 19,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-imperial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 40,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 22,
+          "textures": 12
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 18
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-glacial",
+        "lights": 0,
+        "points": 32,
+        "meshes": 38,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 20,
+          "textures": 9
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 16
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "regalia-astral",
+        "lights": 0,
+        "points": 32,
+        "meshes": 42,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 7,
+        "memory": {
+          "geometries": 27,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 29,
+          "assets": 23
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "relic-warlock-3",
+        "lights": 0,
+        "points": 32,
+        "meshes": 32,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 25,
+          "textures": 10
+        },
+        "resources": {
+          "materials": 2,
+          "materialLeases": 22,
+          "assets": 22
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "steed-fenrir",
+        "lights": 0,
+        "points": 32,
+        "meshes": 36,
+        "sockets": [],
+        "attachments": 0,
+        "memory": {
+          "geometries": 18,
+          "textures": 8
+        },
+        "resources": {
+          "materials": 0,
+          "materialLeases": 0,
+          "assets": 14
+        },
+        "frames": 1,
+        "contexts": 1
+      },
+      {
+        "id": "plume-crystal",
+        "lights": 0,
+        "points": 32,
+        "meshes": 13,
+        "sockets": [
+          {
+            "name": "WeaponHandSocket",
+            "count": 1
+          }
+        ],
+        "attachments": 2,
+        "memory": {
+          "geometries": 18,
+          "textures": 11
+        },
+        "resources": {
+          "materials": 1,
+          "materialLeases": 1,
+          "assets": 15
+        },
+        "frames": 1,
+        "contexts": 1
+      }
+    ],
+    "stable": true,
+    "hidden": {
+      "frames": 0,
+      "actors": 0,
+      "resources": {
+        "materials": 0,
+        "materialLeases": 0,
+        "assets": 0
+      }
+    },
+    "requests": [
+      "http://127.0.0.1:5173/models/optimized/KayKit_Mage.glb",
+      "http://127.0.0.1:5173/models/optimized/KayKit_Knight.glb",
+      "http://127.0.0.1:5173/models/pr22/SolarHelmet.glb",
+      "http://127.0.0.1:5173/models/optimized/KayKit_Weapon_shield_round.glb",
+      "http://127.0.0.1:5173/models/optimized/equipment/CC0_crystal_gems.glb",
+      "http://127.0.0.1:5173/models/optimized/KayKit_Weapon_wand.glb",
+      "http://127.0.0.1:5173/models/pr22/ShadowHelmet.glb",
+      "http://127.0.0.1:5173/models/pr22/ClericStaff.glb",
+      "http://127.0.0.1:5173/models/pr18/Skull.glb",
+      "http://127.0.0.1:5173/models/optimized/pr17-source/ImperialHorse.glb",
+      "http://127.0.0.1:5173/models/optimized/weapon-packs/Kenney_dungeon_shield_round.glb",
+      "http://127.0.0.1:5173/models/pr22/ImperialStag.glb",
+      "http://127.0.0.1:5173/models/pr22/WizardStaff.glb",
+      "http://127.0.0.1:5173/models/optimized/creatures/Creature_wolf.glb"
+    ],
+    "contexts": 1,
+    "frames": 1
+  },
+  "errors": [],
+  "note": "Production GLBs/materials and actual WebGL renderer in SwiftShader. Fifty awaited swaps after warming ten appearances; controlled RAF scheduler verifies one pending loop. Not an Android FPS benchmark."
+}
