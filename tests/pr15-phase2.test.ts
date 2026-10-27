@@ -106,7 +106,7 @@ describe('PR15 — Phase 2 isolated local systems',()=>{
   expect(code).toContain('new Points(');expect(code).toContain('new PointLight(');
   const gather=readFileSync('src/world/GatheringSystem.ts','utf8');
   expect(gather).toContain('new InstancedMesh(');
-  expect(gather).toContain('Math.min(2,this.working.progress+Math.max(0,dt))');
+  expect(gather).toContain('GatheringTask.DURATION');
   expect(gather).toContain('GATHER_RECIPES');
  });
  it('adds the same interactive 3D hero viewer to legacy Profile',()=>{

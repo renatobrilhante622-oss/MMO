@@ -69,8 +69,8 @@ describe('PR13 mobile visual regression contracts',()=>{
     const wings=read('src/companions/WingsSystem.ts');
     expect(wings).toContain('for(let layer=0;layer<shape.layers;layer++)');
     expect(wings).toContain('for(const sign of [-1,1])');
-    expect(wings).toContain('new Points(');
-    expect(wings).toContain('sizeAttenuation:true');
+    expect(read('src/companions/RarityAura.ts')).toContain('extends Points');
+    expect(wings).not.toContain('new Points(');
     expect(WING_STYLES).toEqual(['necrotic','celestial','magma','glacial','solar','astral']);
     const actor=read('src/player/ArticulatedCharacter.ts');
     expect(actor).toContain('this.wings.root.scale.setScalar(1.16)');

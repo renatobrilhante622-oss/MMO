@@ -634,7 +634,7 @@ export class MobileHUD {
 
   notify(text: string, tone: 'info' | 'success' | 'warning' = 'info'): void {
     if (!text) return;
-    while (this.toastNodes.length >= 4) this.toastNodes.shift()?.remove();
+    while (this.toastNodes.length >= 2) this.toastNodes.shift()?.remove();
     const node = document.createElement('div');
     node.className = `game-toast ${tone}`;
     const mark = document.createElement('span'); mark.textContent = tone === 'success' ? '✦' : tone === 'warning' ? '!' : '◇';
@@ -642,7 +642,7 @@ export class MobileHUD {
     node.append(mark, label);
     this.el.toasts.append(node);
     this.toastNodes.push(node);
-    this.later(() => { node.classList.add('leaving'); this.later(() => { node.remove(); const index = this.toastNodes.indexOf(node); if (index >= 0) this.toastNodes.splice(index, 1); }, 250); }, 3700);
+    this.later(() => { node.classList.add('leaving'); this.later(() => { node.remove(); const index = this.toastNodes.indexOf(node); if (index >= 0) this.toastNodes.splice(index, 1); }, 250); }, 2400);
   }
 
   dispose(): void {

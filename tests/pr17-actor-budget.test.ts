@@ -69,6 +69,6 @@ describe('PR17 authored actor optimization',()=>{
  it('preserves class-specific hood/cloth and caps rarity overdraw',()=>{
   for(const id of ['elementalist','warlock','necromancer','assassin','ranger'] as const){expect(SKIN_IDENTITIES[id].helmet).toBe(false);expect(SKIN_IDENTITIES[id].metallic).toBe(false);}
   expect(SKIN_IDENTITIES.paladin.helmet).toBe(true);
-  const aura=new RarityAura();aura.configure(2,0xff0000);expect(aura.visible).toBe(false);aura.configure(5,0xff0000);expect(aura.geometry.drawRange.count).toBe(56);expect(aura.frustumCulled).toBe(true);aura.dispose();
+  const aura=new RarityAura();aura.configure(2,0xff0000);expect(aura.visible).toBe(false);aura.configure(5,0xff0000);expect(aura.geometry.drawRange.count).toBe(32);expect(aura.frustumCulled).toBe(true);aura.dispose();
  });
 });

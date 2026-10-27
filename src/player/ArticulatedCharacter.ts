@@ -1,3 +1,5 @@
+import {WeaponSkinSystem} from './WeaponSkinSystem';
+import {shareAppearanceMaterials} from '../assets/AppearanceResources';
 import {catalogSkin,weaponSkin} from './SkinCatalog';
 import {relicEquipment,decorateRelic,outfitParts,fittedSkinPart,disposeSkinPart,styleSkinMaterial,SkinEnergy} from './SkinAssembly';
 import {loadSharedModel} from '../assets/ModelResources';
@@ -175,7 +177,9 @@ export class ArticulatedCharacter {
   private unregisterVisibility?:()=>void;
   private readonly skinAura=new RarityAura(.6);
   private skinKey='';
+  gathering=false;
   private weaponPackId='ironweapon';
+  private handSockets?:WeaponSkinSystem;
   private outfitEnergy?:SkinEnergy;
   private weaponEnergy:SkinEnergy[]=[];
   private relicParts:Object3D[]=[];
@@ -409,6 +413,7 @@ export class ArticulatedCharacter {
     if(this.imported?.name===name){this.imported.setAttackWeapon(definition.weapon);this.imported.setClassPalette(CLASS_IDENTITIES[definition.id].tint);this.attachImportedGear();return;}
     this.clearGlbWeapons();
     this.clearImportedSkin();
+    this.handSockets?.dispose();this.handSockets=undefined;
     this.imported?.dispose();
     const actor = new AnimatedGLB(name, 1.9, () => {
       if (this.imported !== actor) return;
@@ -427,8 +432,8 @@ export class ArticulatedCharacter {
   private clearGlbWeapons():void {
     this.glbWeaponGeneration++;
     this.weaponEnergy.forEach(e=>e.dispose());this.weaponEnergy=[];
-    this.relicParts.forEach(disposeSkinPart);this.relicParts=[];
-    for(const model of this.glbWeapons)model.removeFromParent();
+    this.relicParts=[];
+    this.handSockets?.clear();
     this.glbWeapons.length=0;
     for(const material of this.weaponPackMaterials)material.dispose();
     this.weaponPackMaterials.clear();
@@ -461,6 +466,8 @@ export class ArticulatedCharacter {
     actor.setClassPalette(CLASS_IDENTITIES[this.definition.id].tint);
     actor.setCosmeticPalette(this.skinTone,this.skinTier);
     this.clearGlbWeapons();
+    this.handSockets??=new WeaponSkinSystem((b,o,p)=>actor.attachAt(b,o,p),o=>actor.detachAttachment(o),disposeSkinPart);
+    const socketToken=this.handSockets.begin(),sockets=this.handSockets;
     const version=this.glbWeaponGeneration;
     const relic=weaponSkin(this.weaponPackId,this.definition.id);
     const equipped=weaponPackForClass(this.weaponPackId,this.definition.id);
@@ -469,41 +476,34 @@ export class ArticulatedCharacter {
          ...CLASS_EQUIPMENT_MODELS[this.definition.id].filter(g=>g.bone!=='righthand')]
       :null;
     for(const gear of relic?relicEquipment(relic):gladiatorGear??equipped?.weapons??CLASS_EQUIPMENT_MODELS[this.definition.id]){
-      void loadWeaponModel(gear.model).then(async imported=>{
+      void loadWeaponModel(gear.model,this.definition.id).then(async imported=>{
         const model=new Group();model.add(imported);
-        if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready)return;
+        try {
+        if(this.imported!==actor||version!==this.glbWeaponGeneration||!actor.ready){disposeSkinPart(model);return;}
         const offset=gear.offset??[0,0,0];
         // KayKit hand sockets point down at rest; reverse the staff's long
         // axis so its focus is above the grip instead of buried in the ground.
-        if(gear.model==='staff'||gear.model==='wand'||gear.model.startsWith('relicbase-')&&['elementalist','warlock','necromancer','monk'].includes(this.definition.id))model.rotation.z+=Math.PI;
+        if(gear.bone==='righthand'||gear.bone==='lefthand')model.rotation.z=Math.PI;
         if(equipped||relic){
           model.scale.multiplyScalar(1+(relic?.tier??equipped!.tier)*.035);
           model.traverse(object=>{
             if(!(object instanceof Mesh))return;
-            const originals=Array.isArray(object.material)?object.material:[object.material];
-            const tinted=originals.map(m=>{
-              if(!(m instanceof MeshStandardMaterial))return m;
-              const mat=m.clone();
-              this.weaponPackMaterials.add(mat);
-              mat.color.lerp(new Color(relic?.color??equipped!.color),Math.min(.22,(relic?.tier??equipped!.tier)*.052));
-              mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+(relic?.tier??equipped!.tier)*.08));
-              mat.roughness=Math.max(.26,mat.roughness-(relic?.tier??equipped!.tier)*.065);
-              mat.emissive.setHex(relic?.color??equipped!.color);
-              mat.emissiveIntensity=(relic?.tier??equipped!.tier)*.13;
+            shareAppearanceMaterials(object,'weapon-'+(relic?.id??equipped!.id),mat=>{
+              const tier=relic?.tier??equipped!.tier,color=relic?.color??equipped!.color;
+              mat.color.lerp(new Color(color),Math.min(.22,tier*.052));mat.metalness=Math.min(.75,Math.max(.1,mat.metalness+tier*.08));mat.roughness=Math.max(.26,mat.roughness-tier*.065);mat.emissive.setHex(color);mat.emissiveIntensity=tier*.13;
               if(relic)styleSkinMaterial(mat,relic.element);
-              return mat;
             });
-            object.material=Array.isArray(object.material)?tinted:tinted[0];
           });
         }
         if(relic&&gear.bone!=='spine2'&&!gear.model.startsWith('paladin-shield-')){
           const parts=await decorateRelic(model,relic);
-          if(this.imported!==actor||version!==this.glbWeaponGeneration){parts.forEach(disposeSkinPart);return;}
+          if(this.imported!==actor||version!==this.glbWeaponGeneration){disposeSkinPart(model);return;}
           this.relicParts.push(...parts);
-          if((relic.tier??0)>=2){const energy=new SkinEnergy(relic.element,relic.tier);energy.root.scale.setScalar(.8);model.add(energy.root);this.weaponEnergy.push(energy);}
+          if((relic.tier??0)>=2){const energy=new SkinEnergy(relic.element,relic.tier,false,false);energy.root.scale.setScalar(.8);model.add(energy.root);this.weaponEnergy.push(energy);}
         }
-        if(actor.attachAt(gear.bone,model,new Vector3(...offset)))this.glbWeapons.push(model);
+        if(sockets.install(socketToken,gear.bone,model,new Vector3(...offset)))this.glbWeapons.push(model);
         else console.warn('KayKit skeleton missing attachment socket:',gear.bone,actor.name);
+        }catch(error){disposeSkinPart(model);console.warn('Cannot prepare equipped weapon:',gear.model,error);}
       }).catch(error=>console.warn('Cannot load KayKit weapon:',gear.model,error));
     }
   }
@@ -511,12 +511,12 @@ export class ArticulatedCharacter {
   private clearImportedSkin():void {
     this.skinVisualVersion++;
     this.outfitEnergy?.dispose();this.outfitEnergy=undefined;
-    for(const object of this.importedSkinParts)object.removeFromParent();
+    for(const object of this.importedSkinParts){this.imported?.detachAttachment(object);disposeSkinPart(object);}
     this.importedSkinParts.length=0;
     for(const mat of this.importedSkinMaterials)mat.dispose();
     this.importedSkinMaterials.clear();
     // Restore the cape to its original simulation anchor when the GLB changes.
-    if(this.cape?.mesh&&this.cape.mesh.parent!==this.torso)this.torso.add(this.cape.mesh);
+    if(this.cape?.mesh&&this.cape.mesh.parent!==this.torso){this.imported?.detachAttachment(this.cape.mesh);this.torso.add(this.cape.mesh);}
   }
   private updateImportedSkin(actor:AnimatedGLB):void {
     this.clearImportedSkin();
@@ -534,8 +534,8 @@ export class ArticulatedCharacter {
       actor.root.add(this.cape.mesh);this.cape.mesh.position.set(0,.84,-.34);
     }
     const attach=(source:Object3D,bone:'head'|'spine2',offset:Vector3,target:number,tilt:number)=>{
-      if(this.imported!==actor||this.skinVisualVersion!==revision)return;
-      const bounds=new Box3().setFromObject(source);if(bounds.isEmpty())return;
+      if(this.imported!==actor||this.skinVisualVersion!==revision){disposeSkinPart(source);return;}
+      const bounds=new Box3().setFromObject(source);if(bounds.isEmpty()){disposeSkinPart(source);return;}
       const center=bounds.getCenter(new Vector3()),extent=bounds.getSize(new Vector3());
       const parent=new Group();source.position.sub(center);
       parent.add(source);
@@ -563,12 +563,12 @@ export class ArticulatedCharacter {
     if(outfit?.body){
       this.cape.mesh.material.color.setHex(outfit.id==='regalia-solar'?0x8d1028:outfit.id==='regalia-reaper'?0x120e1b:outfit.id==='regalia-glacial'?0x84c7e8:outfit.color);
       this.cape.mesh.scale.set(outfit.id==='regalia-titan'?1.65:1.25,outfit.id==='regalia-reaper'?1.55:1.3,1);
-      this.outfitEnergy=new SkinEnergy(outfit.element,3,['regalia-astral','regalia-void','regalia-solar'].includes(outfit.id));
+      this.outfitEnergy=new SkinEnergy(outfit.element,3,['regalia-astral','regalia-void','regalia-solar'].includes(outfit.id),false);
       this.root.add(this.outfitEnergy.root);
       for(const part of outfitParts(outfit.id))void fittedSkinPart(part,outfit.element).then(model=>{
         if(this.imported!==actor||this.skinVisualVersion!==revision){disposeSkinPart(model);return;}
         if(!actor.attachAt(part.bone,model,new Vector3(...part.at))){disposeSkinPart(model);return;}
-        this.importedSkinParts.push(model);model.traverse(n=>{if(n instanceof Mesh)for(const m of Array.isArray(n.material)?n.material:[n.material])if(m instanceof MeshStandardMaterial)this.importedSkinMaterials.add(m);});
+        this.importedSkinParts.push(model);
         this.root.userData.characterRevision=(this.root.userData.characterRevision??0)+1;
       }).catch(error=>console.warn('Outfit attachment unavailable',part.file,error));
       return;
@@ -615,7 +615,7 @@ export class ArticulatedCharacter {
     this.skinGeometry.traverse(o=>{if(o instanceof Mesh){o.geometry.dispose();(o.material as MeshStandardMaterial).dispose();}});this.skinGeometry.clear();
     this.skinAura.configure(rarity,color);
     this.replaceImportedModel(this.definition);
-    if(this.imported?.ready){this.updateImportedSkin(this.imported);this.styleSilhouette(this.definition);}
+    if(this.imported?.ready)this.styleSilhouette(this.definition);
     // Runtime cosmetic VFX stay shader/particle-based; no sculpted mesh horns or spheres.
     if(typeof document!=='undefined'||id==='traveler')return;
     const mat=new MeshStandardMaterial({color,metalness:.55,roughness:.4,emissive:color,emissiveIntensity:.18});
@@ -854,8 +854,9 @@ export class ArticulatedCharacter {
   update(dt: number, time: number, state: HeroState, movement: number, heading: number, hurt: number): void {
     if(!actorIsVisible(this.root))return;
     dt = MathUtils.clamp(dt, 0, .05);
+    const relic=weaponSkin(this.weaponPackId,this.definition.id);this.skinAura.configure(Math.max(this.skinTier,this.wings.activeTier,relic?(relic.tier??0)+1:0),this.wings.root.visible?this.wings.fxColor:relic?.color??this.skinTone);
     this.outfitEnergy?.update(time);this.weaponEnergy.forEach(e=>e.update(time));
-    this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted',state);
+    this.imported?.update(dt,state==='mounted'?0:movement,state==='mounted',this.gathering?'gather':state);
     this.imported?.setHitFlash(hurt>0?Math.min(1,hurt*4):0);
     // Browser actors use authored clip animation. Do not simulate ~100 hidden
     // legacy joints/cloth constraints when no visible cloth is attached.
@@ -896,9 +897,11 @@ export class ArticulatedCharacter {
     this.unregisterVisibility?.();
     this.clearImportedSkin();
     this.clearGlbWeapons();
+    this.handSockets?.dispose();this.handSockets=undefined;
     this.imported?.dispose();this.wings.dispose();this.skinAura.dispose();
     this.weapons.dispose();
-    const geometries = new Set<BufferGeometry>();
+    const geometries = new Set<BufferGeometry>([this.cape.mesh.geometry]);
+    this.materials.add(this.cape.mesh.material);
     this.root.traverse(object => {
       if (object instanceof Mesh) {
         if(!object.geometry.userData.sharedActorGeometry)geometries.add(object.geometry);

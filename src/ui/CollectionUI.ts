@@ -57,7 +57,7 @@ export class CollectionPreviewStage {
       const rim=new Mesh(new TorusGeometry(radius,.014,5,64),this.accent);rim.rotation.x=-Math.PI/2;rim.position.y=y;this.root.add(rim);
     }
     const positions:number[]=[],seeds:number[]=[];
-    for(let i=0;i<80;i++){
+    for(let i=0;i<16;i++){
       const angle=i*2.3999632297,radius=.55+(i%19)/19*.82;
       positions.push(Math.cos(angle)*radius,0,Math.sin(angle)*radius);seeds.push((i*.61803398875)%1);
     }

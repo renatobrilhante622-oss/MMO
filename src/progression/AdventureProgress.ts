@@ -33,7 +33,7 @@ export const COSMETICS:readonly Cosmetic[]=[
   {id:'spiritwolf',name:['Espírito Guardião','Guardian Spirit'],type:'pet',rarity:'epic',color:0xb593ff},
   {id:'sunwolf',name:['Lobo Solar','Sun Wolf'],type:'pet',rarity:'legendary',color:0xffc060},
   {id:'moonwolf',name:['Espírito Lunar','Moon Spirit'],type:'pet',rarity:'mythic',color:0xff90cd},
-  {id:'horse',name:['Cavalo de Viagem','Travel Horse'],type:'mount',rarity:'common',color:0x997454},
+  {id:'horse',name:['Corcel de Guerra Base','Base Warhorse'],type:'mount',rarity:'common',color:0x997454},
   {id:'stag',name:['Cervo do Bosque','Woodland Stag'],type:'mount',rarity:'uncommon',color:0x83ce99},
   {id:'frosthorse',name:['Corcel Glacial','Frost Courser'],type:'mount',rarity:'rare',color:0x80cbff},
   {id:'nighthorse',name:['Lobo Gigante','Dire Wolf'],type:'mount',rarity:'epic',color:0xb88aff},

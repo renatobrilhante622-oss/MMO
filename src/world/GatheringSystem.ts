@@ -1,6 +1,8 @@
+import {loadSharedModel} from '../assets/ModelResources';
+import {GatheringTask} from './GatheringTask';
 import {mapDefinition} from './maps/MapDefinitions';
 import {Box3,Group,InstancedMesh,Matrix4,Mesh,MeshStandardMaterial,Quaternion,Scene,Vector3} from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type {PerspectiveCamera} from 'three';
 export type GatherKind='ore'|'herb'|'chest';
 export interface GatherNode{id:string;kind:GatherKind;x:number;z:number;cooldown:number;}
 export interface GatheringSave{stock:Record<string,number>;exhausted:Record<string,number>;crafts:Record<string,number>;buffs:Record<string,number>;elapsed:number;}
@@ -16,7 +18,6 @@ const models:Record<GatherKind,string>={
  herb:'models/gathering/Kenney_Flower_Astral.glb',
  chest:'models/dungeon/Kenney_Dungeon_chest.glb',
 };
-const loader=new GLTFLoader();
 function rng(seed:number):()=>number{let n=seed>>>0;return()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};}
 export class GatheringSystem{
  readonly root=new Group();
@@ -24,7 +25,12 @@ export class GatheringSystem{
  stock:Record<GatherKind,number>={ore:0,herb:0,chest:0};
  crafts:Record<string,number>={refine:0,key:0};
  buffs:Record<string,number>={damage:0,xp:0,speed:0};
- private working:{id:string;progress:number}|null=null;
+ private readonly task=new GatheringTask();
+ private readonly lastPosition=new Vector3();
+ private readonly projected=new Vector3();
+ private camera?:PerspectiveCamera;
+ private hasPosition=false;
+ get working():boolean{return !!this.task.id;}
  private exhausted=new Map<string,number>();
  private elapsed=0;
  private destroyed=false;
@@ -33,7 +39,7 @@ export class GatheringSystem{
  private readonly label=document.createElement('div');
  private readonly action=document.createElement('button');
  private readonly bar=document.createElement('progress');
- private readonly subtitle=document.createElement('small');
+ private readonly progressLabel=document.createElement('div');
  constructor(private scene:Scene,private host:HTMLElement,readonly regionId:string,private heightAt:(x:number,z:number)=>number,private onCollect:(kind:GatherKind)=>void){
    this.root.name='Five-region authored gathering nodes';
    this.scene.add(this.root);
@@ -50,14 +56,15 @@ export class GatheringSystem{
    }
    this.label.className='gather-context';this.label.hidden=true;
    this.action.type='button';this.action.className='gather-action';this.action.onclick=()=>this.start();
-   this.bar.max=2;this.bar.value=0;this.subtitle.textContent='2s · mantenha-se próximo';
-   this.label.append(this.action,this.bar,this.subtitle);host.append(this.label);
+   this.bar.max=GatheringTask.DURATION;this.bar.value=0;this.bar.setAttribute('aria-label','Coletando · 1,5s');
+   this.progressLabel.className='gather-head-progress';this.progressLabel.hidden=true;this.progressLabel.append(this.bar);
+   this.label.append(this.action);host.append(this.label,this.progressLabel);
    if(typeof document!=='undefined'&&regionId!=='dungeon')void this.build();
  }
  private async build():Promise<void>{
   for(const kind of ['ore','herb','chest'] as GatherKind[]){
    try{
-    const gltf=await loader.loadAsync(import.meta.env.BASE_URL+models[kind]);
+    const gltf=await loadSharedModel(models[kind]);
     if(this.destroyed)return;
     gltf.scene.updateMatrixWorld(true);
     const bounds=new Box3().setFromObject(gltf.scene);if(bounds.isEmpty())continue;
@@ -66,7 +73,7 @@ export class GatheringSystem{
     gltf.scene.traverse(object=>{
      if(!(object instanceof Mesh))return;
      const inst=new InstancedMesh(object.geometry,object.material,nodes.length);
-     inst.name=kind+' CC0 gather props';inst.castShadow=true;inst.receiveShadow=true;inst.frustumCulled=false;
+     inst.name=kind+' CC0 gather props';inst.castShadow=false;inst.receiveShadow=true;inst.frustumCulled=false;
      nodes.forEach((node,i)=>{
       const base=new Matrix4().compose(new Vector3(node.x,this.heightAt(node.x,node.z),node.z),new Quaternion(),new Vector3(scale,scale,scale))
        .multiply(new Matrix4().makeTranslation(-bounds.getCenter(new Vector3()).x,-bounds.min.y,-bounds.getCenter(new Vector3()).z));
@@ -88,8 +95,9 @@ export class GatheringSystem{
    part.mesh.instanceMatrix.needsUpdate=true;
   }
  }
- get progress():number{return this.working?.progress??0;}
- get target():GatherNode|null{return this.nodes.find(n=>n.id===this.working?.id)??null;}
+ get progress():number{return this.task.elapsed;}
+ get target():GatherNode|null{return this.nodes.find(n=>n.id===this.task.id)??null;}
+
  closest(position:Vector3):GatherNode|null{
   let result:GatherNode|null=null,dist=3.4;
   for(const n of this.nodes){if((this.exhausted.get(n.id)??0)>this.elapsed)continue;
@@ -97,37 +105,35 @@ export class GatheringSystem{
   return result;
  }
  start():boolean{
-  const id=this.label.dataset.id;
-  if(!id||!this.nodes.some(n=>n.id===id)||((this.exhausted.get(id)??0)>this.elapsed))return false;
-  if(this.nodes.find(n=>n.id===id)?.kind==='chest'&&(this.crafts.key??0)<1)return false;
-  this.working={id,progress:0};return true;
+  if(!this.hasPosition||this.destroyed||this.task.id)return false;const node=this.closest(this.lastPosition);
+  if(!node||node.kind==='chest'&&this.crafts.key<1)return false;
+  if(!this.task.start(node.id,this.lastPosition.x,this.lastPosition.z))return false;
+  this.label.hidden=true;this.renderHead();return true;
  }
- update(dt:number,position:Vector3,active:boolean):void{
-  this.elapsed+=Math.max(0,dt);
-  for(const node of this.nodes)if((this.exhausted.get(node.id)??0)>0&&(this.exhausted.get(node.id)??0)<=this.elapsed){
-   this.exhausted.delete(node.id);this.showNode(node.id,true);
-  }
-  if(!active){this.label.hidden=true;this.working=null;return;}
-  const nearest=this.closest(position);
-  this.label.hidden=!nearest;
-  if(nearest){
-   this.label.dataset.id=nearest.id;
-   this.action.disabled=nearest.kind==='chest'&&this.crafts.key<1;
-   this.subtitle.textContent=nearest.kind==='chest'&&this.crafts.key<1?'Fabricar Chave Ancestral na aba Coleta':'2s · mantenha-se próximo';
-   this.action.textContent=nearest.kind==='ore'?'⛏️ Minerar Cristal Arcano':nearest.kind==='herb'?'🌿 Coletar Flor Astral':'🗝️ Abrir Baú Antigo';
-  }
-  if(!this.working){this.bar.value=0;return;}
-  const node=this.nodes.find(n=>n.id===this.working!.id);
-  if(!node||!nearest||nearest.id!==node.id){this.working=null;return;}
-  this.working.progress=Math.min(2,this.working.progress+Math.max(0,dt));
-  this.bar.value=this.working.progress;this.action.disabled=true;
-  if(this.working.progress>=2){
-    if(node.kind==='chest'){if((this.crafts.key??0)<1){this.working=null;return;}this.crafts.key--;}
-    this.exhausted.set(node.id,this.elapsed+node.cooldown);this.showNode(node.id,false);
-    this.stock[node.kind]=Math.min(99999,this.stock[node.kind]+1);
-    this.onCollect(node.kind);this.working=null;this.action.disabled=false;this.label.hidden=true;
-  }
+ private renderHead():void{
+  this.progressLabel.hidden=!this.task.id||!this.camera;
+  if(this.progressLabel.hidden)return;
+  this.projected.copy(this.lastPosition);this.projected.y+=1.8;this.projected.project(this.camera!);
+  if(this.projected.z< -1||this.projected.z>1||Math.abs(this.projected.x)>1||Math.abs(this.projected.y)>1){this.progressLabel.hidden=true;return;}
+  this.progressLabel.style.left=((this.projected.x+1)*.5*this.host.clientWidth)+'px';this.progressLabel.style.top=((1-this.projected.y)*.5*this.host.clientHeight)+'px';this.bar.value=this.task.elapsed;
  }
+ update(dt:number,position:Vector3,active:boolean,camera?:PerspectiveCamera):void{
+  dt=Number.isFinite(dt)?Math.max(0,Math.min(.1,dt)):0;this.elapsed+=dt;this.lastPosition.copy(position);this.hasPosition=active;this.camera=camera;
+  for(const node of this.nodes)if((this.exhausted.get(node.id)??0)>0&&(this.exhausted.get(node.id)??0)<=this.elapsed){this.exhausted.delete(node.id);this.showNode(node.id,true);}
+  if(!active){this.task.cancel();this.label.hidden=true;this.progressLabel.hidden=true;return;}
+  const nearest=this.closest(position),result=this.task.advance(dt,position.x,position.z,active);
+  if(result==='complete'){
+   const node=this.target;
+   if(node&&(node.kind!=='chest'||this.crafts.key>0)){
+    if(node.kind==='chest')this.crafts.key--;
+    this.exhausted.set(node.id,this.elapsed+node.cooldown);this.showNode(node.id,false);this.stock[node.kind]=Math.min(99999,this.stock[node.kind]+1);this.task.cancel();this.onCollect(node.kind);
+   }else this.task.cancel();
+  }
+  this.label.hidden=!!this.task.id||!nearest||result==='complete';this.action.hidden=!!this.task.id;
+  if(nearest&&!this.task.id){this.label.dataset.id=nearest.id;this.action.disabled=nearest.kind==='chest'&&this.crafts.key<1;this.action.title=this.action.disabled?'Requer Chave Ancestral':'';this.action.textContent=nearest.kind==='ore'?'⛏ Coletar':nearest.kind==='herb'?'🌿 Extrair':'♜ Abrir';}
+  this.renderHead();
+ }
+
  craft(id:string):boolean{
   const r=GATHER_RECIPES.find(x=>x.id===id);if(!r)return false;
   if((this.stock.ore<r.cost.ore)||(this.stock.herb<r.cost.herb)||(this.stock.chest<r.cost.chest))return false;
@@ -146,10 +152,10 @@ export class GatheringSystem{
   if(r.stock&&typeof r.stock==='object')for(const k of ['ore','herb','chest'] as const)this.stock[k]=Math.floor(num((r.stock as Record<string,unknown>)[k]));
   if(r.crafts&&typeof r.crafts==='object')for(const k of ['refine','key'])this.crafts[k]=Math.floor(num((r.crafts as Record<string,unknown>)[k]));
   if(r.buffs&&typeof r.buffs==='object')for(const k of ['damage','xp','speed'])this.buffs[k]=num((r.buffs as Record<string,unknown>)[k],86400);
-  if(r.exhausted&&typeof r.exhausted==='object')for(const [k,v]of Object.entries(r.exhausted)){if(/^(aurora|crypt|highlands|rift|eclipse)-[0-9]{1,2}$/.test(k)){this.exhausted.set(k,num(v,1e9));this.showNode(k,(this.exhausted.get(k)??0)<=this.elapsed);}}
+  if(r.exhausted&&typeof r.exhausted==='object')for(const [k,v]of Object.entries(r.exhausted)){if(this.nodes.some(n=>n.id===k)){this.exhausted.set(k,num(v,1e9));this.showNode(k,(this.exhausted.get(k)??0)<=this.elapsed);}}
  }
  dispose():void{
-  this.destroyed=true;this.label.remove();this.root.removeFromParent();
-  for(const inst of this.instances)inst.removeFromParent();this.instances=[];this.nodeInstances.clear();
+  this.destroyed=true;this.task.cancel();this.label.remove();this.progressLabel.remove();this.root.removeFromParent();
+  for(const inst of this.instances){inst.removeFromParent();inst.dispose();}this.instances=[];this.nodeInstances.clear();
  }
 }

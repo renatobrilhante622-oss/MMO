@@ -1,5 +1,6 @@
+import {retainAppearanceAssets,releaseAppearanceAssets} from './AppearanceResources';
 import {
-  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshBasicMaterial, MeshStandardMaterial,
+  AnimationAction, AnimationClip, AnimationMixer, Box3, Color, Group, LoopOnce, Mesh, MeshBasicMaterial, MeshStandardMaterial,SkinnedMesh,
   Object3D, Vector3,
 } from 'three';
 import { type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -24,13 +25,15 @@ import {loadSharedModel,actorClonePool,resetPooledActor} from './ModelResources'
 import {registerActor,actorIsVisible} from '../core/ActorVisibility';
 const normalize = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-export function loadModel(name: ModelName): Promise<GLTF> {
+export function modelAssetPath(name:ModelName):string {
   const folder=name.startsWith('Quaternius_')?'models/environment/':name.startsWith('Creature_')?'models/creatures/':'models/';
   // Retire both the retrofitted 704-triangle horse and the unrigged farm horse.
   const replacement=['Creature_horse','Creature_warhorse','Horse'].includes(name)
-    ?'models/pr17-source/ImperialHorse.glb':name==='Creature_stag'?'models/pr22/ImperialStag.glb':name==='Creature_dragon'?'models/pr22/CelestialDragon.glb':name==='Creature_whitehorse'?'models/pr17-source/ImperialHorseWhite.glb':null;
-  return loadSharedModel(replacement??folder + name + '.glb');
+    ?'models/pr17-source/ImperialHorse.glb':name==='Creature_stag'?'models/pr22/ImperialStag.glb':name==='Creature_dragon'?'models/creatures/Creature_wyvern.glb':name==='Creature_whitehorse'?'models/pr17-source/ImperialHorseWhite.glb':null;
+  return replacement??folder+name+'.glb';
 }
+
+export function loadModel(name:ModelName):Promise<GLTF>{return loadSharedModel(modelAssetPath(name));}
 
 /**
  * Reuses shared GLB geometry/textures while giving every animated actor its own
@@ -39,6 +42,7 @@ export function loadModel(name: ModelName): Promise<GLTF> {
 export class AnimatedGLB {
   readonly root = new Group();
   ready = false;
+  failed=false;
 
   private mixer?: AnimationMixer;
   private readonly actions = new Map<string, AnimationAction>();
@@ -91,13 +95,13 @@ export class AnimatedGLB {
       // The shared cache drops rejected requests; retry the same authored asset.
       console.warn('Retrying authored 3D actor:',name,error);
       try{gltf=await loadModel(name);}catch(retryError){
-        console.error('Cannot load 3D actor asset:',name,retryError);return;
+        this.failed=true;console.error('Cannot load 3D actor asset:',name,retryError);return;
       }
     }
     if (this.disposed) return;
     this.poolKey=gltf.scene.uuid;
     const model = this.model = actorClonePool.acquire(this.poolKey)??clone(gltf.scene);
-    resetPooledActor(model);
+    resetPooledActor(model);retainAppearanceAssets(model);
     this.unregister=registerActor(this.root,this.height);
     if(name.startsWith('KayKit_'))clearWeaponSlots(model);
     const pivot = createFootPivot(model, this.height, name === 'Soldier' ? Math.PI : 0);
@@ -189,6 +193,7 @@ export class AnimatedGLB {
       idle:flyer?['flying_idle','idle','idle_b']:['idle','idle_b','idle_combat','unarmed_idle','2h_melee_idle'],
       walk:flyer?['fast_flying','flying_idle']:['walking_a','walking_b','walk','gallop'],
       run:flyer?['fast_flying','flying_idle']:this.name==='Creature_horse'?['gallop','run','walk']:['running_a','running_b','run','gallop','walk'],
+      gather:['interact','pick_up','spellcast_long','idle'],
       mounted:['sit_chair_idle','sit_chair_pose','idle'],
       slide:['dodge_forward','idle'],
       jump:['jump_idle','jump_full_short','jump','idle'],
@@ -250,6 +255,9 @@ export class AnimatedGLB {
     disableCharacterCulling(object);
     return true;
   }
+
+  detachAttachment(object:Object3D):void{this.attachments.delete(object);object.removeFromParent();}
+  get attachmentCount():number{return this.attachments.size;}
 
   /** Real post-normalization 3D dimensions: excludes hidden procedural art. */
   getVisibleBounds():Box3|null{
@@ -377,7 +385,7 @@ export class AnimatedGLB {
     this.creatureTime.value+=step;
     this.creatureStride.value=Math.min(1,Math.max(0,speed));
     this.creaturePhase.value+=step*(2.5+speed*8);
-    const target = locomotion === 'dead' ? 'dead'
+    const target = locomotion === 'dead' ? 'dead' : locomotion === 'gather' ? 'gather'
       : riding ? 'mounted'
       : locomotion === 'slide' ? 'slide'
       : locomotion === 'jump' || locomotion === 'doubleJump' || locomotion === 'fall' ? 'jump'
@@ -399,7 +407,7 @@ export class AnimatedGLB {
     if (this.model) this.mixer?.uncacheRoot(this.model);
     for(const [mesh,material] of this.sourceMaterials)mesh.material=material;
     this.sourceMaterials.clear();
-    if(this.model){this.model.removeFromParent();actorClonePool.release(this.poolKey,this.model);this.model=undefined;}
+    if(this.model){const skeletons=new Set<SkinnedMesh['skeleton']>();this.model.traverse(n=>{if(n instanceof SkinnedMesh)skeletons.add(n.skeleton);});skeletons.forEach(s=>s.dispose());releaseAppearanceAssets(this.model);this.model.removeFromParent();actorClonePool.release(this.poolKey,this.model);this.model=undefined;}
     this.materials.forEach(({ material }) => material.dispose());
     this.materials.length = 0;
     this.actions.clear();
