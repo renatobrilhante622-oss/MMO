@@ -1,0 +1,152 @@
+import type {QuestDefinition} from './QuestSystem';
+import {REGIONS} from '../world/Regions';
+export type LoreLanguage = 'pt' | 'en';
+export type LocalizedLine = readonly [string, string];
+export type DialogueStage = 'opening' | 'progress' | 'completion';
+export interface SpokenLine {id:string; text:string; speaker:string; language:LoreLanguage;}
+export const GAME_TITLE = 'ETERNAL NINEFOLD';
+export const CAMPAIGN_STAGES = ['meet','hunt','scout','reagents','gather','nests','defense','camp','captains','deep-scout','rift','boss'] as const;
+type Episode = readonly [LocalizedLine, LocalizedLine];
+const episode = (pt:string,en:string,storyPt:string,storyEn:string):Episode => [[pt,en],[storyPt,storyEn]];
+/** Narrative is data, not quest state: original IDs, counters, rewards and save migration remain intact. */
+const EPISODES:Readonly<Record<string, readonly Episode[]>> = {
+  aurora:[
+    episode('A marca que não devia voltar','The mark that should not return','Eldrin reconhece em você a Nona Marca, que desapareceu na Guerra das Nove Dobras. O antigo portador morreu cumprindo uma ordem do Conselho.','Eldrin recognizes the Ninth Mark, lost in the Ninefold Sundering. Its former bearer died carrying out a Council order.'),
+    episode('Peregrinos sem destino','Pilgrims without a road','As criaturas atacam apenas quem leva o brasão do Conselho. Alguém está guiando a corrupção por entre os caminhos de Aster.','The creatures attack only those carrying the Council’s crest. Someone is guiding corruption along Aster’s roads.'),
+    episode('O primeiro nome apagado','The first erased name','Um altar conserva o nome de Seris, a guardiã que os livros chamam de traidora. A pedra conta que ela tentou salvar os nove domínios.','An altar preserves the name of Seris, the warden the books call a traitor. The stone says she tried to save the nine realms.'),
+    episode('Sangue nas raízes','Blood in the roots','Os cristais locais carregam pulsos semelhantes aos da sua marca. Lyra suspeita que os selos não sejam objetos, mas pactos vivos.','Local crystals carry pulses like those of your mark. Lyra suspects the seals are living covenants, not objects.'),
+    episode('O preço de uma vigília','The price of a vigil','As provisões do Conselho nunca chegaram. Eldrin manteve a vila viva vendendo a própria armadura. Prepare uma defesa para os refugiados.','The Council’s supplies never arrived. Eldrin sold his own armor to keep the village alive. Prepare a defense for the refugees.'),
+    episode('O semeador invisível','The unseen sower','Os ninhos cresceram ao redor de sinetes partidos. Um mensageiro espalhou as sementes da corrupção e depois desapareceu entre os peregrinos.','The nests grew around broken signets. A messenger scattered corruption’s seeds, then vanished among the pilgrims.'),
+    episode('Quarenta e cinco batidas','Forty-five heartbeats','O obelisco pode proteger os refugiados. Enquanto ele desperta, as criaturas tentarão silenciar seu coração. Não abandone o círculo.','The obelisk can protect the refugees. While it awakens, creatures will try to silence its heart. Do not leave the circle.'),
+    episode('Cartas para um rei morto','Letters to a dead king','Um acampamento guarda cartas assinadas pelo regente de Aster, morto há vinte anos. As ordens recentes usam a mesma caligrafia.','A camp holds letters signed by Aster’s regent, dead for twenty years. Recent orders use the same handwriting.'),
+    episode('Os dois fiéis','The two faithful','Dois capitães mantêm as rotas fechadas. Ambos serviram ao lado de Eldrin. Ele pede que você procure as correntes antes de julgar os homens.','Two captains keep the roads sealed. Both once served beside Eldrin. He asks you to look for chains before judging the men.'),
+    episode('O selo da compaixão','The seal of compassion','A ruína revela a Primeira Dobra: a compaixão tornou-se uma prisão quando o Conselho tentou impedir toda perda.','The ruin reveals the First Fold: compassion became a prison when the Council tried to prevent every loss.'),
+    episode('Uma ferida no juramento','A wound in the oath','A fenda bebe da culpa dos guardiões. O demônio que a protege usa a voz do antigo portador da marca. Escute sem obedecer.','The rift feeds on the wardens’ guilt. Its demon uses the former mark bearer’s voice. Listen without obeying.'),
+    episode('A coroa sob o bosque','The crown beneath the grove','O chefe da região guarda a passagem para as Cinzas. Sua queda revelará que Seris entregou o primeiro selo para salvar uma criança.','The region’s chief guards the passage to the Ashlands. Its fall will reveal that Seris surrendered the first seal to save a child.'),
+  ],
+  crypt:[
+    episode('A vigia dos nomes','The watcher of names','Morwen acolhe você entre as lápides. Aqui foram enterrados os que recusaram apagar Seris da história, não os inimigos do reino.','Morwen welcomes you among the graves. Those who refused to erase Seris from history lie here, not the kingdom’s enemies.'),
+    episode('Uma guarda sem descanso','A guard without rest','Os mortos levantam quando escutam o sino do Conselho. Seus corpos ainda obedecem a uma ordem que suas almas rejeitam.','The dead rise when they hear the Council’s bell. Their bodies still obey an order their souls reject.'),
+    episode('Testemunho em pedra','Testimony in stone','O altar conserva o juramento de Morwen: nenhuma memória seria esquecida. O Conselho transformou essa promessa em uma maldição.','The altar preserves Morwen’s oath: no memory would be forgotten. The Council turned that promise into a curse.'),
+    episode('Cinzas que se lembram','Ashes that remember','Os reagentes absorveram as últimas palavras dos condenados. Nenhuma delas pede vingança. Todas pedem para voltar para casa.','The reagents absorbed the condemned’s final words. None asks for vengeance. Every voice asks to return home.'),
+    episode('Pão para quem vigia','Bread for the watchers','Os vivos ainda cuidam das sepulturas, mesmo cercados de mortos. Leve recursos para que não precisem queimar as placas com os nomes.','The living still tend the graves, surrounded by the dead. Bring supplies so they need not burn the name plaques.'),
+    episode('Vermes do esquecimento','Worms of forgetting','Cada ninho devora inscrições funerárias. O inimigo não quer um exército: quer eliminar as testemunhas do segundo selo.','Each nest devours burial inscriptions. The enemy does not want an army: it wants to erase the second seal’s witnesses.'),
+    episode('O sino interrompido','The interrupted bell','Ative o totem funerário e resista. Durante quarenta e cinco segundos os mortos poderão escolher, pela primeira vez, não lutar.','Activate the funerary totem and hold. For forty-five seconds the dead will be able to choose not to fight.'),
+    episode('O inventário dos inocentes','An inventory of innocents','Os guardas escondem objetos tomados das famílias. No baú há um medalhão com o mesmo símbolo da sua marca.','The guards hide belongings stolen from families. Their chest holds a locket bearing the symbol of your mark.'),
+    episode('Os carrascos do arquivo','Executioners of the archive','Os capitães da cripta destruíram os registros de nascimento. Um deles reconhece Morwen como a mãe que jurou nunca trair.','The crypt captains destroyed the birth records. One recognizes Morwen as the mother he swore never to betray.'),
+    episode('A segunda mentira','The second lie','O segundo selo guardava a memória. A cripta prova que o Conselho a reescreveu para ocultar a origem dos Nove Guardiões.','The second seal guarded memory. The crypt proves the Council rewrote it to conceal the Nine Wardens’ origin.'),
+    episode('Vozes além da lápide','Voices beyond the grave','A fenda usa os nomes roubados para abrir o abismo. Devolva-os aos mortos e encerre o ritual que os mantém acorrentados.','The rift uses stolen names to open the abyss. Return them to the dead and end the rite that keeps them chained.'),
+    episode('O rei que perdeu o nome','The king who lost his name','O senhor da cripta é o primeiro guardião corrompido. Abaixo de sua coroa há uma corrente forjada no Desfiladeiro Ardente.','The crypt lord is the first corrupted warden. Beneath his crown lies a chain forged in the Burning Gorge.'),
+  ],
+  highlands:[
+    episode('A cicatriz de Alaric','Alaric’s scar','Alaric reconhece a corrente da cripta. Ele guardou o terceiro selo por décadas, mas suas lembranças começam a contradizer o calendário.','Alaric recognizes the crypt’s chain. He guarded the third seal for decades, but his memories no longer match the calendar.'),
+    episode('Predadores de lembranças','Memory predators','As feras glaciais transportam fragmentos de memórias roubadas. Recuperá-los pode revelar quem alterou a vigília de Alaric.','Glacial beasts carry fragments of stolen memories. Recovering them may reveal who altered Alaric’s vigil.'),
+    episode('O retrato sob o gelo','The portrait beneath the ice','Um relevo mostra Seris e Alaric como irmãos. Nenhum registro do Conselho admite que os guardiões tinham famílias.','A relief shows Seris and Alaric as siblings. No Council record admits the wardens had families.'),
+    episode('Cristais da última manhã','Crystals of the last morning','Cada cristal conserva um instante da Guerra das Nove Dobras. Em todos eles, o sol se põe antes de nascer.','Each crystal preserves a moment of the Ninefold Sundering. In every one, the sun sets before it rises.'),
+    episode('Abrigo para o degelo','Shelter for the thaw','Freya abriga os peregrinos no passo. Ela sabe que libertar o selo despertará tudo o que o gelo manteve suspenso.','Freya shelters pilgrims at the pass. She knows freeing the seal will awaken everything the ice held suspended.'),
+    episode('O inverno artificial','The artificial winter','Os ninhos alimentam torres que impedem o degelo. O Conselho não protegia a montanha: escondia algo sob ela.','The nests feed towers that prevent the thaw. The Council was not protecting the mountain: it was hiding something beneath it.'),
+    episode('A última vigília','The last vigil','O totem quebrará o ciclo por quarenta e cinco segundos. Defenda-o enquanto Freya conduz os últimos refugiados para fora do passo.','The totem will break the cycle for forty-five seconds. Defend it while Freya leads the last refugees out of the pass.'),
+    episode('Ordens assinadas amanhã','Orders signed tomorrow','As ordens do acampamento têm a data de amanhã e descrevem sua chegada. Alguém tentou aprisionar o futuro.','The camp’s orders are dated tomorrow and describe your arrival. Someone tried to imprison the future.'),
+    episode('Os capitães de vidro','The glass captains','Dois capitães guardam versões diferentes de Alaric. Apenas uma ainda lembra o nome da irmã. Desfaça a escolta do impostor.','Two captains guard different versions of Alaric. Only one still remembers his sister’s name. Break the impostor’s escort.'),
+    episode('O terceiro selo não dorme','The third seal never sleeps','O terceiro selo é a possibilidade de mudança. Congelá-lo evitou uma derrota, mas roubou um século de todos que viviam aqui.','The third seal is the possibility of change. Freezing it prevented a defeat, but stole a century from everyone here.'),
+    episode('A hora que falta','The missing hour','O demônio da fenda repete a mesma hora para impedir o degelo. Rompa suas três vigílias e devolva o tempo à montanha.','The rift demon repeats the same hour to prevent the thaw. Break its three vigils and return time to the mountain.'),
+    episode('O colosso da memória','The colossus of memory','O colosso protege a lembrança de uma forja. Ao libertá-la, Alaric finalmente recordará quem entregou as correntes aos guardiões.','The colossus protects a memory of a forge. Freeing it will let Alaric remember who delivered the chains to the wardens.'),
+  ],
+  rift:[
+    episode('As mãos de Tharok','Tharok’s hands','Tharok não nega ter forjado as correntes. Mostra as próprias mãos queimadas e pede a chance de quebrar o que criou.','Tharok does not deny forging the chains. He shows his burned hands and asks for a chance to break what he made.'),
+    episode('Os trabalhadores da chama','Workers of the flame','Os monstros carregam ferramentas de antigos mineiros. A fornalha consumiu seus nomes para alimentar a guerra do Conselho.','The monsters carry former miners’ tools. The furnace consumed their names to fuel the Council’s war.'),
+    episode('Uma assinatura nas brasas','A signature in the embers','A inscrição da forja tem a assinatura de Eldrin. Seu primeiro aliado ajudou a encomendar as correntes, antes de conhecer seu propósito.','The forge inscription bears Eldrin’s signature. Your first ally helped commission the chains before learning their purpose.'),
+    episode('Metal que aprende a ceder','Metal that learns to yield','Reagentes vulcânicos podem enfraquecer os elos. Tharok precisa reaprender o ofício: uma arma forte também precisa saber ceder.','Volcanic reagents can weaken the links. Tharok must relearn his craft: a strong weapon must also know how to yield.'),
+    episode('O salário da rebelião','The rebellion’s wages','Varka recusou vender os rebeldes em troca de anistia. Reúna recursos para manter suas famílias vivas durante o cerco.','Varka refused to sell out the rebels in exchange for amnesty. Gather supplies to keep their families alive during the siege.'),
+    episode('As raízes da fornalha','Roots of the furnace','Os ninhos bombeiam corrupção para a lava. A máquina não produz armas: alimenta algo que dorme abaixo do trono.','The nests pump corruption into the lava. The machine produces no weapons: it feeds something sleeping beneath the throne.'),
+    episode('A ponte dos que voltam','The bridge of those who return','O totem manterá a ponte firme durante a evacuação. Três ondas tentarão romper a rota. Pela primeira vez, Tharok ficará para lutar.','The totem will hold the bridge during the evacuation. Three waves will try to break the route. For once, Tharok will stay and fight.'),
+    episode('O livro das dívidas','The ledger of debts','O baú guarda o pagamento pelas correntes. O contratante não foi um rei: foi uma voz identificada como o Trono da Eternidade.','The chest holds payment for the chains. The buyer was no king: it was a voice named the Throne of Eternity.'),
+    episode('Os últimos carcereiros','The last jailers','Os capitães mantêm os últimos mineiros presos. Ambos sabem que, sem as correntes, o titã poderá escolher a quem servir.','The captains imprison the last miners. Both know that without the chains, the titan can choose whom to serve.'),
+    episode('O quarto selo é uma recusa','The fourth seal is a refusal','O quarto selo protege a vontade. Tharok o entregou quando aceitou uma ordem que sabia ser injusta. Agora ele diz não.','The fourth seal protects free will. Tharok surrendered it when he accepted an order he knew was unjust. Now he says no.'),
+    episode('O pacto no metal vivo','The pact in living metal','A fenda mantém a fornalha acesa com vidas roubadas. Destrua seu guardião e deixe a chama morrer por um instante.','The rift keeps the furnace burning with stolen lives. Destroy its guardian and let the flame die for a moment.'),
+    episode('O titã sem correntes','The unchained titan','O senhor da forja guarda a rota abissal. Ao vencer, você ouvirá um aviso: o quinto selo foi aberto por alguém com a sua marca.','The forge lord guards the abyssal route. Victory brings a warning: someone bearing your mark opened the fifth seal.'),
+  ],
+  eclipse:[
+    episode('A testemunha do limiar','Witness of the threshold','Nyx esperava você, mas não por uma profecia. Ela conheceu o portador anterior e escolheu guardar o segredo de sua morte.','Nyx expected you, but not because of a prophecy. She knew the previous bearer and chose to keep the secret of their death.'),
+    episode('As vozes sem corpo','Voices without bodies','As criaturas do vazio são ecos dos domínios perdidos. Elas repetem as últimas ordens do trono, mesmo sem compreendê-las.','The void creatures are echoes of lost realms. They repeat the throne’s final orders without understanding them.'),
+    episode('A criança de Seris','Seris’s child','O altar revela que Seris salvou o portador anterior quando criança. A Nona Marca não é herança de reis, mas de uma escolha.','The altar reveals that Seris saved the former bearer as a child. The Ninth Mark is inherited from a choice, not from kings.'),
+    episode('Fragmentos de um mundo inteiro','Fragments of a whole world','Os cristais contêm rotas para quatro masmorras abissais. Os selos restantes aguardam nelas, longe dos guardiões corrompidos.','The crystals contain routes to four abyssal dungeons. The remaining seals await there, far from the corrupted wardens.'),
+    episode('Provisões para ninguém','Supplies for nobody','Ezra mantém uma mesa para peregrinos que nunca chegaram. Prepará-la de novo é sua maneira de recusar o fim do mundo.','Ezra keeps a table for pilgrims who never arrived. Setting it again is his way of refusing the end of the world.'),
+    episode('O jardim do trono','The throne’s garden','Os ninhos cultivam cópias incompletas dos guardiões. O trono não deseja servos leais. Deseja servos que não possam escolher.','The nests cultivate incomplete copies of the wardens. The throne does not want loyal servants. It wants servants unable to choose.'),
+    episode('Um lugar para permanecer','A place to remain','O totem fixará a ilha por quarenta e cinco segundos. Defenda os que ainda acreditam que os domínios podem voltar a se tocar.','The totem will anchor the island for forty-five seconds. Defend those who still believe the realms can touch again.'),
+    episode('O arquivo das nove traições','The archive of nine betrayals','O baú revela nove versões da mesma guerra. Em cada uma, um guardião diferente é chamado de traidor. Todas foram escritas pelo trono.','The chest reveals nine versions of one war. Each calls a different warden a traitor. The throne wrote them all.'),
+    episode('Os sentinelas do impossível','Sentinels of the impossible','Os dois capitães protegem a memória da última recusa. O antigo portador preferiu morrer a unir os selos por ordem do trono.','Two captains guard the memory of the final refusal. The former bearer chose death over joining the seals at the throne’s command.'),
+    episode('A nona mentira','The ninth lie','Os selos não reconstroem um império. Eles permitem que os nove domínios existam sem obedecer a uma única vontade.','The seals do not rebuild an empire. They let the nine realms exist without obeying a single will.'),
+    episode('O vazio aprende seu nome','The void learns your name','O demônio da fenda fala com sua voz. Ele oferece paz em troca da marca. Recuse a promessa que destruiu os guardiões.','The rift demon speaks with your voice. It offers peace in exchange for the mark. Refuse the promise that destroyed the wardens.'),
+    episode('O trono que não é uma coroa','A throne that is no crown','O imperador guarda a passagem final. Vença-o e busque os selos nas masmorras: a eternidade precisa de testemunhas, não de um soberano.','The emperor guards the final passage. Defeat him and seek the seals in the dungeons: eternity needs witnesses, not a sovereign.'),
+  ],
+};
+export const LORE_CREATURES:Readonly<Record<string,LocalizedLine>>={slime:['gosmas','slimes'],wolf:['lobos','wolves'],skeleton:['esqueletos','skeletons'],wraith:['espectros','wraiths'],golem:['golens','golems'],hellhound:['cães infernais','hellhounds'],orc:['orcs','orcs'],wyvern:['dracônicos','wyverns']};
+const objective = (index:number, n:number,prey:LocalizedLine):LocalizedLine => ([
+  ['Apresente-se ao Guardião da região.','Report to the region’s Warden.'],
+  [`Derrote ${n} ${prey[0]} nas rotas da região.`,`Defeat ${n} ${prey[1]} on the region’s roads.`],
+  ['Investigue o primeiro altar das ruínas.','Investigate the first ruined altar.'],
+  [`Extraia ${n} reagentes de depósitos diferentes.`,`Extract ${n} reagents from different deposits.`],
+  [`Colete ${n} recursos locais.`,`Collect ${n} local resources.`],
+  ['Destrua dois ninhos diferentes.','Destroy two different nests.'],
+  ['Defenda o totem por 45 segundos e elimine as três ondas.','Defend the totem for 45 seconds and defeat all three waves.'],
+  ['Elimine os guardas e abra o baú do acampamento.','Defeat the guards and open the camp chest.'],
+  ['Derrote dois capitães de elite distintos.','Defeat two different elite captains.'],
+  ['Investigue o altar das ruínas profundas.','Investigate the altar in the deep ruins.'],
+  ['Vença as três ondas e o Demônio da Fenda.','Defeat all three waves and the Rift Demon.'],
+  ['Derrote o chefe da região e liberte a passagem ancestral.','Defeat the regional boss and free the ancestral passage.'],
+] as LocalizedLine[])[index];
+export function campaignNarrative(region:string,index:number,required:number) {
+  const episodes=EPISODES[region]??EPISODES.aurora, [title,revelation]=episodes[index];
+  const kind=REGIONS.find(r=>r.id===region)?.kinds[0]??'slime';
+  const task=objective(index,required,LORE_CREATURES[kind]??['criaturas','creatures']);
+  const opening:LocalizedLine=[`${revelation[0]} ${task[0]}`,`${revelation[1]} ${task[1]}`];
+  const progress:LocalizedLine=[`A sua marca ainda pulsa. ${task[0]} Volte com a verdade, não com uma promessa.`,`Your mark still burns. ${task[1]} Return with the truth, not a promise.`];
+  const next=episodes[index+1];
+  const completion:LocalizedLine=[`Você cumpriu o juramento. ${revelation[0]} ${next?`Nossa próxima pista: ${next[0][0]}.`:region==='eclipse'?'A Nona Marca está livre. Busque os quatro selos das masmorras e recuse a coroa do Trono da Eternidade.':'Atravesse o Portal Ancestral e apresente-se ao Guardião da nova região.'}`,`You kept the oath. ${revelation[1]} ${next?`Our next lead: ${next[0][1]}.`:region==='eclipse'?'The Ninth Mark is free. Seek the four dungeon seals and refuse the Throne of Eternity’s crown.':'Cross the Ancestral Portal and report to the next Warden.'}`];
+  return {title,description:opening,opening,progress,completion};
+}
+export function questNarrative(q:Pick<QuestDefinition,'category'|'id'|'region'|'required'>) {
+  if(q.category!=='story')return undefined;
+  const index=CAMPAIGN_STAGES.findIndex(suffix=>q.id===`story-${q.region}-${suffix}`);
+  return index<0?undefined:campaignNarrative(q.region,index,q.required);
+}
+/** Every non-campaign goal also receives a localized, lore-aware briefing. */
+export function questText(q:QuestDefinition,language:LoreLanguage):{title:string;description:string} {
+  const l=language==='pt'?0:1, story=questNarrative(q);
+  if(story)return {title:story.title[l],description:story.description[l]};
+  const region=REGIONS.find(r=>r.id===q.region),name=region?.name[l]??q.region;
+  const prey=LORE_CREATURES[q.target]??['criaturas marcadas','marked creatures'];
+  const goals:Partial<Record<QuestDefinition['goal'],LocalizedLine>>={
+    kill:[`Derrote ${q.required} ${prey[0]} nas rotas de ${name}.`,`Defeat ${q.required} ${prey[1]} on the roads of ${name}.`],
+    nest:[`Destrua ${q.required} ninhos corrompidos diferentes.`,`Destroy ${q.required} different corrupted nests.`],
+    elite:[`Elimine ${q.required} capitães de elite.`,`Defeat ${q.required} elite captains.`],
+    core:[`Recupere ${q.required} núcleos abissais.`,`Recover ${q.required} abyssal cores.`],
+    camp:[`Liberte ${q.required} acampamentos e abra seus baús.`,`Liberate ${q.required} camps and open their chests.`],
+    rift:[`Sele ${q.required} fendas e vença seus demônios.`,`Seal ${q.required} rifts and defeat their demons.`],
+    refine:[`Refine uma arma até +${q.required} em memória dos ferreiros da Quarta Dobra.`,`Refine a weapon to +${q.required} in memory of the Fourth Fold’s smiths.`],
+    wing:[`Evolua uma asa até o nível ${q.required}; a marca deve aprender a voar.`,`Evolve wings to level ${q.required}; the mark must learn to fly.`],
+    mount:['Desbloqueie e use uma montaria. Nenhum portador cruza os domínios sozinho.','Unlock and ride a mount. No bearer crosses the realms alone.'],
+    level:[`Alcance o nível ${q.required} e honre os portadores que vieram antes.`,`Reach level ${q.required} and honor the bearers who came before.`],
+  };
+  const prefix=q.category==='contract'?['Contrato da Vigília','Watch Contract']:q.category==='bounty'?['Caçada dos Nove','Hunt of the Nine']:q.category==='milestone'?['Legado da Marca','Legacy of the Mark']:['Juramento dos Peregrinos','Pilgrims’ Oath'];
+  return {title:`${prefix[l]}${q.rank?' '+q.rank:''} — ${name}`,description:(goals[q.goal]??[q.description,q.description])[l]};
+}
+export function questSpeech(q:QuestDefinition,stage:DialogueStage,language:LoreLanguage):SpokenLine {
+  const story=questNarrative(q),l=language==='pt'?0:1;
+  if(story)return {id:`${q.id}-${stage}`,text:story[stage][l],language,speaker:q.npcId??'guide-'+q.region};
+  // Non-story counters can be procedural; native TTS speaks the complete localized objective.
+  const detail=questText(q,language).description;
+  return {id:'dynamic-'+q.id+'-'+stage,text:language==='pt'?`${stage==='completion'?'Seu juramento foi cumprido.':stage==='progress'?'A Vigília ainda precisa de você.':'Os peregrinos pedem sua ajuda.'} ${detail}`:`${stage==='completion'?'Your oath has been fulfilled.':stage==='progress'?'The Watch still needs you.':'The pilgrims ask for your help.'} ${detail}`,language,speaker:q.npcId??'guide-'+q.region};
+}
+export const LORE_CHAPTERS:readonly {id:string;title:LocalizedLine;text:LocalizedLine}[]=[
+  {id:'sundering',title:['I · A Guerra das Nove Dobras','I · The Ninefold Sundering'],text:['Antes da guerra, nove domínios partilhavam o mesmo horizonte. O Trono da Eternidade prometeu uma paz sem perdas. Para comprá-la, exigiu nove juramentos vivos. Quando Seris recusou o último, o mundo se partiu. Os vencedores chamaram sua recusa de traição.','Before the war, nine realms shared one horizon. The Throne of Eternity promised peace without loss. Its price was nine living oaths. When Seris refused the last, the world broke apart. The victors called her refusal treason.']},
+  {id:'compassion',title:['II · O Selo da Compaixão','II · The Seal of Compassion'],text:['Em Aster, Eldrin aprendeu que proteger alguém não significa escolher seu destino. O primeiro selo responde a quem pode perder e ainda assim prefere amar. O Conselho tentou guardá-lo numa coroa. A floresta cresceu ao redor da prisão.','In Aster, Eldrin learned that protecting someone does not mean choosing their fate. The first seal answers those who can lose and still choose to love. The Council tried to keep it inside a crown. The forest grew around its prison.']},
+  {id:'memory',title:['III · O Selo da Memória','III · The Seal of Memory'],text:['Morwen guardava os nomes dos mortos. Quando o Conselho exigiu que apagasse Seris, ela recusou. As Cinzas se encheram de lápides sem nome. O segundo selo sobrevive em cada testemunha que decide contar uma verdade inconveniente.','Morwen kept the names of the dead. When the Council demanded she erase Seris, she refused. The Ashlands filled with nameless graves. The second seal survives in every witness who chooses to tell an inconvenient truth.']},
+  {id:'change',title:['IV · O Selo da Mudança','IV · The Seal of Change'],text:['Alaric congelou a montanha para impedir uma derrota. Salvou uma manhã e perdeu um século. O terceiro selo não promete que o amanhã será melhor. Apenas garante que ninguém pode roubar de todos a possibilidade de tentar.','Alaric froze the mountain to prevent a defeat. He saved one morning and lost a century. The third seal does not promise a better tomorrow. It only ensures that nobody can steal everyone’s chance to try.']},
+  {id:'will',title:['V · O Selo da Vontade','V · The Seal of Will'],text:['Tharok forjou nove correntes perfeitas. Disseram que nenhuma criatura poderia parti-las. O ferreiro descobriu tarde que haviam sido feitas para os próprios guardiões. Seu primeiro ato de rebelião não foi erguer um martelo. Foi dizer não.','Tharok forged nine perfect chains. No creature could break them, he was told. Too late he learned they were made for the wardens themselves. His first act of rebellion was not raising a hammer. It was saying no.']},
+  {id:'mercy',title:['VI · A Cripta e a Misericórdia','VI · The Crypt and Mercy'],text:['Sob as Catacumbas, o Rei Ossudo guarda o quinto selo. Ele pede que alguém termine uma guerra que já esqueceu como começou. Misericórdia não apaga o que ele fez. Impede apenas que a culpa se torne outra corrente.','Beneath the Catacombs, the Bone King guards the fifth seal. He asks someone to end a war whose beginning he has forgotten. Mercy does not erase what he did. It only keeps guilt from becoming another chain.']},
+  {id:'truth',title:['VII · O Cristal e a Verdade','VII · Crystal and Truth'],text:['No templo glacial, o sexto selo reflete aquilo que o visitante tenta esconder. O Colosso foi criado para guardar a verdade e acabou obrigado a defender uma mentira. Quebrar seu cristal é abrir espaço para uma lembrança que ainda dói.','In the glacial temple, the sixth seal reflects what visitors try to hide. The Colossus was made to guard truth and forced to defend a lie. Breaking its crystal makes room for a memory that still hurts.']},
+  {id:'hope',title:['VIII · A Fornalha e a Esperança','VIII · The Furnace and Hope'],text:['O sétimo selo arde na fornalha do titã. O oitavo espera na cidadela do vazio. Nenhum foi feito para premiar um vencedor. Esperança e confiança só existem enquanto alguém aceita que outra pessoa também possa escolher.','The seventh seal burns in the titan’s furnace. The eighth waits in the void citadel. Neither was made to reward a conqueror. Hope and trust exist only while someone accepts that another person may also choose.']},
+  {id:'ninth',title:['IX · O Portador da Nona Marca','IX · The Ninefold Awakened'],text:['Nyx conhece a última verdade: o nono selo nunca foi perdido. Ele passa de uma pessoa a outra quando alguém escolhe a liberdade alheia em vez de uma eternidade obediente. Você não nasceu para ocupar o trono. Nasceu para deixar nove caminhos abertos.','Nyx knows the final truth: the ninth seal was never lost. It passes between people when someone chooses another’s freedom over an obedient eternity. You were not born to occupy the throne. You were born to leave nine roads open.']},
+];

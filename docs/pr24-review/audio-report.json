@@ -1,0 +1,25 @@
+{
+  "effectsOnly": {
+    "voices": 0,
+    "effects": 0.027648304821097546,
+    "music": 0
+  },
+  "voicesOnly": {
+    "voices": 0.006348169837519295,
+    "effects": 8.776794501798505e-05,
+    "music": 0
+  },
+  "musicOnly": {
+    "voices": 0,
+    "effects": 0,
+    "music": 0.010718281028065157
+  },
+  "farImpactCulled": true,
+  "peakVoices": 40,
+  "afterDispose": {
+    "unlocked": false,
+    "voices": 0,
+    "enabled": true
+  },
+  "errors": []
+}

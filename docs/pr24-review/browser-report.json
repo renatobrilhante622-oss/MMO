@@ -1,0 +1,134 @@
+{
+  "landscape": {
+    "voice": {
+      "state": "speaking",
+      "bufferBytes": 2323896,
+      "sources": 1,
+      "nativeVoices": 0
+    },
+    "npc": "Eldrin\nGuardião da Primeira Dobra",
+    "rms": 0.11471959299740614,
+    "typewriterCharacters": 4,
+    "dialogueActions": [
+      {
+        "text": "🎁 Resgatar: A marca que não devia voltar",
+        "bottom": 368,
+        "visible": true
+      },
+      {
+        "text": "📜 Contratos de Caça",
+        "bottom": 368,
+        "visible": true
+      },
+      {
+        "text": "Fechar",
+        "bottom": 368,
+        "visible": true
+      }
+    ],
+    "skipStopsVoice": true,
+    "fullTranscriptAfterSkip": 175,
+    "replayRestartsTypewriter": true,
+    "closeStopsVoice": true,
+    "femaleNpc": "Liora\nMercadora dos Peregrinos",
+    "audioSliders": 3,
+    "mix": {
+      "voices": 0.4,
+      "effects": 0.8,
+      "music": 0.25
+    },
+    "loreContinuesInWorld": true,
+    "miniPlayerVisible": true,
+    "englishTranscript": "You kept the oath. Eldrin recognizes the Ninth Mark, lost in the Ninefold Sundering. Its former bearer died carrying out a Council order. Our next lead: Pilgrims without a road.",
+    "gear": {
+      "before": "starter-weapon",
+      "delta": "240",
+      "equipped": "review-upgrade"
+    },
+    "unstuck": {
+      "before": {
+        "x": 7,
+        "z": 5
+      },
+      "after": {
+        "x": 2.581312708697991,
+        "z": 5.4715425745547535
+      },
+      "ok": true,
+      "repeated": false
+    },
+    "questRing": true,
+    "pageOverflow": {
+      "x": false,
+      "y": false
+    },
+    "failedVoiceAssets": [],
+    "errors": []
+  },
+  "portrait": {
+    "voice": {
+      "state": "speaking",
+      "bufferBytes": 2323896,
+      "sources": 1,
+      "nativeVoices": 0
+    },
+    "npc": "Eldrin\nGuardião da Primeira Dobra",
+    "rms": 0.08551596523006715,
+    "typewriterCharacters": 4,
+    "dialogueActions": [
+      {
+        "text": "🎁 Resgatar: A marca que não devia voltar",
+        "bottom": 778,
+        "visible": true
+      },
+      {
+        "text": "📜 Contratos de Caça",
+        "bottom": 819,
+        "visible": true
+      },
+      {
+        "text": "Fechar",
+        "bottom": 819,
+        "visible": true
+      }
+    ],
+    "skipStopsVoice": true,
+    "fullTranscriptAfterSkip": 175,
+    "replayRestartsTypewriter": true,
+    "closeStopsVoice": true,
+    "femaleNpc": "Liora\nMercadora dos Peregrinos",
+    "audioSliders": 3,
+    "mix": {
+      "voices": 0.4,
+      "effects": 0.8,
+      "music": 0.25
+    },
+    "loreContinuesInWorld": true,
+    "miniPlayerVisible": true,
+    "englishTranscript": "You kept the oath. Eldrin recognizes the Ninth Mark, lost in the Ninefold Sundering. Its former bearer died carrying out a Council order. Our next lead: Pilgrims without a road.",
+    "gear": {
+      "before": "starter-weapon",
+      "delta": "240",
+      "equipped": "review-upgrade"
+    },
+    "unstuck": {
+      "before": {
+        "x": 7,
+        "z": 5
+      },
+      "after": {
+        "x": 2.581312708697991,
+        "z": 5.4715425745547535
+      },
+      "ok": true,
+      "repeated": false
+    },
+    "questRing": true,
+    "pageOverflow": {
+      "x": false,
+      "y": false
+    },
+    "failedVoiceAssets": [],
+    "errors": []
+  }
+}

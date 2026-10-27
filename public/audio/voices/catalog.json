@@ -1,0 +1,6674 @@
+[
+  {
+    "key": "e44fa13b",
+    "text": "A Nona Marca voltou a arder. Eu enterrei seu último portador. Desta vez, não confundirei obediência com coragem.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "b9cc6a42",
+    "text": "As lápides não guardam inimigos. Guardam os nomes que o Conselho apagou. Escute os mortos antes de julgar os vivos.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "dd45b8f7",
+    "text": "O gelo preserva tudo, menos a inocência. Se minha voz mudar, exija que eu lhe mostre a cicatriz da mão esquerda.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "219710f3",
+    "text": "Forjei as correntes dos Guardiões. Disseram que protegeriam os selos. Cada martelada minha tornou uma prisão mais forte.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "f88e7481",
+    "text": "Você atravessou oito mentiras para chegar aqui. A nona será dita com a sua própria voz. Não acredite no trono.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "18015c55",
+    "text": "Poções, mapas e um conselho sem preço: um selo não compra a vida de quem o carrega. Escolha o que vai levar.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "7500b2e7",
+    "text": "Os guardas chamam isto de contrabando. Eu chamo de devolver aos mortos o que o Conselho roubou. Precisa de provisões?",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "c47b9ca7",
+    "text": "Não toque nos frascos azuis sem luvas. Há memórias presas no cristal, e algumas ainda sabem morder.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "573ba053",
+    "text": "Cada moeda mantém uma família fora das fornalhas. Negocio suprimentos, não lealdade. O que falta na sua bolsa?",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "d29212f5",
+    "text": "Aqui o ouro não enferruja e os juramentos não morrem. Traga apenas o necessário. O vazio cobra pelo peso da dúvida.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "c17faff0",
+    "text": "Metal bom não esconde suas rachaduras. Mostre sua arma. Vou reforçá-la sem apagar as marcas do caminho que você escolheu.",
+    "speaker": "blacksmith-aster",
+    "language": "pt"
+  },
+  {
+    "key": "39746a4f",
+    "text": "Não há profecia que obrigue alguém a sofrer. A Nona Marca é uma escolha, não uma sentença. Conheça os selos no códice.",
+    "speaker": "priestess-aster",
+    "language": "pt"
+  },
+  {
+    "key": "b721b43b",
+    "text": "No Coliseu, as nove ordens lutam sob o mesmo juramento. Vença com habilidade. O adversário de hoje pode guardar suas costas amanhã.",
+    "speaker": "commander-aster",
+    "language": "pt"
+  },
+  {
+    "key": "4731adeb",
+    "text": "Vigiei este passo durante cem invernos. Não luto por reis. Luto para que ninguém seja esquecido sob esta neve.",
+    "speaker": "valkyrie-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "59840516",
+    "text": "Antes da guerra, nove domínios partilhavam o mesmo horizonte. O Trono da Eternidade prometeu uma paz sem perdas. Para comprá-la, exigiu nove juramentos vivos. Quando Seris recusou o último, o mundo se partiu. Os vencedores chamaram sua recusa de traição.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "ed30b4eb",
+    "text": "Em Aster, Eldrin aprendeu que proteger alguém não significa escolher seu destino. O primeiro selo responde a quem pode perder e ainda assim prefere amar. O Conselho tentou guardá-lo numa coroa. A floresta cresceu ao redor da prisão.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "7bda1d2a",
+    "text": "Morwen guardava os nomes dos mortos. Quando o Conselho exigiu que apagasse Seris, ela recusou. As Cinzas se encheram de lápides sem nome. O segundo selo sobrevive em cada testemunha que decide contar uma verdade inconveniente.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "768dd626",
+    "text": "Alaric congelou a montanha para impedir uma derrota. Salvou uma manhã e perdeu um século. O terceiro selo não promete que o amanhã será melhor. Apenas garante que ninguém pode roubar de todos a possibilidade de tentar.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "50ca1327",
+    "text": "Tharok forjou nove correntes perfeitas. Disseram que nenhuma criatura poderia parti-las. O ferreiro descobriu tarde que haviam sido feitas para os próprios guardiões. Seu primeiro ato de rebelião não foi erguer um martelo. Foi dizer não.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "94907f38",
+    "text": "Sob as Catacumbas, o Rei Ossudo guarda o quinto selo. Ele pede que alguém termine uma guerra que já esqueceu como começou. Misericórdia não apaga o que ele fez. Impede apenas que a culpa se torne outra corrente.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "b859f832",
+    "text": "No templo glacial, o sexto selo reflete aquilo que o visitante tenta esconder. O Colosso foi criado para guardar a verdade e acabou obrigado a defender uma mentira. Quebrar seu cristal é abrir espaço para uma lembrança que ainda dói.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "44d687b8",
+    "text": "O sétimo selo arde na fornalha do titã. O oitavo espera na cidadela do vazio. Nenhum foi feito para premiar um vencedor. Esperança e confiança só existem enquanto alguém aceita que outra pessoa também possa escolher.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "ee530c44",
+    "text": "Nyx conhece a última verdade: o nono selo nunca foi perdido. Ele passa de uma pessoa a outra quando alguém escolhe a liberdade alheia em vez de uma eternidade obediente. Você não nasceu para ocupar o trono. Nasceu para deixar nove caminhos abertos.",
+    "speaker": "narrator",
+    "language": "pt"
+  },
+  {
+    "key": "483f9611",
+    "text": "Eldrin reconhece em você a Nona Marca, que desapareceu na Guerra das Nove Dobras. O antigo portador morreu cumprindo uma ordem do Conselho. Apresente-se ao Guardião da região.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "d5e43949",
+    "text": "A sua marca ainda pulsa. Apresente-se ao Guardião da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "22ed8e42",
+    "text": "Você cumpriu o juramento. Eldrin reconhece em você a Nona Marca, que desapareceu na Guerra das Nove Dobras. O antigo portador morreu cumprindo uma ordem do Conselho. Nossa próxima pista: Peregrinos sem destino.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "c68a2962",
+    "text": "As criaturas atacam apenas quem leva o brasão do Conselho. Alguém está guiando a corrupção por entre os caminhos de Aster. Derrote 5 gosmas nas rotas da região.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "d5f0242e",
+    "text": "A sua marca ainda pulsa. Derrote 5 gosmas nas rotas da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "632a00c5",
+    "text": "Você cumpriu o juramento. As criaturas atacam apenas quem leva o brasão do Conselho. Alguém está guiando a corrupção por entre os caminhos de Aster. Nossa próxima pista: O primeiro nome apagado.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "a4b100a0",
+    "text": "Um altar conserva o nome de Seris, a guardiã que os livros chamam de traidora. A pedra conta que ela tentou salvar os nove domínios. Investigue o primeiro altar das ruínas.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "7843a692",
+    "text": "A sua marca ainda pulsa. Investigue o primeiro altar das ruínas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "7fc728a8",
+    "text": "Você cumpriu o juramento. Um altar conserva o nome de Seris, a guardiã que os livros chamam de traidora. A pedra conta que ela tentou salvar os nove domínios. Nossa próxima pista: Sangue nas raízes.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "41718d8e",
+    "text": "Os cristais locais carregam pulsos semelhantes aos da sua marca. Lyra suspeita que os selos não sejam objetos, mas pactos vivos. Extraia 4 reagentes de depósitos diferentes.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "1ddf04b3",
+    "text": "A sua marca ainda pulsa. Extraia 4 reagentes de depósitos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "acb5cc37",
+    "text": "Você cumpriu o juramento. Os cristais locais carregam pulsos semelhantes aos da sua marca. Lyra suspeita que os selos não sejam objetos, mas pactos vivos. Nossa próxima pista: O preço de uma vigília.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "48a6b601",
+    "text": "As provisões do Conselho nunca chegaram. Eldrin manteve a vila viva vendendo a própria armadura. Prepare uma defesa para os refugiados. Colete 3 recursos locais.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "a925f513",
+    "text": "A sua marca ainda pulsa. Colete 3 recursos locais. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "0a55ad63",
+    "text": "Você cumpriu o juramento. As provisões do Conselho nunca chegaram. Eldrin manteve a vila viva vendendo a própria armadura. Prepare uma defesa para os refugiados. Nossa próxima pista: O semeador invisível.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "a7d60720",
+    "text": "Os ninhos cresceram ao redor de sinetes partidos. Um mensageiro espalhou as sementes da corrupção e depois desapareceu entre os peregrinos. Destrua dois ninhos diferentes.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "6cd41ee2",
+    "text": "A sua marca ainda pulsa. Destrua dois ninhos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "fe14a12d",
+    "text": "Você cumpriu o juramento. Os ninhos cresceram ao redor de sinetes partidos. Um mensageiro espalhou as sementes da corrupção e depois desapareceu entre os peregrinos. Nossa próxima pista: Quarenta e cinco batidas.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "db503699",
+    "text": "O obelisco pode proteger os refugiados. Enquanto ele desperta, as criaturas tentarão silenciar seu coração. Não abandone o círculo. Defenda o totem por 45 segundos e elimine as três ondas.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "dfc3a7a0",
+    "text": "A sua marca ainda pulsa. Defenda o totem por 45 segundos e elimine as três ondas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "c39886af",
+    "text": "Você cumpriu o juramento. O obelisco pode proteger os refugiados. Enquanto ele desperta, as criaturas tentarão silenciar seu coração. Não abandone o círculo. Nossa próxima pista: Cartas para um rei morto.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "4279cfd9",
+    "text": "Um acampamento guarda cartas assinadas pelo regente de Aster, morto há vinte anos. As ordens recentes usam a mesma caligrafia. Elimine os guardas e abra o baú do acampamento.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "bb7eb479",
+    "text": "A sua marca ainda pulsa. Elimine os guardas e abra o baú do acampamento. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "38a38bdc",
+    "text": "Você cumpriu o juramento. Um acampamento guarda cartas assinadas pelo regente de Aster, morto há vinte anos. As ordens recentes usam a mesma caligrafia. Nossa próxima pista: Os dois fiéis.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "dd48da20",
+    "text": "Dois capitães mantêm as rotas fechadas. Ambos serviram ao lado de Eldrin. Ele pede que você procure as correntes antes de julgar os homens. Derrote dois capitães de elite distintos.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "08ff6784",
+    "text": "A sua marca ainda pulsa. Derrote dois capitães de elite distintos. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "b6dd3149",
+    "text": "Você cumpriu o juramento. Dois capitães mantêm as rotas fechadas. Ambos serviram ao lado de Eldrin. Ele pede que você procure as correntes antes de julgar os homens. Nossa próxima pista: O selo da compaixão.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "4179c8c1",
+    "text": "A ruína revela a Primeira Dobra: a compaixão tornou-se uma prisão quando o Conselho tentou impedir toda perda. Investigue o altar das ruínas profundas.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "cb949a1d",
+    "text": "A sua marca ainda pulsa. Investigue o altar das ruínas profundas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "e6019ab5",
+    "text": "Você cumpriu o juramento. A ruína revela a Primeira Dobra: a compaixão tornou-se uma prisão quando o Conselho tentou impedir toda perda. Nossa próxima pista: Uma ferida no juramento.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "70ee87bc",
+    "text": "A fenda bebe da culpa dos guardiões. O demônio que a protege usa a voz do antigo portador da marca. Escute sem obedecer. Vença as três ondas e o Demônio da Fenda.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "cdc06c17",
+    "text": "A sua marca ainda pulsa. Vença as três ondas e o Demônio da Fenda. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "45494ad7",
+    "text": "Você cumpriu o juramento. A fenda bebe da culpa dos guardiões. O demônio que a protege usa a voz do antigo portador da marca. Escute sem obedecer. Nossa próxima pista: A coroa sob o bosque.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "1fa3b4ad",
+    "text": "O chefe da região guarda a passagem para as Cinzas. Sua queda revelará que Seris entregou o primeiro selo para salvar uma criança. Derrote o chefe da região e liberte a passagem ancestral.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "3f6adc3d",
+    "text": "A sua marca ainda pulsa. Derrote o chefe da região e liberte a passagem ancestral. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "ef7e2fef",
+    "text": "Você cumpriu o juramento. O chefe da região guarda a passagem para as Cinzas. Sua queda revelará que Seris entregou o primeiro selo para salvar uma criança. Atravesse o Portal Ancestral e apresente-se ao Guardião da nova região.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "a0282121",
+    "text": "Morwen acolhe você entre as lápides. Aqui foram enterrados os que recusaram apagar Seris da história, não os inimigos do reino. Apresente-se ao Guardião da região.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4c241809",
+    "text": "A sua marca ainda pulsa. Apresente-se ao Guardião da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "91853117",
+    "text": "Você cumpriu o juramento. Morwen acolhe você entre as lápides. Aqui foram enterrados os que recusaram apagar Seris da história, não os inimigos do reino. Nossa próxima pista: Uma guarda sem descanso.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "8373c777",
+    "text": "Os mortos levantam quando escutam o sino do Conselho. Seus corpos ainda obedecem a uma ordem que suas almas rejeitam. Derrote 7 esqueletos nas rotas da região.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "572e6872",
+    "text": "A sua marca ainda pulsa. Derrote 7 esqueletos nas rotas da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "9984893a",
+    "text": "Você cumpriu o juramento. Os mortos levantam quando escutam o sino do Conselho. Seus corpos ainda obedecem a uma ordem que suas almas rejeitam. Nossa próxima pista: Testemunho em pedra.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4b322c67",
+    "text": "O altar conserva o juramento de Morwen: nenhuma memória seria esquecida. O Conselho transformou essa promessa em uma maldição. Investigue o primeiro altar das ruínas.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "dfa70052",
+    "text": "A sua marca ainda pulsa. Investigue o primeiro altar das ruínas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ab9c6aab",
+    "text": "Você cumpriu o juramento. O altar conserva o juramento de Morwen: nenhuma memória seria esquecida. O Conselho transformou essa promessa em uma maldição. Nossa próxima pista: Cinzas que se lembram.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "17622865",
+    "text": "Os reagentes absorveram as últimas palavras dos condenados. Nenhuma delas pede vingança. Todas pedem para voltar para casa. Extraia 5 reagentes de depósitos diferentes.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "845ba87c",
+    "text": "A sua marca ainda pulsa. Extraia 5 reagentes de depósitos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "553713c8",
+    "text": "Você cumpriu o juramento. Os reagentes absorveram as últimas palavras dos condenados. Nenhuma delas pede vingança. Todas pedem para voltar para casa. Nossa próxima pista: Pão para quem vigia.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "f07a9df4",
+    "text": "Os vivos ainda cuidam das sepulturas, mesmo cercados de mortos. Leve recursos para que não precisem queimar as placas com os nomes. Colete 4 recursos locais.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "2a10816a",
+    "text": "A sua marca ainda pulsa. Colete 4 recursos locais. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "9203399e",
+    "text": "Você cumpriu o juramento. Os vivos ainda cuidam das sepulturas, mesmo cercados de mortos. Leve recursos para que não precisem queimar as placas com os nomes. Nossa próxima pista: Vermes do esquecimento.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "b073b856",
+    "text": "Cada ninho devora inscrições funerárias. O inimigo não quer um exército: quer eliminar as testemunhas do segundo selo. Destrua dois ninhos diferentes.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "60c566a2",
+    "text": "A sua marca ainda pulsa. Destrua dois ninhos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "1f8f2bc9",
+    "text": "Você cumpriu o juramento. Cada ninho devora inscrições funerárias. O inimigo não quer um exército: quer eliminar as testemunhas do segundo selo. Nossa próxima pista: O sino interrompido.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "291b87e1",
+    "text": "Ative o totem funerário e resista. Durante quarenta e cinco segundos os mortos poderão escolher, pela primeira vez, não lutar. Defenda o totem por 45 segundos e elimine as três ondas.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ca5a45e0",
+    "text": "A sua marca ainda pulsa. Defenda o totem por 45 segundos e elimine as três ondas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "423d5882",
+    "text": "Você cumpriu o juramento. Ative o totem funerário e resista. Durante quarenta e cinco segundos os mortos poderão escolher, pela primeira vez, não lutar. Nossa próxima pista: O inventário dos inocentes.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "8ef2dd0a",
+    "text": "Os guardas escondem objetos tomados das famílias. No baú há um medalhão com o mesmo símbolo da sua marca. Elimine os guardas e abra o baú do acampamento.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "29770db9",
+    "text": "A sua marca ainda pulsa. Elimine os guardas e abra o baú do acampamento. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "cc33fcd7",
+    "text": "Você cumpriu o juramento. Os guardas escondem objetos tomados das famílias. No baú há um medalhão com o mesmo símbolo da sua marca. Nossa próxima pista: Os carrascos do arquivo.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4c4b5533",
+    "text": "Os capitães da cripta destruíram os registros de nascimento. Um deles reconhece Morwen como a mãe que jurou nunca trair. Derrote dois capitães de elite distintos.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "d48d3144",
+    "text": "A sua marca ainda pulsa. Derrote dois capitães de elite distintos. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "d1c08704",
+    "text": "Você cumpriu o juramento. Os capitães da cripta destruíram os registros de nascimento. Um deles reconhece Morwen como a mãe que jurou nunca trair. Nossa próxima pista: A segunda mentira.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "c59acdb9",
+    "text": "O segundo selo guardava a memória. A cripta prova que o Conselho a reescreveu para ocultar a origem dos Nove Guardiões. Investigue o altar das ruínas profundas.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "5eee3cdd",
+    "text": "A sua marca ainda pulsa. Investigue o altar das ruínas profundas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "17eb115f",
+    "text": "Você cumpriu o juramento. O segundo selo guardava a memória. A cripta prova que o Conselho a reescreveu para ocultar a origem dos Nove Guardiões. Nossa próxima pista: Vozes além da lápide.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "e86385c1",
+    "text": "A fenda usa os nomes roubados para abrir o abismo. Devolva-os aos mortos e encerre o ritual que os mantém acorrentados. Vença as três ondas e o Demônio da Fenda.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "81173c57",
+    "text": "A sua marca ainda pulsa. Vença as três ondas e o Demônio da Fenda. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "96b7f9d0",
+    "text": "Você cumpriu o juramento. A fenda usa os nomes roubados para abrir o abismo. Devolva-os aos mortos e encerre o ritual que os mantém acorrentados. Nossa próxima pista: O rei que perdeu o nome.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "feea8bcb",
+    "text": "O senhor da cripta é o primeiro guardião corrompido. Abaixo de sua coroa há uma corrente forjada no Desfiladeiro Ardente. Derrote o chefe da região e liberte a passagem ancestral.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "943936fd",
+    "text": "A sua marca ainda pulsa. Derrote o chefe da região e liberte a passagem ancestral. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "51e79d1b",
+    "text": "Você cumpriu o juramento. O senhor da cripta é o primeiro guardião corrompido. Abaixo de sua coroa há uma corrente forjada no Desfiladeiro Ardente. Atravesse o Portal Ancestral e apresente-se ao Guardião da nova região.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4635e654",
+    "text": "Alaric reconhece a corrente da cripta. Ele guardou o terceiro selo por décadas, mas suas lembranças começam a contradizer o calendário. Apresente-se ao Guardião da região.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "27e063a3",
+    "text": "A sua marca ainda pulsa. Apresente-se ao Guardião da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "5d4922a2",
+    "text": "Você cumpriu o juramento. Alaric reconhece a corrente da cripta. Ele guardou o terceiro selo por décadas, mas suas lembranças começam a contradizer o calendário. Nossa próxima pista: Predadores de lembranças.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "dfb5a24b",
+    "text": "As feras glaciais transportam fragmentos de memórias roubadas. Recuperá-los pode revelar quem alterou a vigília de Alaric. Derrote 9 golens nas rotas da região.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "75bd3310",
+    "text": "A sua marca ainda pulsa. Derrote 9 golens nas rotas da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "d7f90426",
+    "text": "Você cumpriu o juramento. As feras glaciais transportam fragmentos de memórias roubadas. Recuperá-los pode revelar quem alterou a vigília de Alaric. Nossa próxima pista: O retrato sob o gelo.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "4f8152ef",
+    "text": "Um relevo mostra Seris e Alaric como irmãos. Nenhum registro do Conselho admite que os guardiões tinham famílias. Investigue o primeiro altar das ruínas.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "ba252c3c",
+    "text": "A sua marca ainda pulsa. Investigue o primeiro altar das ruínas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "6ca5c58b",
+    "text": "Você cumpriu o juramento. Um relevo mostra Seris e Alaric como irmãos. Nenhum registro do Conselho admite que os guardiões tinham famílias. Nossa próxima pista: Cristais da última manhã.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "982587c1",
+    "text": "Cada cristal conserva um instante da Guerra das Nove Dobras. Em todos eles, o sol se põe antes de nascer. Extraia 6 reagentes de depósitos diferentes.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "093cc37f",
+    "text": "A sua marca ainda pulsa. Extraia 6 reagentes de depósitos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "c5f2809e",
+    "text": "Você cumpriu o juramento. Cada cristal conserva um instante da Guerra das Nove Dobras. Em todos eles, o sol se põe antes de nascer. Nossa próxima pista: Abrigo para o degelo.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "182f9432",
+    "text": "Freya abriga os peregrinos no passo. Ela sabe que libertar o selo despertará tudo o que o gelo manteve suspenso. Colete 5 recursos locais.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "ebeb56bf",
+    "text": "A sua marca ainda pulsa. Colete 5 recursos locais. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "acf91f50",
+    "text": "Você cumpriu o juramento. Freya abriga os peregrinos no passo. Ela sabe que libertar o selo despertará tudo o que o gelo manteve suspenso. Nossa próxima pista: O inverno artificial.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "245b4783",
+    "text": "Os ninhos alimentam torres que impedem o degelo. O Conselho não protegia a montanha: escondia algo sob ela. Destrua dois ninhos diferentes.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "857c6e20",
+    "text": "A sua marca ainda pulsa. Destrua dois ninhos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "efd2c68d",
+    "text": "Você cumpriu o juramento. Os ninhos alimentam torres que impedem o degelo. O Conselho não protegia a montanha: escondia algo sob ela. Nossa próxima pista: A última vigília.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "fe2b5938",
+    "text": "O totem quebrará o ciclo por quarenta e cinco segundos. Defenda-o enquanto Freya conduz os últimos refugiados para fora do passo. Defenda o totem por 45 segundos e elimine as três ondas.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "4f57fac6",
+    "text": "A sua marca ainda pulsa. Defenda o totem por 45 segundos e elimine as três ondas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "f75e0c69",
+    "text": "Você cumpriu o juramento. O totem quebrará o ciclo por quarenta e cinco segundos. Defenda-o enquanto Freya conduz os últimos refugiados para fora do passo. Nossa próxima pista: Ordens assinadas amanhã.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "30ec7076",
+    "text": "As ordens do acampamento têm a data de amanhã e descrevem sua chegada. Alguém tentou aprisionar o futuro. Elimine os guardas e abra o baú do acampamento.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "b097ece3",
+    "text": "A sua marca ainda pulsa. Elimine os guardas e abra o baú do acampamento. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "b9938889",
+    "text": "Você cumpriu o juramento. As ordens do acampamento têm a data de amanhã e descrevem sua chegada. Alguém tentou aprisionar o futuro. Nossa próxima pista: Os capitães de vidro.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "60dcfd0a",
+    "text": "Dois capitães guardam versões diferentes de Alaric. Apenas uma ainda lembra o nome da irmã. Desfaça a escolta do impostor. Derrote dois capitães de elite distintos.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "4aa2b7ba",
+    "text": "A sua marca ainda pulsa. Derrote dois capitães de elite distintos. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "fc12b9b9",
+    "text": "Você cumpriu o juramento. Dois capitães guardam versões diferentes de Alaric. Apenas uma ainda lembra o nome da irmã. Desfaça a escolta do impostor. Nossa próxima pista: O terceiro selo não dorme.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "44ee0553",
+    "text": "O terceiro selo é a possibilidade de mudança. Congelá-lo evitou uma derrota, mas roubou um século de todos que viviam aqui. Investigue o altar das ruínas profundas.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "ac547bbb",
+    "text": "A sua marca ainda pulsa. Investigue o altar das ruínas profundas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "7c6f5549",
+    "text": "Você cumpriu o juramento. O terceiro selo é a possibilidade de mudança. Congelá-lo evitou uma derrota, mas roubou um século de todos que viviam aqui. Nossa próxima pista: A hora que falta.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "46e7aea6",
+    "text": "O demônio da fenda repete a mesma hora para impedir o degelo. Rompa suas três vigílias e devolva o tempo à montanha. Vença as três ondas e o Demônio da Fenda.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "1c0c59f1",
+    "text": "A sua marca ainda pulsa. Vença as três ondas e o Demônio da Fenda. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "2dff8b60",
+    "text": "Você cumpriu o juramento. O demônio da fenda repete a mesma hora para impedir o degelo. Rompa suas três vigílias e devolva o tempo à montanha. Nossa próxima pista: O colosso da memória.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "f9fd2466",
+    "text": "O colosso protege a lembrança de uma forja. Ao libertá-la, Alaric finalmente recordará quem entregou as correntes aos guardiões. Derrote o chefe da região e liberte a passagem ancestral.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "fe3287c7",
+    "text": "A sua marca ainda pulsa. Derrote o chefe da região e liberte a passagem ancestral. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "ccb0940c",
+    "text": "Você cumpriu o juramento. O colosso protege a lembrança de uma forja. Ao libertá-la, Alaric finalmente recordará quem entregou as correntes aos guardiões. Atravesse o Portal Ancestral e apresente-se ao Guardião da nova região.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "7f7cc06d",
+    "text": "Tharok não nega ter forjado as correntes. Mostra as próprias mãos queimadas e pede a chance de quebrar o que criou. Apresente-se ao Guardião da região.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "3deb5f2a",
+    "text": "A sua marca ainda pulsa. Apresente-se ao Guardião da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "bf38260c",
+    "text": "Você cumpriu o juramento. Tharok não nega ter forjado as correntes. Mostra as próprias mãos queimadas e pede a chance de quebrar o que criou. Nossa próxima pista: Os trabalhadores da chama.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "c3f3c709",
+    "text": "Os monstros carregam ferramentas de antigos mineiros. A fornalha consumiu seus nomes para alimentar a guerra do Conselho. Derrote 11 golens nas rotas da região.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "d4a02262",
+    "text": "A sua marca ainda pulsa. Derrote 11 golens nas rotas da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "a6fa84ed",
+    "text": "Você cumpriu o juramento. Os monstros carregam ferramentas de antigos mineiros. A fornalha consumiu seus nomes para alimentar a guerra do Conselho. Nossa próxima pista: Uma assinatura nas brasas.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "99d32bd5",
+    "text": "A inscrição da forja tem a assinatura de Eldrin. Seu primeiro aliado ajudou a encomendar as correntes, antes de conhecer seu propósito. Investigue o primeiro altar das ruínas.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "d2a7f2f5",
+    "text": "A sua marca ainda pulsa. Investigue o primeiro altar das ruínas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "5420d6fb",
+    "text": "Você cumpriu o juramento. A inscrição da forja tem a assinatura de Eldrin. Seu primeiro aliado ajudou a encomendar as correntes, antes de conhecer seu propósito. Nossa próxima pista: Metal que aprende a ceder.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "70122846",
+    "text": "Reagentes vulcânicos podem enfraquecer os elos. Tharok precisa reaprender o ofício: uma arma forte também precisa saber ceder. Extraia 7 reagentes de depósitos diferentes.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "b747ded3",
+    "text": "A sua marca ainda pulsa. Extraia 7 reagentes de depósitos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "5c11d6df",
+    "text": "Você cumpriu o juramento. Reagentes vulcânicos podem enfraquecer os elos. Tharok precisa reaprender o ofício: uma arma forte também precisa saber ceder. Nossa próxima pista: O salário da rebelião.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "8a0dea3c",
+    "text": "Varka recusou vender os rebeldes em troca de anistia. Reúna recursos para manter suas famílias vivas durante o cerco. Colete 6 recursos locais.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "72f60653",
+    "text": "A sua marca ainda pulsa. Colete 6 recursos locais. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "a4ade1cf",
+    "text": "Você cumpriu o juramento. Varka recusou vender os rebeldes em troca de anistia. Reúna recursos para manter suas famílias vivas durante o cerco. Nossa próxima pista: As raízes da fornalha.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "c21a4e82",
+    "text": "Os ninhos bombeiam corrupção para a lava. A máquina não produz armas: alimenta algo que dorme abaixo do trono. Destrua dois ninhos diferentes.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "f56c619d",
+    "text": "A sua marca ainda pulsa. Destrua dois ninhos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "6e9824e0",
+    "text": "Você cumpriu o juramento. Os ninhos bombeiam corrupção para a lava. A máquina não produz armas: alimenta algo que dorme abaixo do trono. Nossa próxima pista: A ponte dos que voltam.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "e7a0ec37",
+    "text": "O totem manterá a ponte firme durante a evacuação. Três ondas tentarão romper a rota. Pela primeira vez, Tharok ficará para lutar. Defenda o totem por 45 segundos e elimine as três ondas.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "9ca8bf51",
+    "text": "A sua marca ainda pulsa. Defenda o totem por 45 segundos e elimine as três ondas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "5af9ce81",
+    "text": "Você cumpriu o juramento. O totem manterá a ponte firme durante a evacuação. Três ondas tentarão romper a rota. Pela primeira vez, Tharok ficará para lutar. Nossa próxima pista: O livro das dívidas.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "9d5c5f88",
+    "text": "O baú guarda o pagamento pelas correntes. O contratante não foi um rei: foi uma voz identificada como o Trono da Eternidade. Elimine os guardas e abra o baú do acampamento.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "7bdebb46",
+    "text": "A sua marca ainda pulsa. Elimine os guardas e abra o baú do acampamento. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "21ddfe36",
+    "text": "Você cumpriu o juramento. O baú guarda o pagamento pelas correntes. O contratante não foi um rei: foi uma voz identificada como o Trono da Eternidade. Nossa próxima pista: Os últimos carcereiros.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "43e52897",
+    "text": "Os capitães mantêm os últimos mineiros presos. Ambos sabem que, sem as correntes, o titã poderá escolher a quem servir. Derrote dois capitães de elite distintos.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "936061c3",
+    "text": "A sua marca ainda pulsa. Derrote dois capitães de elite distintos. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "c8e97ab7",
+    "text": "Você cumpriu o juramento. Os capitães mantêm os últimos mineiros presos. Ambos sabem que, sem as correntes, o titã poderá escolher a quem servir. Nossa próxima pista: O quarto selo é uma recusa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "56688ee4",
+    "text": "O quarto selo protege a vontade. Tharok o entregou quando aceitou uma ordem que sabia ser injusta. Agora ele diz não. Investigue o altar das ruínas profundas.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "f6c69f28",
+    "text": "A sua marca ainda pulsa. Investigue o altar das ruínas profundas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "e0dab2c4",
+    "text": "Você cumpriu o juramento. O quarto selo protege a vontade. Tharok o entregou quando aceitou uma ordem que sabia ser injusta. Agora ele diz não. Nossa próxima pista: O pacto no metal vivo.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "a56dda40",
+    "text": "A fenda mantém a fornalha acesa com vidas roubadas. Destrua seu guardião e deixe a chama morrer por um instante. Vença as três ondas e o Demônio da Fenda.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "98b6a3e8",
+    "text": "A sua marca ainda pulsa. Vença as três ondas e o Demônio da Fenda. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "71a6ef49",
+    "text": "Você cumpriu o juramento. A fenda mantém a fornalha acesa com vidas roubadas. Destrua seu guardião e deixe a chama morrer por um instante. Nossa próxima pista: O titã sem correntes.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "0dcb103b",
+    "text": "O senhor da forja guarda a rota abissal. Ao vencer, você ouvirá um aviso: o quinto selo foi aberto por alguém com a sua marca. Derrote o chefe da região e liberte a passagem ancestral.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "73d9a722",
+    "text": "A sua marca ainda pulsa. Derrote o chefe da região e liberte a passagem ancestral. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "b693b565",
+    "text": "Você cumpriu o juramento. O senhor da forja guarda a rota abissal. Ao vencer, você ouvirá um aviso: o quinto selo foi aberto por alguém com a sua marca. Atravesse o Portal Ancestral e apresente-se ao Guardião da nova região.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "511e6ee3",
+    "text": "Nyx esperava você, mas não por uma profecia. Ela conheceu o portador anterior e escolheu guardar o segredo de sua morte. Apresente-se ao Guardião da região.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "8cd40ed4",
+    "text": "A sua marca ainda pulsa. Apresente-se ao Guardião da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "7b16b922",
+    "text": "Você cumpriu o juramento. Nyx esperava você, mas não por uma profecia. Ela conheceu o portador anterior e escolheu guardar o segredo de sua morte. Nossa próxima pista: As vozes sem corpo.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "4b16cf69",
+    "text": "As criaturas do vazio são ecos dos domínios perdidos. Elas repetem as últimas ordens do trono, mesmo sem compreendê-las. Derrote 13 esqueletos nas rotas da região.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "8524fd38",
+    "text": "A sua marca ainda pulsa. Derrote 13 esqueletos nas rotas da região. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "bc4d4e88",
+    "text": "Você cumpriu o juramento. As criaturas do vazio são ecos dos domínios perdidos. Elas repetem as últimas ordens do trono, mesmo sem compreendê-las. Nossa próxima pista: A criança de Seris.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "fe7c7d86",
+    "text": "O altar revela que Seris salvou o portador anterior quando criança. A Nona Marca não é herança de reis, mas de uma escolha. Investigue o primeiro altar das ruínas.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "bdbcaf8f",
+    "text": "A sua marca ainda pulsa. Investigue o primeiro altar das ruínas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "c0536f97",
+    "text": "Você cumpriu o juramento. O altar revela que Seris salvou o portador anterior quando criança. A Nona Marca não é herança de reis, mas de uma escolha. Nossa próxima pista: Fragmentos de um mundo inteiro.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "4614427c",
+    "text": "Os cristais contêm rotas para quatro masmorras abissais. Os selos restantes aguardam nelas, longe dos guardiões corrompidos. Extraia 8 reagentes de depósitos diferentes.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "b6a06350",
+    "text": "A sua marca ainda pulsa. Extraia 8 reagentes de depósitos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "f2ffd9bb",
+    "text": "Você cumpriu o juramento. Os cristais contêm rotas para quatro masmorras abissais. Os selos restantes aguardam nelas, longe dos guardiões corrompidos. Nossa próxima pista: Provisões para ninguém.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "61b0cd8a",
+    "text": "Ezra mantém uma mesa para peregrinos que nunca chegaram. Prepará-la de novo é sua maneira de recusar o fim do mundo. Colete 7 recursos locais.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "6cbc7a8e",
+    "text": "A sua marca ainda pulsa. Colete 7 recursos locais. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "7b1ce755",
+    "text": "Você cumpriu o juramento. Ezra mantém uma mesa para peregrinos que nunca chegaram. Prepará-la de novo é sua maneira de recusar o fim do mundo. Nossa próxima pista: O jardim do trono.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "0b47314b",
+    "text": "Os ninhos cultivam cópias incompletas dos guardiões. O trono não deseja servos leais. Deseja servos que não possam escolher. Destrua dois ninhos diferentes.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "4d0b261b",
+    "text": "A sua marca ainda pulsa. Destrua dois ninhos diferentes. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "16fe2db1",
+    "text": "Você cumpriu o juramento. Os ninhos cultivam cópias incompletas dos guardiões. O trono não deseja servos leais. Deseja servos que não possam escolher. Nossa próxima pista: Um lugar para permanecer.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "c861a21e",
+    "text": "O totem fixará a ilha por quarenta e cinco segundos. Defenda os que ainda acreditam que os domínios podem voltar a se tocar. Defenda o totem por 45 segundos e elimine as três ondas.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "cf56cdf7",
+    "text": "A sua marca ainda pulsa. Defenda o totem por 45 segundos e elimine as três ondas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "60de402b",
+    "text": "Você cumpriu o juramento. O totem fixará a ilha por quarenta e cinco segundos. Defenda os que ainda acreditam que os domínios podem voltar a se tocar. Nossa próxima pista: O arquivo das nove traições.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "201f4941",
+    "text": "O baú revela nove versões da mesma guerra. Em cada uma, um guardião diferente é chamado de traidor. Todas foram escritas pelo trono. Elimine os guardas e abra o baú do acampamento.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "385207a0",
+    "text": "A sua marca ainda pulsa. Elimine os guardas e abra o baú do acampamento. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "68e4eb5b",
+    "text": "Você cumpriu o juramento. O baú revela nove versões da mesma guerra. Em cada uma, um guardião diferente é chamado de traidor. Todas foram escritas pelo trono. Nossa próxima pista: Os sentinelas do impossível.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "ba1a5da1",
+    "text": "Os dois capitães protegem a memória da última recusa. O antigo portador preferiu morrer a unir os selos por ordem do trono. Derrote dois capitães de elite distintos.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "55293ca9",
+    "text": "A sua marca ainda pulsa. Derrote dois capitães de elite distintos. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "5d80715f",
+    "text": "Você cumpriu o juramento. Os dois capitães protegem a memória da última recusa. O antigo portador preferiu morrer a unir os selos por ordem do trono. Nossa próxima pista: A nona mentira.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "0e376b5d",
+    "text": "Os selos não reconstroem um império. Eles permitem que os nove domínios existam sem obedecer a uma única vontade. Investigue o altar das ruínas profundas.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "65af56ae",
+    "text": "A sua marca ainda pulsa. Investigue o altar das ruínas profundas. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "26a8296e",
+    "text": "Você cumpriu o juramento. Os selos não reconstroem um império. Eles permitem que os nove domínios existam sem obedecer a uma única vontade. Nossa próxima pista: O vazio aprende seu nome.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "f31de34f",
+    "text": "O demônio da fenda fala com sua voz. Ele oferece paz em troca da marca. Recuse a promessa que destruiu os guardiões. Vença as três ondas e o Demônio da Fenda.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "5737e462",
+    "text": "A sua marca ainda pulsa. Vença as três ondas e o Demônio da Fenda. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "9cfdab8b",
+    "text": "Você cumpriu o juramento. O demônio da fenda fala com sua voz. Ele oferece paz em troca da marca. Recuse a promessa que destruiu os guardiões. Nossa próxima pista: O trono que não é uma coroa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "96efb8ac",
+    "text": "O imperador guarda a passagem final. Vença-o e busque os selos nas masmorras: a eternidade precisa de testemunhas, não de um soberano. Derrote o chefe da região e liberte a passagem ancestral.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "d73b0fb4",
+    "text": "A sua marca ainda pulsa. Derrote o chefe da região e liberte a passagem ancestral. Volte com a verdade, não com uma promessa.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "ada69555",
+    "text": "Você cumpriu o juramento. O imperador guarda a passagem final. Vença-o e busque os selos nas masmorras: a eternidade precisa de testemunhas, não de um soberano. A Nona Marca está livre. Busque os quatro selos das masmorras e recuse a coroa do Trono da Eternidade.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "3bd8f3c3",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "f549e449",
+    "text": "Derrote",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "0d1a4319",
+    "text": "8",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "f9857f7f",
+    "text": "lobos nas rotas de Vale de Aster.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "17c6d285",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "9c20d63b",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "a76d5d93",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "8e0f10b9",
+    "text": "Derrote",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "2a0ea8b9",
+    "text": "10",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "9e8f7942",
+    "text": "espectros nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "3ae00ad5",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "8ab44b8b",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "2bda4981",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "337dd7c3",
+    "text": "Derrote",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "d1690f44",
+    "text": "12",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b20ddd10",
+    "text": "lobos nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "30470e1b",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "d87c5bbd",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "5820adea",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "ca76eb3a",
+    "text": "Derrote",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "cf690c1e",
+    "text": "14",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "f62d8a26",
+    "text": "espectros nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "ef4633c8",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "cf9f0aac",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "cad4d950",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "599ebbac",
+    "text": "Derrote",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "2c0eabdf",
+    "text": "16",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "935436d5",
+    "text": "espectros nas rotas de Santuário Abissal do Fim.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "2b444fe6",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "5f8513c6",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "273c2bf5",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "6b92e478",
+    "text": "Refine uma arma até +",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "c8ab4d4e",
+    "text": "em memória dos ferreiros da Quarta Dobra.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "2e3a3f5f",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "fe661a31",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "49af1435",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "5a66388d",
+    "text": "Evolua uma asa até o nível",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "181a546a",
+    "text": "5",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "455ef8a4",
+    "text": "; a marca deve aprender a voar.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "d7c4111f",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ea4c76f1",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "3d7fc32c",
+    "text": "Desbloqueie e use uma montaria.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "fd9ab0b5",
+    "text": "Nenhum portador cruza os domínios sozinho.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "d0bcfd07",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "035fb5fa",
+    "text": "Alcance o nível",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "c218925d",
+    "text": "50",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d92a831c",
+    "text": "e honre os portadores que vieram antes.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "8db22ad9",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "7f9b567f",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "922ff097",
+    "text": "Derrote",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "796d4c33",
+    "text": "1",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "924fd21c",
+    "text": "gosmas nas rotas de Vale de Aster.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "56a57185",
+    "text": "lobos nas rotas de Vale de Aster.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "4a7c6c78",
+    "text": "criaturas marcadas nas rotas de Vale de Aster.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "141a4e1e",
+    "text": "1",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "0f32263a",
+    "text": "gosmas nas rotas de Vale de Aster.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "7662226a",
+    "text": "criaturas marcadas nas rotas de Vale de Aster.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "7a6d4dc6",
+    "text": "2",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "131a4c8b",
+    "text": "2",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "7b6d4f59",
+    "text": "3",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "121a4af8",
+    "text": "3",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "7c6d50ec",
+    "text": "4",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "191a55fd",
+    "text": "4",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "7d6d527f",
+    "text": "5",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "7e6d5412",
+    "text": "6",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "171a52d7",
+    "text": "6",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "7f6d55a5",
+    "text": "7",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "161a5144",
+    "text": "7",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "806d5738",
+    "text": "8",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "816d58cb",
+    "text": "9",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "0c1a4186",
+    "text": "9",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "d369126a",
+    "text": "10",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "290ea726",
+    "text": "11",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d46913fd",
+    "text": "11",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "280ea593",
+    "text": "12",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "270ea400",
+    "text": "13",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d26910d7",
+    "text": "13",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2e0eaf05",
+    "text": "14",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "2d0ead72",
+    "text": "15",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d0690db1",
+    "text": "15",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "cd6908f8",
+    "text": "16",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2b0eaa4c",
+    "text": "17",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "ce690a8b",
+    "text": "17",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "320eb551",
+    "text": "18",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cb6905d2",
+    "text": "18",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "310eb3be",
+    "text": "19",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cc690765",
+    "text": "19",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b011ba42",
+    "text": "20",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cd66ca61",
+    "text": "20",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b111bbd5",
+    "text": "21",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cc66c8ce",
+    "text": "21",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ae11b71c",
+    "text": "22",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cb66c73b",
+    "text": "22",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "af11b8af",
+    "text": "23",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "ca66c5a8",
+    "text": "23",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ac11b3f6",
+    "text": "24",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d166d0ad",
+    "text": "24",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ad11b589",
+    "text": "25",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "d066cf1a",
+    "text": "25",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "aa11b0d0",
+    "text": "26",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cf66cd87",
+    "text": "26",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ab11b263",
+    "text": "27",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "ce66cbf4",
+    "text": "27",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b811c6da",
+    "text": "28",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c566bdc9",
+    "text": "28",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b911c86d",
+    "text": "29",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c466bc36",
+    "text": "29",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b614024b",
+    "text": "30",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4763b8d8",
+    "text": "30",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b51400b8",
+    "text": "31",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4863ba6b",
+    "text": "31",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b8140571",
+    "text": "32",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4963bbfe",
+    "text": "32",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b71403de",
+    "text": "33",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4a63bd91",
+    "text": "33",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ba140897",
+    "text": "34",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4b63bf24",
+    "text": "34",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b9140704",
+    "text": "35",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4c63c0b7",
+    "text": "35",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bc140bbd",
+    "text": "36",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4d63c24a",
+    "text": "36",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bb140a2a",
+    "text": "37",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4e63c3dd",
+    "text": "37",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ae13f5b3",
+    "text": "38",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3f63ac40",
+    "text": "38",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ad13f420",
+    "text": "39",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4063add3",
+    "text": "39",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bc164a54",
+    "text": "40",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "517511b7",
+    "text": "40",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bd164be7",
+    "text": "41",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "50751024",
+    "text": "41",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "be164d7a",
+    "text": "42",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "537514dd",
+    "text": "42",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bf164f0d",
+    "text": "43",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "5275134a",
+    "text": "43",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b8164408",
+    "text": "44",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4d750b6b",
+    "text": "44",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b916459b",
+    "text": "45",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4c7509d8",
+    "text": "45",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ba16472e",
+    "text": "46",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4f750e91",
+    "text": "46",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bb1648c1",
+    "text": "47",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4e750cfe",
+    "text": "47",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b4163dbc",
+    "text": "48",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4975051f",
+    "text": "48",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b5163f4f",
+    "text": "49",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4875038c",
+    "text": "49",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "4b72c9ae",
+    "text": "50",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "c11890ca",
+    "text": "51",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4c72cb41",
+    "text": "51",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "c0188f37",
+    "text": "52",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4972c688",
+    "text": "52",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bf188da4",
+    "text": "53",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4a72c81b",
+    "text": "53",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "be188c11",
+    "text": "54",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4f72cffa",
+    "text": "54",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bd188a7e",
+    "text": "55",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "5072d18d",
+    "text": "55",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bc1888eb",
+    "text": "56",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4d72ccd4",
+    "text": "56",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bb188758",
+    "text": "57",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4e72ce67",
+    "text": "57",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ba1885c5",
+    "text": "58",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4372bd16",
+    "text": "58",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b9188432",
+    "text": "59",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4472bea9",
+    "text": "59",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "281b7186",
+    "text": "60",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "457081a5",
+    "text": "60",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "291b7319",
+    "text": "61",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "44708012",
+    "text": "61",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "261b6e60",
+    "text": "62",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "43707e7f",
+    "text": "62",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "271b6ff3",
+    "text": "63",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "42707cec",
+    "text": "63",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2c1b77d2",
+    "text": "64",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "41707b59",
+    "text": "64",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2d1b7965",
+    "text": "65",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "407079c6",
+    "text": "65",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2a1b74ac",
+    "text": "66",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3f707833",
+    "text": "66",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2b1b763f",
+    "text": "67",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3e7076a0",
+    "text": "67",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "301b7e1e",
+    "text": "68",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4d708e3d",
+    "text": "68",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "311b7fb1",
+    "text": "69",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "4c708caa",
+    "text": "69",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2e1db98f",
+    "text": "70",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3f6e399c",
+    "text": "70",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2d1db7fc",
+    "text": "71",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "406e3b2f",
+    "text": "71",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "301dbcb5",
+    "text": "72",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "416e3cc2",
+    "text": "72",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2f1dbb22",
+    "text": "73",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "426e3e55",
+    "text": "73",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2a1db343",
+    "text": "74",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3b6e3350",
+    "text": "74",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "291db1b0",
+    "text": "75",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3c6e34e3",
+    "text": "75",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2c1db669",
+    "text": "76",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3d6e3676",
+    "text": "76",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2b1db4d6",
+    "text": "77",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "3e6e3809",
+    "text": "77",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "361dc627",
+    "text": "78",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "476e4634",
+    "text": "78",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "351dc494",
+    "text": "79",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "486e47c7",
+    "text": "79",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "34200198",
+    "text": "80",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c957b98b",
+    "text": "80",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "3520032b",
+    "text": "81",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c857b7f8",
+    "text": "81",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "362004be",
+    "text": "82",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cb57bcb1",
+    "text": "82",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "37200651",
+    "text": "83",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "ca57bb1e",
+    "text": "83",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "382007e4",
+    "text": "84",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cd57bfd7",
+    "text": "84",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "39200977",
+    "text": "85",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cc57be44",
+    "text": "85",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "3a200b0a",
+    "text": "86",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cf57c2fd",
+    "text": "86",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "3b200c9d",
+    "text": "87",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "ce57c16a",
+    "text": "87",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2c1ff500",
+    "text": "88",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c157acf3",
+    "text": "88",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "2d1ff693",
+    "text": "89",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c057ab60",
+    "text": "89",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "ba231321",
+    "text": "90",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c3557182",
+    "text": "90",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b923118e",
+    "text": "91",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c4557315",
+    "text": "91",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b8230ffb",
+    "text": "92",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c1556e5c",
+    "text": "92",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b7230e68",
+    "text": "93",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c2556fef",
+    "text": "93",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "be23196d",
+    "text": "94",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "bf556b36",
+    "text": "94",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bd2317da",
+    "text": "95",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "c0556cc9",
+    "text": "95",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bc231647",
+    "text": "96",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "bd556810",
+    "text": "96",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "bb2314b4",
+    "text": "97",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "be5569a3",
+    "text": "97",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b2230689",
+    "text": "98",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cb557e1a",
+    "text": "98",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "b12304f6",
+    "text": "99",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "cc557fad",
+    "text": "99",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "be134fab",
+    "text": "100",
+    "speaker": "count-male",
+    "language": "pt"
+  },
+  {
+    "key": "2867e3ae",
+    "text": "100",
+    "speaker": "count-female",
+    "language": "pt"
+  },
+  {
+    "key": "433e1eac",
+    "text": "Destrua",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "2c90c26d",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "d8b0ccf2",
+    "text": "Destrua",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "feaeb4af",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "1f5b4cbb",
+    "text": "Elimine",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "dd6e3150",
+    "text": "capitães de elite.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "6a29206d",
+    "text": "Elimine",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "8767da6a",
+    "text": "capitães de elite.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "efa7e14f",
+    "text": "Recupere",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "80a255df",
+    "text": "núcleos abissais.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "6fb4851d",
+    "text": "Recupere",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "e1e43da5",
+    "text": "núcleos abissais.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "e11536cf",
+    "text": "Liberte",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "1c19bec6",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "guide-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "c1f44385",
+    "text": "Liberte",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "b759d640",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "merchant-aurora",
+    "language": "pt"
+  },
+  {
+    "key": "b4b1d057",
+    "text": "Derrote",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4346abb0",
+    "text": "esqueletos nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "7f5ecc54",
+    "text": "espectros nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "05fff2b2",
+    "text": "criaturas marcadas nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "e048a432",
+    "text": "esqueletos nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "aa6f61ec",
+    "text": "criaturas marcadas nas rotas de Cemitério das Cinzas & Cripta.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "7f0e466c",
+    "text": "Destrua",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "c781d0ad",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "140288c2",
+    "text": "Destrua",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4832f95f",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "04eda07b",
+    "text": "Elimine",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ca7ded90",
+    "text": "capitães de elite.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "b9d4387d",
+    "text": "Elimine",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "38e7f7da",
+    "text": "capitães de elite.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ae4da40f",
+    "text": "Recupere",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "5d89219f",
+    "text": "núcleos abissais.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "9958e08d",
+    "text": "Recupere",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "1b7ec655",
+    "text": "núcleos abissais.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "b019868f",
+    "text": "Liberte",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "4d800f06",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "guide-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "ecea7195",
+    "text": "Liberte",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "7e04e350",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "merchant-crypt",
+    "language": "pt"
+  },
+  {
+    "key": "08573c5d",
+    "text": "Derrote",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "89cedaf9",
+    "text": "golens nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "f4f9baea",
+    "text": "lobos nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "759f25f1",
+    "text": "criaturas marcadas nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "2c415dc3",
+    "text": "golens nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "c8a2761f",
+    "text": "criaturas marcadas nas rotas de Ruínas de Cristal Gelado.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "b7de5b8e",
+    "text": "Destrua",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "b8ec3ce3",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "30f35900",
+    "text": "Destrua",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "dc78ef59",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "a16b4f71",
+    "text": "Elimine",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "5835eb76",
+    "text": "capitães de elite.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "30965397",
+    "text": "Elimine",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "530ac814",
+    "text": "capitães de elite.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "02ce1271",
+    "text": "Recupere",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "22dd0ae9",
+    "text": "núcleos abissais.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "756d644b",
+    "text": "Recupere",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "2b0820ab",
+    "text": "núcleos abissais.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "c13d1771",
+    "text": "Liberte",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "b02d8c84",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "guide-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "5811ebb3",
+    "text": "Liberte",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "cdac82f2",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "merchant-highlands",
+    "language": "pt"
+  },
+  {
+    "key": "bbc179f8",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "342b1644",
+    "text": "Derrote",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "bd45054c",
+    "text": "golens nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "bc3df81e",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "aa0b54ce",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "006e2978",
+    "text": "espectros nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "fe4bf318",
+    "text": "criaturas marcadas nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "4e525292",
+    "text": "golens nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "6ec3f46a",
+    "text": "criaturas marcadas nas rotas de Desfiladeiro da Forja Ardente.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "9af46b87",
+    "text": "Destrua",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "e30af748",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "5051c0a9",
+    "text": "Destrua",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "7a147c56",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "c35c1768",
+    "text": "Elimine",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "ce3ede25",
+    "text": "capitães de elite.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "99873896",
+    "text": "Elimine",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "45e0b99b",
+    "text": "capitães de elite.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "2881d056",
+    "text": "Recupere",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "aae91290",
+    "text": "núcleos abissais.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "5d705e30",
+    "text": "Recupere",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "910f4b8a",
+    "text": "núcleos abissais.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "3a0c577c",
+    "text": "Liberte",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "b3c89b3f",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "guide-rift",
+    "language": "pt"
+  },
+  {
+    "key": "85e9ac76",
+    "text": "Liberte",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "d4c59bbd",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "merchant-rift",
+    "language": "pt"
+  },
+  {
+    "key": "f065ebb2",
+    "text": "Os peregrinos pedem sua ajuda.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "736922b2",
+    "text": "Derrote",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "bb632281",
+    "text": "esqueletos nas rotas de Santuário Abissal do Fim.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "43620700",
+    "text": "A Vigília ainda precisa de você.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "9de44914",
+    "text": "Seu juramento foi cumprido.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "c200c0fb",
+    "text": "espectros nas rotas de Santuário Abissal do Fim.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "7a135cf7",
+    "text": "criaturas marcadas nas rotas de Santuário Abissal do Fim.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "731e4047",
+    "text": "esqueletos nas rotas de Santuário Abissal do Fim.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "fd418575",
+    "text": "criaturas marcadas nas rotas de Santuário Abissal do Fim.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "84853171",
+    "text": "Destrua",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "21e2ec1e",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "d06ff5df",
+    "text": "Destrua",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "6558dd60",
+    "text": "ninhos corrompidos diferentes.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "2a5cd90e",
+    "text": "Elimine",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "0636dbf3",
+    "text": "capitães de elite.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "313314f0",
+    "text": "Elimine",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "21fa03cd",
+    "text": "capitães de elite.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "670288a8",
+    "text": "Recupere",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "db55f142",
+    "text": "núcleos abissais.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "8d70789e",
+    "text": "Recupere",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "d5b05cf8",
+    "text": "núcleos abissais.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "de2904be",
+    "text": "Liberte",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "c0615995",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "guide-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "45478394",
+    "text": "Liberte",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "a0768487",
+    "text": "acampamentos e abra seus baús.",
+    "speaker": "merchant-eclipse",
+    "language": "pt"
+  },
+  {
+    "key": "6483ce5d",
+    "text": "The Ninth Mark burns again. I buried its last bearer. This time I will not mistake obedience for courage.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3219f148",
+    "text": "These graves hold no enemies. They hold the names the Council erased. Hear the dead before judging the living.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "d97ded1b",
+    "text": "Ice preserves everything except innocence. If my voice changes, ask me to show the scar on my left hand.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "fa857291",
+    "text": "I forged the Wardens’ chains. They said the chains would protect the seals. Every hammer blow made a prison stronger.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "9e393fb1",
+    "text": "You crossed eight lies to reach this place. The ninth will be spoken in your own voice. Do not trust the throne.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "57985ba1",
+    "text": "Potions, maps, and some free advice: no seal can buy its bearer’s life. Choose what you will carry.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "8da93aa5",
+    "text": "The guards call this smuggling. I call it returning what the Council stole from the dead. Need supplies?",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "48327ddf",
+    "text": "Do not touch the blue vials without gloves. Memories live inside the crystal, and some still know how to bite.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "e04d4e44",
+    "text": "Every coin keeps a family out of the furnaces. I trade supplies, not loyalty. What is missing from your pack?",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "8c46b9dd",
+    "text": "Here gold never tarnishes and oaths never die. Bring only what you need. The void charges for the weight of doubt.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "7f02be0c",
+    "text": "Good steel does not hide its cracks. Show me your weapon. I will strengthen it without erasing the marks of the road you chose.",
+    "speaker": "blacksmith-aster",
+    "language": "en"
+  },
+  {
+    "key": "00e9c274",
+    "text": "No prophecy can compel someone to suffer. The Ninth Mark is a choice, not a sentence. Learn about the seals in the codex.",
+    "speaker": "priestess-aster",
+    "language": "en"
+  },
+  {
+    "key": "dcdf3593",
+    "text": "In the Colosseum, the nine orders fight under one oath. Win through skill. Today’s opponent may guard your back tomorrow.",
+    "speaker": "commander-aster",
+    "language": "en"
+  },
+  {
+    "key": "e2d41d85",
+    "text": "I have guarded this pass for a hundred winters. I do not fight for kings. I fight so that nobody is forgotten beneath this snow.",
+    "speaker": "valkyrie-highlands",
+    "language": "en"
+  },
+  {
+    "key": "8d6c699b",
+    "text": "Before the war, nine realms shared one horizon. The Throne of Eternity promised peace without loss. Its price was nine living oaths. When Seris refused the last, the world broke apart. The victors called her refusal treason.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "bbcef499",
+    "text": "In Aster, Eldrin learned that protecting someone does not mean choosing their fate. The first seal answers those who can lose and still choose to love. The Council tried to keep it inside a crown. The forest grew around its prison.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "7845cc75",
+    "text": "Morwen kept the names of the dead. When the Council demanded she erase Seris, she refused. The Ashlands filled with nameless graves. The second seal survives in every witness who chooses to tell an inconvenient truth.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "6bf51c84",
+    "text": "Alaric froze the mountain to prevent a defeat. He saved one morning and lost a century. The third seal does not promise a better tomorrow. It only ensures that nobody can steal everyone’s chance to try.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "8158d3c4",
+    "text": "Tharok forged nine perfect chains. No creature could break them, he was told. Too late he learned they were made for the wardens themselves. His first act of rebellion was not raising a hammer. It was saying no.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "6e44c407",
+    "text": "Beneath the Catacombs, the Bone King guards the fifth seal. He asks someone to end a war whose beginning he has forgotten. Mercy does not erase what he did. It only keeps guilt from becoming another chain.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "9583c3b4",
+    "text": "In the glacial temple, the sixth seal reflects what visitors try to hide. The Colossus was made to guard truth and forced to defend a lie. Breaking its crystal makes room for a memory that still hurts.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "b951f774",
+    "text": "The seventh seal burns in the titan’s furnace. The eighth waits in the void citadel. Neither was made to reward a conqueror. Hope and trust exist only while someone accepts that another person may also choose.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "b4c650b4",
+    "text": "Nyx knows the final truth: the ninth seal was never lost. It passes between people when someone chooses another’s freedom over an obedient eternity. You were not born to occupy the throne. You were born to leave nine roads open.",
+    "speaker": "narrator",
+    "language": "en"
+  },
+  {
+    "key": "f90842d9",
+    "text": "Eldrin recognizes the Ninth Mark, lost in the Ninefold Sundering. Its former bearer died carrying out a Council order. Report to the region’s Warden.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "4974f15d",
+    "text": "Your mark still burns. Report to the region’s Warden. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "8640c7a3",
+    "text": "You kept the oath. Eldrin recognizes the Ninth Mark, lost in the Ninefold Sundering. Its former bearer died carrying out a Council order. Our next lead: Pilgrims without a road.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b7b6a8ea",
+    "text": "The creatures attack only those carrying the Council’s crest. Someone is guiding corruption along Aster’s roads. Defeat 5 slimes on the region’s roads.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "043f563e",
+    "text": "Your mark still burns. Defeat 5 slimes on the region’s roads. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3476e63d",
+    "text": "You kept the oath. The creatures attack only those carrying the Council’s crest. Someone is guiding corruption along Aster’s roads. Our next lead: The first erased name.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "bcc59009",
+    "text": "An altar preserves the name of Seris, the warden the books call a traitor. The stone says she tried to save the nine realms. Investigate the first ruined altar.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b79e66d7",
+    "text": "Your mark still burns. Investigate the first ruined altar. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "e5dbb474",
+    "text": "You kept the oath. An altar preserves the name of Seris, the warden the books call a traitor. The stone says she tried to save the nine realms. Our next lead: Blood in the roots.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "dbc0157f",
+    "text": "Local crystals carry pulses like those of your mark. Lyra suspects the seals are living covenants, not objects. Extract 4 reagents from different deposits.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b5e93e7c",
+    "text": "Your mark still burns. Extract 4 reagents from different deposits. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "30370839",
+    "text": "You kept the oath. Local crystals carry pulses like those of your mark. Lyra suspects the seals are living covenants, not objects. Our next lead: The price of a vigil.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "90f65527",
+    "text": "The Council’s supplies never arrived. Eldrin sold his own armor to keep the village alive. Prepare a defense for the refugees. Collect 3 local resources.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "f8e1901d",
+    "text": "Your mark still burns. Collect 3 local resources. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "2446619e",
+    "text": "You kept the oath. The Council’s supplies never arrived. Eldrin sold his own armor to keep the village alive. Prepare a defense for the refugees. Our next lead: The unseen sower.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b0326488",
+    "text": "The nests grew around broken signets. A messenger scattered corruption’s seeds, then vanished among the pilgrims. Destroy two different nests.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "029d4088",
+    "text": "Your mark still burns. Destroy two different nests. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "a9dbf651",
+    "text": "You kept the oath. The nests grew around broken signets. A messenger scattered corruption’s seeds, then vanished among the pilgrims. Our next lead: Forty-five heartbeats.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "de957d74",
+    "text": "The obelisk can protect the refugees. While it awakens, creatures will try to silence its heart. Do not leave the circle. Defend the totem for 45 seconds and defeat all three waves.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b2e37cae",
+    "text": "Your mark still burns. Defend the totem for 45 seconds and defeat all three waves. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "c003e12f",
+    "text": "You kept the oath. The obelisk can protect the refugees. While it awakens, creatures will try to silence its heart. Do not leave the circle. Our next lead: Letters to a dead king.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "717e12da",
+    "text": "A camp holds letters signed by Aster’s regent, dead for twenty years. Recent orders use the same handwriting. Defeat the guards and open the camp chest.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "d24b7980",
+    "text": "Your mark still burns. Defeat the guards and open the camp chest. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "e43bfa55",
+    "text": "You kept the oath. A camp holds letters signed by Aster’s regent, dead for twenty years. Recent orders use the same handwriting. Our next lead: The two faithful.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "837c16cd",
+    "text": "Two captains keep the roads sealed. Both once served beside Eldrin. He asks you to look for chains before judging the men. Defeat two different elite captains.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b57a918e",
+    "text": "Your mark still burns. Defeat two different elite captains. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3aa35537",
+    "text": "You kept the oath. Two captains keep the roads sealed. Both once served beside Eldrin. He asks you to look for chains before judging the men. Our next lead: The seal of compassion.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "adb615fb",
+    "text": "The ruin reveals the First Fold: compassion became a prison when the Council tried to prevent every loss. Investigate the altar in the deep ruins.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3616af19",
+    "text": "Your mark still burns. Investigate the altar in the deep ruins. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "e535d6ff",
+    "text": "You kept the oath. The ruin reveals the First Fold: compassion became a prison when the Council tried to prevent every loss. Our next lead: A wound in the oath.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "374c5c7b",
+    "text": "The rift feeds on the wardens’ guilt. Its demon uses the former mark bearer’s voice. Listen without obeying. Defeat all three waves and the Rift Demon.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "089ed90e",
+    "text": "Your mark still burns. Defeat all three waves and the Rift Demon. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "57d7a54b",
+    "text": "You kept the oath. The rift feeds on the wardens’ guilt. Its demon uses the former mark bearer’s voice. Listen without obeying. Our next lead: The crown beneath the grove.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "03551598",
+    "text": "The region’s chief guards the passage to the Ashlands. Its fall will reveal that Seris surrendered the first seal to save a child. Defeat the regional boss and free the ancestral passage.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "1cf86c33",
+    "text": "Your mark still burns. Defeat the regional boss and free the ancestral passage. Return with the truth, not a promise.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "5c2dbbb6",
+    "text": "You kept the oath. The region’s chief guards the passage to the Ashlands. Its fall will reveal that Seris surrendered the first seal to save a child. Cross the Ancestral Portal and report to the next Warden.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "059bdce4",
+    "text": "Morwen welcomes you among the graves. Those who refused to erase Seris from history lie here, not the kingdom’s enemies. Report to the region’s Warden.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "07834da3",
+    "text": "Your mark still burns. Report to the region’s Warden. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "c74b256a",
+    "text": "You kept the oath. Morwen welcomes you among the graves. Those who refused to erase Seris from history lie here, not the kingdom’s enemies. Our next lead: A guard without rest.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "76de0f52",
+    "text": "The dead rise when they hear the Council’s bell. Their bodies still obey an order their souls reject. Defeat 7 skeletons on the region’s roads.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e65f73c3",
+    "text": "Your mark still burns. Defeat 7 skeletons on the region’s roads. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "0da7a7a0",
+    "text": "You kept the oath. The dead rise when they hear the Council’s bell. Their bodies still obey an order their souls reject. Our next lead: Testimony in stone.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "02a8ba2d",
+    "text": "The altar preserves Morwen’s oath: no memory would be forgotten. The Council turned that promise into a curse. Investigate the first ruined altar.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "aa8d3ca9",
+    "text": "Your mark still burns. Investigate the first ruined altar. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "c0e02a01",
+    "text": "You kept the oath. The altar preserves Morwen’s oath: no memory would be forgotten. The Council turned that promise into a curse. Our next lead: Ashes that remember.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "475afa0d",
+    "text": "The reagents absorbed the condemned’s final words. None asks for vengeance. Every voice asks to return home. Extract 5 reagents from different deposits.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "782f7675",
+    "text": "Your mark still burns. Extract 5 reagents from different deposits. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "ea67cd0e",
+    "text": "You kept the oath. The reagents absorbed the condemned’s final words. None asks for vengeance. Every voice asks to return home. Our next lead: Bread for the watchers.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "7713666a",
+    "text": "The living still tend the graves, surrounded by the dead. Bring supplies so they need not burn the name plaques. Collect 4 local resources.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "04629a0c",
+    "text": "Your mark still burns. Collect 4 local resources. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e34a8f37",
+    "text": "You kept the oath. The living still tend the graves, surrounded by the dead. Bring supplies so they need not burn the name plaques. Our next lead: Worms of forgetting.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "0467c6fb",
+    "text": "Each nest devours burial inscriptions. The enemy does not want an army: it wants to erase the second seal’s witnesses. Destroy two different nests.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "61c6babe",
+    "text": "Your mark still burns. Destroy two different nests. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "904d76ba",
+    "text": "You kept the oath. Each nest devours burial inscriptions. The enemy does not want an army: it wants to erase the second seal’s witnesses. Our next lead: The interrupted bell.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "3ec2a8f5",
+    "text": "Activate the funerary totem and hold. For forty-five seconds the dead will be able to choose not to fight. Defend the totem for 45 seconds and defeat all three waves.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "9cb08f9c",
+    "text": "Your mark still burns. Defend the totem for 45 seconds and defeat all three waves. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "b219b78d",
+    "text": "You kept the oath. Activate the funerary totem and hold. For forty-five seconds the dead will be able to choose not to fight. Our next lead: An inventory of innocents.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "f4f321f5",
+    "text": "The guards hide belongings stolen from families. Their chest holds a locket bearing the symbol of your mark. Defeat the guards and open the camp chest.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "57cc991e",
+    "text": "Your mark still burns. Defeat the guards and open the camp chest. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "91a381cc",
+    "text": "You kept the oath. The guards hide belongings stolen from families. Their chest holds a locket bearing the symbol of your mark. Our next lead: Executioners of the archive.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "d1b803de",
+    "text": "The crypt captains destroyed the birth records. One recognizes Morwen as the mother he swore never to betray. Defeat two different elite captains.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "62f48b1c",
+    "text": "Your mark still burns. Defeat two different elite captains. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e442226a",
+    "text": "You kept the oath. The crypt captains destroyed the birth records. One recognizes Morwen as the mother he swore never to betray. Our next lead: The second lie.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "be7a0f38",
+    "text": "The second seal guarded memory. The crypt proves the Council rewrote it to conceal the Nine Wardens’ origin. Investigate the altar in the deep ruins.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "17294fe3",
+    "text": "Your mark still burns. Investigate the altar in the deep ruins. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e701755e",
+    "text": "You kept the oath. The second seal guarded memory. The crypt proves the Council rewrote it to conceal the Nine Wardens’ origin. Our next lead: Voices beyond the grave.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "b0112262",
+    "text": "The rift uses stolen names to open the abyss. Return them to the dead and end the rite that keeps them chained. Defeat all three waves and the Rift Demon.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "58f9fce4",
+    "text": "Your mark still burns. Defeat all three waves and the Rift Demon. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "72282116",
+    "text": "You kept the oath. The rift uses stolen names to open the abyss. Return them to the dead and end the rite that keeps them chained. Our next lead: The king who lost his name.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "566301c7",
+    "text": "The crypt lord is the first corrupted warden. Beneath his crown lies a chain forged in the Burning Gorge. Defeat the regional boss and free the ancestral passage.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "21e03915",
+    "text": "Your mark still burns. Defeat the regional boss and free the ancestral passage. Return with the truth, not a promise.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e380ba97",
+    "text": "You kept the oath. The crypt lord is the first corrupted warden. Beneath his crown lies a chain forged in the Burning Gorge. Cross the Ancestral Portal and report to the next Warden.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "492089f7",
+    "text": "Alaric recognizes the crypt’s chain. He guarded the third seal for decades, but his memories no longer match the calendar. Report to the region’s Warden.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "dba63af9",
+    "text": "Your mark still burns. Report to the region’s Warden. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "85342d70",
+    "text": "You kept the oath. Alaric recognizes the crypt’s chain. He guarded the third seal for decades, but his memories no longer match the calendar. Our next lead: Memory predators.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "950c2b91",
+    "text": "Glacial beasts carry fragments of stolen memories. Recovering them may reveal who altered Alaric’s vigil. Defeat 9 golems on the region’s roads.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "eecac702",
+    "text": "Your mark still burns. Defeat 9 golems on the region’s roads. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f3f020b3",
+    "text": "You kept the oath. Glacial beasts carry fragments of stolen memories. Recovering them may reveal who altered Alaric’s vigil. Our next lead: The portrait beneath the ice.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "96952d07",
+    "text": "A relief shows Seris and Alaric as siblings. No Council record admits the wardens had families. Investigate the first ruined altar.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "e9a2a4eb",
+    "text": "Your mark still burns. Investigate the first ruined altar. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "72b0652e",
+    "text": "You kept the oath. A relief shows Seris and Alaric as siblings. No Council record admits the wardens had families. Our next lead: Crystals of the last morning.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "14430dc8",
+    "text": "Each crystal preserves a moment of the Ninefold Sundering. In every one, the sun sets before it rises. Extract 6 reagents from different deposits.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "e3f2116e",
+    "text": "Your mark still burns. Extract 6 reagents from different deposits. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "9fe49fbe",
+    "text": "You kept the oath. Each crystal preserves a moment of the Ninefold Sundering. In every one, the sun sets before it rises. Our next lead: Shelter for the thaw.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "6266cf67",
+    "text": "Freya shelters pilgrims at the pass. She knows freeing the seal will awaken everything the ice held suspended. Collect 5 local resources.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "89337c73",
+    "text": "Your mark still burns. Collect 5 local resources. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "61e2e96f",
+    "text": "You kept the oath. Freya shelters pilgrims at the pass. She knows freeing the seal will awaken everything the ice held suspended. Our next lead: The artificial winter.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f547adaf",
+    "text": "The nests feed towers that prevent the thaw. The Council was not protecting the mountain: it was hiding something beneath it. Destroy two different nests.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "d9d9e784",
+    "text": "Your mark still burns. Destroy two different nests. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "366204e2",
+    "text": "You kept the oath. The nests feed towers that prevent the thaw. The Council was not protecting the mountain: it was hiding something beneath it. Our next lead: The last vigil.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "4d4d1124",
+    "text": "The totem will break the cycle for forty-five seconds. Defend it while Freya leads the last refugees out of the pass. Defend the totem for 45 seconds and defeat all three waves.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "baae34ca",
+    "text": "Your mark still burns. Defend the totem for 45 seconds and defeat all three waves. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "ffb23489",
+    "text": "You kept the oath. The totem will break the cycle for forty-five seconds. Defend it while Freya leads the last refugees out of the pass. Our next lead: Orders signed tomorrow.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "5d9e4f29",
+    "text": "The camp’s orders are dated tomorrow and describe your arrival. Someone tried to imprison the future. Defeat the guards and open the camp chest.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "04d224d4",
+    "text": "Your mark still burns. Defeat the guards and open the camp chest. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "1a1f6a6a",
+    "text": "You kept the oath. The camp’s orders are dated tomorrow and describe your arrival. Someone tried to imprison the future. Our next lead: The glass captains.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f19e3676",
+    "text": "Two captains guard different versions of Alaric. Only one still remembers his sister’s name. Break the impostor’s escort. Defeat two different elite captains.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "eba8329a",
+    "text": "Your mark still burns. Defeat two different elite captains. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "96075cfc",
+    "text": "You kept the oath. Two captains guard different versions of Alaric. Only one still remembers his sister’s name. Break the impostor’s escort. Our next lead: The third seal never sleeps.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "1fdfee12",
+    "text": "The third seal is the possibility of change. Freezing it prevented a defeat, but stole a century from everyone here. Investigate the altar in the deep ruins.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "59948f25",
+    "text": "Your mark still burns. Investigate the altar in the deep ruins. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "4f513605",
+    "text": "You kept the oath. The third seal is the possibility of change. Freezing it prevented a defeat, but stole a century from everyone here. Our next lead: The missing hour.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "c8cb99cf",
+    "text": "The rift demon repeats the same hour to prevent the thaw. Break its three vigils and return time to the mountain. Defeat all three waves and the Rift Demon.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "e1d6cc02",
+    "text": "Your mark still burns. Defeat all three waves and the Rift Demon. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "0967c2c6",
+    "text": "You kept the oath. The rift demon repeats the same hour to prevent the thaw. Break its three vigils and return time to the mountain. Our next lead: The colossus of memory.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "61e5d0c5",
+    "text": "The colossus protects a memory of a forge. Freeing it will let Alaric remember who delivered the chains to the wardens. Defeat the regional boss and free the ancestral passage.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "4214dfd7",
+    "text": "Your mark still burns. Defeat the regional boss and free the ancestral passage. Return with the truth, not a promise.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "a8b57581",
+    "text": "You kept the oath. The colossus protects a memory of a forge. Freeing it will let Alaric remember who delivered the chains to the wardens. Cross the Ancestral Portal and report to the next Warden.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "d9365fff",
+    "text": "Tharok does not deny forging the chains. He shows his burned hands and asks for a chance to break what he made. Report to the region’s Warden.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "20044b7e",
+    "text": "Your mark still burns. Report to the region’s Warden. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "99f5966f",
+    "text": "You kept the oath. Tharok does not deny forging the chains. He shows his burned hands and asks for a chance to break what he made. Our next lead: Workers of the flame.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "a60f18ff",
+    "text": "The monsters carry former miners’ tools. The furnace consumed their names to fuel the Council’s war. Defeat 11 golems on the region’s roads.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "459568f6",
+    "text": "Your mark still burns. Defeat 11 golems on the region’s roads. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "1c3ba9da",
+    "text": "You kept the oath. The monsters carry former miners’ tools. The furnace consumed their names to fuel the Council’s war. Our next lead: A signature in the embers.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "e1040f60",
+    "text": "The forge inscription bears Eldrin’s signature. Your first ally helped commission the chains before learning their purpose. Investigate the first ruined altar.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "a8ed189a",
+    "text": "Your mark still burns. Investigate the first ruined altar. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "ce3f4b29",
+    "text": "You kept the oath. The forge inscription bears Eldrin’s signature. Your first ally helped commission the chains before learning their purpose. Our next lead: Metal that learns to yield.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c64b49a4",
+    "text": "Volcanic reagents can weaken the links. Tharok must relearn his craft: a strong weapon must also know how to yield. Extract 7 reagents from different deposits.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "6c84336c",
+    "text": "Your mark still burns. Extract 7 reagents from different deposits. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "2ec9f914",
+    "text": "You kept the oath. Volcanic reagents can weaken the links. Tharok must relearn his craft: a strong weapon must also know how to yield. Our next lead: The rebellion’s wages.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c455896e",
+    "text": "Varka refused to sell out the rebels in exchange for amnesty. Gather supplies to keep their families alive during the siege. Collect 6 local resources.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "6ef7ba2f",
+    "text": "Your mark still burns. Collect 6 local resources. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "3893e6e0",
+    "text": "You kept the oath. Varka refused to sell out the rebels in exchange for amnesty. Gather supplies to keep their families alive during the siege. Our next lead: Roots of the furnace.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "b969f100",
+    "text": "The nests pump corruption into the lava. The machine produces no weapons: it feeds something sleeping beneath the throne. Destroy two different nests.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c736e0e3",
+    "text": "Your mark still burns. Destroy two different nests. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "5c32df0f",
+    "text": "You kept the oath. The nests pump corruption into the lava. The machine produces no weapons: it feeds something sleeping beneath the throne. Our next lead: The bridge of those who return.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "1872d9ea",
+    "text": "The totem will hold the bridge during the evacuation. Three waves will try to break the route. For once, Tharok will stay and fight. Defend the totem for 45 seconds and defeat all three waves.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "d7e9812f",
+    "text": "Your mark still burns. Defend the totem for 45 seconds and defeat all three waves. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "3a2215cc",
+    "text": "You kept the oath. The totem will hold the bridge during the evacuation. Three waves will try to break the route. For once, Tharok will stay and fight. Our next lead: The ledger of debts.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "08d0bce9",
+    "text": "The chest holds payment for the chains. The buyer was no king: it was a voice named the Throne of Eternity. Defeat the guards and open the camp chest.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "535852bb",
+    "text": "Your mark still burns. Defeat the guards and open the camp chest. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "6d60bad3",
+    "text": "You kept the oath. The chest holds payment for the chains. The buyer was no king: it was a voice named the Throne of Eternity. Our next lead: The last jailers.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c3d54763",
+    "text": "The captains imprison the last miners. Both know that without the chains, the titan can choose whom to serve. Defeat two different elite captains.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "9af221a9",
+    "text": "Your mark still burns. Defeat two different elite captains. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "e26c978b",
+    "text": "You kept the oath. The captains imprison the last miners. Both know that without the chains, the titan can choose whom to serve. Our next lead: The fourth seal is a refusal.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "db218143",
+    "text": "The fourth seal protects free will. Tharok surrendered it when he accepted an order he knew was unjust. Now he says no. Investigate the altar in the deep ruins.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "3d07012e",
+    "text": "Your mark still burns. Investigate the altar in the deep ruins. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "51cd6c61",
+    "text": "You kept the oath. The fourth seal protects free will. Tharok surrendered it when he accepted an order he knew was unjust. Now he says no. Our next lead: The pact in living metal.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "1c56d0ff",
+    "text": "The rift keeps the furnace burning with stolen lives. Destroy its guardian and let the flame die for a moment. Defeat all three waves and the Rift Demon.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "fe149d85",
+    "text": "Your mark still burns. Defeat all three waves and the Rift Demon. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "3e380dfc",
+    "text": "You kept the oath. The rift keeps the furnace burning with stolen lives. Destroy its guardian and let the flame die for a moment. Our next lead: The unchained titan.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "b53217fd",
+    "text": "The forge lord guards the abyssal route. Victory brings a warning: someone bearing your mark opened the fifth seal. Defeat the regional boss and free the ancestral passage.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c0f23e40",
+    "text": "Your mark still burns. Defeat the regional boss and free the ancestral passage. Return with the truth, not a promise.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "2f5d9133",
+    "text": "You kept the oath. The forge lord guards the abyssal route. Victory brings a warning: someone bearing your mark opened the fifth seal. Cross the Ancestral Portal and report to the next Warden.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "259de6b6",
+    "text": "Nyx expected you, but not because of a prophecy. She knew the previous bearer and chose to keep the secret of their death. Report to the region’s Warden.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "86647ce6",
+    "text": "Your mark still burns. Report to the region’s Warden. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "15e5e259",
+    "text": "You kept the oath. Nyx expected you, but not because of a prophecy. She knew the previous bearer and chose to keep the secret of their death. Our next lead: Voices without bodies.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "d4e8c95c",
+    "text": "The void creatures are echoes of lost realms. They repeat the throne’s final orders without understanding them. Defeat 13 skeletons on the region’s roads.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "10db43a9",
+    "text": "Your mark still burns. Defeat 13 skeletons on the region’s roads. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "488163e5",
+    "text": "You kept the oath. The void creatures are echoes of lost realms. They repeat the throne’s final orders without understanding them. Our next lead: Seris’s child.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "0b86044a",
+    "text": "The altar reveals that Seris saved the former bearer as a child. The Ninth Mark is inherited from a choice, not from kings. Investigate the first ruined altar.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "b79dec32",
+    "text": "Your mark still burns. Investigate the first ruined altar. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "428c4bae",
+    "text": "You kept the oath. The altar reveals that Seris saved the former bearer as a child. The Ninth Mark is inherited from a choice, not from kings. Our next lead: Fragments of a whole world.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "4a6f9c9c",
+    "text": "The crystals contain routes to four abyssal dungeons. The remaining seals await there, far from the corrupted wardens. Extract 8 reagents from different deposits.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "98bd0ba5",
+    "text": "Your mark still burns. Extract 8 reagents from different deposits. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "55e34ff4",
+    "text": "You kept the oath. The crystals contain routes to four abyssal dungeons. The remaining seals await there, far from the corrupted wardens. Our next lead: Supplies for nobody.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "52687163",
+    "text": "Ezra keeps a table for pilgrims who never arrived. Setting it again is his way of refusing the end of the world. Collect 7 local resources.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "e5d6984a",
+    "text": "Your mark still burns. Collect 7 local resources. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "2d40b605",
+    "text": "You kept the oath. Ezra keeps a table for pilgrims who never arrived. Setting it again is his way of refusing the end of the world. Our next lead: The throne’s garden.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "03d16493",
+    "text": "The nests cultivate incomplete copies of the wardens. The throne does not want loyal servants. It wants servants unable to choose. Destroy two different nests.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "023133cb",
+    "text": "Your mark still burns. Destroy two different nests. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "1264d14b",
+    "text": "You kept the oath. The nests cultivate incomplete copies of the wardens. The throne does not want loyal servants. It wants servants unable to choose. Our next lead: A place to remain.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "4910e6fd",
+    "text": "The totem will anchor the island for forty-five seconds. Defend those who still believe the realms can touch again. Defend the totem for 45 seconds and defeat all three waves.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "b378d6d7",
+    "text": "Your mark still burns. Defend the totem for 45 seconds and defeat all three waves. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "f43e573b",
+    "text": "You kept the oath. The totem will anchor the island for forty-five seconds. Defend those who still believe the realms can touch again. Our next lead: The archive of nine betrayals.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "ed87ea68",
+    "text": "The chest reveals nine versions of one war. Each calls a different warden a traitor. The throne wrote them all. Defeat the guards and open the camp chest.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "f03b4693",
+    "text": "Your mark still burns. Defeat the guards and open the camp chest. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "f1a5792d",
+    "text": "You kept the oath. The chest reveals nine versions of one war. Each calls a different warden a traitor. The throne wrote them all. Our next lead: Sentinels of the impossible.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "1dc2ff85",
+    "text": "Two captains guard the memory of the final refusal. The former bearer chose death over joining the seals at the throne’s command. Defeat two different elite captains.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "ae9d5ea1",
+    "text": "Your mark still burns. Defeat two different elite captains. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "d0e8cd3e",
+    "text": "You kept the oath. Two captains guard the memory of the final refusal. The former bearer chose death over joining the seals at the throne’s command. Our next lead: The ninth lie.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "b85651f7",
+    "text": "The seals do not rebuild an empire. They let the nine realms exist without obeying a single will. Investigate the altar in the deep ruins.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "bd6fcb76",
+    "text": "Your mark still burns. Investigate the altar in the deep ruins. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "40ae9109",
+    "text": "You kept the oath. The seals do not rebuild an empire. They let the nine realms exist without obeying a single will. Our next lead: The void learns your name.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "654e8765",
+    "text": "The rift demon speaks with your voice. It offers peace in exchange for the mark. Refuse the promise that destroyed the wardens. Defeat all three waves and the Rift Demon.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "5c87afbd",
+    "text": "Your mark still burns. Defeat all three waves and the Rift Demon. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "2b1f1272",
+    "text": "You kept the oath. The rift demon speaks with your voice. It offers peace in exchange for the mark. Refuse the promise that destroyed the wardens. Our next lead: A throne that is no crown.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "ab18566d",
+    "text": "The emperor guards the final passage. Defeat him and seek the seals in the dungeons: eternity needs witnesses, not a sovereign. Defeat the regional boss and free the ancestral passage.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "82c89f08",
+    "text": "Your mark still burns. Defeat the regional boss and free the ancestral passage. Return with the truth, not a promise.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "c31b890e",
+    "text": "You kept the oath. The emperor guards the final passage. Defeat him and seek the seals in the dungeons: eternity needs witnesses, not a sovereign. The Ninth Mark is free. Seek the four dungeon seals and refuse the Throne of Eternity’s crown.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "0c9e1dd5",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "63808db0",
+    "text": "Defeat",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "1056a0b0",
+    "text": "8",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "3bf34e2a",
+    "text": "wolves on the roads of Aster Vale.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "a5713255",
+    "text": "The Watch still needs you.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "0163d2e5",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "c436cbef",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "d5827316",
+    "text": "Defeat",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "8a43df26",
+    "text": "10",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "022eadb1",
+    "text": "wraiths on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "47890143",
+    "text": "The Watch still needs you.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "5e3c085f",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "559e9b49",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "2d152e94",
+    "text": "Defeat",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "cc7558cb",
+    "text": "12",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9e6d3ede",
+    "text": "wolves on the roads of Frozen Crystal Ruins.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "6f4a8581",
+    "text": "The Watch still needs you.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "12487b89",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f865dc12",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "8a95bff1",
+    "text": "Defeat",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "d275623d",
+    "text": "14",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "58c82016",
+    "text": "wraiths on the roads of Blazing Forge Canyon.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "b354feb8",
+    "text": "The Watch still needs you.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "6181bd6a",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "1fa9766a",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "f2c01379",
+    "text": "Defeat",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "8c43e24c",
+    "text": "16",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "46919532",
+    "text": "wraiths on the roads of Sanctuary of the Abyss.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "3d29a310",
+    "text": "The Watch still needs you.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "1c7e2b32",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "cc2baea1",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "afd8c409",
+    "text": "Refine a weapon to +",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "073ca056",
+    "text": "in memory of the Fourth Fold’s smiths.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "6c179e79",
+    "text": "The Watch still needs you.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "fb132b51",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "c1071bcb",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "c74bfa47",
+    "text": "Evolve wings to level",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "1d56b527",
+    "text": "5",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9f18cdb3",
+    "text": "; the mark must learn to fly.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "12f5d1a7",
+    "text": "The Watch still needs you.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "ea0ad84b",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "279f0318",
+    "text": "Unlock and ride a mount.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "87186c5d",
+    "text": "No bearer crosses the realms alone.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "de9b764d",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "657f5194",
+    "text": "Reach level",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "123a27e2",
+    "text": "50",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "83a45052",
+    "text": "and honor the bearers who came before.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "48ee040d",
+    "text": "The Watch still needs you.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "9daef8cd",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "b304437c",
+    "text": "Defeat",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "97863432",
+    "text": "1",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "8afae45f",
+    "text": "slimes on the roads of Aster Vale.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "7393a6e6",
+    "text": "wolves on the roads of Aster Vale.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "a5fa4c80",
+    "text": "marked creatures on the roads of Aster Vale.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "1956aedb",
+    "text": "1",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "17f4da53",
+    "text": "slimes on the roads of Aster Vale.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "95581a04",
+    "text": "marked creatures on the roads of Aster Vale.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "9686329f",
+    "text": "2",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1a56b06e",
+    "text": "2",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9586310c",
+    "text": "3",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1b56b201",
+    "text": "3",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "94862f79",
+    "text": "4",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1c56b394",
+    "text": "4",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "93862de6",
+    "text": "5",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "92862c53",
+    "text": "6",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1e56b6ba",
+    "text": "6",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "91862ac0",
+    "text": "7",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1f56b84d",
+    "text": "7",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a086425d",
+    "text": "8",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "9f8640ca",
+    "text": "9",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "1156a243",
+    "text": "9",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "ce755bf1",
+    "text": "10",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "8b43e0b9",
+    "text": "11",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cd755a5e",
+    "text": "11",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "8843dc00",
+    "text": "12",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "8943dd93",
+    "text": "13",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cb755738",
+    "text": "13",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "8e43e572",
+    "text": "14",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "8f43e705",
+    "text": "15",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d17560aa",
+    "text": "15",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "d0755f17",
+    "text": "16",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "8d43e3df",
+    "text": "17",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cf755d84",
+    "text": "17",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9243ebbe",
+    "text": "18",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c6754f59",
+    "text": "18",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9343ed51",
+    "text": "19",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c5754dc6",
+    "text": "19",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a441c97d",
+    "text": "20",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d477a3fa",
+    "text": "20",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a341c7ea",
+    "text": "21",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d577a58d",
+    "text": "21",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a241c657",
+    "text": "22",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d277a0d4",
+    "text": "22",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a141c4c4",
+    "text": "23",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d377a267",
+    "text": "23",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a041c331",
+    "text": "24",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d0779dae",
+    "text": "24",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9f41c19e",
+    "text": "25",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d1779f41",
+    "text": "25",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9e41c00b",
+    "text": "26",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "ce779a88",
+    "text": "26",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9d41be78",
+    "text": "27",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cf779c1b",
+    "text": "27",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9c41bce5",
+    "text": "28",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cc779762",
+    "text": "28",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9b41bb52",
+    "text": "29",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cd7798f5",
+    "text": "29",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9e3f8174",
+    "text": "30",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3a7a8323",
+    "text": "30",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9f3f8307",
+    "text": "31",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "397a8190",
+    "text": "31",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a03f849a",
+    "text": "32",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3c7a8649",
+    "text": "32",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "a13f862d",
+    "text": "33",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3b7a84b6",
+    "text": "33",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9a3f7b28",
+    "text": "34",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3e7a896f",
+    "text": "34",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9b3f7cbb",
+    "text": "35",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3d7a87dc",
+    "text": "35",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9c3f7e4e",
+    "text": "36",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "407a8c95",
+    "text": "36",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "9d3f7fe1",
+    "text": "37",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3f7a8b02",
+    "text": "37",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "963f74dc",
+    "text": "38",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "427a8fbb",
+    "text": "38",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "973f766f",
+    "text": "39",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "417a8e28",
+    "text": "39",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "183c6feb",
+    "text": "40",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "407ccb2c",
+    "text": "40",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "173c6e58",
+    "text": "41",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "417cccbf",
+    "text": "41",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1a3c7311",
+    "text": "42",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "427cce52",
+    "text": "42",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "193c717e",
+    "text": "43",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "437ccfe5",
+    "text": "43",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1c3c7637",
+    "text": "44",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3c7cc4e0",
+    "text": "44",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1b3c74a4",
+    "text": "45",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3d7cc673",
+    "text": "45",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1e3c795d",
+    "text": "46",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3e7cc806",
+    "text": "46",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1d3c77ca",
+    "text": "47",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3f7cc999",
+    "text": "47",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "103c6353",
+    "text": "48",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "487cd7c4",
+    "text": "48",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0f3c61c0",
+    "text": "49",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "497cd957",
+    "text": "49",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "467f1335",
+    "text": "50",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "133a2975",
+    "text": "51",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "457f11a2",
+    "text": "51",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "103a24bc",
+    "text": "52",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "447f100f",
+    "text": "52",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "113a264f",
+    "text": "53",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "437f0e7c",
+    "text": "53",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0e3a2196",
+    "text": "54",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "427f0ce9",
+    "text": "54",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0f3a2329",
+    "text": "55",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "417f0b56",
+    "text": "55",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0c3a1e70",
+    "text": "56",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "407f09c3",
+    "text": "56",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0d3a2003",
+    "text": "57",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3f7f0830",
+    "text": "57",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1a3a347a",
+    "text": "58",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4e7f1fcd",
+    "text": "58",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1b3a360d",
+    "text": "59",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4d7f1e3a",
+    "text": "59",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0c37dfd9",
+    "text": "60",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4c815b3e",
+    "text": "60",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0b37de46",
+    "text": "61",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4d815cd1",
+    "text": "61",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0a37dcb3",
+    "text": "62",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4a815818",
+    "text": "62",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0937db20",
+    "text": "63",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4b8159ab",
+    "text": "63",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1037e625",
+    "text": "64",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "5081618a",
+    "text": "64",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0f37e492",
+    "text": "65",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "5181631d",
+    "text": "65",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0e37e2ff",
+    "text": "66",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4e815e64",
+    "text": "66",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0d37e16c",
+    "text": "67",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "4f815ff7",
+    "text": "67",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1437ec71",
+    "text": "68",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "44814ea6",
+    "text": "68",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1337eade",
+    "text": "69",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "45815039",
+    "text": "69",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "063597d0",
+    "text": "70",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d2846cc7",
+    "text": "70",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "07359963",
+    "text": "71",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d1846b34",
+    "text": "71",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "08359af6",
+    "text": "72",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d4846fed",
+    "text": "72",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "09359c89",
+    "text": "73",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d3846e5a",
+    "text": "73",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0a359e1c",
+    "text": "74",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "ce84667b",
+    "text": "74",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0b359faf",
+    "text": "75",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cd8464e8",
+    "text": "75",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0c35a142",
+    "text": "76",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "d08469a1",
+    "text": "76",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0d35a2d5",
+    "text": "77",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "cf84680e",
+    "text": "77",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0e35a468",
+    "text": "78",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "ca84602f",
+    "text": "78",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "0f35a5fb",
+    "text": "79",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c9845e9c",
+    "text": "79",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "205a9197",
+    "text": "80",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "385ea980",
+    "text": "80",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1f5a9004",
+    "text": "81",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "395eab13",
+    "text": "81",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "225a94bd",
+    "text": "82",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3a5eaca6",
+    "text": "82",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "215a932a",
+    "text": "83",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3b5eae39",
+    "text": "83",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1c5a8b4b",
+    "text": "84",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3c5eafcc",
+    "text": "84",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1b5a89b8",
+    "text": "85",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3d5eb15f",
+    "text": "85",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1e5a8e71",
+    "text": "86",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3e5eb2f2",
+    "text": "86",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1d5a8cde",
+    "text": "87",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "3f5eb485",
+    "text": "87",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "185a84ff",
+    "text": "88",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "405eb618",
+    "text": "88",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "175a836c",
+    "text": "89",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "415eb7ab",
+    "text": "89",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1a58498e",
+    "text": "90",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "be61bb09",
+    "text": "90",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1b584b21",
+    "text": "91",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "bd61b976",
+    "text": "91",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "18584668",
+    "text": "92",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "bc61b7e3",
+    "text": "92",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "195847fb",
+    "text": "93",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "bb61b650",
+    "text": "93",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1e584fda",
+    "text": "94",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c261c155",
+    "text": "94",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1f58516d",
+    "text": "95",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c161bfc2",
+    "text": "95",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1c584cb4",
+    "text": "96",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c061be2f",
+    "text": "96",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "1d584e47",
+    "text": "97",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "bf61bc9c",
+    "text": "97",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "12583cf6",
+    "text": "98",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c661c7a1",
+    "text": "98",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "13583e89",
+    "text": "99",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c561c60e",
+    "text": "99",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "bed82fa2",
+    "text": "100",
+    "speaker": "count-male",
+    "language": "en"
+  },
+  {
+    "key": "c3bf70d3",
+    "text": "100",
+    "speaker": "count-female",
+    "language": "en"
+  },
+  {
+    "key": "320eea6f",
+    "text": "Destroy",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "eabdf6fb",
+    "text": "different corrupted nests.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3f6957c3",
+    "text": "Destroy",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "b4587f67",
+    "text": "different corrupted nests.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "3fb6cc0b",
+    "text": "elite captains.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "d45f6117",
+    "text": "elite captains.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "76b4dbb5",
+    "text": "Recover",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "41b6744a",
+    "text": "abyssal cores.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "65de63f9",
+    "text": "Recover",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "42b9b226",
+    "text": "abyssal cores.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "7cf560cb",
+    "text": "Liberate",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "31813dda",
+    "text": "camps and open their chests.",
+    "speaker": "guide-aurora",
+    "language": "en"
+  },
+  {
+    "key": "9c893127",
+    "text": "Liberate",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "da2a74be",
+    "text": "camps and open their chests.",
+    "speaker": "merchant-aurora",
+    "language": "en"
+  },
+  {
+    "key": "08437992",
+    "text": "Defeat",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "cacb3d75",
+    "text": "skeletons on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "6185132d",
+    "text": "wraiths on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "66fb5ee1",
+    "text": "marked creatures on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e839c299",
+    "text": "skeletons on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "9eb648b5",
+    "text": "marked creatures on the roads of Ashen Graveyard & Crypt.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e36e4429",
+    "text": "Destroy",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "282cc0dd",
+    "text": "different corrupted nests.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "c28aab0d",
+    "text": "Destroy",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "2eeabbb9",
+    "text": "different corrupted nests.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "c82d1d39",
+    "text": "elite captains.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e62c0475",
+    "text": "elite captains.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "15691aaf",
+    "text": "Recover",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e2a537b4",
+    "text": "abyssal cores.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "e26e3233",
+    "text": "Recover",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "cd801590",
+    "text": "abyssal cores.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "3bb96add",
+    "text": "Liberate",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "1312a86c",
+    "text": "camps and open their chests.",
+    "speaker": "guide-crypt",
+    "language": "en"
+  },
+  {
+    "key": "49b717e9",
+    "text": "Liberate",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "0602d1f0",
+    "text": "camps and open their chests.",
+    "speaker": "merchant-crypt",
+    "language": "en"
+  },
+  {
+    "key": "0cda6ad8",
+    "text": "Defeat",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f2e74daf",
+    "text": "golems on the roads of Frozen Crystal Ruins.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "28aa3aaa",
+    "text": "wolves on the roads of Frozen Crystal Ruins.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "32265e8c",
+    "text": "marked creatures on the roads of Frozen Crystal Ruins.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "ef5e1be3",
+    "text": "golems on the roads of Frozen Crystal Ruins.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f9b4a540",
+    "text": "marked creatures on the roads of Frozen Crystal Ruins.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "02de645b",
+    "text": "Destroy",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "f7ce8cff",
+    "text": "different corrupted nests.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "a3895937",
+    "text": "Destroy",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "5e06a223",
+    "text": "different corrupted nests.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "3476ea5f",
+    "text": "elite captains.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "7d91c863",
+    "text": "elite captains.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "b021b4e1",
+    "text": "Recover",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "9e566fae",
+    "text": "abyssal cores.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "386cce4d",
+    "text": "Recover",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "fee90622",
+    "text": "abyssal cores.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "b8ece8af",
+    "text": "Liberate",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "71b65846",
+    "text": "camps and open their chests.",
+    "speaker": "guide-highlands",
+    "language": "en"
+  },
+  {
+    "key": "e715ae43",
+    "text": "Liberate",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "d2166d32",
+    "text": "camps and open their chests.",
+    "speaker": "merchant-highlands",
+    "language": "en"
+  },
+  {
+    "key": "49d5cd4e",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "0632d09d",
+    "text": "Defeat",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "2e234397",
+    "text": "golems on the roads of Blazing Forge Canyon.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "43c3b6cc",
+    "text": "The Watch still needs you.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "49622d96",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "3a69efba",
+    "text": "wraiths on the roads of Blazing Forge Canyon.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "c27d51fc",
+    "text": "marked creatures on the roads of Blazing Forge Canyon.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "14b22c43",
+    "text": "golems on the roads of Blazing Forge Canyon.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "0c5833b8",
+    "text": "marked creatures on the roads of Blazing Forge Canyon.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "2ba88718",
+    "text": "Destroy",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "b3fd4a22",
+    "text": "different corrupted nests.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "dea04c4c",
+    "text": "Destroy",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "8a2f42ee",
+    "text": "different corrupted nests.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "393c4408",
+    "text": "elite captains.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "ed120b64",
+    "text": "elite captains.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "fb39a9a2",
+    "text": "Recover",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "56410913",
+    "text": "abyssal cores.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "cd348ed6",
+    "text": "Recover",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "713fc41f",
+    "text": "abyssal cores.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "26a7dbd2",
+    "text": "Liberate",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "83bbbfbf",
+    "text": "camps and open their chests.",
+    "speaker": "guide-rift",
+    "language": "en"
+  },
+  {
+    "key": "be5ab19e",
+    "text": "Liberate",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "dec01513",
+    "text": "camps and open their chests.",
+    "speaker": "merchant-rift",
+    "language": "en"
+  },
+  {
+    "key": "8d647f96",
+    "text": "The pilgrims ask for your help.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "a7c6e835",
+    "text": "Defeat",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "cd8ae342",
+    "text": "skeletons on the roads of Sanctuary of the Abyss.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "5299d134",
+    "text": "The Watch still needs you.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "aae40cee",
+    "text": "Your oath has been fulfilled.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "be4afd3e",
+    "text": "wraiths on the roads of Sanctuary of the Abyss.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "41f4d17c",
+    "text": "marked creatures on the roads of Sanctuary of the Abyss.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "b6497496",
+    "text": "skeletons on the roads of Sanctuary of the Abyss.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "4c1ab3d0",
+    "text": "marked creatures on the roads of Sanctuary of the Abyss.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "701e4e60",
+    "text": "Destroy",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "763b658a",
+    "text": "different corrupted nests.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "d18c2764",
+    "text": "Destroy",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "82c3ed86",
+    "text": "different corrupted nests.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "755af6c0",
+    "text": "elite captains.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "1baa492c",
+    "text": "elite captains.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "b2e559ba",
+    "text": "Recover",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "fd2e560b",
+    "text": "abyssal cores.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "4690e59e",
+    "text": "Recover",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "1e48c2c7",
+    "text": "abyssal cores.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "bc24e66a",
+    "text": "Liberate",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "406b8f17",
+    "text": "camps and open their chests.",
+    "speaker": "guide-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "a33bebe6",
+    "text": "Liberate",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  },
+  {
+    "key": "edc74afb",
+    "text": "camps and open their chests.",
+    "speaker": "merchant-eclipse",
+    "language": "en"
+  }
+]

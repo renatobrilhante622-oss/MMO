@@ -1,3 +1,4 @@
+import {sanitizeAudioMix,DEFAULT_AUDIO_MIX,type AudioMix} from '../audio/SoundEngine';
 import {COMPLETE_SKIN_CATALOG,cosmeticWing} from '../player/SkinCatalog';
 import {WardrobeProgress} from './WardrobeProgress';
 import {mapDefinition,WORLD_MAPS} from '../world/maps/MapDefinitions';
@@ -110,6 +111,8 @@ export class AdventureProgress {
   missions:Record<string,number>={};
   missionClaims:string[]=[];
   language:Language='pt';
+  audioEnabled=true;
+  audioMix:AudioMix={...DEFAULT_AUDIO_MIX};
   hudScale=1;
   controlsScale=1;
   waypoint:{x:number;z:number}|null=null;
@@ -303,6 +306,7 @@ export class AdventureProgress {
     if(['skin','pet','mount','weapon','wing','equipment'].includes(String(raw.banner)))this.banner=raw.banner as typeof this.banner;
     this.pulls=integer(raw.pulls,0,1e9);this.pity=integer(raw.pity,0,59);this.purchasedSlots=integer(raw.purchasedSlots,0,4);
     this.vipUntil=integer(raw.vipUntil,0,Date.now()+31*86400000);this.premiumUntil=integer(raw.premiumUntil,0,Date.now()+31*86400000);
+    this.audioEnabled=raw.audioEnabled!==false;this.audioMix=sanitizeAudioMix(raw.audioMix);
     this.language=raw.language==='en'?'en':'pt';this.hudScale=typeof raw.hudScale==='number'?Math.max(.5,Math.min(1.5,raw.hudScale)):1;this.controlsScale=typeof raw.controlsScale==='number'?Math.max(.5,Math.min(1.5,raw.controlsScale)):1;
     if(Array.isArray(raw.bookmarks))for(let i=0;i<10;i++){
       const b=raw.bookmarks[i];if(!object(b))continue;const region=REGIONS.find(r=>r.id===b.region);const limit=b.localMap===true&&region?mapDefinition(region.id).size/2-12:240;

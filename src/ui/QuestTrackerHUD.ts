@@ -1,3 +1,4 @@
+import {questText} from '../rpg/LoreSystem';
 import type {QuestSystem,QuestDefinition} from '../rpg/QuestSystem';
 export interface TrackerCallbacks {navigate(quest:QuestDefinition):void;claim(questId:string):void;}
 /** Compact quest dock; dropping or expanding notifications cannot cover HP/gold. */
@@ -13,7 +14,7 @@ export class QuestTrackerHUD{
   private readonly content=document.createElement('div');
   private collapsed=true;
   constructor(private readonly host:HTMLElement,private readonly quests:QuestSystem,
-      private readonly callbacks:TrackerCallbacks){
+      private readonly callbacks:TrackerCallbacks,private readonly language:()=> 'pt'|'en'=()=> 'pt'){
     this.root.className='eterna-quest-tracker';
     this.root.setAttribute('aria-label','Missão ativa');
     this.heading.className='quest-tracker-heading';
@@ -54,12 +55,14 @@ export class QuestTrackerHUD{
     this.root.hidden=!quest;
     if(!quest)return;
     const state=this.quests.progressOf(quest);
-    this.title.textContent=(quest.act?'Ato '+quest.act+' · ':'')+quest.title;
-    this.detail.textContent=quest.description+' ('+state.progress+'/'+quest.required+')';
+    const pt=this.language()==='pt',text=questText(quest,this.language());
+    this.title.textContent=(quest.act?(pt?'Ato ':'Act ')+quest.act+' · ':'')+text.title;
+    this.detail.textContent=text.description+' ('+state.progress+'/'+quest.required+')';
     this.meter.style.width=(state.progress/Math.max(1,quest.required)*100)+'%';
-    this.button.textContent=state.ready?'🎁 RESGATAR RECOMPENSA':'⌖ NAVEGAR PARA OBJETIVO';
+    this.button.textContent=state.ready?(pt?'🎁 RESGATAR RECOMPENSA':'🎁 CLAIM REWARD'):(pt?'⌖ NAVEGAR PARA OBJETIVO':'⌖ NAVIGATE TO OBJECTIVE');
     this.button.classList.toggle('can-claim',state.ready);
-    this.button.setAttribute('aria-label',state.ready?'Resgatar recompensa da missão':'Navegar até o objetivo da missão');
+    this.button.setAttribute('aria-label',state.ready?(pt?'Resgatar recompensa da missão':'Claim quest reward'):(pt?'Navegar até o objetivo da missão':'Navigate to quest objective'));
+    this.root.setAttribute('aria-label',pt?'Missão ativa':'Active quest');
   }
   dispose():void{this.root.remove();}
 }

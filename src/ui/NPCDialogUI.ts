@@ -1,3 +1,4 @@
+import {questText} from '../rpg/LoreSystem';
 import {avatarSvg} from './AvatarRenderer';
 import type {QuestDefinition} from '../rpg/QuestSystem';
 
@@ -28,7 +29,7 @@ export function questRewardCard(quest:QuestDefinition,pt=true):HTMLElement {
  const section=document.createElement('article');
  section.className='npc-quest-reward';
  const heading=document.createElement('strong');
- heading.textContent=(pt?'RECOMPENSAS • ':'REWARDS • ')+localizeQuestText(quest.title,pt);
+ heading.textContent=(pt?'RECOMPENSAS • ':'REWARDS • ')+questText(quest,pt?'pt':'en').title;
  const tokens=document.createElement('div');tokens.className='npc-quest-reward-tokens';
  const rewards:[string,string][]=[
    ['✦',quest.reward.xp+' XP'],
@@ -44,7 +45,7 @@ export function questRewardCard(quest:QuestDefinition,pt=true):HTMLElement {
    const value=document.createElement('small');value.textContent=label;
    token.append(glyph,value);tokens.append(token);
  }
- const objective=document.createElement('p');objective.className='npc-quest-objective';objective.textContent=(quest.act?'Ato '+quest.act+' · '+quest.actName+' — ':'')+localizeQuestText(quest.description,pt);
+ const objective=document.createElement('p');objective.className='npc-quest-objective';objective.textContent=(quest.act?'Ato '+quest.act+' · '+quest.actName+' — ':'')+questText(quest,pt?'pt':'en').description;
  section.append(heading,objective,tokens);
  return section;
 }
